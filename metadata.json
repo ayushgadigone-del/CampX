@@ -1,0 +1,6 @@
+{
+  "name": "Campus Resale & Exchange",
+  "description": "A verified college marketplace to buy, sell, and exchange pre-owned student gear, textbooks, and equipment with AI item inspection and Google Calendar handover scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

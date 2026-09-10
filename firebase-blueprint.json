@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "Listing": {
+      "title": "Listing",
+      "description": "A pre-owned item listed by a college student for sale or exchange",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string", "enum": ["Books", "Calculators", "Lab Equipment", "Cycles", "Bags", "Other"] },
+        "condition": { "type": "string", "enum": ["Like New", "Good", "Fair", "Wear & Tear"] },
+        "listingType": { "type": "string", "enum": ["sell", "exchange", "both"] },
+        "price": { "type": "number" },
+        "exchangeFor": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "sellerEmail": { "type": "string" },
+        "sellerPhoto": { "type": "string" },
+        "status": { "type": "string", "enum": ["available", "reserved", "handover_scheduled", "completed"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "category", "condition", "listingType", "sellerId", "status"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Direct student-to-student negotiation thread linked to an item listing",
+      "type": "object",
+      "properties": {
+        "listingId": { "type": "string" },
+        "listingTitle": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "participants": { "type": "array" },
+        "lastMessage": { "type": "string" },
+        "lastMessageTimestamp": { "type": "number" }
+      },
+      "required": ["listingId", "sellerId", "buyerId", "participants"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Verified student account profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "department": { "type": "string" },
+        "year": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/listings/{listingId}": {
+      "schema": "Listing",
+      "description": "Collection of all student resale and exchange items"
+    },
+    "/conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "Direct negotiation chat channels between buyer and seller"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Verified student profile records"
+    }
+  }
+}
