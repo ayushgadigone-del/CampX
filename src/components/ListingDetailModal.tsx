@@ -28,9 +28,11 @@ import {
 import { Listing, Review } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
 import { getCategoryFAQs } from "../utils/faqQuestions";
+import { SellerReputationBadge } from "./SellerReputationBadge";
 
 interface ListingDetailModalProps {
   listing: Listing | null;
+  allListings?: Listing[];
   isOpen: boolean;
   onClose: () => void;
   onOpenChat: (listing: Listing, initialQuestion?: string) => void;
@@ -49,6 +51,7 @@ interface ListingDetailModalProps {
 
 export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   listing,
+  allListings,
   isOpen,
   onClose,
   onOpenChat,
@@ -534,18 +537,20 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     {listing.sellerName.charAt(0)}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900 flex-wrap">
                       <span>{listing.sellerName}</span>
                       <BadgeCheck className="w-4 h-4 text-blue-600" />
-                      {listing.sellerRating && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-extrabold border border-amber-200">
-                          <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
-                          <span>{listing.sellerRating.toFixed(1)}</span>
-                          <span className="text-[9px] text-amber-600 font-normal">
-                            ({listing.sellerReviewCount || 0})
-                          </span>
-                        </span>
-                      )}
+                      <SellerReputationBadge
+                        listing={listing}
+                        allListings={allListings}
+                        variant="badge"
+                        onViewReviews={() => {
+                          const reviewsTabBtn = document.getElementById("tab-reviews-btn");
+                          if (reviewsTabBtn) {
+                            reviewsTabBtn.click();
+                          }
+                        }}
+                      />
                     </div>
                     <span className="text-xs text-slate-500 block">
                       {listing.sellerEmail} • {listing.department || "Engineering"}

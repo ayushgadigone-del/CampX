@@ -89,6 +89,7 @@ export interface Listing {
   reportedBy?: string;
   sellerRating?: number;
   sellerReviewCount?: number;
+  completedHandovers?: number;
   createdAt: string;
 }
 
@@ -156,3 +157,28 @@ export interface AlertMatchEvent {
   listing: Listing;
   timestamp: number;
 }
+
+export interface TopperNote {
+  id: string;
+  title: string;
+  subject: string;
+  branch: "Computer Science" | "Information Technology" | "Mechanical" | "Civil" | "Electronics" | "Common 1st Year";
+  semester: "Sem 1" | "Sem 2" | "Sem 3" | "Sem 4" | "Sem 5" | "Sem 6" | "Sem 7" | "Sem 8";
+  author: string;
+  authorRank?: string; // e.g., "Branch Rank 1 (9.84 CGPA)"
+  authorCollege?: string;
+  description: string;
+  isFree: boolean; // Always true for free student access
+  pagesCount: number;
+  readTimeMinutes: number;
+  tags: string[];
+  lastUpdated: string;
+  content: string; // Markdown / readable study guide notes
+  chapters: {
+    title: string;
+    summary: string;
+    keyFormulasOrTips: string[];
+  }[];
+  featured?: boolean;
+}
+

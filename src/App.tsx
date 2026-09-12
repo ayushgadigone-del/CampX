@@ -22,6 +22,7 @@ import {
   Bike,
   Briefcase,
   FlaskConical,
+  GraduationCap,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import {
@@ -58,6 +59,19 @@ import { ChatDrawer } from "./components/ChatDrawer";
 import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
 import { PBLProjectInfoModal } from "./components/PBLProjectInfoModal";
 import { WishlistModal } from "./components/WishlistModal";
+import { TopperNotesModal } from "./components/TopperNotesModal";
+import { TopperNote } from "./types";
+import {
+  getStoredTopperNotes,
+  saveStoredTopperNotes,
+  isAppOwner,
+} from "./utils/topperNotesStorage";
+import { CollegeLoginPage } from "./components/CollegeLoginPage";
+import {
+  ALLOWED_COLLEGE_DOMAIN,
+  isValidCollegeEmail,
+  COLLEGE_RESTRICTION_MESSAGE,
+} from "./utils/collegeAuth";
 import { AlertsModal } from "./components/AlertsModal";
 import { AlertToastNotification } from "./components/AlertToastNotification";
 import { OfflineBanner } from "./components/OfflineBanner";
@@ -74,6 +88,8 @@ import {
   calculateNewExpiryDate,
   checkAndMarkInactiveListings,
 } from "./utils/expiryUtils";
+import { useTheme } from "./context/ThemeContext";
+import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
   "All",
@@ -107,8 +123,12 @@ const getCategoryIcon = (category: ItemCategory | "All") => {
 };
 
 export default function App() {
+  const { theme, isDark, toggleTheme } = useTheme();
+
   // Auth state
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
 
   // Listings state
   const [listings, setListings] = useState<Listing[]>(INITIAL_SEED_LISTINGS);
@@ -156,6 +176,8 @@ export default function App() {
 
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
   const [isPBLModalOpen, setIsPBLModalOpen] = useState(false);
+  const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
+  const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
 
   // Alerts & 'Notify Me' feature state
   const [alerts, setAlerts] = useState<AlertSubscription[]>(() => getSavedAlerts());
@@ -182,11 +204,28 @@ export default function App() {
   // 1. Initialize Auth
   useEffect(() => {
     const unsubscribe = initAuth(
-      (user) => {
-        setCurrentUser(user);
+      async (user) => {
+        // Enforce @pvgcoet.ac.in college domain on re-hydration
+        if (user && user.email) {
+          if (!isValidCollegeEmail(user.email)) {
+            console.warn("Unauthorized domain detected during session re-hydration:", user.email);
+            await logout();
+            setCurrentUser(null);
+            setAuthErrorMessage(
+              `Access Denied: The account (${user.email}) does not end with @${ALLOWED_COLLEGE_DOMAIN}. Anyone with an official college email ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
+            );
+          } else {
+            setCurrentUser(user);
+            setAuthErrorMessage(null);
+          }
+        } else {
+          setCurrentUser(null);
+        }
+        setIsAuthLoading(false);
       },
       () => {
         setCurrentUser(null);
+        setIsAuthLoading(false);
       }
     );
     return () => {
@@ -302,11 +341,14 @@ export default function App() {
     return listings.filter((item) => wishlistIds.includes(item.id));
   }, [listings, wishlistIds]);
 
-  // Handle shared listing URL parameter (e.g. ?item=...)
+  // Handle shared listing URL parameter (e.g. ?item=...) or ?notes=...
   useEffect(() => {
-    if (listings.length === 0) return;
     try {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("notes")) {
+        setIsTopperNotesModalOpen(true);
+      }
+      if (listings.length === 0) return;
       const itemId = params.get("item");
       if (itemId) {
         const found = listings.find((l) => l.id === itemId);
@@ -316,7 +358,7 @@ export default function App() {
         }
       }
     } catch (err) {
-      console.warn("Could not read shared listing param:", err);
+      console.warn("Could not read shared URL params:", err);
     }
   }, [listings]);
 
@@ -382,37 +424,65 @@ export default function App() {
 
   // Auth Handlers
   const handleLogin = async () => {
+    setAuthErrorMessage(null);
     try {
       const res = await googleSignIn();
       if (res?.user) {
+        const userEmail = res.user.email;
+        if (!isValidCollegeEmail(userEmail)) {
+          // Immediately reject and log out
+          await logout();
+          setCurrentUser(null);
+          setAuthErrorMessage(
+            `Access Denied: The Google account (${userEmail || "unknown"}) does not end with @${ALLOWED_COLLEGE_DOMAIN}. Anyone with an email ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
+          );
+          return;
+        }
+
         setCurrentUser(res.user);
-        showToast(`Welcome, ${res.user.displayName || "Student"}! College student account verified.`);
+        setAuthErrorMessage(null);
+        showToast(`Welcome, ${res.user.displayName || "Student"}! College account verified (@${ALLOWED_COLLEGE_DOMAIN}).`);
       } else {
-        showToast("Google sign-in popup was closed. You can retry or click 'Demo Student'.");
+        showToast("Google sign-in popup was closed. Please try again or use direct college ID verification.");
       }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
         console.warn("Login notice:", err?.message || err);
+        setAuthErrorMessage(err?.message || "Google Sign-In could not complete. Please use Direct College ID verification.");
       }
-      showToast("Sign in was cancelled or closed.");
     }
   };
 
-  const handleDemoLogin = async () => {
+  const handleDemoCollegeLogin = async (
+    customEmail: string = "ayush.gadigone@pvgcoet.ac.in",
+    displayName?: string
+  ) => {
+    setAuthErrorMessage(null);
+    const cleanEmail = customEmail.trim().toLowerCase();
+    if (!isValidCollegeEmail(cleanEmail)) {
+      setAuthErrorMessage(
+        `Invalid Email Domain: Only accounts ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
+      );
+      return;
+    }
+
     try {
-      const res = await demoStudentSignIn();
+      const res = await demoStudentSignIn(cleanEmail, displayName);
       if (res?.user) {
         setCurrentUser(res.user);
-        showToast(`Welcome, ${res.user.displayName}! College student account active.`);
+        setAuthErrorMessage(null);
+        showToast(`Welcome, ${res.user.displayName || "Student"}! College account verified.`);
       }
     } catch (err: any) {
-      console.warn("Demo login notice:", err);
+      console.warn("College login notice:", err);
+      setAuthErrorMessage(err?.message || "Failed to log in with college account.");
     }
   };
 
   const handleLogout = async () => {
     await logout();
     setCurrentUser(null);
+    setAuthErrorMessage(null);
     showToast("Signed out successfully.");
   };
 
@@ -768,13 +838,122 @@ export default function App() {
   };
 
   const upcomingHandoversCount = listings.filter((l) => l.handoverDetails).length;
+  const availableListingsCount = listings.filter((l) => l.status === "available").length;
+
+  // Global Terminal Keyboard Shortcuts (Style 1 ergonomics)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const searchInput = document.getElementById(
+          "main-navbar-search-input"
+        ) as HTMLInputElement | null;
+        searchInput?.focus();
+      } else if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        if (isOnline) {
+          setPrefilledInspection(null);
+          setPrefilledImage(null);
+          setIsCreateModalOpen(true);
+        } else {
+          showToast("⚠️ Offline: Creating listings is disabled.");
+        }
+      } else if ((e.key === "t" || e.key === "T") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setIsTopperNotesModalOpen(true);
+      } else if ((e.key === "w" || e.key === "W") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setIsWishlistModalOpen(true);
+      } else if ((e.key === "d" || e.key === "D") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        toggleTheme();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOnline, toggleTheme]);
+
+  // 1. Initial Authentication Check / Loading
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-slate-100 p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase">
+            Verifying College Identity...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. First-View Enforced Gate: If not logged in with verified college email, show CollegeLoginPage
+  if (!currentUser || !isValidCollegeEmail(currentUser.email)) {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
+            <div className="px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-slate-800 flex items-center gap-2 max-w-md">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{toastMessage}</span>
+            </div>
+          </div>
+        )}
+        <CollegeLoginPage
+          onGoogleSignIn={handleLogin}
+          onDemoCollegeSignIn={handleDemoCollegeLogin}
+          authErrorMessage={authErrorMessage}
+          onClearError={() => setAuthErrorMessage(null)}
+        />
+      </>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100/60 text-slate-900 font-sans antialiased">
+    <div
+      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-200 ${
+        isDark
+          ? "bg-slate-900 text-slate-100 selection:bg-indigo-500 selection:text-white"
+          : "bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900"
+      }`}
+    >
+      {/* Ambient background glows matching CollegeLoginPage */}
+      <div
+        className={`absolute -top-40 -left-40 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+          isDark ? "bg-indigo-600/20" : "bg-indigo-300/30"
+        }`}
+      />
+      <div
+        className={`absolute top-1/4 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+          isDark ? "bg-amber-500/10" : "bg-amber-300/20"
+        }`}
+      />
+      <div
+        className={`absolute bottom-1/3 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+          isDark ? "bg-blue-600/15" : "bg-blue-300/20"
+        }`}
+      />
+      <div
+        className={`absolute -bottom-40 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+          isDark ? "bg-indigo-500/15" : "bg-indigo-300/25"
+        }`}
+      />
+
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div className="px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-slate-800 flex items-center gap-2 max-w-md">
+          <div className="px-4 py-3 rounded-2xl bg-slate-800/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/80 backdrop-blur-xl flex items-center gap-2 max-w-md">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{toastMessage}</span>
           </div>
@@ -785,7 +964,7 @@ export default function App() {
       <Navbar
         currentUser={currentUser}
         onLogin={handleLogin}
-        onDemoLogin={handleDemoLogin}
+        onDemoLogin={() => handleDemoCollegeLogin()}
         onLogout={handleLogout}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -807,6 +986,7 @@ export default function App() {
         }}
         onOpenHandovers={() => setIsHandoversModalOpen(true)}
         onOpenPBLInfo={() => setIsPBLModalOpen(true)}
+        onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
         upcomingHandoversCount={upcomingHandoversCount}
         wishlistCount={wishlistIds.length}
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
@@ -830,86 +1010,39 @@ export default function App() {
         onRetry={reconnect}
       />
 
-      {/* Hero / Information Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-blue-900 text-white py-8 px-4 sm:px-6 lg:px-8 border-b border-indigo-950 shadow-inner">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs border border-white/15">
-              <Building2 className="w-3.5 h-3.5 text-indigo-300" />
-              <span>Campus Resale & Exchange Network</span>
-              <span>•</span>
-              <span className="text-emerald-300">Verified College Access</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-              Buy, Sell & Swap Student Equipment on Campus
-            </h1>
-            <p className="text-xs sm:text-sm text-indigo-200 leading-relaxed">
-              Safe student-to-student transactions for calculators, engineering books, workshop tools, cycles, and bags. Inspected with <strong>Gemini 3.1 Pro Preview</strong> and synchronized to <strong>Google Calendar</strong> for safe campus handovers.
-            </p>
-          </div>
-
-          {/* Quick Action Metrics & CTAs */}
-          <div className="flex flex-wrap gap-2.5 shrink-0">
-            <button
-              id="hero-scan-gemini-btn"
-              disabled={!isOnline}
-              onClick={() => {
-                if (!isOnline) {
-                  showToast("⚠️ Offline: AI item scanner requires an active internet connection.");
-                  return;
-                }
-                setIsAIInspectorOpen(true);
-              }}
-              title={
-                !isOnline
-                  ? "AI scanning requires an active internet connection"
-                  : "Scan item with Gemini 3.1 Pro Preview"
-              }
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all select-none ${
-                !isOnline
-                  ? "bg-white/40 text-indigo-950/60 border border-white/20 cursor-not-allowed"
-                  : "bg-white text-indigo-900 hover:bg-indigo-50 cursor-pointer"
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <span>Scan Item with Gemini AI</span>
-            </button>
-            <button
-              id="hero-post-preowned-btn"
-              disabled={!isOnline}
-              onClick={() => {
-                if (!isOnline) {
-                  showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
-                  return;
-                }
-                setPrefilledInspection(null);
-                setPrefilledImage(null);
-                setIsCreateModalOpen(true);
-              }}
-              title={
-                !isOnline
-                  ? "Creating listings is disabled while offline to prevent data loss"
-                  : "Post a pre-owned item on campus"
-              }
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md border transition-all select-none ${
-                !isOnline
-                  ? "bg-indigo-950/70 text-indigo-300/60 border-indigo-900 cursor-not-allowed opacity-75"
-                  : "bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-400/40 cursor-pointer"
-              }`}
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>{!isOnline ? "Post Disabled (Offline)" : "Post Pre-Owned Item"}</span>
-            </button>
-            <button
-              onClick={() => setIsPBLModalOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/20 transition-all"
-            >
-              <BookOpen className="w-4 h-4 text-indigo-200" />
-              PBL Scope & Team
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Engineering Bento Terminal Hero (Style 1) */}
+      <EngineeringBentoHero
+        totalListingsCount={listings.length}
+        availableCount={availableListingsCount}
+        topperNotesCount={topperNotes.length}
+        upcomingHandoversCount={upcomingHandoversCount}
+        isOnline={isOnline}
+        onOpenCreateListing={() => {
+          if (!isOnline) {
+            showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
+            return;
+          }
+          setPrefilledInspection(null);
+          setPrefilledImage(null);
+          setIsCreateModalOpen(true);
+        }}
+        onOpenAIInspector={() => {
+          if (!isOnline) {
+            showToast("⚠️ Offline: AI item scanner requires an active internet connection.");
+            return;
+          }
+          setIsAIInspectorOpen(true);
+        }}
+        onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
+        onOpenPBLInfo={() => setIsPBLModalOpen(true)}
+        onOpenAlerts={() => {
+          setPrefilledAlertKeyword("");
+          setPrefilledAlertCategory("All");
+          setIsAlertsModalOpen(true);
+        }}
+        onSelectCategory={(cat) => setSelectedCategory(cat)}
+        selectedCategory={selectedCategory}
+      />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -936,8 +1069,10 @@ export default function App() {
                 transition={{ type: "spring", stiffness: 450, damping: 28 }}
                 className={`relative px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer select-none transition-[color,background-color,border-color,box-shadow] duration-200 ${
                   isSelected
-                    ? "text-white shadow-md shadow-indigo-600/25"
-                    : "text-slate-600 hover:text-indigo-600 bg-white hover:bg-slate-50/90 border border-slate-200/90 hover:border-indigo-200 shadow-2xs"
+                    ? "text-white shadow-lg shadow-indigo-600/30"
+                    : isDark
+                    ? "text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/50 shadow-xs"
+                    : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 hover:border-indigo-400 shadow-xs"
                 }`}
               >
                 {/* Active Sliding Pill Background */}
@@ -965,7 +1100,7 @@ export default function App() {
                 >
                   <Icon
                     className={`w-3.5 h-3.5 transition-colors ${
-                      isSelected ? "text-white" : "text-slate-400 group-hover:text-indigo-500"
+                      isSelected ? "text-white" : isDark ? "text-slate-400 group-hover:text-indigo-400" : "text-slate-500 group-hover:text-indigo-600"
                     }`}
                   />
                 </motion.span>
@@ -978,8 +1113,10 @@ export default function App() {
                   animate={{
                     backgroundColor: isSelected
                       ? "rgba(255, 255, 255, 0.22)"
-                      : "rgba(241, 245, 249, 1)",
-                    color: isSelected ? "#ffffff" : "#64748b",
+                      : isDark
+                      ? "rgba(51, 65, 85, 0.8)"
+                      : "rgba(226, 232, 240, 0.9)",
+                    color: isSelected ? "#ffffff" : isDark ? "#94a3b8" : "#475569",
                   }}
                   transition={{ duration: 0.2 }}
                   className="relative z-10 ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-tight"
@@ -992,15 +1129,23 @@ export default function App() {
         </div>
 
         {/* Secondary Filter & Sorting Controls */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-4 text-xs">
+        <div
+          className={`p-4 rounded-2xl border shadow-md backdrop-blur-xl flex flex-wrap items-center justify-between gap-4 text-xs ${
+            isDark
+              ? "bg-slate-800/90 border-slate-700/80 text-slate-200"
+              : "bg-white border-slate-200 text-slate-800 shadow-slate-200/60"
+          }`}
+        >
           <div className="flex flex-wrap items-center gap-3">
             {/* Listing Type Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-500">Type:</span>
+              <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Type:</span>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as any)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                  isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
+                }`}
               >
                 <option value="all">All Types (Sell & Swap)</option>
                 <option value="sell">For Sale (₹ Cash)</option>
@@ -1010,11 +1155,13 @@ export default function App() {
 
             {/* Condition Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-500">Condition:</span>
+              <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Condition:</span>
               <select
                 value={selectedCondition}
                 onChange={(e) => setSelectedCondition(e.target.value as any)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                  isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
+                }`}
               >
                 <option value="all">All Conditions</option>
                 <option value="Like New">Like New</option>
@@ -1028,17 +1175,17 @@ export default function App() {
               id="filter-wishlist-toggle"
               onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
               title="Show only items saved to your Wishlist"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
                 wishlistOnlyFilter
-                  ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60"
+                  ? "bg-rose-600 text-white shadow-xs border-rose-500"
+                  : "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-rose-500/30"
               }`}
             >
               <Heart
                 className={`w-3.5 h-3.5 ${
                   wishlistOnlyFilter
                     ? "fill-white text-white"
-                    : "fill-rose-500 text-rose-500"
+                    : "fill-rose-400 text-rose-400"
                 }`}
               />
               <span>Wishlist ({wishlistIds.length})</span>
@@ -1053,9 +1200,9 @@ export default function App() {
                 setIsAlertsModalOpen(true);
               }}
               title="Set an alert to notify you when items matching this criteria are posted"
-              className="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 shadow-2xs"
+              className="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 shadow-xs cursor-pointer"
             >
-              <Bell className="w-3.5 h-3.5 text-amber-600" />
+              <Bell className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>
                 Notify Me
                 {searchQuery
@@ -1080,7 +1227,7 @@ export default function App() {
                   setWishlistOnlyFilter(false);
                   setSearchQuery("");
                 }}
-                className="text-indigo-600 hover:text-indigo-800 font-bold ml-1"
+                className="text-indigo-500 dark:text-indigo-400 hover:underline font-bold ml-1 cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -1089,14 +1236,16 @@ export default function App() {
 
           {/* Sort By */}
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-500 flex items-center gap-1">
-              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+            <span className={`font-bold flex items-center gap-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              <ArrowUpDown className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
               Sort:
             </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
+              }`}
             >
               <option value="newest">Recently Listed</option>
               <option value="price_asc">Price: Low to High</option>
@@ -1109,15 +1258,21 @@ export default function App() {
         {/* Listings Header & Count */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
               {selectedCategory === "All" ? "Campus Marketplace Items" : `${selectedCategory} Listings`}
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-slate-200 text-slate-700">
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
+                isDark
+                  ? "bg-slate-800 border-slate-700 text-indigo-300"
+                  : "bg-indigo-50 border-indigo-200 text-indigo-700"
+              }`}
+            >
               {filteredListings.length}
             </span>
           </div>
 
-          <span className="text-xs text-slate-500">
+          <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
             Click on any item to view AI condition breakdown or negotiate
           </span>
         </div>
@@ -1125,8 +1280,8 @@ export default function App() {
         {/* Listings Grid */}
         {isLoadingListings ? (
           <div className="text-center py-16 space-y-3">
-            <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
-            <p className="text-sm font-semibold text-slate-600">
+            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
+            <p className="text-sm font-semibold text-slate-400">
               Loading verified campus listings...
             </p>
           </div>
@@ -1164,6 +1319,7 @@ export default function App() {
                     >
                       <ListingCard
                         listing={listing}
+                        allListings={listings}
                         isWishlisted={wishlistIds.includes(listing.id)}
                         onToggleWishlist={handleToggleWishlist}
                         onOpenDetails={(item) => {
@@ -1196,16 +1352,22 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: -10 }}
                 transition={{ duration: 0.25 }}
-                className="text-center py-16 p-8 rounded-2xl bg-white border border-slate-200 space-y-4"
+                className={`text-center py-16 p-8 rounded-2xl border shadow-xl backdrop-blur-xl space-y-4 ${
+                  isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-white border-slate-200 shadow-slate-200/50"
+                }`}
               >
-                <div className="w-14 h-14 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
-                  <Package className="w-7 h-7" />
+                <div
+                  className={`w-14 h-14 mx-auto rounded-full border flex items-center justify-center ${
+                    isDark ? "bg-slate-900 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-500"
+                  }`}
+                >
+                  <Package className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
                     No items match your active filters
                   </h3>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
+                  <p className={`text-xs max-w-md mx-auto mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     Try clearing your search or switching categories. You can also set a notification alert to get notified the second a student posts a matching item!
                   </p>
                 </div>
@@ -1217,7 +1379,7 @@ export default function App() {
                       setPrefilledAlertCategory(selectedCategory);
                       setIsAlertsModalOpen(true);
                     }}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors shadow-lg flex items-center gap-1.5 cursor-pointer"
                   >
                     <Bell className="w-3.5 h-3.5 text-slate-950" />
                     <span>
@@ -1232,7 +1394,11 @@ export default function App() {
                       setWishlistOnlyFilter(false);
                       setSearchQuery("");
                     }}
-                    className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer ${
+                      isDark
+                        ? "bg-slate-700/90 hover:bg-slate-700 text-slate-200 border-slate-600"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                    }`}
                   >
                     Reset All Filters
                   </button>
@@ -1244,32 +1410,46 @@ export default function App() {
       </main>
 
       {/* Footer with Mentorship & PBL Credits */}
-      <footer className="mt-16 bg-white border-t border-slate-200 py-8 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+      <footer
+        className={`mt-16 border-t py-8 px-4 sm:px-6 lg:px-8 text-xs backdrop-blur-xl transition-colors duration-200 ${
+          isDark
+            ? "bg-slate-950/80 border-slate-800/90 text-slate-400"
+            : "bg-white border-slate-200 text-slate-600"
+        }`}
+      >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center md:text-left">
-            <div className="font-bold text-slate-800 text-sm">
-              Campus Resale & Exchange Platform
+            <div className={`font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+              PVG's COET Campus Resale & Exchange Platform
             </div>
             <p>
               Problem-Based Learning (PBL) Project • 2nd Year Computer Science & Engineering
             </p>
             <p>
-              Guided by: <strong className="text-slate-700">Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
+              Guided by: <strong className={isDark ? "text-slate-200" : "text-slate-800"}>Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setIsPBLModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold text-slate-700 transition-colors"
+              className={`px-3 py-1.5 rounded-lg border font-semibold transition-colors cursor-pointer ${
+                isDark
+                  ? "border-slate-700 hover:bg-slate-800 text-slate-300"
+                  : "border-slate-200 hover:bg-slate-100 text-slate-700"
+              }`}
             >
               PBL Documentation & Milestones
             </button>
             <button
               onClick={() => setIsAIInspectorOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition-colors flex items-center gap-1"
+              className={`px-3 py-1.5 rounded-lg border font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                isDark
+                  ? "bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border-indigo-500/40"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
               Gemini 3.1 Pro Preview
             </button>
           </div>
@@ -1279,6 +1459,7 @@ export default function App() {
       {/* Modals & Drawers */}
       <ListingDetailModal
         listing={selectedListing}
+        allListings={listings}
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
@@ -1430,6 +1611,20 @@ export default function App() {
         }}
         alertHistory={alertHistory}
         onClearHistory={handleClearAlertHistory}
+      />
+
+      {/* Topper Notes Free Vault Modal */}
+      <TopperNotesModal
+        isOpen={isTopperNotesModalOpen}
+        onClose={() => setIsTopperNotesModalOpen(false)}
+        currentUserEmail={currentUser?.email}
+        currentUserName={currentUser?.displayName}
+        notes={topperNotes}
+        onSaveNotes={(updated) => {
+          setTopperNotes(updated);
+          saveStoredTopperNotes(updated);
+        }}
+        onShowToast={showToast}
       />
 
       {/* Item Image Inspection Lightbox Modal */}

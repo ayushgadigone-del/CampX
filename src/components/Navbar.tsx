@@ -17,8 +17,12 @@ import {
   ArrowRight,
   Wifi,
   WifiOff,
+  GraduationCap,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { User } from "firebase/auth";
+import { useTheme } from "../context/ThemeContext";
 
 interface NavbarProps {
   currentUser: User | null;
@@ -31,6 +35,7 @@ interface NavbarProps {
   onOpenAIInspector: () => void;
   onOpenHandovers: () => void;
   onOpenPBLInfo: () => void;
+  onOpenTopperNotes: () => void;
   upcomingHandoversCount: number;
   wishlistCount?: number;
   onOpenWishlist: () => void;
@@ -53,6 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAIInspector,
   onOpenHandovers,
   onOpenPBLInfo,
+  onOpenTopperNotes,
   upcomingHandoversCount,
   wishlistCount = 0,
   onOpenWishlist,
@@ -63,6 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSimulateOffline,
   onShowToast,
 }) => {
+  const { isDark, toggleTheme } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -153,7 +160,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+    <header
+      className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors duration-200 ${
+        isDark
+          ? "bg-slate-900/90 border-slate-800 shadow-xl"
+          : "bg-white/95 border-slate-200 shadow-xs"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3">
           {/* Brand Logo & College Marker */}
@@ -167,18 +180,30 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="hidden sm:block">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base font-extrabold text-slate-900 tracking-tight">
+                  <span
+                    className={`text-base font-extrabold tracking-tight ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     Campus Resale
                   </span>
-                  <span className="text-xs font-bold text-indigo-600">&</span>
-                  <span className="text-base font-extrabold text-slate-900 tracking-tight">
+                  <span className="text-xs font-bold text-indigo-500">&</span>
+                  <span
+                    className={`text-base font-extrabold tracking-tight ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     Exchange
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium -mt-0.5">
-                  <span>Verified College Marketplace</span>
+                <div
+                  className={`flex items-center gap-1 text-[10px] font-medium -mt-0.5 ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  <span>PVG's COET Marketplace</span>
                   <span>•</span>
-                  <span className="text-indigo-600 font-bold">PBL 2026</span>
+                  <span className="text-indigo-500 font-bold">PBL 2026</span>
                 </div>
               </div>
             </div>
@@ -187,7 +212,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Centered Search Bar with Recent History Dropdown */}
           <div ref={searchContainerRef} className="flex-1 max-w-md mx-2 relative">
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <Search
+                className={`w-4 h-4 absolute left-3.5 top-3 ${
+                  isDark ? "text-slate-400" : "text-slate-400"
+                }`}
+              />
               <input
                 id="main-navbar-search-input"
                 type="text"
@@ -198,8 +227,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                   if (!isSearchDropdownOpen) setIsSearchDropdownOpen(true);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search calculators, books, lab calipers, cycles..."
-                className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                placeholder="Search calculators, books, lab calipers, cycles... (Press '/' to focus)"
+                className={`w-full pl-9 pr-8 py-2 text-xs sm:text-sm rounded-xl border transition-all font-medium ${
+                  isDark
+                    ? "border-slate-700 bg-slate-800/90 hover:bg-slate-800 focus:bg-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder:text-slate-500"
+                    : "border-slate-300 bg-slate-100/90 hover:bg-slate-100 focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-slate-900 placeholder:text-slate-400"
+                }`}
               />
               {searchQuery && (
                 <button
@@ -207,7 +240,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => {
                     onSearchChange("");
                   }}
-                  className="absolute right-2.5 top-2.5 p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                  className={`absolute right-2.5 top-2.5 p-1 rounded-full cursor-pointer ${
+                    isDark
+                      ? "text-slate-400 hover:text-slate-200"
+                      : "text-slate-400 hover:text-slate-700"
+                  }`}
                   title="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -219,7 +256,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isSearchDropdownOpen && (
               <div
                 id="search-history-dropdown"
-                className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                className={`absolute left-0 right-0 top-full mt-1.5 rounded-2xl border shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl ${
+                  isDark
+                    ? "bg-slate-800/95 border-slate-700 text-slate-100"
+                    : "bg-white border-slate-200 text-slate-900 shadow-xl"
+                }`}
               >
                 {/* Active query prompt if user typed something */}
                 {searchQuery.trim() && (
@@ -228,29 +269,49 @@ export const Navbar: React.FC<NavbarProps> = ({
                       addRecentSearch(searchQuery);
                       setIsSearchDropdownOpen(false);
                     }}
-                    className="p-2.5 px-3.5 flex items-center justify-between text-xs bg-indigo-50/70 hover:bg-indigo-100 text-indigo-900 border-b border-indigo-100 font-semibold cursor-pointer transition-colors"
+                    className={`p-2.5 px-3.5 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors ${
+                      isDark
+                        ? "bg-indigo-950/70 hover:bg-indigo-900/80 text-indigo-200 border-b border-indigo-800/50"
+                        : "bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border-b border-indigo-100"
+                    }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <Search className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <Search className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                       <span>Search for "{searchQuery}"</span>
                     </div>
-                    <span className="flex items-center gap-1 text-[10px] text-indigo-600 bg-white px-1.5 py-0.5 rounded border border-indigo-200 shrink-0">
+                    <span
+                      className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border shrink-0 ${
+                        isDark
+                          ? "text-indigo-300 bg-indigo-900/60 border-indigo-700"
+                          : "text-indigo-700 bg-white border-indigo-200"
+                      }`}
+                    >
                       <span>Enter ↵</span>
                     </span>
                   </div>
                 )}
 
                 {/* Dropdown Header */}
-                <div className="px-3.5 py-2 flex items-center justify-between bg-slate-50/80 border-b border-slate-100">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
-                    <History className="w-3.5 h-3.5 text-slate-400" />
+                <div
+                  className={`px-3.5 py-2 flex items-center justify-between border-b ${
+                    isDark
+                      ? "bg-slate-900/80 border-slate-700/80"
+                      : "bg-slate-50 border-slate-200"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 text-[11px] font-bold ${
+                      isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
+                    <History className="w-3.5 h-3.5" />
                     <span>Recent Searches (Last 5)</span>
                   </div>
                   {recentSearches.length > 0 && (
                     <button
                       type="button"
                       onClick={clearAllRecentSearches}
-                      className="text-[10px] font-bold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                     >
                       Clear History
                     </button>
@@ -259,16 +320,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Recent Searches List */}
                 {recentSearches.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-slate-400">
+                  <div
+                    className={`p-4 text-center text-xs ${
+                      isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
                     No recent search history yet
                   </div>
                 ) : (
-                  <ul className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                  <ul
+                    className={`divide-y max-h-60 overflow-y-auto ${
+                      isDark ? "divide-slate-700/60" : "divide-slate-100"
+                    }`}
+                  >
                     {recentSearches.map((item) => (
                       <li
                         key={item}
                         onClick={() => handleSelectRecentSearch(item)}
-                        className="flex items-center justify-between px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-colors group"
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs cursor-pointer transition-colors group ${
+                          isDark
+                            ? "text-slate-200 hover:bg-slate-700/60 hover:text-indigo-300"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                        }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <Clock className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 shrink-0" />
@@ -279,7 +352,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onClick={(e) => removeRecentSearch(item, e)}
                           title="Remove from history"
                           aria-label={`Remove ${item} from search history`}
-                          className="p-1 text-slate-300 hover:text-rose-500 rounded-md hover:bg-rose-50 transition-colors shrink-0"
+                          className="p-1 text-slate-400 hover:text-rose-500 rounded-md hover:bg-rose-500/10 transition-colors shrink-0"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -297,9 +370,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenAIInspector}
               title="Inspect item condition using Gemini 3.1 Pro Preview"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition-colors shadow-2xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden md:inline">AI Inspector</span>
             </button>
 
@@ -308,18 +381,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="navbar-alerts-button"
               onClick={onOpenAlerts}
               title="Set 'Notify Me' alerts for calculators, books, and keywords"
-              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 transition-colors shadow-2xs"
+              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-colors shadow-2xs"
             >
               <Bell
                 className={`w-3.5 h-3.5 ${
                   alertsCount > 0
-                    ? "text-amber-600 fill-amber-400"
-                    : "text-amber-600"
+                    ? "text-amber-400 fill-amber-400"
+                    : "text-amber-400"
                 }`}
               />
               <span className="hidden md:inline">Notify Me</span>
               {alertsCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold flex items-center justify-center">
                   {alertsCount}
                 </span>
               )}
@@ -330,13 +403,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="navbar-wishlist-button"
               onClick={onOpenWishlist}
               title="View My Saved Wishlist"
-              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/60 transition-colors shadow-2xs"
+              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-colors shadow-2xs"
             >
               <Heart
                 className={`w-3.5 h-3.5 ${
                   wishlistCount > 0
-                    ? "fill-rose-500 text-rose-500"
-                    : "text-rose-600"
+                    ? "fill-rose-500 text-rose-400"
+                    : "text-rose-400"
                 }`}
               />
               <span className="hidden md:inline">Wishlist</span>
@@ -351,9 +424,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenHandovers}
               title="View Scheduled Campus Handovers"
-              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 transition-colors shadow-2xs"
+              className="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 transition-colors shadow-2xs"
             >
-              <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
+              <CalendarIcon className="w-3.5 h-3.5 text-blue-400" />
               <span className="hidden lg:inline">Handovers</span>
               {upcomingHandoversCount > 0 && (
                 <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
@@ -375,8 +448,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-colors shadow-2xs select-none ${
                   isOnline
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100"
-                    : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                    : "bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/25"
                 }`}
               >
                 <span className="flex h-2 w-2 relative">
@@ -385,14 +458,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                   <span
                     className={`relative inline-flex rounded-full h-2 w-2 ${
-                      isOnline ? "bg-emerald-500" : "bg-rose-500"
+                      isOnline ? "bg-emerald-400" : "bg-rose-400"
                     }`}
                   ></span>
                 </span>
                 {isOnline ? (
                   <span className="hidden xl:inline">Online</span>
                 ) : (
-                  <span className="inline font-extrabold text-rose-700">Offline</span>
+                  <span className="inline font-extrabold text-rose-300">Offline</span>
                 )}
               </button>
             )}
@@ -412,12 +485,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               }
               className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all select-none ${
                 !isOnline
-                  ? "bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow-md cursor-pointer"
+                  ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none"
+                  : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md hover:shadow-indigo-500/20 cursor-pointer"
               }`}
             >
               {!isOnline ? (
-                <WifiOff className="w-4 h-4 text-slate-400 shrink-0" />
+                <WifiOff className="w-4 h-4 text-slate-500 shrink-0" />
               ) : (
                 <PlusCircle className="w-4 h-4 shrink-0" />
               )}
@@ -429,11 +502,49 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </button>
 
+            {/* Free Topper Notes Vault Button */}
+            <button
+              id="navbar-topper-notes-btn"
+              onClick={onOpenTopperNotes}
+              title="Free Topper Notes Vault (Pre-uploaded by App Owner)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-400/30 bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 text-amber-200 text-xs font-bold transition-all shadow-2xs cursor-pointer select-none"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="hidden md:inline">Topper Notes</span>
+              <span className="px-1.5 py-0.2 rounded bg-emerald-500 text-white text-[10px] font-extrabold uppercase">
+                Free
+              </span>
+            </button>
+
+            {/* Dark / Light Mode Switcher Button */}
+            <button
+              id="navbar-theme-toggle-btn"
+              type="button"
+              onClick={toggleTheme}
+              title={`Switch to ${isDark ? "Light" : "Dark"} Mode (Shortcut: D)`}
+              aria-label={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
+              className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                isDark
+                  ? "bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-amber-400 hover:text-amber-300 shadow-2xs"
+                  : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-indigo-700 hover:text-indigo-900 shadow-2xs"
+              }`}
+            >
+              {isDark ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-700" />
+              )}
+            </button>
+
             {/* PBL Info Button */}
             <button
               onClick={onOpenPBLInfo}
               title="PBL Project Scope & Team Info"
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+              }`}
             >
               <BookOpen className="w-4 h-4" />
             </button>
@@ -443,13 +554,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-1.5 p-1 rounded-xl hover:bg-slate-100 transition-colors"
+                  className={`flex items-center gap-1.5 p-1 rounded-xl transition-colors cursor-pointer ${
+                    isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"
+                  }`}
                 >
                   {currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt={currentUser.displayName || "User"}
-                      className="w-8 h-8 rounded-full border border-indigo-300"
+                      className="w-8 h-8 rounded-full border border-indigo-400/50"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
@@ -457,37 +570,100 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {currentUser.displayName?.charAt(0) || "S"}
                     </div>
                   )}
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  />
                 </button>
 
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-xl border border-slate-200 py-2 z-50 text-xs animate-in fade-in duration-150">
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <div className="font-bold text-slate-900 flex items-center gap-1">
+                  <div
+                    className={`absolute right-0 mt-2 w-56 rounded-2xl shadow-2xl border py-2 z-50 text-xs animate-in fade-in duration-150 backdrop-blur-xl ${
+                      isDark
+                        ? "bg-slate-800/95 border-slate-700 text-slate-200"
+                        : "bg-white border-slate-200 text-slate-800 shadow-xl"
+                    }`}
+                  >
+                    <div
+                      className={`px-4 py-2 border-b ${
+                        isDark ? "border-slate-700/80" : "border-slate-100"
+                      }`}
+                    >
+                      <div
+                        className={`font-bold flex items-center gap-1 ${
+                          isDark ? "text-white" : "text-slate-900"
+                        }`}
+                      >
                         {currentUser.displayName || "Student User"}
-                        <BadgeCheck className="w-3.5 h-3.5 text-blue-600" />
+                        <BadgeCheck className="w-3.5 h-3.5 text-blue-500" />
                       </div>
-                      <span className="text-[11px] text-slate-500 truncate block">
+                      <span
+                        className={`text-[11px] truncate block font-mono ${
+                          isDark ? "text-slate-400" : "text-slate-500"
+                        }`}
+                      >
                         {currentUser.email}
                       </span>
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold text-[10px]">
-                        College Verified Account
+                      <span
+                        className={`inline-block mt-1 px-2 py-0.5 rounded-md font-semibold text-[10px] border ${
+                          isDark
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        }`}
+                      >
+                        ✓ @pvgcoet.ac.in Verified
                       </span>
                     </div>
+
+                    {/* Dark/Light Mode toggle option in dropdown */}
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        toggleTheme();
+                      }}
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {isDark ? (
+                          <Sun className="w-3.5 h-3.5 text-amber-400" />
+                        ) : (
+                          <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                        )}
+                        <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
+                      </span>
+                      <kbd
+                        className={`text-[10px] font-mono px-1 py-0.5 rounded border ${
+                          isDark
+                            ? "bg-slate-700 border-slate-600 text-slate-300"
+                            : "bg-slate-100 border-slate-300 text-slate-600"
+                        }`}
+                      >
+                        D
+                      </kbd>
+                    </button>
 
                     <button
                       onClick={() => {
                         setShowProfileMenu(false);
                         onOpenAlerts();
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center justify-between text-slate-700"
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
                     >
                       <span className="flex items-center gap-2">
-                        <Bell className="w-3.5 h-3.5 text-amber-600" />
+                        <Bell className="w-3.5 h-3.5 text-amber-400" />
                         'Notify Me' Alerts
                       </span>
                       {alertsCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                        <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
                           {alertsCount}
                         </span>
                       )}
@@ -498,14 +674,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setShowProfileMenu(false);
                         onOpenWishlist();
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center justify-between text-slate-700"
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
                     >
                       <span className="flex items-center gap-2">
-                        <Heart className="w-3.5 h-3.5 text-rose-600" />
+                        <Heart className="w-3.5 h-3.5 text-rose-400" />
                         My Saved Wishlist
                       </span>
                       {wishlistCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                        <span className="px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">
                           {wishlistCount}
                         </span>
                       )}
@@ -516,10 +696,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setShowProfileMenu(false);
                         onOpenHandovers();
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                      className={`w-full text-left px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
                     >
-                      <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
+                      <CalendarIcon className="w-3.5 h-3.5 text-blue-400" />
                       Calendar Handovers
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        onOpenTopperNotes();
+                      }}
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                        Topper Notes Vault
+                      </span>
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+                        Free
+                      </span>
                     </button>
 
                     <button
@@ -527,9 +731,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setShowProfileMenu(false);
                         onOpenPBLInfo();
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                      className={`w-full text-left px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                      }`}
                     >
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
                       PBL Project Report
                     </button>
 
@@ -538,7 +746,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setShowProfileMenu(false);
                         onLogout();
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-rose-50 text-rose-700 font-semibold flex items-center gap-2 border-t border-slate-100"
+                      className={`w-full text-left px-4 py-2 flex items-center gap-2 font-semibold border-t transition-colors cursor-pointer ${
+                        isDark
+                          ? "hover:bg-rose-500/20 text-rose-300 border-slate-700/80"
+                          : "hover:bg-rose-50 text-rose-600 border-slate-100"
+                      }`}
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out
@@ -548,11 +760,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-1.5">
-                {/* Google Sign-in button adhering to Workspace Skill SVG specifications */}
                 <button
                   onClick={onLogin}
                   title="Sign in with your Google account"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-md transition-all cursor-pointer ${
+                    isDark
+                      ? "border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                      : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
+                  }`}
                 >
                   <svg
                     version="1.1"
@@ -584,7 +799,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     onClick={onDemoLogin}
                     title="1-Click verified student account for testing without Google popup"
-                    className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition-all cursor-pointer"
+                    className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-400 text-xs font-semibold transition-all cursor-pointer"
                   >
                     <span>Demo Student</span>
                   </button>

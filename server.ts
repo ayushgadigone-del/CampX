@@ -7,7 +7,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const isProduction = process.env.NODE_ENV === "production";
+// In development, the dev server must bind to port 3000 behind the Nginx reverse proxy.
+// In production on Cloud Run, listen on Cloud Run's injected PORT (default 8080) or fallback to 3000.
+const PORT = isProduction && process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Middleware for parsing large image payloads
 app.use(express.json({ limit: "25mb" }));
@@ -26,9 +29,9 @@ function getGeminiClient(): GoogleGenAI {
   return genAIClient;
 }
 
-// Health check endpoint
-app.get("/api/health", (_req: Request, res: Response) => {
-  res.json({
+// Health check endpoints for Cloud Run startup/liveness probes and monitoring
+app.get(["/health", "/api/health", "/_health"], (_req: Request, res: Response) => {
+  res.status(200).json({
     status: "ok",
     service: "campus-resale-backend",
     timestamp: new Date().toISOString(),
@@ -221,7 +224,7 @@ async function setupApp() {
   const distPath = path.join(process.cwd(), "dist");
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProduction) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -231,19 +234,49 @@ async function setupApp() {
   } else {
     // Production static file serving
     app.use(express.static(distPath));
-    app.get("*", (_req: Request, res: Response) => {
+    app.use((_req: Request, res: Response) => {
       const indexFile = path.join(distPath, "index.html");
       if (fs.existsSync(indexFile)) {
         res.sendFile(indexFile);
       } else {
-        res.status(503).send("Application static bundle is preparing. Please refresh momentarily.");
+        res.status(200).send("<!DOCTYPE html><html><head><title>Campus Resale & Exchange</title></head><body><div id='root'>Loading...</div></body></html>");
       }
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Campus Resale & Exchange server listening on http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Campus Resale & Exchange server listening on http://0.0.0.0:${PORT} (NODE_ENV=${process.env.NODE_ENV || 'development'})`);
   });
+
+  server.on("error", (err: any) => {
+    console.error(`Server error on primary port ${PORT}:`, err?.message || err);
+  });
+
+  // In production on Cloud Run (e.g. PORT=8080), also listen on port 3000 if available
+  // so both direct traffic and reverse-proxied traffic are seamlessly supported.
+  if (isProduction && PORT !== 3000) {
+    try {
+      const secondaryServer = app.listen(3000, "0.0.0.0", () => {
+        console.log("Also listening on internal port 3000");
+      });
+      secondaryServer.on("error", (err: any) => {
+        if (err.code !== "EADDRINUSE") {
+          console.warn("Secondary port 3000 notice:", err?.message);
+        }
+      });
+    } catch {
+      // Ignore if port 3000 cannot be bound
+    }
+  }
+
+  const shutdown = () => {
+    server.close(() => {
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
 setupApp();
