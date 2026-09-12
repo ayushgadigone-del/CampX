@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
+import { ThemeSelector } from "./ThemeSelector";
 
 interface NavbarProps {
   currentUser: User | null;
@@ -516,25 +517,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </button>
 
-            {/* Dark / Light Mode Switcher Button */}
-            <button
-              id="navbar-theme-toggle-btn"
-              type="button"
-              onClick={toggleTheme}
-              title={`Switch to ${isDark ? "Light" : "Dark"} Mode (Shortcut: D)`}
-              aria-label={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
-              className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
-                isDark
-                  ? "bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-amber-400 hover:text-amber-300 shadow-2xs"
-                  : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-indigo-700 hover:text-indigo-900 shadow-2xs"
-              }`}
-            >
-              {isDark ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
-              )}
-            </button>
+            {/* Light / Dark Mode Selector */}
+            <div className="hidden sm:inline-flex">
+              <ThemeSelector variant="segmented" />
+            </div>
+            <div className="sm:hidden inline-flex">
+              <ThemeSelector variant="button" />
+            </div>
 
             {/* PBL Info Button */}
             <button
@@ -617,35 +606,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
 
                     {/* Dark/Light Mode toggle option in dropdown */}
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        toggleTheme();
-                      }}
-                      className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
-                        isDark
-                          ? "hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                          : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {isDark ? (
-                          <Sun className="w-3.5 h-3.5 text-amber-400" />
-                        ) : (
-                          <Moon className="w-3.5 h-3.5 text-indigo-600" />
-                        )}
-                        <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
-                      </span>
-                      <kbd
-                        className={`text-[10px] font-mono px-1 py-0.5 rounded border ${
-                          isDark
-                            ? "bg-slate-700 border-slate-600 text-slate-300"
-                            : "bg-slate-100 border-slate-300 text-slate-600"
-                        }`}
-                      >
-                        D
-                      </kbd>
-                    </button>
+                    <ThemeSelector variant="dropdown-item" />
 
                     <button
                       onClick={() => {

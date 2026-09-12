@@ -152,7 +152,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                   AI Item Inspector
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                  gemini-3.1-pro-preview
+                  gemini-3.8-flash
                 </span>
               </div>
               <p className="text-xs text-slate-500">

@@ -92,7 +92,7 @@ Ensure the pricing is realistic for an Indian engineering college student budget
     let responseText = "{}";
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-3.8-flash",
         contents: [
           {
             role: "user",
@@ -115,30 +115,35 @@ Ensure the pricing is realistic for an Indian engineering college student budget
       });
       responseText = response.text?.trim() || "{}";
     } catch (primaryErr: any) {
-      console.warn("Primary model gemini-3.1-pro-preview failed, retrying with gemini-3.8-flash:", primaryErr?.message);
-      const fallbackResponse = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                inlineData: {
-                  mimeType: cleanMime,
-                  data: base64Data,
+      console.warn("Primary model gemini-3.8-flash encountered issue, retrying with gemini-flash-latest:", primaryErr?.message);
+      try {
+        const fallbackResponse = await ai.models.generateContent({
+          model: "gemini-flash-latest",
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: cleanMime,
+                    data: base64Data,
+                  },
                 },
-              },
-              {
-                text: prompt,
-              },
-            ],
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+          config: {
+            responseMimeType: "application/json",
           },
-        ],
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
-      responseText = fallbackResponse.text?.trim() || "{}";
+        });
+        responseText = fallbackResponse.text?.trim() || "{}";
+      } catch (fallbackErr: any) {
+        console.warn("Gemini fallback model also failed:", fallbackErr?.message);
+        responseText = "{}";
+      }
     }
 
     let parsedResult: any = {};
@@ -213,7 +218,7 @@ Ensure the pricing is realistic for an Indian engineering college student budget
   } catch (error: any) {
     console.error("Gemini image analysis error:", error);
     res.status(500).json({
-      error: "Failed to analyze image using Gemini 3.1 Pro Preview",
+      error: "Failed to analyze image using Gemini",
       details: error?.message || "Unknown error",
     });
   }

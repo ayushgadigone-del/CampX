@@ -10,7 +10,6 @@ import {
   Tag,
   ShieldCheck,
   CheckCircle2,
-  RefreshCw,
   Search,
   Building2,
   Package,
@@ -49,7 +48,9 @@ import { db, initAuth, googleSignIn, demoStudentSignIn, logout } from "./lib/fir
 import { GoogleCalendarEventResponse } from "./lib/calendar";
 
 import { Navbar } from "./components/Navbar";
+import { ThemeSelector } from "./components/ThemeSelector";
 import { ListingCard } from "./components/ListingCard";
+import { ListingGridSkeleton } from "./components/ListingCardSkeleton";
 import { ListingDetailModal } from "./components/ListingDetailModal";
 import { ListingImageLightboxModal } from "./components/ListingImageLightboxModal";
 import { AIItemInspectorModal } from "./components/AIItemInspectorModal";
@@ -1255,158 +1256,163 @@ export default function App() {
           </div>
         </div>
 
-        {/* Listings Header & Count */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-              {selectedCategory === "All" ? "Campus Marketplace Items" : `${selectedCategory} Listings`}
-            </h2>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
-                isDark
-                  ? "bg-slate-800 border-slate-700 text-indigo-300"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-700"
-              }`}
-            >
-              {filteredListings.length}
+        {/* Campus Marketplace Items Section */}
+        <section
+          id="campus-marketplace-items-section"
+          className={`p-6 sm:p-8 rounded-3xl border transition-colors ${
+            isDark
+              ? "bg-slate-900/90 border-slate-800 shadow-xl"
+              : "bg-white border-slate-200/90 shadow-sm"
+          }`}
+        >
+          {/* Listings Header & Count */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6">
+            <div className="flex items-center gap-2">
+              <h2 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                {selectedCategory === "All" ? "Campus Marketplace Items" : `${selectedCategory} Listings`}
+              </h2>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
+                  isDark
+                    ? "bg-slate-800 border-slate-700 text-indigo-300"
+                    : "bg-indigo-50 border-indigo-200 text-indigo-700"
+                }`}
+              >
+                {filteredListings.length}
+              </span>
+            </div>
+
+            <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              Click on any item to view AI condition breakdown or negotiate
             </span>
           </div>
 
-          <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-            Click on any item to view AI condition breakdown or negotiate
-          </span>
-        </div>
-
-        {/* Listings Grid */}
-        {isLoadingListings ? (
-          <div className="text-center py-16 space-y-3">
-            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
-            <p className="text-sm font-semibold text-slate-400">
-              Loading verified campus listings...
-            </p>
-          </div>
-        ) : (
-          <AnimatePresence mode="wait">
-            {filteredListings.length > 0 ? (
-              <motion.div
-                key="listings-grid"
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              >
-                <AnimatePresence mode="popLayout">
-                  {filteredListings.map((listing) => (
-                    <motion.div
-                      key={listing.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.94, y: 12 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.92, y: -8 }}
-                      transition={{
-                        opacity: { duration: 0.22 },
-                        scale: { duration: 0.22 },
-                        y: { duration: 0.22 },
-                        layout: {
-                          type: "spring",
-                          stiffness: 380,
-                          damping: 32,
-                        },
-                      }}
-                      className="h-full flex flex-col"
-                    >
-                      <ListingCard
-                        listing={listing}
-                        allListings={listings}
-                        isWishlisted={wishlistIds.includes(listing.id)}
-                        onToggleWishlist={handleToggleWishlist}
-                        onOpenDetails={(item) => {
-                          setSelectedListing(item);
-                          setIsDetailModalOpen(true);
+          {/* Listings Grid */}
+          {isLoadingListings ? (
+            <ListingGridSkeleton count={8} />
+          ) : (
+            <AnimatePresence mode="wait">
+              {filteredListings.length > 0 ? (
+                <motion.div
+                  key="listings-grid"
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {filteredListings.map((listing) => (
+                      <motion.div
+                        key={listing.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                        transition={{
+                          opacity: { duration: 0.22 },
+                          scale: { duration: 0.22 },
+                          y: { duration: 0.22 },
+                          layout: {
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 32,
+                          },
                         }}
-                        onOpenLightbox={(item) => {
-                          setLightboxListing(item);
-                        }}
-                        onOpenChat={(item) => {
-                          if (!isOnline) {
-                            showToast("⚠️ Chat is disabled while offline to prevent data loss.");
-                            return;
-                          }
-                          setChatListing(item);
-                          setIsChatOpen(true);
-                        }}
-                        onOpenCalendar={handleOpenCalendar}
-                        onShowToast={showToast}
-                        isOnline={isOnline}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="empty-state"
-                initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -10 }}
-                transition={{ duration: 0.25 }}
-                className={`text-center py-16 p-8 rounded-2xl border shadow-xl backdrop-blur-xl space-y-4 ${
-                  isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-white border-slate-200 shadow-slate-200/50"
-                }`}
-              >
-                <div
-                  className={`w-14 h-14 mx-auto rounded-full border flex items-center justify-center ${
-                    isDark ? "bg-slate-900 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-500"
+                        className="h-full flex flex-col"
+                      >
+                        <ListingCard
+                          listing={listing}
+                          allListings={listings}
+                          isWishlisted={wishlistIds.includes(listing.id)}
+                          onToggleWishlist={handleToggleWishlist}
+                          onOpenDetails={(item) => {
+                            setSelectedListing(item);
+                            setIsDetailModalOpen(true);
+                          }}
+                          onOpenLightbox={(item) => {
+                            setLightboxListing(item);
+                          }}
+                          onOpenChat={(item) => {
+                            if (!isOnline) {
+                              showToast("⚠️ Chat is disabled while offline to prevent data loss.");
+                              return;
+                            }
+                            setChatListing(item);
+                            setIsChatOpen(true);
+                          }}
+                          onOpenCalendar={handleOpenCalendar}
+                          onShowToast={showToast}
+                          isOnline={isOnline}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty-state"
+                  initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                  className={`text-center py-16 p-8 rounded-2xl border shadow-xs space-y-4 ${
+                    isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-slate-50 border-slate-200/90"
                   }`}
                 >
-                  <Package className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
-                </div>
-                <div>
-                  <h3 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                    No items match your active filters
-                  </h3>
-                  <p className={`text-xs max-w-md mx-auto mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Try clearing your search or switching categories. You can also set a notification alert to get notified the second a student posts a matching item!
-                  </p>
-                </div>
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
-                  <button
-                    id="empty-state-notify-btn"
-                    onClick={() => {
-                      setPrefilledAlertKeyword(searchQuery);
-                      setPrefilledAlertCategory(selectedCategory);
-                      setIsAlertsModalOpen(true);
-                    }}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors shadow-lg flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Bell className="w-3.5 h-3.5 text-slate-950" />
-                    <span>
-                      Notify Me When Listed {searchQuery ? `("${searchQuery}")` : ""}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedCategory("All");
-                      setSelectedType("all");
-                      setSelectedCondition("all");
-                      setWishlistOnlyFilter(false);
-                      setSearchQuery("");
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer ${
-                      isDark
-                        ? "bg-slate-700/90 hover:bg-slate-700 text-slate-200 border-slate-600"
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                  <div
+                    className={`w-14 h-14 mx-auto rounded-full border flex items-center justify-center ${
+                      isDark ? "bg-slate-900 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-500"
                     }`}
                   >
-                    Reset All Filters
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
+                    <Package className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <h3 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                      No items match your active filters
+                    </h3>
+                    <p className={`text-xs max-w-md mx-auto mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Try clearing your search or switching categories. You can also set a notification alert to get notified the second a student posts a matching item!
+                    </p>
+                  </div>
+                  <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+                    <button
+                      id="empty-state-notify-btn"
+                      onClick={() => {
+                        setPrefilledAlertKeyword(searchQuery);
+                        setPrefilledAlertCategory(selectedCategory);
+                        setIsAlertsModalOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors shadow-lg flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Bell className="w-3.5 h-3.5 text-slate-950" />
+                      <span>
+                        Notify Me When Listed {searchQuery ? `("${searchQuery}")` : ""}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedCategory("All");
+                        setSelectedType("all");
+                        setSelectedCondition("all");
+                        setWishlistOnlyFilter(false);
+                        setSearchQuery("");
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer ${
+                        isDark
+                          ? "bg-slate-700/90 hover:bg-slate-700 text-slate-200 border-slate-600"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                      }`}
+                    >
+                      Reset All Filters
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        </section>
       </main>
 
       {/* Footer with Mentorship & PBL Credits */}
@@ -1431,6 +1437,7 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <ThemeSelector variant="segmented" />
             <button
               onClick={() => setIsPBLModalOpen(true)}
               className={`px-3 py-1.5 rounded-lg border font-semibold transition-colors cursor-pointer ${
@@ -1450,7 +1457,7 @@ export default function App() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-              Gemini 3.1 Pro Preview
+              Gemini 3.8 Flash
             </button>
           </div>
         </div>
