@@ -12,7 +12,7 @@ service cloud.firestore {
     match /listings/{listingId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow update: if isSignedIn() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
       allow delete: if isSignedIn() && (resource.data.sellerId == request.auth.uid);
     }
 

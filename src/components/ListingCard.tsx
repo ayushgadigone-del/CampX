@@ -15,6 +15,9 @@ import {
   Flag,
   Clock,
   WifiOff,
+  Eye,
+  Flame,
+  CheckCircle2,
 } from "lucide-react";
 import { Listing } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
@@ -144,10 +147,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   return (
     <div
       id={`listing-card-${listing.id}`}
-      className={`group relative flex flex-col rounded-2xl border backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
+      className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
         isDark
-          ? "bg-slate-800/90 border-slate-700/80 shadow-xl hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10"
-          : "bg-white border-slate-200/90 shadow-sm hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/5"
+          ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-indigo-400 hover:shadow-indigo-500/20 hover:-translate-y-0.5"
+          : "bg-white border-slate-200/90 shadow-md hover:border-indigo-500 hover:shadow-xl hover:-translate-y-0.5"
       }`}
     >
       {/* Image Container with Lightbox Trigger */}
@@ -300,44 +303,75 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         )}
 
-        {/* Quick Zoom Trigger Button */}
-        <button
-          id={`listing-zoom-btn-${listing.id}`}
-          type="button"
-          aria-label={`Zoom and inspect condition of ${listing.title}`}
-          title="Zoom & inspect condition in lightbox"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onOpenLightbox) {
-              onOpenLightbox(listing);
-            } else {
-              onOpenDetails(listing);
-            }
-          }}
-          className="absolute bottom-2.5 right-3 z-10 px-2 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 border border-slate-700 opacity-90 hover:opacity-100 transition-all hover:scale-105 shadow-sm"
-        >
-          <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Zoom</span>
-        </button>
+        {/* Quick Zoom & View Count Pill */}
+        <div className="absolute bottom-2.5 right-3 z-10 flex items-center gap-1.5">
+          <span
+            id={`listing-thumb-views-${listing.id}`}
+            className={`px-2 py-1 rounded-lg backdrop-blur-md text-[10px] font-bold flex items-center gap-1 border shadow-xs select-none ${
+              (listing.views || 0) >= 100
+                ? "bg-slate-950/90 text-amber-300 border-amber-500/50"
+                : "bg-slate-900/80 text-slate-200 border-slate-700/80"
+            }`}
+            title={`${listing.views || 0} students viewed this listing`}
+          >
+            {(listing.views || 0) >= 100 ? (
+              <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />
+            ) : (
+              <Eye className="w-3 h-3 text-indigo-400" />
+            )}
+            <span>{(listing.views || 0).toLocaleString()}</span>
+          </span>
 
-        {/* Status overlay if not available */}
+          <button
+            id={`listing-zoom-btn-${listing.id}`}
+            type="button"
+            aria-label={`Zoom and inspect condition of ${listing.title}`}
+            title="Zoom & inspect condition in lightbox"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenLightbox) {
+                onOpenLightbox(listing);
+              } else {
+                onOpenDetails(listing);
+              }
+            }}
+            className="px-2 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 border border-slate-700 opacity-90 hover:opacity-100 transition-all hover:scale-105 shadow-sm"
+          >
+            <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Zoom</span>
+          </button>
+        </div>
+
+        {/* Status overlay if not available or completed */}
         {listing.status !== "available" && (
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center">
-            <span
-              className={`px-3 py-1 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-lg ${
-                listing.status === "inactive"
-                  ? "bg-slate-800 border border-slate-700 text-slate-300"
-                  : "bg-amber-600/90 border border-amber-500/40"
-              }`}
-            >
-              {listing.status === "reserved"
-                ? "Reserved"
-                : listing.status === "handover_scheduled"
-                ? "Handover Scheduled"
-                : listing.status === "inactive"
-                ? "Inactive (Expired 30d)"
-                : "Sold / Exchanged"}
-            </span>
+          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center">
+            {listing.status === "completed" ? (
+              <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-1.5 shadow-lg">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                </div>
+                <span className="px-3 py-1 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 font-extrabold text-xs uppercase tracking-wider shadow-md">
+                  Sold / Completed
+                </span>
+                <span className="text-[10px] text-slate-300 mt-1 font-medium">
+                  Verified Campus Handover
+                </span>
+              </div>
+            ) : (
+              <span
+                className={`px-3 py-1 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-lg ${
+                  listing.status === "inactive"
+                    ? "bg-slate-800 border border-slate-700 text-slate-300"
+                    : "bg-amber-600/90 border border-amber-500/40"
+                }`}
+              >
+                {listing.status === "reserved"
+                  ? "Reserved"
+                  : listing.status === "handover_scheduled"
+                  ? "Handover Scheduled"
+                  : "Inactive (Expired 30d)"}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -371,6 +405,50 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 </span>
               )}
             </div>
+          </div>
+
+          {/* Social Proof & Views Pill */}
+          <div className="flex items-center justify-between text-xs mt-1.5 mb-2">
+            <div className="flex items-center gap-1.5">
+              <span
+                id={`listing-card-views-${listing.id}`}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border transition-colors select-none ${
+                  (listing.views || 0) >= 100
+                    ? isDark
+                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                      : "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
+                    : isDark
+                    ? "bg-slate-900/60 text-slate-300 border-slate-700/60"
+                    : "bg-slate-100 text-slate-700 border-slate-200"
+                }`}
+                title={`${listing.views || 0} students viewed this item on campus`}
+              >
+                {(listing.views || 0) >= 100 ? (
+                  <Flame className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
+                ) : (
+                  <Eye className="w-3 h-3 text-indigo-400 shrink-0" />
+                )}
+                <span>{(listing.views || 0).toLocaleString()} views</span>
+              </span>
+
+              {(listing.views || 0) >= 100 && (
+                <span
+                  id={`listing-hot-badge-${listing.id}`}
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30 select-none animate-pulse"
+                  title="High student demand • Trending listing"
+                >
+                  <Flame className="w-2.5 h-2.5 fill-rose-500 text-rose-500" />
+                  <span>Popular</span>
+                </span>
+              )}
+            </div>
+
+            {listing.status === "completed" && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                Completed Deal
+              </span>
+            )}
           </div>
 
           <h3
@@ -520,46 +598,76 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             <button
               id={`listing-details-btn-${listing.id}`}
               onClick={() => onOpenDetails(listing)}
-              className={`px-2 py-1.5 rounded-xl border text-xs font-semibold transition-colors text-center cursor-pointer ${
-                isDark
-                  ? "border-slate-700 bg-slate-900/60 hover:bg-slate-700 text-slate-200"
-                  : "border-slate-200 bg-slate-100/80 hover:bg-slate-200 text-slate-700"
+              className={`px-2 py-1.5 rounded-xl border text-xs font-semibold transition-colors text-center cursor-pointer shadow-2xs ${
+                listing.status === "completed"
+                  ? isDark
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                    : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                  : isDark
+                  ? "border-slate-600 bg-slate-700/80 hover:bg-slate-600 text-slate-100"
+                  : "border-slate-200 bg-white hover:bg-slate-50 text-slate-800"
               }`}
             >
-              Details
+              {listing.status === "completed" ? "History" : "Details"}
             </button>
             <button
               id={`listing-chat-btn-${listing.id}`}
               onClick={() => {
+                if (listing.status === "completed") {
+                  onOpenDetails(listing);
+                  return;
+                }
                 if (!isOnline) {
                   onShowToast?.("⚠️ Chat is disabled while offline to prevent data loss.");
                   return;
                 }
                 onOpenChat(listing);
               }}
-              disabled={!isOnline}
+              disabled={!isOnline && listing.status !== "completed"}
               title={
-                !isOnline
+                listing.status === "completed"
+                  ? "This item has already been sold and completed on campus. Click to view history."
+                  : !isOnline
                   ? "Chat is disabled while offline to prevent data loss"
                   : "Chat & negotiate with student seller"
               }
-              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-colors select-none ${
-                !isOnline
-                  ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60"
-                  : "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 cursor-pointer"
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-colors select-none shadow-2xs ${
+                listing.status === "completed"
+                  ? isDark
+                    ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
+                    : "bg-slate-100 text-emerald-700 border border-emerald-200 cursor-pointer"
+                  : !isOnline
+                  ? isDark ? "bg-slate-800 text-slate-500 border border-slate-700" : "bg-slate-100 text-slate-400 border border-slate-200"
+                  : isDark
+                  ? "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 cursor-pointer"
+                  : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 cursor-pointer"
               }`}
             >
-              {!isOnline ? (
-                <WifiOff className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+              {listing.status === "completed" ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                  <span>Sold</span>
+                </>
+              ) : !isOnline ? (
+                <>
+                  <WifiOff className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+                  <span>Chat</span>
+                </>
               ) : (
-                <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+                <>
+                  <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>Chat</span>
+                </>
               )}
-              <span>Chat</span>
             </button>
             <button
               id={`listing-meet-btn-${listing.id}`}
               onClick={() => onOpenCalendar(listing)}
-              className="inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-600 dark:text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors cursor-pointer"
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-2xs ${
+                isDark
+                  ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40"
+                  : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+              }`}
               title="Schedule Handover on Google Calendar"
             >
               <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
@@ -569,12 +677,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               id={`listing-share-btn-${listing.id}`}
               type="button"
               onClick={handleShare}
-              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
                 isShared
-                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
+                  ? isDark
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                   : isDark
-                  ? "bg-slate-900/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200"
+                  ? "bg-slate-700/80 hover:bg-slate-600 text-slate-200 hover:text-white border border-slate-600"
+                  : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200"
               }`}
               title="Share listing via Web Share"
             >

@@ -10,10 +10,10 @@ export const ListingCardSkeleton: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col rounded-2xl border overflow-hidden h-full animate-pulse transition-all ${
+      className={`flex flex-col rounded-2xl border-2 overflow-hidden h-full animate-pulse transition-all ${
         isDark
-          ? "bg-slate-800/90 border-slate-700/80 shadow-xl"
-          : "bg-white border-slate-200/90 shadow-sm"
+          ? "bg-slate-800/95 border-slate-700/90 shadow-2xl"
+          : "bg-white border-slate-200/90 shadow-md"
       }`}
       aria-hidden="true"
     >
@@ -260,7 +260,7 @@ export const ListingGridSkeleton: React.FC<ListingCardSkeletonProps> = ({
   return (
     <div
       id="marketplace-skeleton-grid"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
       aria-label="Loading campus marketplace items..."
     >
       {Array.from({ length: count }).map((_, index) => (

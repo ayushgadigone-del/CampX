@@ -54,9 +54,9 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         id="online-restored-banner"
         role="status"
         aria-live="polite"
-        className="w-full bg-emerald-600 text-white px-4 py-2.5 shadow-md border-b border-emerald-700 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
+        className="w-full bg-emerald-600 text-white px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-2.5 shadow-md border-b border-emerald-700 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
+        <div className="w-full flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
           <div className="flex items-center gap-2.5">
             <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
@@ -93,7 +93,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
       aria-live="assertive"
       className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-rose-700 text-white shadow-lg border-b border-amber-800 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           {/* Main Status Information */}
           <div className="flex items-start sm:items-center gap-3">

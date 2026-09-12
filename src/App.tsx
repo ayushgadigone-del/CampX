@@ -22,6 +22,9 @@ import {
   Briefcase,
   FlaskConical,
   GraduationCap,
+  Eye,
+  Archive,
+  Flame,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import {
@@ -31,6 +34,7 @@ import {
   updateDoc,
   setDoc,
   getDocs,
+  increment,
 } from "firebase/firestore";
 
 import {
@@ -91,6 +95,7 @@ import {
 } from "./utils/expiryUtils";
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
+import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
   "All",
@@ -140,7 +145,8 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory | "All">("All");
   const [selectedType, setSelectedType] = useState<ListingType | "all">("all");
   const [selectedCondition, setSelectedCondition] = useState<ItemCondition | "all">("all");
-  const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "ai_score">("newest");
+  const [includeSoldItems, setIncludeSoldItems] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<"newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("newest");
 
   // Modals state
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
@@ -263,6 +269,7 @@ export default function App() {
               fetched.push({
                 id: docSnap.id,
                 ...data,
+                views: typeof data.views === "number" ? data.views : seedMatch?.views ?? 0,
                 reviews: data.reviews && data.reviews.length > 0 ? data.reviews : seedMatch?.reviews || [],
                 averageRating: data.averageRating ?? seedMatch?.averageRating,
                 totalReviews: data.totalReviews ?? (data.reviews ? data.reviews.length : seedMatch?.totalReviews || 0),
@@ -342,6 +349,41 @@ export default function App() {
     return listings.filter((item) => wishlistIds.includes(item.id));
   }, [listings, wishlistIds]);
 
+  // Listing Details and View Tracking Handler
+  const handleOpenDetails = (item: Listing) => {
+    // 1. Session tracking to prevent false view flooding within the same session
+    const sessionKey = `viewed_item_${item.id}`;
+    const alreadyViewed = sessionStorage.getItem(sessionKey);
+
+    let updatedItem = item;
+
+    if (!alreadyViewed) {
+      sessionStorage.setItem(sessionKey, "true");
+      const updatedViews = (item.views || 0) + 1;
+      updatedItem = { ...item, views: updatedViews };
+
+      // Local optimistic state update
+      setListings((prev) =>
+        prev.map((l) => (l.id === item.id ? { ...l, views: updatedViews } : l))
+      );
+
+      // Async Firestore increment
+      try {
+        const docRef = doc(db, "listings", item.id);
+        updateDoc(docRef, {
+          views: increment(1),
+        }).catch((err) => {
+          console.warn("Could not sync view increment to Firestore:", err);
+        });
+      } catch (e) {
+        // Fallback for offline mode
+      }
+    }
+
+    setSelectedListing(updatedItem);
+    setIsDetailModalOpen(true);
+  };
+
   // Handle shared listing URL parameter (e.g. ?item=...) or ?notes=...
   useEffect(() => {
     try {
@@ -354,8 +396,7 @@ export default function App() {
       if (itemId) {
         const found = listings.find((l) => l.id === itemId);
         if (found) {
-          setSelectedListing(found);
-          setIsDetailModalOpen(true);
+          handleOpenDetails(found);
         }
       }
     } catch (err) {
@@ -367,6 +408,12 @@ export default function App() {
   const filteredListings = useMemo(() => {
     return listings
       .filter((item) => {
+        // Sold items filter: By default hide completed listings to keep marketplace clean,
+        // unless 'Include Sold Items' toggle is active for browsing transaction history.
+        if (!includeSoldItems && item.status === "completed") {
+          return false;
+        }
+
         // Wishlist only filter
         if (wishlistOnlyFilter && !wishlistIds.includes(item.id)) {
           return false;
@@ -402,6 +449,11 @@ export default function App() {
         return true;
       })
       .sort((a, b) => {
+        if (sortBy === "views_desc") {
+          const viewsA = a.views || 0;
+          const viewsB = b.views || 0;
+          return viewsB - viewsA;
+        }
         if (sortBy === "price_asc") return a.price - b.price;
         if (sortBy === "price_desc") return b.price - a.price;
         if (sortBy === "ai_score") {
@@ -412,16 +464,24 @@ export default function App() {
         // default newest
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [listings, searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, wishlistOnlyFilter, wishlistIds]);
+  }, [listings, includeSoldItems, searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, wishlistOnlyFilter, wishlistIds]);
+
+  const soldItemsCount = useMemo(() => {
+    return listings.filter((item) => item.status === "completed").length;
+  }, [listings]);
 
   // Dynamic counts for each category
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: listings.length };
-    listings.forEach((item) => {
+    const visibleListings = includeSoldItems
+      ? listings
+      : listings.filter((item) => item.status !== "completed");
+
+    const counts: Record<string, number> = { All: visibleListings.length };
+    visibleListings.forEach((item) => {
       counts[item.category] = (counts[item.category] || 0) + 1;
     });
     return counts;
-  }, [listings]);
+  }, [listings, includeSoldItems]);
 
   // Auth Handlers
   const handleLogin = async () => {
@@ -856,9 +916,11 @@ export default function App() {
 
       if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        const searchInput = document.getElementById(
+        const searchInput = (document.getElementById(
+          "dedicated-search-bar-input"
+        ) || document.getElementById(
           "main-navbar-search-input"
-        ) as HTMLInputElement | null;
+        )) as HTMLInputElement | null;
         searchInput?.focus();
       } else if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
@@ -925,8 +987,8 @@ export default function App() {
     <div
       className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-200 ${
         isDark
-          ? "bg-slate-900 text-slate-100 selection:bg-indigo-500 selection:text-white"
-          : "bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900"
+          ? "bg-[#0B0F19] text-slate-100 selection:bg-indigo-500 selection:text-white"
+          : "bg-slate-100/90 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900"
       }`}
     >
       {/* Ambient background glows matching CollegeLoginPage */}
@@ -1035,7 +1097,13 @@ export default function App() {
           setIsAIInspectorOpen(true);
         }}
         onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
+        onOpenWishlist={() => setIsWishlistModalOpen(true)}
         onOpenPBLInfo={() => setIsPBLModalOpen(true)}
+        onFocusSearch={() => {
+          const input = (document.getElementById("dedicated-search-bar-input") ||
+            document.getElementById("main-navbar-search-input")) as HTMLInputElement | null;
+          input?.focus();
+        }}
         onOpenAlerts={() => {
           setPrefilledAlertKeyword("");
           setPrefilledAlertCategory("All");
@@ -1045,8 +1113,17 @@ export default function App() {
         selectedCategory={selectedCategory}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Main Container (Full Width Responsive) */}
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6">
+        {/* Dedicated Search Bar Section with History & Quick Tags */}
+        <DedicatedSearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          totalResultsCount={filteredListings.length}
+          selectedCategory={selectedCategory}
+          onSelectCategory={(cat) => setSelectedCategory(cat)}
+        />
+
         {/* Category Filter Pills */}
         <div
           role="tablist"
@@ -1192,6 +1269,43 @@ export default function App() {
               <span>Wishlist ({wishlistIds.length})</span>
             </button>
 
+            {/* Include Sold Items Toggle */}
+            <button
+              id="filter-include-sold-toggle"
+              type="button"
+              onClick={() => setIncludeSoldItems(!includeSoldItems)}
+              title={
+                includeSoldItems
+                  ? "Currently showing all items including sold transactions. Click to hide sold items and keep marketplace clean."
+                  : "Include completed transactions to browse historical student sales, prices, and handovers."
+              }
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
+                includeSoldItems
+                  ? isDark
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-xs"
+                    : "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-xs"
+                  : isDark
+                  ? "bg-slate-900/60 text-slate-400 hover:text-slate-200 border-slate-700/80 hover:border-slate-600"
+                  : "bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <Archive className={`w-3.5 h-3.5 ${includeSoldItems ? "text-emerald-400" : "text-slate-400"}`} />
+              <span>Include Sold Items</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
+                  includeSoldItems
+                    ? isDark
+                      ? "bg-emerald-400/20 text-emerald-300"
+                      : "bg-emerald-200 text-emerald-900"
+                    : isDark
+                    ? "bg-slate-800 text-slate-400"
+                    : "bg-slate-200 text-slate-600"
+                }`}
+              >
+                {soldItemsCount}
+              </span>
+            </button>
+
             {/* Notify Me / Alerts Filter Shortcut */}
             <button
               id="filter-notify-me-btn"
@@ -1219,6 +1333,7 @@ export default function App() {
               selectedType !== "all" ||
               selectedCondition !== "all" ||
               wishlistOnlyFilter ||
+              includeSoldItems ||
               searchQuery) && (
               <button
                 onClick={() => {
@@ -1226,6 +1341,7 @@ export default function App() {
                   setSelectedType("all");
                   setSelectedCondition("all");
                   setWishlistOnlyFilter(false);
+                  setIncludeSoldItems(false);
                   setSearchQuery("");
                 }}
                 className="text-indigo-500 dark:text-indigo-400 hover:underline font-bold ml-1 cursor-pointer"
@@ -1249,6 +1365,7 @@ export default function App() {
               }`}
             >
               <option value="newest">Recently Listed</option>
+              <option value="views_desc">🔥 Most Popular (Views)</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
               <option value="ai_score">AI Inspection Score</option>
@@ -1259,15 +1376,15 @@ export default function App() {
         {/* Campus Marketplace Items Section */}
         <section
           id="campus-marketplace-items-section"
-          className={`p-6 sm:p-8 rounded-3xl border transition-colors ${
+          className={`p-6 sm:p-8 rounded-3xl border-2 transition-colors ${
             isDark
-              ? "bg-slate-900/90 border-slate-800 shadow-xl"
+              ? "bg-slate-950/80 border-slate-800/90 shadow-2xl"
               : "bg-white border-slate-200/90 shadow-sm"
           }`}
         >
           {/* Listings Header & Count */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
                 {selectedCategory === "All" ? "Campus Marketplace Items" : `${selectedCategory} Listings`}
               </h2>
@@ -1280,6 +1397,16 @@ export default function App() {
               >
                 {filteredListings.length}
               </span>
+
+              {includeSoldItems && (
+                <span
+                  id="header-history-badge"
+                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 animate-in fade-in"
+                >
+                  <Archive className="w-3 h-3 text-emerald-400" />
+                  <span>Transaction History Included</span>
+                </span>
+              )}
             </div>
 
             <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
@@ -1300,7 +1427,7 @@ export default function App() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
                 >
                   <AnimatePresence mode="popLayout">
                     {filteredListings.map((listing) => (
@@ -1328,8 +1455,7 @@ export default function App() {
                           isWishlisted={wishlistIds.includes(listing.id)}
                           onToggleWishlist={handleToggleWishlist}
                           onOpenDetails={(item) => {
-                            setSelectedListing(item);
-                            setIsDetailModalOpen(true);
+                            handleOpenDetails(item);
                           }}
                           onOpenLightbox={(item) => {
                             setLightboxListing(item);
@@ -1415,24 +1541,24 @@ export default function App() {
         </section>
       </main>
 
-      {/* Footer with Mentorship & PBL Credits */}
+      {/* Footer with Mentorship & PBL Credits (Full Width) */}
       <footer
-        className={`mt-16 border-t py-8 px-4 sm:px-6 lg:px-8 text-xs backdrop-blur-xl transition-colors duration-200 ${
+        className={`mt-16 border-t-2 py-10 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 text-xs transition-colors duration-200 ${
           isDark
-            ? "bg-slate-950/80 border-slate-800/90 text-slate-400"
-            : "bg-white border-slate-200 text-slate-600"
+            ? "bg-[#060911] border-slate-800/90 text-slate-400 shadow-2xl"
+            : "bg-slate-900 border-slate-800 text-slate-300 shadow-inner"
         }`}
       >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center md:text-left">
-            <div className={`font-bold text-sm ${isDark ? "text-white" : "text-slate-900"}`}>
+            <div className="font-bold text-sm text-white">
               PVG's COET Campus Resale & Exchange Platform
             </div>
-            <p>
+            <p className={isDark ? "text-slate-400" : "text-slate-300"}>
               Problem-Based Learning (PBL) Project • 2nd Year Computer Science & Engineering
             </p>
-            <p>
-              Guided by: <strong className={isDark ? "text-slate-200" : "text-slate-800"}>Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
+            <p className={isDark ? "text-slate-400" : "text-slate-300"}>
+              Guided by: <strong className="text-white">Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
             </p>
           </div>
 
@@ -1440,23 +1566,15 @@ export default function App() {
             <ThemeSelector variant="segmented" />
             <button
               onClick={() => setIsPBLModalOpen(true)}
-              className={`px-3 py-1.5 rounded-lg border font-semibold transition-colors cursor-pointer ${
-                isDark
-                  ? "border-slate-700 hover:bg-slate-800 text-slate-300"
-                  : "border-slate-200 hover:bg-slate-100 text-slate-700"
-              }`}
+              className="px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-200 font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               PBL Documentation & Milestones
             </button>
             <button
               onClick={() => setIsAIInspectorOpen(true)}
-              className={`px-3 py-1.5 rounded-lg border font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
-                isDark
-                  ? "bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border-indigo-500/40"
-                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
-              }`}
+              className="px-3 py-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
               Gemini 3.8 Flash
             </button>
           </div>
@@ -1465,7 +1583,7 @@ export default function App() {
 
       {/* Modals & Drawers */}
       <ListingDetailModal
-        listing={selectedListing}
+        listing={selectedListing ? (listings.find((l) => l.id === selectedListing.id) || selectedListing) : null}
         allListings={listings}
         isOpen={isDetailModalOpen}
         onClose={() => {

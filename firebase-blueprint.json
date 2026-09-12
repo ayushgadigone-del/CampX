@@ -18,6 +18,7 @@
         "sellerEmail": { "type": "string" },
         "sellerPhoto": { "type": "string" },
         "status": { "type": "string", "enum": ["available", "reserved", "handover_scheduled", "completed"] },
+        "views": { "type": "number", "description": "Total count of student views/impressions received for social proof" },
         "createdAt": { "type": "string" }
       },
       "required": ["title", "category", "condition", "listingType", "sellerId", "status"]

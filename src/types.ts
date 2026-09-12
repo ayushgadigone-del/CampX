@@ -90,6 +90,7 @@ export interface Listing {
   sellerRating?: number;
   sellerReviewCount?: number;
   completedHandovers?: number;
+  views?: number;
   createdAt: string;
 }
 

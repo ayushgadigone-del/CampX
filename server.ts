@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
@@ -12,17 +12,102 @@ const isProduction = process.env.NODE_ENV === "production";
 // In production on Cloud Run, listen on Cloud Run's injected PORT (default 8080) or fallback to 3000.
 const PORT = isProduction && process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-// Middleware for parsing large image payloads
-app.use(express.json({ limit: "25mb" }));
-app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+// Security: Disable X-Powered-By header to prevent server technology fingerprinting
+app.disable("x-powered-by");
 
-// Lazy initialization of Gemini client
+// Security: HTTP Security & Privacy Headers Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // Prevent MIME-sniffing
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // Cross-site scripting filter
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  // Referrer policy
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  // Restrict unrequested device features
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+
+  // Prevent browser & proxy caching on all API routes to protect user data
+  if (req.path.startsWith("/api/")) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
+
+  next();
+});
+
+// Middleware for parsing image payloads with strict size boundaries
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ extended: true, limit: "20mb" }));
+
+// Security: In-memory sliding-window Rate Limiter for API endpoints
+interface RateLimitRecord {
+  count: number;
+  resetTime: number;
+}
+const rateLimitMap = new Map<string, RateLimitRecord>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 25; // 25 requests/min per IP
+
+function apiRateLimiter(req: Request, res: Response, next: NextFunction): void {
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.socket.remoteAddress ||
+    "unknown-client";
+
+  const now = Date.now();
+  const clientRecord = rateLimitMap.get(ip);
+
+  if (!clientRecord || now > clientRecord.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    next();
+    return;
+  }
+
+  if (clientRecord.count >= MAX_REQUESTS_PER_WINDOW) {
+    res.status(429).json({
+      error: "Rate limit exceeded. Too many requests. Please wait a minute before trying again.",
+    });
+    return;
+  }
+
+  clientRecord.count += 1;
+  next();
+}
+
+// Periodically clean up expired rate-limiting entries to prevent memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 5 * 60 * 1000);
+
+// Security: Secret Redactor utility to ensure no API keys or endpoint tokens ever leak in error responses or logs
+function scrubSecrets(rawText: string): string {
+  if (!rawText || typeof rawText !== "string") return "";
+  const apiKey = process.env.GEMINI_API_KEY;
+  let scrubbed = rawText;
+  if (apiKey && apiKey.length > 5) {
+    scrubbed = scrubbed.split(apiKey).join("[REDACTED_API_KEY]");
+  }
+  return scrubbed
+    .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]")
+    .replace(/key=[a-zA-Z0-9_\-]+/gi, "key=[REDACTED]")
+    .replace(/bearer\s+[a-zA-Z0-9_\-\.]+/gi, "Bearer [REDACTED]")
+    .replace(/https?:\/\/[^\s"',]+/gi, "[REDACTED_ENDPOINT]");
+}
+
+// Lazy initialization of Gemini client with secret isolation
 let genAIClient: GoogleGenAI | null = null;
-function getGeminiClient(): GoogleGenAI {
+function getGeminiClient(): GoogleGenAI | null {
   if (!genAIClient) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is missing.");
+      console.warn("Security Alert: GEMINI_API_KEY environment variable is not configured.");
+      return null;
     }
     genAIClient = new GoogleGenAI({ apiKey });
   }
@@ -38,21 +123,52 @@ app.get(["/health", "/api/health", "/_health"], (_req: Request, res: Response) =
   });
 });
 
-// Image Analysis using Gemini 3.1 Pro Preview as required
-app.post("/api/analyze-image", async (req: Request, res: Response) => {
+// Image Analysis using Gemini model with rigorous validation & key isolation
+app.post("/api/analyze-image", apiRateLimiter, async (req: Request, res: Response) => {
   try {
     const { imageBase64, mimeType } = req.body;
 
-    if (!imageBase64) {
-      res.status(400).json({ error: "No image payload provided" });
+    // Security: Validate payload presence & type
+    if (!imageBase64 || typeof imageBase64 !== "string") {
+      res.status(400).json({ error: "Invalid or missing image payload" });
       return;
     }
 
+    // Security: Enforce payload size limit (max 15MB of base64 text)
+    if (imageBase64.length > 15 * 1024 * 1024) {
+      res.status(400).json({ error: "Image size exceeds the 15MB limit. Please upload a compressed photo." });
+      return;
+    }
+
+    // Security: Whitelist allowed MIME types
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+      "image/heic",
+    ];
+    const cleanMime = typeof mimeType === "string" && allowedMimeTypes.includes(mimeType.toLowerCase())
+      ? mimeType.toLowerCase()
+      : "image/jpeg";
+
     // Clean base64 string
     const base64Data = imageBase64.replace(/^data:image\/[a-zA-Z+]+;base64,/, "");
-    const cleanMime = mimeType || "image/jpeg";
+
+    // Validate sanitized base64 structure
+    if (!base64Data || base64Data.length < 50) {
+      res.status(400).json({ error: "Invalid image format received." });
+      return;
+    }
 
     const ai = getGeminiClient();
+    if (!ai) {
+      res.status(503).json({
+        error: "AI inspection service is temporarily unavailable. Please try again later.",
+      });
+      return;
+    }
 
     const prompt = `You are a certified campus resale inspector for an engineering college marketplace.
 Your primary task is to perform an in-depth visual analysis of this photo of a student-owned pre-owned item to accurately determine its Category and physical Condition for the Create Listing form.
@@ -115,7 +231,7 @@ Ensure the pricing is realistic for an Indian engineering college student budget
       });
       responseText = response.text?.trim() || "{}";
     } catch (primaryErr: any) {
-      console.warn("Primary model gemini-3.8-flash encountered issue, retrying with gemini-flash-latest:", primaryErr?.message);
+      console.warn("Primary model gemini-3.8-flash encountered issue, retrying with gemini-flash-latest:", scrubSecrets(primaryErr?.message || ""));
       try {
         const fallbackResponse = await ai.models.generateContent({
           model: "gemini-flash-latest",
@@ -141,7 +257,7 @@ Ensure the pricing is realistic for an Indian engineering college student budget
         });
         responseText = fallbackResponse.text?.trim() || "{}";
       } catch (fallbackErr: any) {
-        console.warn("Gemini fallback model also failed:", fallbackErr?.message);
+        console.warn("Gemini fallback model also failed:", scrubSecrets(fallbackErr?.message || ""));
         responseText = "{}";
       }
     }
@@ -216,10 +332,12 @@ Ensure the pricing is realistic for an Indian engineering college student budget
       analysis: analysisResult,
     });
   } catch (error: any) {
-    console.error("Gemini image analysis error:", error);
+    // Security: Ensure raw error objects, URLs, or API keys are NEVER sent to the client
+    const scrubbedErrorMsg = scrubSecrets(error?.message || "");
+    console.error("Gemini image analysis error:", scrubbedErrorMsg);
+
     res.status(500).json({
-      error: "Failed to analyze image using Gemini",
-      details: error?.message || "Unknown error",
+      error: "Failed to process image analysis. Please try again with a clear photo.",
     });
   }
 });

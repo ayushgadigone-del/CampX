@@ -102,7 +102,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       className={`inline-flex items-center p-1 rounded-xl border transition-all ${
         isDark
           ? "bg-slate-900/90 border-slate-700/80 shadow-inner"
-          : "bg-slate-100 border-slate-300/80 shadow-inner"
+          : "bg-slate-800/90 border-slate-700 shadow-inner"
       } ${className}`}
     >
       <button
@@ -114,7 +114,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         title="Select Light Mode"
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer select-none ${
           !isDark
-            ? "bg-white text-amber-700 border border-amber-200/80 shadow-xs"
+            ? "bg-white text-slate-950 border border-slate-200 shadow-sm"
             : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
         }`}
       >
@@ -131,11 +131,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         title="Select Dark Mode"
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer select-none ${
           isDark
-            ? "bg-slate-800 text-indigo-300 border border-indigo-500/40 shadow-xs"
-            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-sm"
+            : "text-slate-300 hover:text-white hover:bg-slate-700/60"
         }`}
       >
-        <Moon className={`w-3.5 h-3.5 ${isDark ? "text-indigo-400 fill-indigo-400" : "text-slate-500"}`} />
+        <Moon className={`w-3.5 h-3.5 ${isDark ? "text-indigo-200 fill-indigo-200" : "text-slate-400"}`} />
         <span>Dark</span>
       </button>
     </div>

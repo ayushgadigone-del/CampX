@@ -24,6 +24,8 @@ import {
   WifiOff,
   HelpCircle,
   ArrowRight,
+  Eye,
+  Flame,
 } from "lucide-react";
 import { Listing, Review } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
@@ -251,16 +253,39 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               {listing.condition}
             </span>
             {listing.status !== "available" && (
-              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              <span
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                  listing.status === "completed"
+                    ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                    : "bg-amber-100 text-amber-900 border-amber-300"
+                }`}
+              >
                 {listing.status === "reserved"
                   ? "Reserved"
                   : listing.status === "handover_scheduled"
                   ? "Handover Scheduled"
                   : listing.status === "inactive"
                   ? "Inactive (Expired)"
-                  : "Completed"}
+                  : "Sold / Handover Done"}
               </span>
             )}
+            {/* Views counter chip in modal header */}
+            <span
+              id={`detail-header-views-${listing.id}`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 border select-none ${
+                (listing.views || 0) >= 100
+                  ? "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
+                  : "bg-slate-100 text-slate-700 border-slate-200"
+              }`}
+              title={`${listing.views || 0} students have viewed this item on campus`}
+            >
+              {(listing.views || 0) >= 100 ? (
+                <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
+              ) : (
+                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+              )}
+              <span>{(listing.views || 0).toLocaleString()} views</span>
+            </span>
             {/* Reported Badge */}
             {isReported && (
               <span
@@ -473,8 +498,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   )}
                 </div>
 
-                {/* Rating & Review Summary Pill */}
-                <div className="flex items-center gap-2 mt-2.5">
+                {/* Rating & Social Proof Views Pill */}
+                <div className="flex flex-wrap items-center gap-2 mt-2.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -490,6 +515,28 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       ({totalReviewsCount} {totalReviewsCount === 1 ? "review" : "reviews"})
                     </span>
                   </button>
+
+                  <span
+                    id={`detail-views-social-proof-${listing.id}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border select-none ${
+                      (listing.views || 0) >= 100
+                        ? "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
+                        : "bg-slate-100 text-slate-700 border-slate-200"
+                    }`}
+                    title={`${listing.views || 0} campus students viewed this listing`}
+                  >
+                    {(listing.views || 0) >= 100 ? (
+                      <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    )}
+                    <span>{(listing.views || 0).toLocaleString()} views</span>
+                    {(listing.views || 0) >= 100 && (
+                      <span className="text-[10px] font-black uppercase text-amber-700 tracking-wider">
+                        • Trending
+                      </span>
+                    )}
+                  </span>
 
                   <button
                     type="button"
@@ -558,6 +605,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Completed Deal Banner */}
+              {listing.status === "completed" && (
+                <div
+                  id="detail-completed-notice"
+                  className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5 shadow-xs"
+                >
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <strong className="font-bold">Deal Completed:</strong> This item has already been sold and handed over between students. You are viewing this record from campus transaction history.
+                  </div>
+                </div>
+              )}
 
               {/* Offline Warning Notice */}
               {!isOnline && (
