@@ -7,10 +7,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const isProduction = process.env.NODE_ENV === "production";
-// In development, the dev server must bind to port 3000 behind the Nginx reverse proxy.
-// In production on Cloud Run, listen on Cloud Run's injected PORT (default 8080) or fallback to 3000.
-const PORT = isProduction && process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  process.argv.some((arg) => arg.includes("server.cjs") || arg.includes("dist"));
+
+// Port 3000 is hardcoded by the infrastructure behind the Nginx reverse proxy layer.
+const PORT = 3000;
 
 // Security: Disable X-Powered-By header to prevent server technology fingerprinting
 app.disable("x-powered-by");
@@ -372,25 +374,8 @@ async function setupApp() {
   });
 
   server.on("error", (err: any) => {
-    console.error(`Server error on primary port ${PORT}:`, err?.message || err);
+    console.error(`Server error on port ${PORT}:`, err?.message || err);
   });
-
-  // In production on Cloud Run (e.g. PORT=8080), also listen on port 3000 if available
-  // so both direct traffic and reverse-proxied traffic are seamlessly supported.
-  if (isProduction && PORT !== 3000) {
-    try {
-      const secondaryServer = app.listen(3000, "0.0.0.0", () => {
-        console.log("Also listening on internal port 3000");
-      });
-      secondaryServer.on("error", (err: any) => {
-        if (err.code !== "EADDRINUSE") {
-          console.warn("Secondary port 3000 notice:", err?.message);
-        }
-      });
-    } catch {
-      // Ignore if port 3000 cannot be bound
-    }
-  }
 
   const shutdown = () => {
     server.close(() => {

@@ -56,15 +56,15 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
 
   const getTierIcon = () => {
     if (rep.tier === "Elite") {
-      return <Award className="w-3 h-3 text-emerald-500 shrink-0" />;
+      return <Award className="w-3 h-3 text-emerald-100 shrink-0" />;
     }
     if (rep.tier === "Trusted") {
-      return <ShieldCheck className="w-3 h-3 text-indigo-500 shrink-0" />;
+      return <ShieldCheck className="w-3 h-3 text-indigo-100 shrink-0" />;
     }
     if (rep.tier === "Good Standing") {
-      return <CheckCircle2 className="w-3 h-3 text-sky-500 shrink-0" />;
+      return <CheckCircle2 className="w-3 h-3 text-sky-100 shrink-0" />;
     }
-    return <Shield className="w-3 h-3 text-amber-500 shrink-0" />;
+    return <Shield className="w-3 h-3 text-amber-100 shrink-0" />;
   };
 
   return (
@@ -77,27 +77,19 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Seller Trust Score: ${rep.trustScore} out of 100 (${rep.tierLabel})`}
           title={`Click to view ${listing.sellerName}'s verified Trust Score breakdown (${rep.trustScore}/100)`}
-          className={`group/badge relative inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border transition-all duration-200 cursor-pointer select-none ${
+          className={`group/badge relative inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black border transition-all duration-200 cursor-pointer select-none shadow-xs text-white ${
             rep.tier === "Elite"
-              ? isDark
-                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25 hover:border-emerald-500/50"
-                : "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+              ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-500"
               : rep.tier === "Trusted"
-              ? isDark
-                ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/25 hover:border-indigo-500/50"
-                : "bg-indigo-50 text-indigo-700 border-indigo-300 hover:bg-indigo-100"
+              ? "bg-indigo-600 hover:bg-indigo-700 border-indigo-500"
               : rep.tier === "Good Standing"
-              ? isDark
-                ? "bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50"
-                : "bg-sky-50 text-sky-700 border-sky-300 hover:bg-sky-100"
-              : isDark
-              ? "bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25 hover:border-amber-500/50"
-              : "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100"
+              ? "bg-sky-600 hover:bg-sky-700 border-sky-500"
+              : "bg-amber-600 hover:bg-amber-700 border-amber-500"
           }`}
         >
           {getTierIcon()}
-          <span className="font-extrabold">{rep.trustScore}</span>
-          <span className="opacity-80 text-[9px] font-medium hidden sm:inline">Trust</span>
+          <span className="font-black text-white">{rep.trustScore}</span>
+          <span className="text-white/90 text-[9px] font-bold hidden sm:inline">Trust</span>
         </button>
       ) : variant === "compact" ? (
         <button
@@ -106,18 +98,18 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Trust Score: ${rep.trustScore}/100`}
           title={`Trust Score: ${rep.trustScore}/100 • ${rep.tierLabel}`}
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border transition-transform hover:scale-105 select-none cursor-pointer ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-transform hover:scale-105 select-none cursor-pointer shadow-xs text-white ${
             rep.tier === "Elite"
-              ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
+              ? "bg-emerald-600 border-emerald-500"
               : rep.tier === "Trusted"
-              ? "bg-indigo-500/20 text-indigo-300 border-indigo-400/40"
+              ? "bg-indigo-600 border-indigo-500"
               : rep.tier === "Good Standing"
-              ? "bg-sky-500/20 text-sky-300 border-sky-400/40"
-              : "bg-amber-500/20 text-amber-300 border-amber-400/40"
+              ? "bg-sky-600 border-sky-500"
+              : "bg-amber-600 border-amber-500"
           }`}
         >
           {getTierIcon()}
-          <span>{rep.trustScore}% Trust</span>
+          <span className="font-black text-white tracking-wide">{rep.trustScore}% Trust</span>
         </button>
       ) : (
         /* Default "badge" variant: Prominent pill */
@@ -127,34 +119,26 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Seller Trust Score: ${rep.trustScore} out of 100 (${rep.tierLabel})`}
           title={`Click to view ${listing.sellerName}'s Trust Score breakdown`}
-          className={`group/trust relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border backdrop-blur-md transition-all duration-200 cursor-pointer select-none shadow-xs hover:scale-[1.02] ${
+          className={`group/trust relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer select-none shadow-sm hover:scale-[1.02] text-white ${
             rep.tier === "Elite"
-              ? isDark
-                ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/40 hover:border-emerald-400 shadow-emerald-950/30"
-                : "bg-emerald-50 text-emerald-800 border-emerald-300 hover:border-emerald-400"
+              ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-500 shadow-emerald-950/20"
               : rep.tier === "Trusted"
-              ? isDark
-                ? "bg-indigo-950/60 text-indigo-300 border-indigo-500/40 hover:border-indigo-400 shadow-indigo-950/30"
-                : "bg-indigo-50 text-indigo-800 border-indigo-300 hover:border-indigo-400"
+              ? "bg-indigo-600 hover:bg-indigo-700 border-indigo-500 shadow-indigo-950/20"
               : rep.tier === "Good Standing"
-              ? isDark
-                ? "bg-sky-950/60 text-sky-300 border-sky-500/40 hover:border-sky-400 shadow-sky-950/30"
-                : "bg-sky-50 text-sky-800 border-sky-300 hover:border-sky-400"
-              : isDark
-              ? "bg-amber-950/60 text-amber-300 border-amber-500/40 hover:border-amber-400 shadow-amber-950/30"
-              : "bg-amber-50 text-amber-800 border-amber-300 hover:border-amber-400"
+              ? "bg-sky-600 hover:bg-sky-700 border-sky-500 shadow-sky-950/20"
+              : "bg-amber-600 hover:bg-amber-700 border-amber-500 shadow-amber-950/20"
           }`}
         >
           <div className="flex items-center gap-1">
             {getTierIcon()}
-            <span className="font-extrabold">{rep.trustScore}</span>
-            <span className="text-[10px] font-medium opacity-85">/100</span>
+            <span className="font-black text-white">{rep.trustScore}</span>
+            <span className="text-[10px] font-semibold text-white/90">/100</span>
           </div>
-          <span className="h-2.5 w-[1px] bg-current opacity-30" />
-          <span className="text-[11px] font-semibold truncate max-w-[85px] sm:max-w-[105px]">
+          <span className="h-2.5 w-[1px] bg-white/40" />
+          <span className="text-[11px] font-bold text-white truncate max-w-[85px] sm:max-w-[105px]">
             {rep.tierLabel}
           </span>
-          <Info className="w-3 h-3 opacity-60 group-hover/trust:opacity-100 transition-opacity ml-0.5" />
+          <Info className="w-3 h-3 text-white/80 group-hover/trust:text-white transition-opacity ml-0.5" />
         </button>
       )}
 

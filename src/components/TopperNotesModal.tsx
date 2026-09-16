@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   BookOpen,
@@ -63,8 +64,6 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   const [editFormData, setEditFormData] = useState<Partial<TopperNote> | null>(
     null
   );
-
-  if (!isOpen) return null;
 
   // Filter notes
   const filteredNotes = notes.filter((n) => {
@@ -200,14 +199,24 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   ];
 
   return (
-    <div
-      id="topper-notes-modal-overlay"
-      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
-    >
-      <div
-        id="topper-notes-modal-card"
-        className="bg-white w-full max-w-6xl h-[92vh] max-h-[850px] rounded-3xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          id="topper-notes-modal-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+        >
+          <motion.div
+            id="topper-notes-modal-card"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="bg-white w-full max-w-6xl h-[92vh] max-h-[850px] rounded-3xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden"
+          >
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -822,7 +831,9 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             Close Vault
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   Upload,
@@ -51,8 +52,6 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<AIInspectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -116,7 +115,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
       }
     } catch (err: any) {
       console.error("Analysis failure:", err);
-      setError(err.message || "Failed to analyze image with Gemini 3.1 Pro Preview.");
+      setError(err.message || "Failed to analyze image with Google Gemini 3.8 Flash.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -135,11 +134,23 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div
-        id="ai-inspector-modal"
-        className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        >
+          <motion.div
+            id="ai-inspector-modal"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+          >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex items-center gap-2.5">
@@ -239,7 +250,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                   <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4">
                     <Loader2 className="w-8 h-8 text-indigo-400 animate-spin mb-3" />
                     <span className="text-sm font-semibold">
-                      Inspecting with Gemini 3.1 Pro Preview...
+                      Inspecting with Google Gemini 3.8 Flash...
                     </span>
                     <span className="text-xs text-slate-300 mt-1 text-center">
                       Auditing surface scratches, labels, and calculating fair campus resale price
@@ -253,7 +264,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                 {!analysisResult && !isAnalyzing && (
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
                     <p className="text-sm text-slate-600">
-                      Photo ready for multimodal inspection with Google Gemini 3.1 Pro Preview.
+                      Photo ready for multimodal inspection with Google Gemini 3.8 Flash.
                     </p>
                     {!isOnline && (
                       <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-center gap-2">
@@ -303,9 +314,10 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                           Inspection Complete
                         </span>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          Score: {analysisResult.inspectionScore}/100
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-950 text-white text-xs font-black shadow-xs border border-slate-800">
+                          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span className="text-slate-200 font-bold">AI Score:</span>
+                          <span className="text-emerald-400 font-black">{analysisResult.inspectionScore}/100</span>
                         </div>
                       </div>
 
@@ -430,7 +442,9 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

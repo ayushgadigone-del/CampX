@@ -25,6 +25,13 @@ import {
   Eye,
   Archive,
   Flame,
+  LayoutGrid,
+  SlidersHorizontal,
+  Maximize2,
+  Minimize2,
+  X,
+  ArrowUpNarrowWide,
+  ArrowDownWideNarrow,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import {
@@ -72,6 +79,7 @@ import {
   isAppOwner,
 } from "./utils/topperNotesStorage";
 import { CollegeLoginPage } from "./components/CollegeLoginPage";
+import { LandingPage } from "./components/LandingPage";
 import {
   ALLOWED_COLLEGE_DOMAIN,
   isValidCollegeEmail,
@@ -96,6 +104,10 @@ import {
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
 import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
+import { CampusLiveTicker } from "./components/CampusLiveTicker";
+import { CampusHandoverBlueprintModal } from "./components/CampusHandoverBlueprintModal";
+import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
+import { StudentPassportModal } from "./components/StudentPassportModal";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
   "All",
@@ -147,6 +159,32 @@ export default function App() {
   const [selectedCondition, setSelectedCondition] = useState<ItemCondition | "all">("all");
   const [includeSoldItems, setIncludeSoldItems] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<"newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("newest");
+  const [layoutMode, setLayoutMode] = useState<"grid" | "detailed">("grid");
+  const [isFullScreenMode, setIsFullScreenMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullScreenMode(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch((err) => {
+        console.warn("Fullscreen request error:", err);
+      });
+      setIsFullScreenMode(true);
+    } else {
+      document.exitFullscreen?.().catch((err) => {
+        console.warn("Exit fullscreen error:", err);
+      });
+      setIsFullScreenMode(false);
+    }
+  };
 
   // Modals state
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
@@ -183,6 +221,7 @@ export default function App() {
 
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
   const [isPBLModalOpen, setIsPBLModalOpen] = useState(false);
+  const [authView, setAuthView] = useState<"landing" | "login">("landing");
   const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
   const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
 
@@ -202,6 +241,14 @@ export default function App() {
 
   // Success Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Visual Innovation States
+  const [isBlueprintModalOpen, setIsBlueprintModalOpen] = useState(false);
+  const [blueprintPreselectedLocation, setBlueprintPreselectedLocation] = useState<string | undefined>(undefined);
+  const [isBarterDrawerOpen, setIsBarterDrawerOpen] = useState(false);
+  const [barterListing, setBarterListing] = useState<Listing | null>(null);
+  const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
+  const [passportListing, setPassportListing] = useState<Listing | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -483,6 +530,29 @@ export default function App() {
     return counts;
   }, [listings, includeSoldItems]);
 
+  // Dynamic available stock inventory for each category
+  const categoryStockCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      Cycles: 0,
+      Books: 0,
+      Calculators: 0,
+      "Lab Equipment": 0,
+      Bags: 0,
+      Other: 0,
+    };
+    listings.forEach((item) => {
+      if (item.status === "available") {
+        const stock = typeof item.availableStock === "number" ? item.availableStock : 1;
+        if (counts[item.category] !== undefined) {
+          counts[item.category] += stock;
+        } else {
+          counts["Other"] += stock;
+        }
+      }
+    });
+    return counts;
+  }, [listings]);
+
   // Auth Handlers
   const handleLogin = async () => {
     setAuthErrorMessage(null);
@@ -659,7 +729,7 @@ export default function App() {
     setPrefilledInspection(inspection);
     setPrefilledImage(imageSrc);
     setIsCreateModalOpen(true);
-    showToast("✨ Applied Gemini 3.1 Pro analysis to listing form!");
+    showToast("✨ Applied Gemini 3.8 Flash analysis to listing form!");
   };
 
   // Alerts Matching & Management Logic
@@ -900,6 +970,15 @@ export default function App() {
 
   const upcomingHandoversCount = listings.filter((l) => l.handoverDetails).length;
   const availableListingsCount = listings.filter((l) => l.status === "available").length;
+  const totalActiveStock = useMemo(() => {
+    return listings.reduce((sum, item) => {
+      if (item.status === "available") {
+        const stock = typeof item.availableStock === "number" ? item.availableStock : 1;
+        return sum + stock;
+      }
+      return sum;
+    }, 0);
+  }, [listings]);
 
   // Global Terminal Keyboard Shortcuts (Style 1 ergonomics)
   useEffect(() => {
@@ -916,11 +995,9 @@ export default function App() {
 
       if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        const searchInput = (document.getElementById(
+        const searchInput = document.getElementById(
           "dedicated-search-bar-input"
-        ) || document.getElementById(
-          "main-navbar-search-input"
-        )) as HTMLInputElement | null;
+        ) as HTMLInputElement | null;
         searchInput?.focus();
       } else if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
@@ -940,12 +1017,22 @@ export default function App() {
       } else if ((e.key === "d" || e.key === "D") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         toggleTheme();
+      } else if ((e.key === "f" || e.key === "F") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        toggleFullScreen();
+      } else if ((e.key === "i" || e.key === "I") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        if (isOnline) {
+          setIsAIInspectorOpen(true);
+        } else {
+          showToast("⚠️ Offline: AI item scanner requires an active internet connection.");
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOnline, toggleTheme]);
+  }, [isOnline, toggleTheme, toggleFullScreen]);
 
   // 1. Initial Authentication Check / Loading
   if (isAuthLoading) {
@@ -961,7 +1048,7 @@ export default function App() {
     );
   }
 
-  // 2. First-View Enforced Gate: If not logged in with verified college email, show CollegeLoginPage
+  // 2. First-View Enforced Gate: If not logged in with verified college email, show LandingPage first (or CollegeLoginPage)
   if (!currentUser || !isValidCollegeEmail(currentUser.email)) {
     return (
       <>
@@ -973,11 +1060,26 @@ export default function App() {
             </div>
           </div>
         )}
-        <CollegeLoginPage
-          onGoogleSignIn={handleLogin}
-          onDemoCollegeSignIn={handleDemoCollegeLogin}
-          authErrorMessage={authErrorMessage}
-          onClearError={() => setAuthErrorMessage(null)}
+
+        {authView === "landing" ? (
+          <LandingPage
+            onProceedToSignIn={() => setAuthView("login")}
+            onOpenPBLInfo={() => setIsPBLModalOpen(true)}
+          />
+        ) : (
+          <CollegeLoginPage
+            onGoogleSignIn={handleLogin}
+            onDemoCollegeSignIn={handleDemoCollegeLogin}
+            authErrorMessage={authErrorMessage}
+            onClearError={() => setAuthErrorMessage(null)}
+            onBackToLanding={() => setAuthView("landing")}
+          />
+        )}
+
+        {/* PBL Documentation Modal accessible before sign-in */}
+        <PBLProjectInfoModal
+          isOpen={isPBLModalOpen}
+          onClose={() => setIsPBLModalOpen(false)}
         />
       </>
     );
@@ -985,30 +1087,30 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-200 ${
+      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-500 ease-in-out ${
         isDark
           ? "bg-[#0B0F19] text-slate-100 selection:bg-indigo-500 selection:text-white"
-          : "bg-slate-100/90 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900"
+          : "bg-[#F4F5F9] text-slate-800 selection:bg-purple-100 selection:text-purple-900"
       }`}
     >
       {/* Ambient background glows matching CollegeLoginPage */}
       <div
-        className={`absolute -top-40 -left-40 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+        className={`absolute -top-40 -left-40 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
           isDark ? "bg-indigo-600/20" : "bg-indigo-300/30"
         }`}
       />
       <div
-        className={`absolute top-1/4 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+        className={`absolute top-1/4 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
           isDark ? "bg-amber-500/10" : "bg-amber-300/20"
         }`}
       />
       <div
-        className={`absolute bottom-1/3 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+        className={`absolute bottom-1/3 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
           isDark ? "bg-blue-600/15" : "bg-blue-300/20"
         }`}
       />
       <div
-        className={`absolute -bottom-40 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 ${
+        className={`absolute -bottom-40 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
           isDark ? "bg-indigo-500/15" : "bg-indigo-300/25"
         }`}
       />
@@ -1059,10 +1161,24 @@ export default function App() {
           setPrefilledAlertCategory("All");
           setIsAlertsModalOpen(true);
         }}
+        onOpenBlueprint={() => {
+          setBlueprintPreselectedLocation(undefined);
+          setIsBlueprintModalOpen(true);
+        }}
         isOnline={isOnline}
         isSimulatedOffline={isSimulatedOffline}
         onToggleSimulateOffline={toggleSimulateOffline}
         onShowToast={showToast}
+      />
+
+      {/* Live Campus Ticker & Hot-Drop Beacon */}
+      <CampusLiveTicker
+        onSelectItem={(query) => {
+          if (query) setSearchQuery(query);
+        }}
+        onOpenBlueprint={() => {
+          setIsBlueprintModalOpen(true);
+        }}
       />
 
       {/* Offline Status Banner */}
@@ -1075,7 +1191,8 @@ export default function App() {
 
       {/* Engineering Bento Terminal Hero (Style 1) */}
       <EngineeringBentoHero
-        totalListingsCount={listings.length}
+        totalListingsCount={totalActiveStock}
+        totalActiveStock={totalActiveStock}
         availableCount={availableListingsCount}
         topperNotesCount={topperNotes.length}
         upcomingHandoversCount={upcomingHandoversCount}
@@ -1100,8 +1217,7 @@ export default function App() {
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
         onOpenPBLInfo={() => setIsPBLModalOpen(true)}
         onFocusSearch={() => {
-          const input = (document.getElementById("dedicated-search-bar-input") ||
-            document.getElementById("main-navbar-search-input")) as HTMLInputElement | null;
+          const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
           input?.focus();
         }}
         onOpenAlerts={() => {
@@ -1122,6 +1238,7 @@ export default function App() {
           totalResultsCount={filteredListings.length}
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => setSelectedCategory(cat)}
+          categoryStockCounts={categoryStockCounts}
         />
 
         {/* Category Filter Pills */}
@@ -1145,19 +1262,19 @@ export default function App() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 450, damping: 28 }}
-                className={`relative px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer select-none transition-[color,background-color,border-color,box-shadow] duration-200 ${
+                className={`relative px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer select-none transition-all duration-200 overflow-hidden ${
                   isSelected
-                    ? "text-white shadow-lg shadow-indigo-600/30"
+                    ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-lg shadow-purple-600/40 ring-2 ring-purple-400 border border-purple-400"
                     : isDark
-                    ? "text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/50 shadow-xs"
-                    : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 hover:border-indigo-400 shadow-xs"
+                    ? "text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
+                    : "text-slate-700 hover:text-purple-950 bg-white hover:bg-purple-50/60 border border-slate-200 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
                 }`}
               >
                 {/* Active Sliding Pill Background */}
                 {isSelected && (
                   <motion.div
                     layoutId="activeCategoryPillHighlight"
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-700 shadow-sm -z-10"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 shadow-md shadow-purple-600/30 z-0"
                     transition={{
                       type: "spring",
                       stiffness: 500,
@@ -1183,24 +1300,29 @@ export default function App() {
                   />
                 </motion.span>
 
-                {/* Category Label */}
-                <span className="relative z-10">{cat}</span>
+                {/* Category Label (shows Total: for All) */}
+                <span className={`relative z-10 font-bold ${isSelected ? "text-white font-extrabold" : ""}`}>
+                  {cat === "All" ? "Total:" : cat}
+                </span>
 
-                {/* Item Counter Badge with Smooth Active State Transition */}
-                <motion.span
-                  animate={{
-                    backgroundColor: isSelected
-                      ? "rgba(255, 255, 255, 0.22)"
+                {/* Item Counter Badge */}
+                <span
+                  className={`relative z-10 ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
+                    count === 0
+                      ? isSelected
+                        ? "bg-rose-500 text-white ring-1 ring-white/40 shadow-xs"
+                        : isDark
+                        ? "bg-rose-950/80 text-rose-300 border border-rose-800/80"
+                        : "bg-rose-100 text-rose-700 border border-rose-200"
+                      : isSelected
+                      ? "bg-emerald-500 text-white ring-1 ring-white/40 shadow-xs"
                       : isDark
-                      ? "rgba(51, 65, 85, 0.8)"
-                      : "rgba(226, 232, 240, 0.9)",
-                    color: isSelected ? "#ffffff" : isDark ? "#94a3b8" : "#475569",
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className="relative z-10 ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-tight"
+                      ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/80"
+                      : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                  }`}
                 >
                   {count}
-                </motion.span>
+                </span>
               </motion.button>
             );
           })}
@@ -1252,8 +1374,9 @@ export default function App() {
             <button
               id="filter-wishlist-toggle"
               onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
-              title="Show only items saved to your Wishlist"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+              aria-keyshortcuts="W"
+              title="Show only items saved to your Wishlist (Shortcut: W)"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
                 wishlistOnlyFilter
                   ? "bg-rose-600 text-white shadow-xs border-rose-500"
                   : "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-rose-500/30"
@@ -1267,6 +1390,15 @@ export default function App() {
                 }`}
               />
               <span>Wishlist ({wishlistIds.length})</span>
+              <kbd
+                className={`hidden sm:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
+                  wishlistOnlyFilter
+                    ? "bg-white/25 text-white border-white/30"
+                    : "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                }`}
+              >
+                W
+              </kbd>
             </button>
 
             {/* Include Sold Items Toggle */}
@@ -1351,25 +1483,217 @@ export default function App() {
             )}
           </div>
 
-          {/* Sort By */}
+          {/* View Mode Switcher & Full Screen Controls */}
           <div className="flex items-center gap-2">
-            <span className={`font-bold flex items-center gap-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              <ArrowUpDown className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
-              Sort:
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
-                isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
+            {/* View Mode Segmented Control */}
+            <div
+              className={`p-1 rounded-xl border flex items-center gap-1 ${
+                isDark ? "bg-slate-900/90 border-slate-700" : "bg-slate-100 border-slate-200"
+              }`}
+              role="group"
+              aria-label="Listing card layout mode"
+            >
+              <button
+                type="button"
+                id="view-mode-grid-btn"
+                onClick={() => setLayoutMode("grid")}
+                title="Grid layout view with expandable details"
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  layoutMode === "grid"
+                    ? isDark
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                    : isDark
+                    ? "text-slate-400 hover:text-white"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+
+              <button
+                type="button"
+                id="view-mode-detailed-btn"
+                onClick={() => setLayoutMode("detailed")}
+                title="Detailed full-specs layout view"
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  layoutMode === "detailed"
+                    ? isDark
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                    : isDark
+                    ? "text-slate-400 hover:text-white"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Full Specs</span>
+              </button>
+            </div>
+
+            {/* Full Screen Mode Toggle */}
+            <motion.button
+              type="button"
+              id="fullscreen-toggle-btn"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleFullScreen}
+              aria-keyshortcuts="F"
+              title={
+                isFullScreenMode
+                  ? "Exit Fullscreen Theater View (Shortcut: F)"
+                  : "Enter Fullscreen Theater View - Every Detail Visible (Shortcut: F)"
+              }
+              className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs select-none ${
+                isFullScreenMode
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-md"
+                  : isDark
+                  ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
               }`}
             >
-              <option value="newest">Recently Listed</option>
-              <option value="views_desc">🔥 Most Popular (Views)</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="ai_score">AI Inspection Score</option>
-            </select>
+              {isFullScreenMode ? (
+                <>
+                  <Minimize2 className="w-3.5 h-3.5 text-indigo-200" />
+                  <span className="hidden md:inline">Exit Fullscreen</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="w-3.5 h-3.5 text-indigo-500" />
+                  <span className="hidden md:inline">Fullscreen Mode</span>
+                </>
+              )}
+              <kbd
+                className={`hidden md:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
+                  isFullScreenMode
+                    ? "bg-white/25 text-white border-white/30"
+                    : isDark
+                    ? "bg-slate-700 text-slate-300 border-slate-600"
+                    : "bg-slate-100 text-slate-600 border-slate-300"
+                }`}
+              >
+                F
+              </kbd>
+            </motion.button>
+
+            {/* Sort By Dropdown with Animated Visual Indicator & Icon Transition */}
+            <div
+              id="marketplace-sort-container"
+              className={`flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-xl border transition-all select-none ${
+                sortBy !== "newest"
+                  ? isDark
+                    ? "bg-indigo-950/70 border-indigo-500/50 shadow-xs ring-1 ring-indigo-500/30"
+                    : "bg-indigo-50/90 border-indigo-300 shadow-xs ring-1 ring-indigo-200"
+                  : isDark
+                  ? "bg-slate-900/80 border-slate-700"
+                  : "bg-slate-50 border-slate-200"
+              }`}
+            >
+              {/* Dynamic Icon Transition signaling active sort state */}
+              <div className="relative flex items-center justify-center w-4 h-4 shrink-0">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={sortBy}
+                    initial={{ scale: 0.4, rotate: -30, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    exit={{ scale: 0.4, rotate: 30, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                    className="flex items-center justify-center"
+                  >
+                    {sortBy === "newest" && (
+                      <Clock className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
+                    )}
+                    {sortBy === "views_desc" && (
+                      <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/30" />
+                    )}
+                    {sortBy === "price_asc" && (
+                      <ArrowUpNarrowWide className="w-3.5 h-3.5 text-emerald-500" />
+                    )}
+                    {sortBy === "price_desc" && (
+                      <ArrowDownWideNarrow className="w-3.5 h-3.5 text-blue-500" />
+                    )}
+                    {sortBy === "ai_score" && (
+                      <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Pulsing indicator when a non-default sorting state is active */}
+                {sortBy !== "newest" && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                )}
+              </div>
+
+              <span
+                className={`text-xs font-bold hidden sm:inline ${
+                  sortBy !== "newest"
+                    ? isDark
+                      ? "text-indigo-300"
+                      : "text-indigo-700"
+                    : isDark
+                    ? "text-slate-400"
+                    : "text-slate-500"
+                }`}
+              >
+                Sort:
+              </span>
+
+              <select
+                id="marketplace-sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                aria-label="Sort listings"
+                className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1 ${
+                  sortBy !== "newest"
+                    ? isDark
+                      ? "text-indigo-200"
+                      : "text-indigo-900"
+                    : isDark
+                    ? "text-slate-200"
+                    : "text-slate-800"
+                }`}
+              >
+                <option value="newest" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                  Recently Listed
+                </option>
+                <option value="views_desc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                  🔥 Most Popular (Views)
+                </option>
+                <option value="price_asc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                  Price: Low to High
+                </option>
+                <option value="price_desc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                  Price: High to Low
+                </option>
+                <option value="ai_score" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                  AI Inspection Score
+                </option>
+              </select>
+
+              {/* Quick Reset Button when an active sort filter is selected */}
+              {sortBy !== "newest" && (
+                <motion.button
+                  type="button"
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.85 }}
+                  onClick={() => setSortBy("newest")}
+                  title="Reset sort to Recently Listed"
+                  className={`p-0.5 rounded-full cursor-pointer transition-colors ${
+                    isDark
+                      ? "hover:bg-indigo-900/80 text-indigo-300"
+                      : "hover:bg-indigo-200 text-indigo-700"
+                  }`}
+                >
+                  <X className="w-3 h-3" />
+                </motion.button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1382,6 +1706,34 @@ export default function App() {
               : "bg-white border-slate-200/90 shadow-sm"
           }`}
         >
+          {/* Full Screen Notice Banner */}
+          {isFullScreenMode && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mb-6 p-3 px-4 rounded-2xl border flex items-center justify-between shadow-lg ${
+                isDark
+                  ? "bg-indigo-950/70 border-indigo-500/40 text-indigo-200"
+                  : "bg-indigo-50 border-indigo-200 text-indigo-900"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Maximize2 className="w-4 h-4 text-indigo-400 animate-pulse shrink-0" />
+                <span>
+                  <strong>Theater Mode Active:</strong> Wide multi-column inspection view with AI scores, condition metrics, swap conditions, and seller credentials visible simultaneously.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleFullScreen}
+                className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-sm transition-colors flex items-center gap-1.5 shrink-0 ml-3"
+              >
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>Exit Fullscreen</span>
+              </button>
+            </motion.div>
+          )}
+
           {/* Listings Header & Count */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6">
             <div className="flex flex-wrap items-center gap-2">
@@ -1409,25 +1761,36 @@ export default function App() {
               )}
             </div>
 
-            <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              Click on any item to view AI condition breakdown or negotiate
-            </span>
+            <div className="flex items-center gap-3">
+              <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                {layoutMode === "detailed" || isFullScreenMode
+                  ? "Displaying comprehensive full-screen specs for all items"
+                  : "Click 'Quick Specs' or switch to 'Full Specs' to inspect every detail"}
+              </span>
+            </div>
           </div>
 
           {/* Listings Grid */}
           {isLoadingListings ? (
-            <ListingGridSkeleton count={8} />
+            <ListingGridSkeleton
+              count={8}
+              layoutMode={layoutMode}
+            />
           ) : (
             <AnimatePresence mode="wait">
               {filteredListings.length > 0 ? (
                 <motion.div
-                  key="listings-grid"
+                  key={`${layoutMode}-${isFullScreenMode ? "fullscreen" : "window"}`}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                  className={
+                    layoutMode === "detailed"
+                      ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+                      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
+                  }
                 >
                   <AnimatePresence mode="popLayout">
                     {filteredListings.map((listing) => (
@@ -1470,7 +1833,22 @@ export default function App() {
                           }}
                           onOpenCalendar={handleOpenCalendar}
                           onShowToast={showToast}
+                          onOpenPassport={(item) => {
+                            setPassportListing(item);
+                            setIsPassportModalOpen(true);
+                          }}
+                          onOpenBarter={(item) => {
+                            setBarterListing(item);
+                            setIsBarterDrawerOpen(true);
+                          }}
+                          onOpenBlueprint={(loc) => {
+                            setBlueprintPreselectedLocation(loc);
+                            setIsBlueprintModalOpen(true);
+                          }}
                           isOnline={isOnline}
+                          layoutMode={layoutMode}
+                          isFullScreen={isFullScreenMode}
+                          onTagClick={(tag) => setSearchQuery(tag)}
                         />
                       </motion.div>
                     ))}
@@ -1555,7 +1933,7 @@ export default function App() {
               PVG's COET Campus Resale & Exchange Platform
             </div>
             <p className={isDark ? "text-slate-400" : "text-slate-300"}>
-              Problem-Based Learning (PBL) Project • 2nd Year Computer Science & Engineering
+              Project Based Learning (PBL) • 2nd Year Computer Science & Engineering
             </p>
             <p className={isDark ? "text-slate-400" : "text-slate-300"}>
               Guided by: <strong className="text-white">Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
@@ -1588,7 +1966,7 @@ export default function App() {
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
-          setSelectedListing(null);
+          setTimeout(() => setSelectedListing(null), 300);
         }}
         onOpenChat={(item, initialQuestion) => {
           if (!isOnline) {
@@ -1610,6 +1988,18 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onOpenLightbox={(item) => {
           setLightboxListing(item);
+        }}
+        onOpenPassport={(item) => {
+          setPassportListing(item);
+          setIsPassportModalOpen(true);
+        }}
+        onOpenBarter={(item) => {
+          setBarterListing(item);
+          setIsBarterDrawerOpen(true);
+        }}
+        onOpenBlueprint={(loc) => {
+          setBlueprintPreselectedLocation(loc);
+          setIsBlueprintModalOpen(true);
         }}
         isOnline={isOnline}
       />
@@ -1666,7 +2056,7 @@ export default function App() {
           isOpen={isCalendarModalOpen}
           onClose={() => {
             setIsCalendarModalOpen(false);
-            setCalendarTargetListing(null);
+            setTimeout(() => setCalendarTargetListing(null), 300);
           }}
           listing={calendarTargetListing}
           currentUserEmail={currentUser?.email || undefined}
@@ -1771,6 +2161,62 @@ export default function App() {
           setLightboxListing(null);
           handleOpenCalendar(item);
         }}
+      />
+
+      {/* Campus Handover Blueprint & Interactive Map */}
+      <CampusHandoverBlueprintModal
+        isOpen={isBlueprintModalOpen}
+        onClose={() => {
+          setIsBlueprintModalOpen(false);
+          setBlueprintPreselectedLocation(undefined);
+        }}
+        onFilterByLocation={(locationName) => {
+          setSearchQuery(locationName);
+          showToast(`Filtered listings for campus spot: "${locationName}"`);
+        }}
+        onSelectMeetingPoint={(spotName) => {
+          setSearchQuery(spotName);
+          showToast(`Selected campus handover spot: "${spotName}"`);
+        }}
+      />
+
+      {/* Barter Flow Split Comparison Drawer */}
+      <BarterComparisonDrawer
+        isOpen={isBarterDrawerOpen}
+        onClose={() => {
+          setIsBarterDrawerOpen(false);
+          setBarterListing(null);
+        }}
+        listing={barterListing}
+        userListings={listings.filter((l) => l.sellerEmail === currentUser?.email || l.sellerName.includes("Ayush") || l.sellerName.includes("Priya"))}
+        onSendBarterProposal={(listing, proposalText) => {
+          showToast(`🤝 Barter proposal sent to ${listing.sellerName}! Direct message thread initialized.`);
+          setChatListing(listing);
+          setChatInitialMessage(
+            `Hi ${listing.sellerName}! I submitted a barter proposal for your "${listing.title}": ${proposalText}`
+          );
+          setIsChatOpen(true);
+        }}
+      />
+
+      {/* Verified Student Digital ID Passport Modal */}
+      <StudentPassportModal
+        isOpen={isPassportModalOpen}
+        onClose={() => {
+          setIsPassportModalOpen(false);
+          setPassportListing(null);
+        }}
+        sellerListing={passportListing}
+        allListings={listings}
+        onOpenChat={(item) => {
+          if (!isOnline) {
+            showToast("⚠️ Chat is disabled while offline to prevent data loss.");
+            return;
+          }
+          setChatListing(item);
+          setIsChatOpen(true);
+        }}
+        onShowToast={showToast}
       />
     </div>
   );

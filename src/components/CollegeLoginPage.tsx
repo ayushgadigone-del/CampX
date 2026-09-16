@@ -7,11 +7,8 @@ import {
   Building2,
   Lock,
   ArrowRight,
-  CheckCircle2,
-  Sparkles,
-  HelpCircle,
+  ArrowLeft,
   Mail,
-  UserCheck,
 } from "lucide-react";
 import {
   ALLOWED_COLLEGE_DOMAIN,
@@ -24,6 +21,7 @@ interface CollegeLoginPageProps {
   onDemoCollegeSignIn: (customEmail?: string, displayName?: string) => Promise<void>;
   authErrorMessage?: string | null;
   onClearError?: () => void;
+  onBackToLanding?: () => void;
 }
 
 export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
@@ -31,40 +29,12 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   onDemoCollegeSignIn,
   authErrorMessage,
   onClearError,
+  onBackToLanding,
 }) => {
   const [inputEmail, setInputEmail] = useState("");
   const [inputName, setInputName] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemoProfiles, setShowDemoProfiles] = useState(false);
-
-  const sampleProfiles = [
-    {
-      name: "Ayush Gadigone (App Owner / Roll 26)",
-      email: "ayush.gadigone@pvgcoet.ac.in",
-      role: "2nd Year CSE • App Owner",
-    },
-    {
-      name: "Parshwa Gandhi (Student / Roll 28)",
-      email: "parshwa.gandhi@pvgcoet.ac.in",
-      role: "2nd Year CSE • Verified Student",
-    },
-    {
-      name: "Omkar Ghadashi (Student / Roll 32)",
-      email: "omkar.ghadashi@pvgcoet.ac.in",
-      role: "2nd Year CSE • Verified Student",
-    },
-    {
-      name: "Krishna Gopnarayan (Student / Roll 35)",
-      email: "krishna.gopnarayan@pvgcoet.ac.in",
-      role: "2nd Year CSE • Verified Student",
-    },
-    {
-      name: "Engineering Student (General Student ID)",
-      email: "student@pvgcoet.ac.in",
-      role: "PVG's COET • Verified Student",
-    },
-  ];
 
   const handleCustomCollegeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,13 +76,6 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
     }
   };
 
-  const handleSelectSample = (sample: { name: string; email: string }) => {
-    setInputEmail(sample.email);
-    setInputName(sample.name);
-    setValidationError(null);
-    if (onClearError) onClearError();
-  };
-
   const activeError = validationError || authErrorMessage;
 
   return (
@@ -128,6 +91,20 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
       </div>
 
       <div className="w-full max-w-xl mx-auto flex flex-col items-center">
+        {onBackToLanding && (
+          <div className="w-full flex justify-start mb-4">
+            <button
+              id="back-to-overview-btn"
+              type="button"
+              onClick={onBackToLanding}
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all cursor-pointer select-none"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Overview</span>
+            </button>
+          </div>
+        )}
+
         {/* College Institutional Branding Header */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
@@ -137,7 +114,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
         >
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-xs">
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-            <span>PVG's COET & GKPIM, Pune</span>
+            <span>PVG's COET, Pune</span>
             <span className="text-indigo-400">•</span>
             <span className="text-emerald-400 font-bold">Official Campus Portal</span>
           </div>
@@ -306,48 +283,6 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Pre-Configured College Accounts for Instant Testing */}
-          <div className="pt-2 border-t border-slate-700/60">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
-                Verified Student Accounts (1-Click Test)
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowDemoProfiles(!showDemoProfiles)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer underline underline-offset-2"
-              >
-                {showDemoProfiles ? "Hide list" : "Show accounts"}
-              </button>
-            </div>
-
-            {showDemoProfiles && (
-              <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1">
-                {sampleProfiles.map((p) => (
-                  <button
-                    key={p.email}
-                    type="button"
-                    onClick={() => handleSelectSample(p)}
-                    className="w-full text-left p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-700/60 hover:border-indigo-500/50 transition-all flex items-center justify-between group"
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-slate-200 block group-hover:text-indigo-300">
-                        {p.name}
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-400 block">
-                        {p.email}
-                      </span>
-                    </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-medium">
-                      Fill
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </motion.div>
 
         {/* Footer Security Badges */}
@@ -359,7 +294,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
           <span>•</span>
           <span className="flex items-center gap-1.5">
             <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-            PVG's COET Problem-Based Learning Project
+            PVG's COET Project Based Learning
           </span>
         </div>
       </div>

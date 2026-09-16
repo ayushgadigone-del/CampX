@@ -1,5 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, X, Clock, Sparkles, Tag, ArrowRight, CornerDownLeft } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Search,
+  X,
+  Clock,
+  Sparkles,
+  Tag,
+  ArrowRight,
+  CornerDownLeft,
+  BookOpen,
+  Calculator,
+  FlaskConical,
+  Bike,
+  Briefcase,
+  Package,
+  Layers,
+  Boxes,
+} from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 interface DedicatedSearchBarProps {
@@ -8,6 +25,7 @@ interface DedicatedSearchBarProps {
   totalResultsCount: number;
   selectedCategory: string;
   onSelectCategory?: (category: any) => void;
+  categoryStockCounts?: Record<string, number>;
 }
 
 const STORAGE_KEY = "campus_marketplace_recent_searches";
@@ -21,12 +39,23 @@ const POPULAR_CAMPUS_SEARCHES = [
   { label: "Vernier Caliper", category: "Lab Equipment" },
 ];
 
+const CATEGORY_ITEMS = [
+  { key: "All", label: "Total:", icon: Layers },
+  { key: "Cycles", label: "Cycles", icon: Bike },
+  { key: "Books", label: "Books", icon: BookOpen },
+  { key: "Calculators", label: "Calculators", icon: Calculator },
+  { key: "Lab Equipment", label: "Lab Equipment", icon: FlaskConical },
+  { key: "Bags", label: "Bags", icon: Briefcase },
+  { key: "Other", label: "Other", icon: Package },
+];
+
 export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
   searchQuery,
   onSearchChange,
   totalResultsCount,
   selectedCategory,
   onSelectCategory,
+  categoryStockCounts = {},
 }) => {
   const { isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -216,8 +245,10 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
             {/* Right Action Cluster in Search Bar */}
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
               {searchQuery && (
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.85 }}
                   onClick={() => {
                     onSearchChange("");
                     inputRef.current?.focus();
@@ -227,12 +258,14 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                   aria-label="Clear search text"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </motion.button>
               )}
 
-              <button
+              <motion.button
                 type="submit"
                 id="dedicated-search-submit-btn"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.94 }}
                 className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
                   searchQuery.trim()
                     ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25"
@@ -244,109 +277,194 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
               >
                 <span>Search</span>
                 <CornerDownLeft className="w-3.5 h-3.5" />
-              </button>
+              </motion.button>
             </div>
           </form>
 
-          {/* Search Dropdown: Query Action + Recent History */}
-          {isDropdownOpen && (
-            <div
-              id="dedicated-search-dropdown"
-              className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl ${
-                isDark
-                  ? "bg-slate-900/98 border-slate-700 text-slate-100"
-                  : "bg-white/98 border-slate-200 text-slate-900"
-              }`}
-            >
-              {searchQuery.trim() && (
-                <div
-                  onClick={() => {
-                    addRecentSearch(searchQuery);
-                    setIsDropdownOpen(false);
-                  }}
-                  className={`p-3 px-4 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors border-b ${
-                    isDark
-                      ? "bg-indigo-950/70 hover:bg-indigo-900/80 text-indigo-200 border-indigo-800/50"
-                      : "bg-indigo-50/80 hover:bg-indigo-100 text-indigo-900 border-indigo-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 truncate">
-                    <Search className="w-4 h-4 text-indigo-500 shrink-0" />
-                    <span>Search for &ldquo;{searchQuery}&rdquo;</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-indigo-500 flex items-center gap-1">
-                    <span>Press Enter</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              )}
-
-              {/* Recent Searches Header */}
-              <div
-                className={`px-4 py-2 flex items-center justify-between border-b text-xs ${
+          {/* Search Dropdown: Query Action + Recent History with AnimatePresence */}
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                id="dedicated-search-dropdown"
+                initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl overflow-hidden z-50 backdrop-blur-xl ${
                   isDark
-                    ? "bg-slate-950/70 border-slate-800 text-slate-400"
-                    : "bg-slate-50 border-slate-100 text-slate-500"
+                    ? "bg-slate-900/98 border-slate-700 text-slate-100"
+                    : "bg-white/98 border-slate-200 text-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-1.5 font-bold">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Recent Searches</span>
-                </div>
-                {recentSearches.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearAllRecent}
-                    className="text-[11px] font-semibold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                {searchQuery.trim() && (
+                  <div
+                    onClick={() => {
+                      addRecentSearch(searchQuery);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`p-3 px-4 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors border-b ${
+                      isDark
+                        ? "bg-indigo-950/70 hover:bg-indigo-900/80 text-indigo-200 border-indigo-800/50"
+                        : "bg-indigo-50/80 hover:bg-indigo-100 text-indigo-900 border-indigo-100"
+                    }`}
                   >
-                    Clear History
-                  </button>
-                )}
-              </div>
-
-              {recentSearches.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-400">
-                  No recent searches yet. Search any engineering equipment above!
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-800/40 max-h-56 overflow-y-auto">
-                  {recentSearches.map((term) => (
-                    <div
-                      key={term}
-                      onClick={() => {
-                        onSearchChange(term);
-                        addRecentSearch(term);
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`flex items-center justify-between px-4 py-2.5 text-xs cursor-pointer transition-colors ${
-                        isDark
-                          ? "hover:bg-slate-800/70 text-slate-200 hover:text-white"
-                          : "hover:bg-slate-50 text-slate-700 hover:text-indigo-600"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate font-medium">{term}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => removeRecentSearch(term, e)}
-                        title="Remove from history"
-                        aria-label={`Remove ${term} from search history`}
-                        className="p-1 text-slate-400 hover:text-rose-500 rounded-md transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Search className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <span>Search for &ldquo;{searchQuery}&rdquo;</span>
                     </div>
-                  ))}
+                    <span className="text-[11px] font-bold text-indigo-500 flex items-center gap-1">
+                      <span>Press Enter</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                )}
+
+                {/* Recent Searches Header */}
+                <div
+                  className={`px-4 py-2 flex items-center justify-between border-b text-xs ${
+                    isDark
+                      ? "bg-slate-950/70 border-slate-800 text-slate-400"
+                      : "bg-slate-50 border-slate-100 text-slate-500"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Recent Searches</span>
+                  </div>
+                  {recentSearches.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllRecent}
+                      className="text-[11px] font-semibold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                    >
+                      Clear History
+                    </button>
+                  )}
                 </div>
-              )}
+
+                {recentSearches.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-slate-400">
+                    No recent searches yet. Search any engineering equipment above!
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/40 max-h-56 overflow-y-auto">
+                    {recentSearches.map((term) => (
+                      <div
+                        key={term}
+                        onClick={() => {
+                          onSearchChange(term);
+                          addRecentSearch(term);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`flex items-center justify-between px-4 py-2.5 text-xs cursor-pointer transition-colors ${
+                          isDark
+                            ? "hover:bg-slate-800/70 text-slate-200 hover:text-white"
+                            : "hover:bg-slate-50 text-slate-700 hover:text-indigo-600"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate font-medium">{term}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => removeRecentSearch(term, e)}
+                          title="Remove from history"
+                          aria-label={`Remove ${term} from search history`}
+                          className="p-1 text-slate-400 hover:text-rose-500 rounded-md transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Category Available Stock Console Bar */}
+        <div className="pt-3.5 mt-2 border-t border-slate-700/50 dark:border-slate-800/80">
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Boxes className="w-3.5 h-3.5 text-purple-400" />
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider ${
+                  isDark ? "text-purple-300" : "text-purple-700 font-extrabold"
+                }`}
+              >
+                Category Available Stock:
+              </span>
             </div>
-          )}
+            <span
+              className={`text-[11px] font-medium ${
+                isDark ? "text-slate-400" : "text-slate-500"
+              }`}
+            >
+              Click any category to filter &bull; Real-time Pune campus inventory
+            </span>
+          </div>
+
+          <div className="w-full flex flex-wrap items-center justify-between gap-2 sm:gap-2.5">
+            {CATEGORY_ITEMS.map((cat) => {
+              const Icon = cat.icon;
+              const isSelected = selectedCategory === cat.key;
+              const stock =
+                cat.key === "All"
+                  ? Object.values(categoryStockCounts).reduce((a, b) => a + b, 0)
+                  : categoryStockCounts[cat.key] ?? 0;
+
+              return (
+                <button
+                  key={cat.key}
+                  type="button"
+                  id={`search-console-category-${cat.key.toLowerCase().replace(/\s+/g, "-")}`}
+                  onClick={() => onSelectCategory && onSelectCategory(cat.key)}
+                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 hover:shadow-[0_0_22px_rgba(168,85,247,0.65)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/50 ${
+                    isSelected
+                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white border-purple-400 ring-2 ring-purple-400/60 shadow-lg shadow-purple-600/30 scale-[1.02]"
+                      : isDark
+                      ? "bg-slate-800/85 hover:bg-slate-800 text-slate-200 hover:text-white border-slate-700/80"
+                      : "bg-slate-50/90 hover:bg-purple-50/80 text-slate-700 hover:text-purple-700 border-slate-200 shadow-2xs"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                    <Icon
+                      className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                        isSelected
+                          ? "text-white"
+                          : "text-purple-400 group-hover:text-purple-300"
+                      }`}
+                    />
+                    <span className="font-bold whitespace-nowrap">{cat.label}</span>
+                  </div>
+
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-black shrink-0 whitespace-nowrap transition-all ${
+                      stock === 0
+                        ? isSelected
+                          ? "bg-rose-600 text-white shadow-xs ring-1 ring-rose-300"
+                          : isDark
+                          ? "bg-rose-950/80 text-rose-300 border border-rose-800/80 group-hover:bg-rose-900"
+                          : "bg-rose-100 text-rose-700 border border-rose-300 group-hover:bg-rose-200"
+                        : isSelected
+                        ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-300"
+                        : isDark
+                        ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 group-hover:bg-emerald-900"
+                        : "bg-emerald-100 text-emerald-700 border border-emerald-300 group-hover:bg-emerald-200"
+                    }`}
+                  >
+                    {stock > 0 ? `${stock} in stock` : "0 in stock"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Dedicated Popular Campus Search Shortcuts */}
-        <div className="pt-3 mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="pt-3 mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
           <span
             className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mr-1 ${
               isDark ? "text-slate-400" : "text-slate-500"
@@ -357,28 +475,25 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
           </span>
 
           {POPULAR_CAMPUS_SEARCHES.map((item) => (
-            <button
+            <motion.button
               key={item.label}
               type="button"
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 onSearchChange(item.label);
                 addRecentSearch(item.label);
-                if (onSelectCategory && selectedCategory !== "All" && selectedCategory !== item.category) {
-                  // Keep search versatile
-                }
               }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 hover:shadow-[0_0_18px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-1 hover:ring-purple-400/40 ${
                 searchQuery.toLowerCase().includes(item.label.toLowerCase())
-                  ? isDark
-                    ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
-                    : "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-xs"
                   : isDark
-                  ? "bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700/80 hover:border-indigo-500/40"
-                  : "bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 border-slate-200"
+                  ? "bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700/80"
+                  : "bg-slate-100/90 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border-slate-200"
               }`}
             >
               <span>{item.label}</span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

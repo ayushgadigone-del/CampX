@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Sparkles,
@@ -6,6 +7,7 @@ import {
   Calendar as CalendarIcon,
   MessageCircle,
   ShieldCheck,
+  Shield,
   CheckCircle2,
   Tag,
   Repeat,
@@ -16,6 +18,9 @@ import {
   Share2,
   Check,
   ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Package,
   Star,
   MessageSquarePlus,
   Flag,
@@ -31,6 +36,8 @@ import { Listing, Review } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
 import { getCategoryFAQs } from "../utils/faqQuestions";
 import { SellerReputationBadge } from "./SellerReputationBadge";
+import { UserMilestoneBadge } from "./UserMilestoneBadge";
+import { PriceTrendSparkline } from "./PriceTrendSparkline";
 
 interface ListingDetailModalProps {
   listing: Listing | null;
@@ -49,10 +56,13 @@ interface ListingDetailModalProps {
   onReportListing?: (listingId: string, reason: string, details: string) => void;
   onRenewListing?: (listingId: string) => void;
   isOnline?: boolean;
+  onOpenPassport?: (listing: Listing) => void;
+  onOpenBarter?: (listing: Listing) => void;
+  onOpenBlueprint?: (locationName?: string) => void;
 }
 
 export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
-  listing,
+  listing: incomingListing,
   allListings,
   isOpen,
   onClose,
@@ -68,11 +78,24 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   onReportListing,
   onRenewListing,
   isOnline = true,
+  onOpenPassport,
+  onOpenBarter,
+  onOpenBlueprint,
 }) => {
-  if (!isOpen || !listing) return null;
+  const lastListingRef = React.useRef<Listing | null>(incomingListing);
+  if (incomingListing) {
+    lastListingRef.current = incomingListing;
+  }
+  const listing = incomingListing || lastListingRef.current;
+  if (!listing) return null;
 
   const isSeller = currentUserId === listing.sellerId;
   const [isShared, setIsShared] = useState(false);
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
+
+  React.useEffect(() => {
+    setIsImageZoomed(false);
+  }, [listing?.id]);
 
   // Reporting state
   const [showReportModal, setShowReportModal] = useState(false);
@@ -238,18 +261,40 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div
-        id={`listing-detail-${listing.id}`}
-        className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        >
+          <motion.div
+            id={`listing-detail-${listing.id}`}
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 26, stiffness: 360 }}
+            className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+          >
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
               {listing.category}
             </span>
-            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 text-slate-800">
+            <span
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs ${
+                listing.condition === "Like New"
+                  ? "bg-emerald-600 border border-emerald-500"
+                  : listing.condition === "Good"
+                  ? "bg-blue-600 border border-blue-500"
+                  : listing.condition === "Fair"
+                  ? "bg-amber-600 border border-amber-500"
+                  : "bg-rose-600 border border-rose-500"
+              }`}
+            >
               {listing.condition}
             </span>
             {listing.status !== "available" && (
@@ -316,9 +361,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           </div>
           <div className="flex items-center gap-2">
             {/* Report Button */}
-            <button
+            <motion.button
               id={`detail-report-btn-${listing.id}`}
               type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowReportModal(true)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
                 isReported
@@ -329,11 +376,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             >
               <Flag className={`w-4 h-4 ${isReported ? "text-rose-600 fill-rose-600" : "text-slate-400"}`} />
               <span className="hidden sm:inline">{isReported ? "Reported" : "Report"}</span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               id={`detail-share-btn-${listing.id}`}
               type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleShare}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
                 isShared
@@ -353,11 +402,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   <span>Share</span>
                 </>
               )}
-            </button>
+            </motion.button>
 
             {onToggleWishlist && (
-              <button
+              <motion.button
                 id={`detail-wishlist-toggle-${listing.id}`}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={() => onToggleWishlist(listing.id)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
                   isWishlisted
@@ -374,14 +425,16 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 <span className="hidden sm:inline">
                   {isWishlisted ? "Saved" : "Save"}
                 </span>
-              </button>
+              </motion.button>
             )}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={onClose}
               className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -444,17 +497,50 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           {/* Main Grid: Image + Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div
-              className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-inner group cursor-pointer"
-              onClick={() => onOpenLightbox && onOpenLightbox(listing)}
-              title="Click to zoom and inspect item condition in lightbox"
+              className={`relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 shadow-inner group transition-all duration-300 select-none ${
+                isImageZoomed ? "cursor-zoom-out ring-2 ring-indigo-500 shadow-xl" : "cursor-zoom-in"
+              }`}
+              onClick={() => setIsImageZoomed((prev) => !prev)}
+              title={
+                isImageZoomed
+                  ? "Click picture to zoom out"
+                  : "Click picture to zoom in (or open HD Inspector)"
+              }
             >
               <img
                 src={listing.imageUrl}
                 alt={listing.title}
-                className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
+                className={`w-full h-72 transition-transform duration-300 select-none ${
+                  isImageZoomed
+                    ? "scale-175 object-contain"
+                    : "object-cover group-hover:scale-105"
+                }`}
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-xs text-white px-3 py-1 rounded-lg text-xs flex items-center gap-1.5 z-10">
+
+              {/* Zoom Status Hint Pill */}
+              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950/85 text-white text-xs font-bold border border-slate-700/80 backdrop-blur-md shadow-md select-none pointer-events-none">
+                {isImageZoomed ? (
+                  <>
+                    <ZoomOut className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Click picture to zoom out</span>
+                  </>
+                ) : (
+                  <>
+                    <ZoomIn className="w-3.5 h-3.5 text-indigo-300 shrink-0" />
+                    <span>Click picture to zoom in</span>
+                  </>
+                )}
+              </div>
+
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenBlueprint?.(listing.locationPreference);
+                }}
+                className="absolute bottom-3 left-3 bg-black/75 hover:bg-black/90 backdrop-blur-xs text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 cursor-pointer border border-white/10 hover:border-indigo-400/50 transition-colors shadow-md"
+                title={`View ${listing.locationPreference || "Campus Handover"} on Blueprint Map`}
+              >
                 <MapPin className="w-3.5 h-3.5 text-red-400" />
                 <span>{listing.locationPreference || "Campus Handover"}</span>
               </div>
@@ -466,10 +552,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     e.stopPropagation();
                     onOpenLightbox(listing);
                   }}
-                  className="absolute bottom-3 right-3 z-10 px-2.5 py-1.5 rounded-xl bg-black/70 hover:bg-black/90 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-transform hover:scale-105 shadow-md"
+                  className="absolute bottom-3 right-3 z-10 px-2.5 py-1.5 rounded-xl bg-black/75 hover:bg-black/95 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-transform hover:scale-105 shadow-md cursor-pointer"
+                  title="Open full interactive HD inspection lightbox"
                 >
-                  <ZoomIn className="w-3.5 h-3.5 text-indigo-300" />
-                  <span>Zoom Condition</span>
+                  <Maximize2 className="w-3.5 h-3.5 text-indigo-300" />
+                  <span>HD Inspector</span>
                 </button>
               )}
             </div>
@@ -538,6 +625,28 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     )}
                   </span>
 
+                  {/* Stock Availability Badge (Red for 1 in stock, Green for >1 in stock) */}
+                  <span
+                    id={`detail-stock-badge-${listing.id}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold border select-none ${
+                      listing.availableStock === 0 || listing.status === "completed"
+                        ? "bg-slate-100 text-slate-700 border-slate-300"
+                        : (listing.availableStock ?? 1) === 1
+                        ? "bg-rose-100 text-rose-700 border-rose-300 shadow-rose-100 shadow-xs"
+                        : "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-emerald-100 shadow-xs"
+                    }`}
+                    title="Real-time verified campus inventory"
+                  >
+                    <Package className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {listing.availableStock === 0 || listing.status === "completed"
+                        ? "Out of Stock"
+                        : (listing.availableStock ?? 1) === 1
+                        ? "1 in stock"
+                        : `${listing.availableStock ?? 1} in stock`}
+                    </span>
+                  </span>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -554,6 +663,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Price Trend Sparkline: Historical Average Selling Price for this specific category over last 6 months */}
+              <PriceTrendSparkline
+                category={listing.category}
+                currentPrice={listing.price}
+                listingType={listing.listingType}
+                allListings={allListings}
+              />
 
               {listing.exchangeFor && (
                 <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 space-y-1">
@@ -577,7 +694,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     <BadgeCheck className="w-3 h-3 text-blue-600 shrink-0" />
                     <span>Verified Student Seller</span>
                   </span>
-                  <span className="text-[10px] text-slate-400 font-medium">Campus Authenticated</span>
+                  {onOpenPassport && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenPassport(listing)}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer"
+                      title="Inspect Student Digital Passport credentials"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Student Passport</span>
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
@@ -587,6 +714,10 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900 flex-wrap">
                       <span>{listing.sellerName}</span>
                       <BadgeCheck className="w-4 h-4 text-blue-600" />
+                      <UserMilestoneBadge
+                        listing={listing}
+                        allListings={allListings}
+                      />
                       <SellerReputationBadge
                         listing={listing}
                         allListings={allListings}
@@ -634,9 +765,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
               {/* Primary Call to actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
+                <motion.button
                   id="detail-chat-negotiate-btn"
                   disabled={!isOnline}
+                  whileHover={isOnline ? { scale: 1.02 } : {}}
+                  whileTap={isOnline ? { scale: 0.98 } : {}}
                   onClick={() => {
                     if (!isOnline) return;
                     onClose();
@@ -659,8 +792,10 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     <MessageCircle className="w-4 h-4 shrink-0" />
                   )}
                   <span>{!isOnline ? "Chat Disabled (Offline)" : "Chat & Negotiate"}</span>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     onClose();
                     onOpenCalendar(listing);
@@ -669,7 +804,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 >
                   <CalendarIcon className="w-4 h-4" />
                   Schedule Handover
-                </button>
+                </motion.button>
               </div>
 
               {/* Ask Seller: Dynamic Category FAQs */}
@@ -694,10 +829,12 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
                   <div className="space-y-1.5">
                     {dynamicFaqs.map((faq, idx) => (
-                      <button
+                      <motion.button
                         key={faq.id || idx}
                         id={`ask-seller-faq-btn-${idx}`}
                         type="button"
+                        whileHover={isOnline ? { scale: 1.01, x: 2 } : {}}
+                        whileTap={isOnline ? { scale: 0.99 } : {}}
                         disabled={!isOnline}
                         onClick={() => {
                           if (!isOnline) return;
@@ -730,7 +867,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                           <span className="hidden sm:inline">Ask</span>
                           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </div>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -771,51 +908,113 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* AI Inspection Details if available */}
           {listing.aiInspection && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-purple-50/50 to-white border border-indigo-200 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-indigo-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-indigo-600 text-white">
-                    <Sparkles className="w-4 h-4" />
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-white border-2 border-indigo-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-xs shrink-0">
+                    <Sparkles className="w-5 h-5 text-amber-300" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900">
-                      Gemini 3.1 Pro Preview Inspection Report
+                    <h4 className="text-base font-extrabold text-slate-950">
+                      Gemini 3.8 Flash Inspection Report
                     </h4>
-                    <span className="text-xs text-indigo-700 font-medium">
+                    <span className="text-xs text-indigo-900 font-bold">
                       Automated physical condition analysis & fair price estimation
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-xs">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Inspection Score: {listing.aiInspection.inspectionScore}/100
+                {/* High-Visibility AI Inspection Score Header Badge */}
+                <div
+                  id="detail-ai-inspection-score-header-badge"
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white shadow-md border border-slate-800 shrink-0 select-none"
+                >
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-xs font-extrabold text-slate-200">
+                    AI Inspection Score:
+                  </span>
+                  <span className="text-sm font-black text-emerald-400">
+                    {listing.aiInspection.inspectionScore}/100
+                  </span>
+                </div>
+              </div>
+
+              {/* Dedicated Prominent AI Inspection Score & Verification Card */}
+              <div className="p-4 rounded-xl bg-white border-2 border-indigo-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-950 text-white border-2 border-indigo-500/40 flex flex-col items-center justify-center shrink-0 shadow-md">
+                    <span className="text-2xl font-black text-emerald-400 leading-none">
+                      {listing.aiInspection.inspectionScore}
+                    </span>
+                    <span className="text-[10px] font-extrabold text-slate-300 uppercase tracking-wider mt-0.5">
+                      / 100
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h5 className="text-sm font-black text-slate-950">
+                        AI Inspection Score: {listing.aiInspection.inspectionScore}/100
+                      </h5>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${
+                          listing.aiInspection.inspectionScore >= 90
+                            ? "bg-emerald-100 text-emerald-950 border-emerald-300"
+                            : listing.aiInspection.inspectionScore >= 80
+                            ? "bg-indigo-100 text-indigo-950 border-indigo-300"
+                            : "bg-amber-100 text-amber-950 border-amber-300"
+                        }`}
+                      >
+                        {listing.aiInspection.inspectionScore >= 90
+                          ? "Grade A+ • Excellent Authenticity"
+                          : listing.aiInspection.inspectionScore >= 80
+                          ? "Grade A • High Quality Resale"
+                          : "Grade B • Verified Working Condition"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-800 font-bold leading-relaxed">
+                      Physical integrity audit score based on high-resolution image analysis and campus condition standards.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Visual Score Progress Bar */}
+                <div className="w-full sm:w-48 shrink-0 bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
+                  <div className="flex justify-between text-xs font-black text-slate-900">
+                    <span>Inspection Rating</span>
+                    <span className="text-indigo-950 font-black">{listing.aiInspection.inspectionScore}%</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-500"
+                      style={{ width: `${Math.min(100, Math.max(10, listing.aiInspection.inspectionScore))}%` }}
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="font-bold text-slate-800 block mb-1">
+                  <span className="font-extrabold text-slate-950 block mb-1 text-xs">
                     Visual Condition Audit:
                   </span>
-                  <p className="bg-white/80 p-3 rounded-xl border border-indigo-100/60 text-slate-700 leading-relaxed">
+                  <p className="bg-white p-3 rounded-xl border border-indigo-100 text-slate-900 font-semibold leading-relaxed shadow-2xs">
                     {listing.aiInspection.conditionDetails}
                   </p>
                 </div>
 
                 <div>
-                  <span className="font-bold text-slate-800 block mb-1">
+                  <span className="font-extrabold text-slate-950 block mb-1 text-xs">
                     Student Economy Valuation:
                   </span>
-                  <div className="bg-white/80 p-3 rounded-xl border border-indigo-100/60 space-y-1.5">
-                    <div className="flex items-center justify-between text-indigo-950 font-semibold">
+                  <div className="bg-white p-3 rounded-xl border border-indigo-100 space-y-1.5 shadow-2xs">
+                    <div className="flex items-center justify-between text-slate-950 font-bold">
                       <span>Fair Campus Resale Range:</span>
-                      <span className="text-emerald-700 font-bold">
+                      <span className="text-emerald-800 font-black text-sm">
                         ₹{listing.aiInspection.suggestedPriceMin} – ₹{listing.aiInspection.suggestedPriceMax}
                       </span>
                     </div>
                     {listing.aiInspection.authenticityCheck && (
-                      <p className="text-slate-500 text-[11px] pt-1 border-t border-slate-100">
+                      <p className="text-slate-800 font-semibold text-xs pt-1.5 border-t border-slate-100">
                         {listing.aiInspection.authenticityCheck}
                       </p>
                     )}
@@ -1406,7 +1605,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

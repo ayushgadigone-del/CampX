@@ -58,6 +58,24 @@ export interface Review {
   createdAt: string;
 }
 
+export type MilestoneBadgeId =
+  | "top-seller"
+  | "quick-responder"
+  | "eco-friendly-exchanger"
+  | "five-star-peer"
+  | "campus-pioneer";
+
+export interface UserMilestone {
+  id: MilestoneBadgeId;
+  label: string;
+  shortLabel: string;
+  description: string;
+  criteria: string;
+  icon: "Trophy" | "Zap" | "Leaf" | "Star" | "Award";
+  earnedAt?: string;
+  highlightText?: string;
+}
+
 export interface Listing {
   id: string;
   title: string;
@@ -75,6 +93,7 @@ export interface Listing {
   department?: string;
   year?: string;
   status: ListingStatus;
+  availableStock?: number;
   locationPreference?: string;
   tags?: string[];
   aiInspection?: AIInspectionResult;
@@ -91,6 +110,7 @@ export interface Listing {
   sellerReviewCount?: number;
   completedHandovers?: number;
   views?: number;
+  sellerMilestones?: UserMilestone[];
   createdAt: string;
 }
 
@@ -137,6 +157,10 @@ export interface UserProfile {
   collegeVerified: boolean;
   department?: string;
   year?: string;
+  milestones?: UserMilestone[];
+  completedHandoversCount?: number;
+  averageRating?: number;
+  responseRateMinutes?: number;
 }
 
 export interface AlertSubscription {

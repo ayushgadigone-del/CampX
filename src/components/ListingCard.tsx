@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   MapPin,
@@ -18,11 +19,22 @@ import {
   Eye,
   Flame,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  ShieldCheck,
+  Award,
+  SlidersHorizontal,
+  ArrowRight,
+  Maximize2,
+  CalendarCheck,
+  GraduationCap,
+  Package,
 } from "lucide-react";
 import { Listing } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
 import { useTheme } from "../context/ThemeContext";
 import { SellerReputationBadge } from "./SellerReputationBadge";
+import { UserMilestoneBadge } from "./UserMilestoneBadge";
 
 interface ListingCardProps {
   listing: Listing;
@@ -34,7 +46,13 @@ interface ListingCardProps {
   onOpenCalendar: (listing: Listing) => void;
   onShowToast?: (message: string) => void;
   onOpenLightbox?: (listing: Listing) => void;
+  onOpenPassport?: (listing: Listing) => void;
+  onOpenBarter?: (listing: Listing) => void;
+  onOpenBlueprint?: (locationName?: string) => void;
   isOnline?: boolean;
+  layoutMode?: "grid" | "detailed";
+  isFullScreen?: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
 export const ListingCard: React.FC<ListingCardProps> = ({
@@ -47,10 +65,21 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   onOpenCalendar,
   onShowToast,
   onOpenLightbox,
+  onOpenPassport,
+  onOpenBarter,
+  onOpenBlueprint,
   isOnline = true,
+  layoutMode = "grid",
+  isFullScreen = false,
+  onTagClick,
 }) => {
   const { isDark } = useTheme();
   const [isShared, setIsShared] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const reviewCount = listing.reviews?.length ?? listing.totalReviews ?? 0;
   const rating =
@@ -63,16 +92,62 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         ) / 10
       : 0);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
+    // Subtle 3D perspective tilt calculation (limit to ±5.5 degrees)
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = Math.max(-5.5, Math.min(5.5, ((y - centerY) / centerY) * -5.5));
+    const rotateY = Math.max(-5.5, Math.min(5.5, ((x - centerX) / centerX) * 5.5));
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
+  const getConditionScore = (cond: string) => {
+    switch (cond) {
+      case "Like New":
+        return 96;
+      case "Good":
+        return 82;
+      case "Fair":
+        return 65;
+      default:
+        return 45;
+    }
+  };
+
   const getConditionColor = (cond: string) => {
     switch (cond) {
       case "Like New":
-        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+        return "bg-emerald-600 text-white border-emerald-500 shadow-xs";
       case "Good":
-        return "bg-blue-500/20 text-blue-300 border-blue-500/30";
+        return "bg-blue-600 text-white border-blue-500 shadow-xs";
       case "Fair":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/30";
+        return "bg-amber-600 text-white border-amber-500 shadow-xs";
       default:
-        return "bg-rose-500/20 text-rose-300 border-rose-500/30";
+        return "bg-rose-600 text-white border-rose-500 shadow-xs";
+    }
+  };
+
+  const getConditionBarColor = (cond: string) => {
+    switch (cond) {
+      case "Like New":
+        return "bg-emerald-500";
+      case "Good":
+        return "bg-blue-500";
+      case "Fair":
+        return "bg-amber-500";
+      default:
+        return "bg-rose-500";
     }
   };
 
@@ -114,13 +189,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       ? ` Handover spot: ${listing.locationPreference}.`
       : "";
 
-    // Custom message formatted for students
     const customMessage = `🎓 Check out this verified student listing on Campus Marketplace: "${listing.title}" for ${priceText} (Condition: ${listing.condition}) by ${listing.sellerName}.${locationText}`;
 
-    // Generate listing URL with query parameter
     const shareUrl = `${window.location.origin}${window.location.pathname}?item=${listing.id}#listing-${listing.id}`;
 
-    // Try native Web Share API
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({
@@ -132,30 +204,652 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         setTimeout(() => setIsShared(false), 2500);
         onShowToast?.("Shared listing successfully!");
       } catch (err: any) {
-        // Only fallback if not aborted/dismissed by user
         if (err.name !== "AbortError") {
-          console.warn("Web Share API encountered error, falling back to clipboard:", err);
           await fallbackCopy(shareUrl, customMessage);
         }
       }
     } else {
-      // Fallback for browsers / iframes where navigator.share is unavailable
       await fallbackCopy(shareUrl, customMessage);
     }
   };
 
+  // Check if we should render detailed widescreen card layout
+  const isDetailedView = layoutMode === "detailed";
+
+  /* ========================================================================= */
+  /* DETAILED WIDESCREEN / FULL-SCREEN CARD LAYOUT (EVERY DETAIL VISIBLE)      */
+  /* ========================================================================= */
+  if (isDetailedView) {
+    return (
+      <motion.div
+        ref={cardRef}
+        id={`listing-card-${listing.id}`}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={handleMouseLeave}
+        whileHover={{ y: -4 }}
+        transition={{ type: "spring", stiffness: 350, damping: 26 }}
+        style={{
+          transform: isHovered
+            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
+            : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
+          transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+        }}
+        className={`group relative flex flex-col md:flex-row rounded-3xl border-2 backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg ${
+          isDark
+            ? "bg-slate-900/95 border-slate-800/90 shadow-slate-950/80 hover:border-indigo-500/60 hover:shadow-indigo-500/10"
+            : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
+        }`}
+      >
+        {/* Realistic Spotlight Highlight */}
+        {isHovered && (
+          <div
+            className="pointer-events-none absolute -inset-px rounded-3xl opacity-100 transition-opacity duration-300 z-0"
+            style={{
+              background: isDark
+                ? `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.12), transparent 75%)`
+                : `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.08), transparent 75%)`,
+            }}
+          />
+        )}
+
+        {/* Holographic Iridescent Foil Sheen */}
+        {isHovered && (
+          <div
+            className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 mix-blend-color-dodge transition-opacity duration-300 z-10"
+            style={{
+              background: `radial-gradient(450px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.4) 0%, rgba(147,197,253,0.25) 30%, rgba(244,114,182,0.2) 60%, transparent 80%)`,
+            }}
+          />
+        )}
+
+        {/* Top edge physical bevel shine */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
+
+        {/* Left Side: Visual Media & Condition Gauge Column */}
+        <div className="relative md:w-5/12 lg:w-4/12 flex-shrink-0 flex flex-col bg-slate-950/5 dark:bg-slate-950/30">
+          <div
+            className="relative h-64 md:h-full min-h-[240px] w-full cursor-pointer overflow-hidden group/image"
+            onClick={() => {
+              if (onOpenLightbox) {
+                onOpenLightbox(listing);
+              } else {
+                onOpenDetails(listing);
+              }
+            }}
+            title="Click to zoom and inspect item condition"
+          >
+            <img
+              src={listing.imageUrl}
+              alt={listing.title}
+              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              referrerPolicy="no-referrer"
+            />
+
+            {/* Hover zoom affordance */}
+            <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex items-center justify-center">
+              <span className="px-3.5 py-2 rounded-full bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold flex items-center gap-2 shadow-xl border border-slate-700 transform -translate-y-1 group-hover:translate-y-0 transition-transform">
+                <ZoomIn className="w-4 h-4 text-indigo-400" />
+                <span>Zoom & Inspect</span>
+              </span>
+            </div>
+
+            {/* Badges on Media */}
+            <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[78%] z-10">
+              {/* Verified Student Badge */}
+              <span
+                id={`verified-student-badge-${listing.id}`}
+                className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-600/95 text-white border border-blue-400/40 backdrop-blur-md shadow-xs select-none"
+                title="Verified Student Seller • Campus Authenticated"
+              >
+                <span className="animate-shimmer-hover" aria-hidden="true" />
+                <BadgeCheck className="w-3.5 h-3.5 text-blue-200 shrink-0" />
+                <span>Verified Student</span>
+              </span>
+
+              {/* Condition Badge */}
+              <span
+                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border backdrop-blur-md ${getConditionColor(
+                  listing.condition
+                )}`}
+              >
+                {listing.condition}
+              </span>
+
+              {/* Available Stock Badge */}
+              <span
+                id={`stock-badge-${listing.id}`}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border backdrop-blur-md shadow-xs flex items-center gap-1 ${
+                  listing.availableStock === 0 || listing.status === "completed"
+                    ? "bg-slate-700 text-slate-300 border-slate-600"
+                    : (listing.availableStock ?? 1) === 1
+                    ? "bg-rose-600 text-white border-rose-400/50 shadow-rose-900/30 shadow-xs"
+                    : "bg-emerald-600 text-white border-emerald-400/50 shadow-emerald-900/30 shadow-xs"
+                }`}
+              >
+                <Package className="w-3 h-3" />
+                <span>
+                  {listing.availableStock === 0 || listing.status === "completed"
+                    ? "Out of Stock"
+                    : `${listing.availableStock ?? 1} in stock`}
+                </span>
+              </span>
+
+              {/* Listing Type Tag */}
+              {listing.listingType === "exchange" ? (
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-purple-600 text-white shadow-xs flex items-center gap-1">
+                  <Repeat className="w-3 h-3" />
+                  Exchange Only
+                </span>
+              ) : listing.listingType === "both" ? (
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-indigo-600 text-white shadow-xs flex items-center gap-1">
+                  Sell or Swap
+                </span>
+              ) : null}
+
+              {listing.isReported && (
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1 animate-pulse">
+                  <Flag className="w-3 h-3 fill-white" />
+                  Reported
+                </span>
+              )}
+            </div>
+
+            {/* Floating Top Right: Quick Share & Wishlist */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+              <motion.button
+                id={`listing-quick-share-${listing.id}`}
+                type="button"
+                aria-label="Share listing"
+                title="Share this listing"
+                whileHover={{ scale: 1.12 }}
+                whileTap={{ scale: 0.88 }}
+                onClick={handleShare}
+                className={`p-2.5 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+                  isShared
+                    ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
+                    : "bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-white border-slate-700"
+                }`}
+              >
+                {isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+              </motion.button>
+
+              {onToggleWishlist && (
+                <motion.button
+                  id={`wishlist-toggle-${listing.id}`}
+                  type="button"
+                  aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                  title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                  whileHover={{ scale: 1.12 }}
+                  whileTap={{ scale: 0.88 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleWishlist(listing.id);
+                  }}
+                  className={`p-2.5 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+                    isWishlisted
+                      ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
+                      : "bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
+                  }`}
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : ""
+                    }`}
+                  />
+                </motion.button>
+              )}
+            </div>
+
+            {/* Bottom on Image: AI Inspection & Views */}
+            <div className="absolute bottom-3 inset-x-3 z-10 flex items-center justify-between gap-2">
+              {listing.aiInspection ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-slate-950 text-white border border-slate-700/80 backdrop-blur-md shadow-lg select-none">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+                  <span className="text-slate-100 font-bold">AI Score:</span>
+                  <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
+                </span>
+              ) : (
+                <span />
+              )}
+
+              <span
+                className={`px-2.5 py-1 rounded-lg backdrop-blur-md text-[11px] font-bold flex items-center gap-1.5 border shadow-xs select-none ${
+                  (listing.views || 0) >= 100
+                    ? "bg-slate-950/90 text-amber-300 border-amber-500/50"
+                    : "bg-slate-900/80 text-slate-200 border-slate-700/80"
+                }`}
+              >
+                {(listing.views || 0) >= 100 ? (
+                  <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                )}
+                <span>{(listing.views || 0).toLocaleString()} views</span>
+              </span>
+            </div>
+
+            {/* Status Overlay */}
+            {listing.status !== "available" && (
+              <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-20">
+                {listing.status === "completed" ? (
+                  <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-2 shadow-xl">
+                      <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                    </div>
+                    <span className="px-3.5 py-1 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 font-extrabold text-xs uppercase tracking-wider shadow-md">
+                      Sold / Deal Completed
+                    </span>
+                    <span className="text-[11px] text-slate-300 mt-1.5 font-medium">
+                      Verified Campus Handover
+                    </span>
+                  </div>
+                ) : (
+                  <span
+                    className={`px-3.5 py-1.5 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-lg ${
+                      listing.status === "inactive"
+                        ? "bg-slate-800 border border-slate-700 text-slate-300"
+                        : "bg-amber-600/90 border border-amber-500/40"
+                    }`}
+                  >
+                    {listing.status === "reserved"
+                      ? "Reserved"
+                      : listing.status === "handover_scheduled"
+                      ? "Handover Scheduled"
+                      : "Inactive (Expired 30d)"}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side: Rich Information, Specs & Actions Column */}
+        <div className="flex-1 p-5 md:p-6 flex flex-col justify-between space-y-4 relative z-10">
+          <div>
+            {/* Meta Row: Category, Handover Spot, Expiry */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs pb-2 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400">
+                  <Tag className="w-3.5 h-3.5" />
+                  {listing.category}
+                </span>
+
+                {listing.locationPreference && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenBlueprint?.(listing.locationPreference);
+                    }}
+                    className="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/15 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                    title={`View ${listing.locationPreference} on Campus Blueprint Map`}
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                    <span className="font-semibold">{listing.locationPreference}</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {listing.expiryDate && (
+                  <span
+                    className={`flex items-center gap-1 text-[11px] font-medium ${
+                      listing.status === "inactive"
+                        ? "text-slate-400 line-through"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{formatExpiryInfo(listing).label}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Title (Full unclipped in full screen) */}
+            <h3
+              onClick={() => onOpenDetails(listing)}
+              className={`text-lg sm:text-xl font-extrabold mt-3 cursor-pointer transition-colors leading-snug ${
+                isDark ? "text-white hover:text-indigo-300" : "text-slate-900 hover:text-indigo-600"
+              }`}
+            >
+              {listing.title}
+            </h3>
+
+            {/* Description (Full text in detailed view) */}
+            <p className={`text-sm mt-2 leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+              {listing.description}
+            </p>
+
+            {/* Exchange Terms Box if Applicable */}
+            {listing.exchangeFor && (
+              <div className="mt-3 p-3 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-start gap-2.5">
+                <Repeat className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
+                <div className="text-xs">
+                  <span className="font-extrabold text-purple-700 dark:text-purple-300">
+                    Open for Exchange Barter:{" "}
+                  </span>
+                  <span className="text-purple-900 dark:text-purple-200 font-medium">
+                    {listing.exchangeFor}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* AI Inspection Highlights Banner if Available */}
+            {listing.aiInspection && (
+              <div className="mt-3 p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border-2 border-indigo-200 dark:border-indigo-800/80 space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                    <span className="text-xs font-extrabold text-slate-950 dark:text-white">
+                      Gemini Inspection
+                    </span>
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-950 text-white border border-slate-800 shadow-xs">
+                    <span className="text-[10px] font-bold text-slate-300">Score:</span>
+                    <span className="text-xs font-black text-emerald-400">
+                      {listing.aiInspection.inspectionScore}%
+                    </span>
+                  </div>
+                </div>
+
+                {listing.aiInspection.conditionDetails && (
+                  <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-normal">
+                    {listing.aiInspection.conditionDetails}
+                  </p>
+                )}
+
+                {listing.aiInspection.keyFeatures && listing.aiInspection.keyFeatures.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {listing.aiInspection.keyFeatures.slice(0, 4).map((feature, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 shadow-2xs"
+                      >
+                        <Check className="w-2.5 h-2.5 text-indigo-500" />
+                        <span>{feature}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Scheduled Handover Banner if Active */}
+            {listing.handoverDetails && (
+              <div className="mt-3 p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300">
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="w-4 h-4 text-emerald-500" />
+                  <span className="font-bold">Meetup Scheduled:</span>
+                  <span>
+                    {listing.handoverDetails.scheduledDate} at {listing.handoverDetails.scheduledTime} ({listing.handoverDetails.location})
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Tags Row */}
+            {listing.tags && listing.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                {listing.tags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTagClick?.(tag);
+                    }}
+                    className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                      isDark
+                        ? "bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500 hover:text-indigo-300"
+                        : "bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-700"
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Card Footer: Seller Credentials, Price & Action Buttons */}
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+            {/* Seller & Price Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Seller Profile Info */}
+              <div
+                onClick={() => onOpenPassport?.(listing)}
+                className="flex items-center gap-3 cursor-pointer group/seller"
+                title="Click to inspect Verified Student Digital Passport"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-extrabold text-sm shadow-md shrink-0 group-hover/seller:scale-105 transition-transform">
+                  {listing.sellerName.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-sm font-bold group-hover/seller:text-indigo-400 transition-colors ${isDark ? "text-white" : "text-slate-900"}`}>
+                      {listing.sellerName}
+                    </span>
+                    <span className="badge-shimmer-hover relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30">
+                      <span className="animate-shimmer-hover" aria-hidden="true" />
+                      <BadgeCheck className="w-3 h-3 text-blue-500" />
+                      <span>Passport</span>
+                    </span>
+                    <UserMilestoneBadge listing={listing} allListings={allListings} />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span>{listing.department || "Engineering"}</span>
+                    <span>•</span>
+                    <span>{listing.year || "Student"}</span>
+                    <span>•</span>
+                    <SellerReputationBadge
+                      listing={listing}
+                      allListings={allListings}
+                      variant="seller-row"
+                      onViewReviews={onOpenDetails}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Display */}
+              <div className="sm:text-right">
+                {listing.listingType === "exchange" ? (
+                  <div className="text-base font-extrabold text-purple-500">
+                    Open for Exchange
+                  </div>
+                ) : (
+                  <div className="flex items-baseline sm:justify-end gap-1">
+                    <span className="text-sm font-bold text-slate-500">₹</span>
+                    <span className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                      {listing.price}
+                    </span>
+                    {listing.listingType === "both" && (
+                      <span className="text-xs font-semibold text-indigo-500 ml-1">
+                        (or Swap)
+                      </span>
+                    )}
+                  </div>
+                )}
+                {/* Available Stock Indicator */}
+                <div className="flex items-center sm:justify-end gap-1.5 text-xs font-semibold mt-1">
+                  <Package className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <span className={isDark ? "text-slate-300" : "text-slate-600"}>
+                    Stock:{" "}
+                    <strong
+                      className={
+                        listing.availableStock === 0 || listing.status === "completed"
+                          ? "text-slate-500 font-bold"
+                          : (listing.availableStock ?? 1) === 1
+                          ? "text-rose-600 dark:text-rose-400 font-bold"
+                          : "text-emerald-600 dark:text-emerald-400 font-bold"
+                      }
+                    >
+                      {listing.availableStock === 0 || listing.status === "completed"
+                        ? "0 Available (Sold Out)"
+                        : `${listing.availableStock ?? 1} Available`}
+                    </strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Full-width Responsive Action Buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <motion.button
+                id={`listing-details-btn-${listing.id}`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onOpenDetails(listing)}
+                className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 ${
+                  listing.status === "completed"
+                    ? isDark
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                      : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                    : isDark
+                    ? "border-slate-700 bg-slate-800 hover:bg-slate-700 text-white"
+                    : "border-slate-300 bg-white hover:bg-slate-50 text-slate-800"
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{listing.status === "completed" ? "History" : "Full Specs"}</span>
+              </motion.button>
+
+              <motion.button
+                id={`listing-chat-btn-${listing.id}`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  if (listing.status === "completed") {
+                    onOpenDetails(listing);
+                    return;
+                  }
+                  if (!isOnline) {
+                    onShowToast?.("⚠️ Chat is disabled while offline to prevent data loss.");
+                    return;
+                  }
+                  onOpenChat(listing);
+                }}
+                disabled={!isOnline && listing.status !== "completed"}
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                  listing.status === "completed"
+                    ? isDark
+                      ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
+                      : "bg-slate-100 text-emerald-700 border border-emerald-200 cursor-pointer"
+                    : !isOnline
+                    ? "bg-slate-800 text-slate-500 border border-slate-700"
+                    : isDark
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 cursor-pointer"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20 cursor-pointer"
+                }`}
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>Offer</span>
+              </motion.button>
+
+              <motion.button
+                id={`listing-meet-btn-${listing.id}`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onOpenCalendar(listing)}
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
+                  isDark
+                    ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40"
+                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+                }`}
+                title="Schedule Handover on Google Calendar"
+              >
+                <CalendarIcon className="w-3.5 h-3.5" />
+                <span>Meetup</span>
+              </motion.button>
+
+              <motion.button
+                id={`listing-share-btn-${listing.id}`}
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleShare}
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
+                  isShared
+                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40"
+                    : isDark
+                    ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                }`}
+              >
+                {isShared ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Share</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  /* ========================================================================= */
+  /* STANDARD DYNAMIC GRID CARD LAYOUT (WITH EXPANDABLE QUICK SPECS & REALISM) */
+  /* ========================================================================= */
   return (
-    <div
+    <motion.div
+      ref={cardRef}
       id={`listing-card-${listing.id}`}
-      className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      style={{
+        transform: isHovered
+          ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
+          : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
+        transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+      }}
+      className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full hover:shadow-[0_12px_32px_rgba(168,85,247,0.22)] hover:border-purple-400 ${
         isDark
-          ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-indigo-400 hover:shadow-indigo-500/20 hover:-translate-y-0.5"
-          : "bg-white border-slate-200/90 shadow-md hover:border-indigo-500 hover:shadow-xl hover:-translate-y-0.5"
+          ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-purple-400"
+          : "bg-white border-slate-200/90 shadow-md hover:border-purple-400"
       }`}
     >
+      {/* Realistic Spotlight Gradient */}
+      {isHovered && (
+        <div
+          className="pointer-events-none absolute -inset-px rounded-2xl opacity-100 transition-opacity duration-300 z-0"
+          style={{
+            background: isDark
+              ? `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.14), transparent 70%)`
+              : `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.08), transparent 70%)`,
+          }}
+        />
+      )}
+
+      {/* Holographic Iridescent Foil Sheen */}
+      {isHovered && (
+        <div
+          className="pointer-events-none absolute -inset-px rounded-2xl opacity-35 mix-blend-color-dodge transition-opacity duration-300 z-10"
+          style={{
+            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.4) 0%, rgba(147,197,253,0.25) 30%, rgba(244,114,182,0.2) 60%, transparent 80%)`,
+          }}
+        />
+      )}
+
+      {/* Subtle top edge bevel highlight */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
+
       {/* Image Container with Lightbox Trigger */}
       <div
-        className={`relative h-48 w-full cursor-pointer overflow-hidden group/image ${
+        className={`relative h-42 sm:h-44 w-full cursor-pointer overflow-hidden group/image ${
           isDark ? "bg-slate-900" : "bg-slate-100"
         }`}
         onClick={() => {
@@ -170,12 +864,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <img
           src={listing.imageUrl}
           alt={listing.title}
-          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
           referrerPolicy="no-referrer"
         />
 
         {/* Hover zoom affordance badge */}
-        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex items-center justify-center">
+        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex items-center justify-center z-10">
           <span className="px-3 py-1.5 rounded-full bg-slate-900/90 text-white backdrop-blur-md text-[11px] font-bold flex items-center gap-1.5 shadow-lg transform -translate-y-1 group-hover:translate-y-0 transition-transform duration-200 border border-slate-700">
             <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
             <span>Click to Zoom</span>
@@ -183,16 +877,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         </div>
 
         {/* Badges on Image */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[72%]">
-          {/* Verified Student Badge with Subtle Shimmer on Hover */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[75%] z-10">
+          {/* Verified Student Badge */}
           <span
             id={`verified-student-badge-${listing.id}`}
-            className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600/95 hover:bg-blue-600 text-white border border-blue-400/40 backdrop-blur-md shadow-xs overflow-hidden transition-all duration-300 select-none group-hover:scale-[1.02] cursor-default"
+            className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600/95 hover:bg-blue-600 text-white border border-blue-400/40 backdrop-blur-md shadow-xs overflow-hidden select-none"
             title="Verified Student Seller • Campus Authenticated"
           >
-            {/* Subtle Shimmer Sweep Effect on Hover */}
             <span className="animate-shimmer-hover" aria-hidden="true" />
-            <BadgeCheck className="w-3 h-3 text-blue-200 shrink-0 group-hover:rotate-12 transition-transform duration-300" />
+            <BadgeCheck className="w-3 h-3 text-blue-200 shrink-0" />
             <span>Verified Student</span>
           </span>
 
@@ -211,6 +904,27 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           >
             {listing.condition}
           </span>
+
+          {/* Available Stock Badge */}
+          <span
+            id={`stock-badge-${listing.id}`}
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border backdrop-blur-md shadow-xs flex items-center gap-1 ${
+              listing.availableStock === 0 || listing.status === "completed"
+                ? "bg-slate-700 text-slate-300 border-slate-600"
+                : (listing.availableStock ?? 1) === 1
+                ? "bg-rose-600 text-white border-rose-400/40 shadow-rose-900/30 shadow-xs"
+                : "bg-emerald-600 text-white border-emerald-400/40 shadow-emerald-900/30 shadow-xs"
+            }`}
+            title="Current available campus stock"
+          >
+            <Package className="w-3 h-3" />
+            <span>
+              {listing.availableStock === 0 || listing.status === "completed"
+                ? "0 Stock"
+                : `${listing.availableStock ?? 1} in stock`}
+            </span>
+          </span>
+
           {listing.listingType === "exchange" ? (
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-600 text-white shadow-xs flex items-center gap-1">
               <Repeat className="w-3 h-3" />
@@ -222,7 +936,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             </span>
           ) : null}
 
-          {/* Reported for Moderation Badge */}
           {listing.isReported && (
             <span
               id={`reported-badge-${listing.id}`}
@@ -234,7 +947,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             </span>
           )}
 
-          {/* Inactive / Expired Badge */}
           {listing.status === "inactive" && (
             <span
               id={`inactive-badge-${listing.id}`}
@@ -249,39 +961,39 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         {/* Floating Actions: Share & Wishlist */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
-          <button
+          <motion.button
             id={`listing-quick-share-${listing.id}`}
             type="button"
             aria-label="Share listing"
             title="Share this listing"
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.88 }}
             onClick={handleShare}
-            className={`p-2 rounded-full backdrop-blur-md transition-all duration-200 shadow-sm border ${
+            className={`p-2 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
               isShared
-                ? "bg-emerald-600 text-white scale-105 shadow-md border-emerald-400/50"
-                : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border-slate-700 hover:scale-110"
+                ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
+                : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border-slate-700"
             }`}
           >
-            {isShared ? (
-              <Check className="w-4 h-4 text-white" />
-            ) : (
-              <Share2 className="w-4 h-4" />
-            )}
-          </button>
+            {isShared ? <Check className="w-4 h-4 text-white" /> : <Share2 className="w-4 h-4" />}
+          </motion.button>
 
           {onToggleWishlist && (
-            <button
+            <motion.button
               id={`wishlist-toggle-${listing.id}`}
               type="button"
               aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
               title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.88 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleWishlist(listing.id);
               }}
-              className={`p-2 rounded-full backdrop-blur-md transition-all duration-200 shadow-sm border ${
+              className={`p-2 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
                 isWishlisted
-                  ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 scale-105 shadow-md"
-                  : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-rose-400 border-slate-700 hover:scale-110"
+                  ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
+                  : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
               }`}
             >
               <Heart
@@ -289,19 +1001,39 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : ""
                 }`}
               />
-            </button>
+            </motion.button>
           )}
         </div>
 
-        {/* AI Inspection tag if verified */}
-        {listing.aiInspection && (
-          <div className="absolute bottom-2.5 left-3 z-10">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/90 text-indigo-300 border border-indigo-500/30 backdrop-blur-xs shadow-md">
-              <Sparkles className="w-3 h-3 text-indigo-400" />
-              AI Verified: {listing.aiInspection.inspectionScore}%
+        {/* Interactive Holographic Condition Pass Pill */}
+        <div className="absolute bottom-2.5 left-3 z-10">
+          {listing.aiInspection ? (
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenDetails(listing);
+              }}
+              className="relative overflow-hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/90 text-indigo-200 border border-indigo-500/40 backdrop-blur-md shadow-md group/holo cursor-pointer"
+              title="Interactive 3D Holographic Pass • Inspected by Gemini 3.8 Flash"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/holo:translate-x-full transition-transform duration-700 ease-out" />
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="text-white font-black text-xs">Pass • {listing.aiInspection.inspectionScore}% AI Score</span>
+            </motion.button>
+          ) : (
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border backdrop-blur-xs shadow-md ${getConditionColor(
+                listing.condition
+              )}`}
+            >
+              <Award className="w-3 h-3 shrink-0" />
+              <span>{getConditionScore(listing.condition)}% {listing.condition}</span>
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Quick Zoom & View Count Pill */}
         <div className="absolute bottom-2.5 right-3 z-10 flex items-center gap-1.5">
@@ -344,7 +1076,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         {/* Status overlay if not available or completed */}
         {listing.status !== "available" && (
-          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center">
+          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center z-20">
             {listing.status === "completed" ? (
               <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-1.5 shadow-lg">
@@ -377,11 +1109,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       </div>
 
       {/* Card Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2 relative z-10">
         <div>
-          <div className={`flex items-center justify-between text-xs mb-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-            <span className="flex items-center gap-1 font-medium">
-              <Tag className="w-3 h-3 text-indigo-400" />
+          {/* Category & Handover Location Row */}
+          <div className={`flex items-center justify-between text-xs mb-1.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+            <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
+              <Tag className="w-3 h-3" />
               {listing.category}
             </span>
             <div className="flex items-center gap-2">
@@ -399,93 +1132,170 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 </span>
               )}
               {listing.locationPreference && (
-                <span className={`flex items-center gap-0.5 truncate max-w-[110px] ${isDark ? "text-slate-400" : "text-slate-500"}`} title={listing.locationPreference}>
-                  <MapPin className="w-3 h-3 text-rose-400 shrink-0" />
-                  {listing.locationPreference}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Social Proof & Views Pill */}
-          <div className="flex items-center justify-between text-xs mt-1.5 mb-2">
-            <div className="flex items-center gap-1.5">
-              <span
-                id={`listing-card-views-${listing.id}`}
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border transition-colors select-none ${
-                  (listing.views || 0) >= 100
-                    ? isDark
-                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                      : "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
-                    : isDark
-                    ? "bg-slate-900/60 text-slate-300 border-slate-700/60"
-                    : "bg-slate-100 text-slate-700 border-slate-200"
-                }`}
-                title={`${listing.views || 0} students viewed this item on campus`}
-              >
-                {(listing.views || 0) >= 100 ? (
-                  <Flame className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
-                ) : (
-                  <Eye className="w-3 h-3 text-indigo-400 shrink-0" />
-                )}
-                <span>{(listing.views || 0).toLocaleString()} views</span>
-              </span>
-
-              {(listing.views || 0) >= 100 && (
-                <span
-                  id={`listing-hot-badge-${listing.id}`}
-                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30 select-none animate-pulse"
-                  title="High student demand • Trending listing"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBlueprint?.(listing.locationPreference);
+                  }}
+                  className={`flex items-center gap-0.5 font-medium hover:text-indigo-400 transition-colors cursor-pointer ${
+                    isFullScreen ? "max-w-none" : "truncate max-w-[130px]"
+                  } ${isDark ? "text-slate-300" : "text-slate-600"}`}
+                  title={`View ${listing.locationPreference} on Campus Blueprint Map`}
                 >
-                  <Flame className="w-2.5 h-2.5 fill-rose-500 text-rose-500" />
-                  <span>Popular</span>
-                </span>
+                  <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                  <span className={isFullScreen ? "break-words" : "truncate"}>{listing.locationPreference}</span>
+                </button>
               )}
             </div>
-
-            {listing.status === "completed" && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                Completed Deal
-              </span>
-            )}
           </div>
 
+          {/* Title */}
           <h3
             onClick={() => onOpenDetails(listing)}
-            className={`text-sm font-bold transition-colors line-clamp-2 cursor-pointer leading-snug ${
+            className={`text-sm font-bold transition-colors cursor-pointer leading-snug break-words ${
+              isFullScreen ? "line-clamp-none" : "line-clamp-2 hover:line-clamp-none"
+            } ${
               isDark ? "text-white hover:text-indigo-300" : "text-slate-900 hover:text-indigo-600"
             }`}
           >
             {listing.title}
           </h3>
 
-          <p className={`text-xs line-clamp-2 mt-1 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+          {/* Description */}
+          <p className={`text-xs mt-1 leading-relaxed break-words ${
+            isFullScreen ? "line-clamp-none" : "line-clamp-3 hover:line-clamp-none"
+          } ${isDark ? "text-slate-400" : "text-slate-600"}`}>
             {listing.description}
           </p>
+
+          {/* Exchange Terms Badge if present */}
+          {listing.exchangeFor && (
+            <div className="mt-2 p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-700 dark:text-purple-300 flex items-start gap-1.5">
+              <Repeat className="w-3 h-3 text-purple-500 shrink-0 mt-0.5" />
+              <span className="break-words">
+                <strong className="font-bold">Swap for:</strong> {listing.exchangeFor}
+              </span>
+            </div>
+          )}
 
           {/* Tags Chips */}
           {listing.tags && listing.tags.length > 0 && (
             <div className="flex flex-wrap items-center gap-1 mt-2">
-              {listing.tags.slice(0, 3).map((tag) => (
-                <span
+              {(isFullScreen ? listing.tags : listing.tags.slice(0, 3)).map((tag) => (
+                <button
                   key={tag}
-                  className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTagClick?.(tag);
+                  }}
+                  className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold transition-colors cursor-pointer ${
                     isDark
-                      ? "bg-slate-900/80 text-slate-300 border border-slate-700/60 group-hover:border-indigo-500/40 group-hover:text-indigo-300"
-                      : "bg-slate-100 text-slate-700 border border-slate-200 group-hover:border-indigo-400 group-hover:text-indigo-700"
+                      ? "bg-slate-900/80 text-slate-300 border border-slate-700/60 hover:border-indigo-500/40 hover:text-indigo-300"
+                      : "bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-700"
                   }`}
                 >
                   #{tag}
-                </span>
+                </button>
               ))}
-              {listing.tags.length > 3 && (
+              {!isFullScreen && listing.tags.length > 3 && (
                 <span className={`text-[10px] font-medium ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                   +{listing.tags.length - 3}
                 </span>
               )}
             </div>
           )}
+
+          {/* Expandable Quick Specs & AI Report Accordion */}
+          <div className="mt-2.5">
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`w-full py-1 px-2 rounded-lg text-[11px] font-bold flex items-center justify-between border transition-colors cursor-pointer ${
+                isExpanded
+                  ? isDark
+                    ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                    : "bg-indigo-50 border-indigo-200 text-indigo-700"
+                  : isDark
+                  ? "bg-slate-900/50 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                  : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                <span>{isExpanded ? "Hide Full Details" : "Show All Details & Specs"}</span>
+              </span>
+              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden pt-2 space-y-2 text-xs"
+                >
+                  {/* Full Description */}
+                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
+                    <div className="font-bold text-[10px] uppercase text-slate-400 mb-1">Full Description</div>
+                    <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                      {listing.description}
+                    </p>
+                  </div>
+
+                  {/* Condition Meter */}
+                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
+                    <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                      <span>Condition Health: {listing.condition}</span>
+                      <span className="text-indigo-400">{getConditionScore(listing.condition)}%</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${getConditionBarColor(listing.condition)}`}
+                        style={{ width: `${getConditionScore(listing.condition)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* AI Inspection Notes if present */}
+                  {listing.aiInspection && (
+                    <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-black text-slate-900 dark:text-white">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                          AI Inspection Score
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-slate-950 text-emerald-400 font-black">
+                          {listing.aiInspection.inspectionScore}%
+                        </span>
+                      </div>
+                      {listing.aiInspection.conditionDetails && (
+                        <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-normal">
+                          {listing.aiInspection.conditionDetails}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Seller Details */}
+                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-400 text-[10px] uppercase">Seller Credentials</span>
+                      <span className="text-[10px] text-emerald-500 font-bold">✓ Campus Verified</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-xs">
+                      <span className="font-semibold">{listing.sellerName}</span>
+                      <span className="text-slate-400">{listing.department} ({listing.year || "Student"})</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Star Rating & Review Summary */}
           <div
             id={`listing-rating-summary-${listing.id}`}
@@ -493,16 +1303,11 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               e.stopPropagation();
               onOpenDetails(listing);
             }}
-            className={`mt-2.5 flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer group/rating ${
+            className={`mt-2 flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer group/rating ${
               isDark
                 ? "bg-slate-900/60 hover:bg-slate-900/90 border-slate-700/60 hover:border-indigo-500/40"
                 : "bg-slate-50 hover:bg-slate-100/90 border-slate-200/80 hover:border-indigo-400"
             }`}
-            title={
-              reviewCount > 0
-                ? `${rating.toFixed(1)} ★ based on ${reviewCount} student handovers • Click to view reviews`
-                : "No reviews yet • Click to view details and leave feedback after handover"
-            }
           >
             <div className="flex items-center gap-1.5">
               {reviewCount > 0 ? (
@@ -513,8 +1318,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                       {rating.toFixed(1)}
                     </span>
                   </div>
-                  <span className={`text-[11px] transition-colors ${isDark ? "text-slate-400 group-hover/rating:text-indigo-300" : "text-slate-500 group-hover/rating:text-indigo-600"}`}>
-                    ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+                  <span className={`text-[11px] ${isDark ? "text-slate-400 group-hover/rating:text-indigo-300" : "text-slate-500 group-hover/rating:text-indigo-600"}`}>
+                    ({reviewCount} reviews)
                   </span>
                 </>
               ) : (
@@ -525,62 +1330,81 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               )}
             </div>
 
-            <span className={`text-[10px] font-semibold transition-colors flex items-center gap-0.5 ${isDark ? "text-slate-400 group-hover/rating:text-indigo-300" : "text-slate-500 group-hover/rating:text-indigo-600"}`}>
+            <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               {reviewCount > 0 ? (
                 <>
-                  <span>Handover Verified</span>
+                  <span>Verified Deal</span>
                   <span className="text-emerald-500 font-bold">✓</span>
                 </>
               ) : (
-                <span>Review after meetup</span>
+                <span>Campus Guarantee</span>
               )}
             </span>
           </div>
         </div>
 
-        <div className={`pt-2 border-t space-y-3 ${isDark ? "border-slate-700/60" : "border-slate-200"}`}>
+        {/* Card Footer: Price, Seller & Quick Actions */}
+        <div className={`pt-2.5 border-t space-y-2.5 ${isDark ? "border-slate-700/60" : "border-slate-200"}`}>
           {/* Price & Seller Row */}
           <div className="flex items-center justify-between">
             <div>
               {listing.listingType === "exchange" ? (
-                <div className="text-sm font-bold text-purple-400">
+                <div className="text-sm font-bold text-purple-500">
                   Open for Exchange
                 </div>
               ) : (
                 <div className="flex items-baseline gap-1">
                   <span className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>₹</span>
-                  <span className={`text-lg font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+                  <span className={`text-lg font-black ${isDark ? "text-white" : "text-slate-900"}`}>
                     {listing.price}
                   </span>
                   {listing.listingType === "both" && (
-                    <span className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>or Swap</span>
+                    <span className={`text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>or Swap</span>
                   )}
                 </div>
               )}
+              {/* Available Stock Indicator */}
+              <div className="flex items-center gap-1 text-[11px] font-bold mt-0.5">
+                <Package className="w-3 h-3 text-purple-400 shrink-0" />
+                <span className={isDark ? "text-slate-300" : "text-slate-600"}>
+                  Stock:{" "}
+                  <strong
+                    className={
+                      listing.availableStock === 0 || listing.status === "completed"
+                        ? "text-slate-500 font-bold"
+                        : (listing.availableStock ?? 1) === 1
+                        ? "text-rose-600 dark:text-rose-400 font-bold"
+                        : "text-emerald-600 dark:text-emerald-400 font-bold"
+                    }
+                  >
+                    {listing.availableStock === 0 || listing.status === "completed"
+                      ? "0 Left"
+                      : `${listing.availableStock ?? 1} Available`}
+                  </strong>
+                </span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 text-right">
-              <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold text-[10px] shrink-0">
+            <div
+              onClick={() => onOpenPassport?.(listing)}
+              className="flex items-center gap-1.5 text-right cursor-pointer group/seller"
+              title="Click to view Verified Student Digital Passport"
+            >
+              <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 group-hover/seller:scale-105 group-hover/seller:border-indigo-400 transition-all">
                 {listing.sellerName.charAt(0)}
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1">
-                  <span className={`text-xs font-semibold truncate max-w-[80px] ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-                    {listing.sellerName.split(" ")[0]}
+                  <span className={`text-xs font-semibold group-hover/seller:text-indigo-400 transition-colors ${
+                    isFullScreen ? "break-words" : "truncate max-w-[90px]"
+                  } ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                    {isFullScreen ? listing.sellerName : listing.sellerName.split(" ")[0]}
                   </span>
-                  <span
-                    id={`seller-verified-student-badge-${listing.id}`}
-                    className="badge-shimmer-hover relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30 overflow-hidden select-none transition-colors"
-                    title="Verified Student Seller • Campus Authenticated"
-                  >
-                    <span className="animate-shimmer-hover" aria-hidden="true" />
-                    <BadgeCheck className="w-2.5 h-2.5 text-blue-500 dark:text-blue-400 shrink-0" />
-                    <span>Verified</span>
-                  </span>
+                  <UserMilestoneBadge listing={listing} allListings={allListings} />
                 </div>
-                <div className="flex items-center gap-1.5 -mt-0.5">
+                <div className="flex items-center gap-1 -mt-0.5">
                   <span className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    {listing.department?.split(" ")[0] || "Student"}
+                    {isFullScreen ? (listing.department || "Student") : (listing.department?.split(" ")[0] || "Student")}
                   </span>
                   <SellerReputationBadge
                     listing={listing}
@@ -595,10 +1419,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
           {/* Quick Action Buttons */}
           <div className="grid grid-cols-4 gap-1.5">
-            <button
+            <motion.button
               id={`listing-details-btn-${listing.id}`}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
               onClick={() => onOpenDetails(listing)}
-              className={`px-2 py-1.5 rounded-xl border text-xs font-semibold transition-colors text-center cursor-pointer shadow-2xs ${
+              className={`px-2 py-2 rounded-xl border text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs ${
                 listing.status === "completed"
                   ? isDark
                     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
@@ -609,9 +1435,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               }`}
             >
               {listing.status === "completed" ? "History" : "Details"}
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               id={`listing-chat-btn-${listing.id}`}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
               onClick={() => {
                 if (listing.status === "completed") {
                   onOpenDetails(listing);
@@ -626,12 +1455,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               disabled={!isOnline && listing.status !== "completed"}
               title={
                 listing.status === "completed"
-                  ? "This item has already been sold and completed on campus. Click to view history."
+                  ? "This item has already been sold on campus. Click to view history."
                   : !isOnline
-                  ? "Chat is disabled while offline to prevent data loss"
+                  ? "Chat is disabled while offline"
                   : "Chat & negotiate with student seller"
               }
-              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-colors select-none shadow-2xs ${
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-2 rounded-xl text-xs font-bold transition-colors select-none shadow-2xs ${
                 listing.status === "completed"
                   ? isDark
                     ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
@@ -659,11 +1488,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   <span>Chat</span>
                 </>
               )}
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               id={`listing-meet-btn-${listing.id}`}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
               onClick={() => onOpenCalendar(listing)}
-              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-2xs ${
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs ${
                 isDark
                   ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40"
                   : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
@@ -672,12 +1504,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             >
               <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
               <span>Meet</span>
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               id={`listing-share-btn-${listing.id}`}
               type="button"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
               onClick={handleShare}
-              className={`inline-flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs ${
                 isShared
                   ? isDark
                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
@@ -691,7 +1526,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               {isShared ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span className="text-[11px] font-bold">Shared</span>
+                  <span className="text-[11px] font-bold">Done</span>
                 </>
               ) : (
                 <>
@@ -699,10 +1534,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   <span className="text-[11px]">Share</span>
                 </>
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Users,
@@ -7,10 +8,10 @@ import {
   Server,
   Cloud,
   Layers,
-  Terminal,
   ExternalLink,
   ShieldCheck,
   CheckCircle2,
+  Key,
 } from "lucide-react";
 
 interface PBLProjectInfoModalProps {
@@ -24,14 +25,24 @@ export const PBLProjectInfoModal: React.FC<PBLProjectInfoModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"team" | "pbl" | "deploy">("team");
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div
-        id="pbl-project-modal"
-        className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        >
+          <motion.div
+            id="pbl-project-modal"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+          >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex items-center gap-2.5">
@@ -48,7 +59,7 @@ export const PBLProjectInfoModal: React.FC<PBLProjectInfoModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Problem-Based Learning Project • Guided by Prof. Snehal Kokil
+                Project Based Learning • Guided by Prof. Snehal Kokil
               </p>
             </div>
           </div>
@@ -136,7 +147,7 @@ export const PBLProjectInfoModal: React.FC<PBLProjectInfoModalProps> = ({
                       Server & Core Logic
                     </span>
                     <p className="text-xs text-slate-500 mt-1">
-                      Backend Development, Listing & Search Engine, Express API Design & Gemini 3.1 Pro integration.
+                      Backend Development, Listing & Search Engine, Express API Design & Gemini 3.8 Flash integration.
                     </p>
                   </div>
 
@@ -218,7 +229,7 @@ export const PBLProjectInfoModal: React.FC<PBLProjectInfoModalProps> = ({
                 <div className="p-3 rounded-xl border border-slate-200 bg-white space-y-1">
                   <span className="font-bold text-slate-800 block">Week 4: Software / Hardware</span>
                   <p className="text-slate-500">
-                    React.js, Tailwind CSS, Express backend, Google Gemini 3.1 Pro for AI inspection, Google Calendar for handover appointments, and Cloud Firestore.
+                    React.js, Tailwind CSS, Express backend, Google Gemini 3.8 Flash for AI inspection, Google Calendar for handover appointments, and Cloud Firestore.
                   </p>
                 </div>
 
@@ -273,25 +284,29 @@ export const PBLProjectInfoModal: React.FC<PBLProjectInfoModalProps> = ({
                     2. Deploying to Render / Railway / Heroku
                   </span>
                   <p className="text-slate-600">
-                    Connect your GitHub repository. Set the build command to <code>npm run build</code> and the start command to <code>npm start</code>. Add <code>GEMINI_API_KEY</code> in the Environment Variables dashboard.
+                    Connect your GitHub repository. Set the build command to <code>npm run build</code> and the production start command to <code>npm start</code>. The platform handles backend containerization automatically.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                   <span className="font-bold text-slate-900 block flex items-center gap-1.5">
-                    <Terminal className="w-4 h-4 text-purple-600" />
-                    3. Required Environment Variables
+                    <Key className="w-4 h-4 text-amber-600" />
+                    3. Environment and variables This includes API keys such as Google Gemini API key used here.
                   </span>
-                  <div className="bg-slate-900 text-slate-200 p-2.5 rounded-lg font-mono text-[11px] space-y-1">
-                    <div>GEMINI_API_KEY="Your-Google-Gemini-Key"</div>
-                    <div>APP_URL="https://your-domain.run.app"</div>
+                  <p className="text-slate-600">
+                    Set up your sensitive runtime secrets in your hosting dashboard or container environment. The server uses <code>GEMINI_API_KEY</code> on the backend to authenticate Google Gemini AI services (for automated item inspection, campus price estimation, and title refinement) without exposing keys to client browsers.
+                  </p>
+                  <div className="bg-slate-900 text-slate-200 p-2.5 rounded-lg font-mono text-[11px]">
+                    GEMINI_API_KEY=your_gemini_api_key_here
                   </div>
                 </div>
               </div>
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

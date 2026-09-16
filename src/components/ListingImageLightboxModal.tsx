@@ -104,6 +104,21 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
     setRotation((prev) => (prev + 90) % 360);
   };
 
+  // Drag detection & click tracking
+  const dragStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const hasDraggedRef = useRef<boolean>(false);
+
+  // Dedicated single-click to zoom in and zoom out upon clicking the picture
+  const handlePictureClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (hasDraggedRef.current) return;
+    if (scale > 1) {
+      handleResetZoom();
+    } else {
+      setScale(2.2);
+    }
+  };
+
   const handleDoubleTapOrClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (scale > 1) {
@@ -128,6 +143,8 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
 
   // Dragging support when zoomed in
   const handleMouseDown = (e: React.MouseEvent) => {
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+    hasDraggedRef.current = false;
     if (scale <= 1) return;
     e.preventDefault();
     setIsDragging(true);
@@ -138,6 +155,13 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    const dist = Math.hypot(
+      e.clientX - dragStartPosRef.current.x,
+      e.clientY - dragStartPosRef.current.y
+    );
+    if (dist > 6) {
+      hasDraggedRef.current = true;
+    }
     if (!isDragging || scale <= 1) return;
     e.preventDefault();
     const newX = e.clientX - dragStartRef.current.x;
@@ -154,20 +178,34 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
     setIsDragging(false);
   };
 
-  // Touch handlers for mobile devices
+  // Touch handlers for mobile devices with click vs drag detection
   const touchStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchMovedRef = useRef<boolean>(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (scale <= 1 || e.touches.length !== 1) return;
-    touchStartRef.current = {
-      x: e.touches[0].clientX - position.x,
-      y: e.touches[0].clientY - position.y,
-    };
-    setIsDragging(true);
+    if (e.touches.length !== 1) return;
+    touchStartPosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchMovedRef.current = false;
+    if (scale > 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      };
+      setIsDragging(true);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || scale <= 1 || e.touches.length !== 1) return;
+    if (e.touches.length !== 1) return;
+    const dist = Math.hypot(
+      e.touches[0].clientX - touchStartPosRef.current.x,
+      e.touches[0].clientY - touchStartPosRef.current.y
+    );
+    if (dist > 8) {
+      touchMovedRef.current = true;
+    }
+    if (!isDragging || scale <= 1) return;
     const newX = e.touches[0].clientX - touchStartRef.current.x;
     const newY = e.touches[0].clientY - touchStartRef.current.y;
     const maxBound = 350 * (scale - 1);
@@ -177,8 +215,15 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
     });
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     setIsDragging(false);
+    if (!touchMovedRef.current && e.changedTouches.length === 1) {
+      if (scale > 1) {
+        handleResetZoom();
+      } else {
+        setScale(2.2);
+      }
+    }
   };
 
   if (!isOpen || !listing) return null;
@@ -186,13 +231,13 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
   const getConditionColor = (cond: string) => {
     switch (cond) {
       case "Like New":
-        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+        return "bg-emerald-600 text-white border-emerald-500 shadow-sm";
       case "Good":
-        return "bg-blue-500/20 text-blue-300 border-blue-500/40";
+        return "bg-blue-600 text-white border-blue-500 shadow-sm";
       case "Fair":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        return "bg-amber-600 text-white border-amber-500 shadow-sm";
       default:
-        return "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        return "bg-rose-600 text-white border-rose-500 shadow-sm";
     }
   };
 
@@ -343,8 +388,15 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
               transition: isDragging ? "none" : "transform 0.22s cubic-bezier(0.2, 0, 0, 1)",
             }}
+            onClick={handlePictureClick}
             onDoubleClick={handleDoubleTapOrClick}
-            className="relative flex items-center justify-center max-w-full max-h-full"
+            className={`relative flex items-center justify-center max-w-full max-h-full ${
+              scale > 1
+                ? isDragging
+                  ? "cursor-grabbing"
+                  : "cursor-zoom-out"
+                : "cursor-zoom-in"
+            }`}
           >
             <img
               id="lightbox-inspected-image"
@@ -352,7 +404,19 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               alt={listing.title}
               draggable={false}
               referrerPolicy="no-referrer"
-              className="max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-auto"
+              onClick={handlePictureClick}
+              className={`max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-auto select-none transition-shadow ${
+                scale > 1
+                  ? isDragging
+                    ? "cursor-grabbing ring-2 ring-indigo-500/50"
+                    : "cursor-zoom-out hover:ring-2 hover:ring-amber-400/60"
+                  : "cursor-zoom-in hover:ring-2 hover:ring-indigo-400/60"
+              }`}
+              title={
+                scale > 1
+                  ? "Click picture to zoom out (or drag to pan)"
+                  : "Click picture to zoom in"
+              }
             />
           </motion.div>
 
@@ -384,8 +448,8 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
             <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <span>
               {scale > 1
-                ? "Drag to pan and examine wear, scratches, or ports • Double-click to reset"
-                : "Click or scroll to zoom in • Inspect condition before chatting"}
+                ? "Click picture to zoom out • Drag to pan and examine details"
+                : "Click picture to zoom in • Scroll or use buttons to adjust"}
             </span>
           </div>
         </main>
@@ -415,14 +479,15 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
 
               {/* AI Verification or Condition Details */}
               {listing.aiInspection ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/30 text-indigo-200">
-                  <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 text-white border border-slate-700/80 shadow-md">
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
                   <div>
-                    <span className="font-bold">
-                      AI Verified Condition: {listing.aiInspection.inspectionScore}%
+                    <span className="font-extrabold text-slate-100 text-xs">
+                      AI Inspection Score:{" "}
+                      <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
                     </span>
                     {listing.aiInspection.conditionDetails && (
-                      <span className="hidden lg:inline text-slate-300 ml-1.5 text-[11px]">
+                      <span className="hidden lg:inline text-slate-300 ml-1.5 text-xs font-medium">
                         "{listing.aiInspection.conditionDetails}"
                       </span>
                     )}

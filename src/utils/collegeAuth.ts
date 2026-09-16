@@ -1,6 +1,6 @@
 /**
  * College Domain Authentication & Verification Utilities
- * PVG's COET & GKPIM, Pune (pvgcoet.ac.in)
+ * PVG's COET, Pune (pvgcoet.ac.in)
  */
 
 export const ALLOWED_COLLEGE_DOMAIN = "pvgcoet.ac.in";

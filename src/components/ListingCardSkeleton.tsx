@@ -3,10 +3,67 @@ import { useTheme } from "../context/ThemeContext";
 
 interface ListingCardSkeletonProps {
   count?: number;
+  layoutMode?: "grid" | "detailed";
 }
 
-export const ListingCardSkeleton: React.FC = () => {
+export const ListingCardSkeleton: React.FC<{ layoutMode?: "grid" | "detailed" }> = ({
+  layoutMode = "grid",
+}) => {
   const { isDark } = useTheme();
+
+  if (layoutMode === "detailed") {
+    return (
+      <div
+        className={`flex flex-col md:flex-row rounded-3xl border-2 overflow-hidden h-full animate-pulse transition-all ${
+          isDark
+            ? "bg-slate-800/95 border-slate-700/90 shadow-2xl"
+            : "bg-white border-slate-200/90 shadow-md"
+        }`}
+        aria-hidden="true"
+      >
+        {/* Left Media Column */}
+        <div
+          className={`relative h-64 md:h-full md:w-5/12 lg:w-4/12 overflow-hidden ${
+            isDark ? "bg-slate-900" : "bg-slate-100"
+          }`}
+        >
+          <div
+            className={`absolute inset-0 bg-gradient-to-r ${
+              isDark
+                ? "from-slate-900 via-slate-800/60 to-slate-900"
+                : "from-slate-100 via-slate-200/60 to-slate-100"
+            } animate-pulse`}
+          />
+          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[75%]">
+            <div className={`h-5 w-24 rounded-full ${isDark ? "bg-slate-700/80" : "bg-slate-200"}`} />
+            <div className={`h-5 w-16 rounded-full ${isDark ? "bg-slate-700/70" : "bg-slate-200"}`} />
+          </div>
+        </div>
+
+        {/* Right Info Column */}
+        <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className={`h-4 w-28 rounded ${isDark ? "bg-slate-700/80" : "bg-slate-200"}`} />
+              <div className={`h-4 w-20 rounded ${isDark ? "bg-slate-700/60" : "bg-slate-200"}`} />
+            </div>
+            <div className={`h-6 w-3/4 rounded ${isDark ? "bg-slate-700" : "bg-slate-200"}`} />
+            <div className={`h-4 w-full rounded ${isDark ? "bg-slate-700/50" : "bg-slate-100"}`} />
+            <div className={`h-4 w-5/6 rounded ${isDark ? "bg-slate-700/50" : "bg-slate-100"}`} />
+            <div className={`h-12 w-full rounded-2xl ${isDark ? "bg-slate-800 border border-slate-700" : "bg-slate-50 border border-slate-200"}`} />
+          </div>
+
+          <div className="pt-3 border-t border-slate-700/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full ${isDark ? "bg-slate-700" : "bg-slate-200"}`} />
+              <div className={`h-4 w-24 rounded ${isDark ? "bg-slate-700" : "bg-slate-200"}`} />
+            </div>
+            <div className={`h-7 w-20 rounded ${isDark ? "bg-slate-700" : "bg-slate-200"}`} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -19,7 +76,7 @@ export const ListingCardSkeleton: React.FC = () => {
     >
       {/* Image Skeleton with Badges Layout */}
       <div
-        className={`relative h-48 w-full overflow-hidden ${
+        className={`relative h-42 sm:h-44 w-full overflow-hidden ${
           isDark ? "bg-slate-900" : "bg-slate-100"
         }`}
       >
@@ -256,16 +313,21 @@ export const ListingCardSkeleton: React.FC = () => {
 
 export const ListingGridSkeleton: React.FC<ListingCardSkeletonProps> = ({
   count = 8,
+  layoutMode = "grid",
 }) => {
   return (
     <div
       id="marketplace-skeleton-grid"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+      className={
+        layoutMode === "detailed"
+          ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
+      }
       aria-label="Loading campus marketplace items..."
     >
       {Array.from({ length: count }).map((_, index) => (
         <div key={`listing-skeleton-${index}`} className="h-full flex flex-col">
-          <ListingCardSkeleton />
+          <ListingCardSkeleton layoutMode={layoutMode} />
         </div>
       ))}
     </div>

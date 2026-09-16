@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Bell,
@@ -71,8 +72,6 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
     if (prefilledCategory) setCategory(prefilledCategory);
   }, [prefilledKeyword, prefilledCategory]);
 
-  if (!isOpen) return null;
-
   const handleAddAlert = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const cleanKeyword = keyword.trim();
@@ -127,16 +126,26 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
   };
 
   return (
-    <div
-      id="alerts-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        id="alerts-modal-content"
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          id="alerts-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={onClose}
+        >
+          <motion.div
+            id="alerts-modal-content"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6"
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Modal Header */}
         <div className="relative px-6 py-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -563,7 +572,9 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             Done
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

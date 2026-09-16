@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Sparkles,
@@ -356,11 +357,22 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div
-        id="create-listing-modal"
-        className="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        >
+          <motion.div
+            id="create-listing-modal"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+          >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex items-center gap-2.5">
@@ -376,12 +388,14 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               </p>
             </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         {/* AI Scanner Banner */}
@@ -392,24 +406,26 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-bold text-indigo-950 block">
-                Have a photo? Use Gemini 3.1 Pro Preview
+                Have a photo? Use Gemini 3.8 Flash
               </span>
               <p className="text-xs text-indigo-700">
                 AI scans your item, detects scratches, assesses condition, and suggests fair campus pricing.
               </p>
             </div>
           </div>
-          <button
+          <motion.button
             type="button"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => {
               onClose();
               onOpenAIInspector();
             }}
-            className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+            className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Scan Item with AI
-          </button>
+          </motion.button>
         </div>
 
         {/* Form Body */}
@@ -983,9 +999,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
           {/* Footer Submit */}
           <div className="pt-3 border-t border-slate-100 flex items-center gap-3">
-            <button
+            <motion.button
               id="create-modal-submit-btn"
               type="submit"
+              whileHover={isOnline && !isSubmitting ? { scale: 1.02 } : {}}
+              whileTap={isOnline && !isSubmitting ? { scale: 0.98 } : {}}
               disabled={isSubmitting || !isOnline}
               title={
                 !isOnline
@@ -1014,17 +1032,21 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   Publish Item Listing
                 </>
               )}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-100 transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-100 transition-colors cursor-pointer"
             >
               Cancel
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
