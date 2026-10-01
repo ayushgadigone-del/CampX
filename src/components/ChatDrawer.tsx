@@ -17,7 +17,8 @@ import {
   WifiOff,
 } from "lucide-react";
 import { Conversation, ChatMessage, Listing } from "../types";
-import { db } from "../lib/firebase";
+import { recordChatMessage, getStoredChats, saveStoredChat } from "../utils/chatStorage";
+import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import {
   collection,
   doc,
@@ -84,19 +85,29 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
   useEffect(() => {
     if (!isOpen || !activeListing) return;
 
-    // Set initial mock message if empty
-    const initialMsg: ChatMessage = {
-      id: "msg_init",
-      conversationId,
-      senderId: activeListing.sellerId,
-      senderName: activeListing.sellerName,
-      senderEmail: activeListing.sellerEmail,
-      text: `Hi! Thanks for checking out my listing "${activeListing.title}". Feel free to make an offer or suggest a campus meeting spot for handover.`,
-      type: "text",
-      timestamp: Date.now() - 3600000,
-    };
+    // Check if we have existing stored messages for this conversation
+    const storedChats = getStoredChats();
+    const existing = storedChats.find(
+      (c) => c.listingId === activeListing.id || c.id === conversationId
+    );
 
-    setMessages([initialMsg]);
+    if (existing && existing.messages && existing.messages.length > 0) {
+      setMessages(existing.messages);
+    } else {
+      // Set initial mock message if empty
+      const initialMsg: ChatMessage = {
+        id: "msg_init",
+        conversationId,
+        senderId: activeListing.sellerId,
+        senderName: activeListing.sellerName,
+        senderEmail: activeListing.sellerEmail,
+        text: `Hi! Thanks for checking out my listing "${activeListing.title}". Feel free to make an offer or suggest a campus meeting spot for handover.`,
+        type: "text",
+        timestamp: Date.now() - 3600000,
+      };
+
+      setMessages([initialMsg]);
+    }
 
     // Listen to firestore subcollection if available
     try {
@@ -114,12 +125,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           }
         },
         (err) => {
-          console.warn("Firestore chat listener fallback:", err);
+          handleFirestoreError(err, OperationType.GET, `conversations/${conversationId}/messages`);
         }
       );
       return () => unsubscribe();
-    } catch {
-      // Offline fallback
+    } catch (err) {
+      handleFirestoreError(err, OperationType.GET, `conversations/${conversationId}/messages`);
     }
   }, [isOpen, activeListing, conversationId]);
 
@@ -156,6 +167,9 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
     setInputText("");
     setShowOfferBox(false);
 
+    // Save to user's stored chats
+    recordChatMessage(activeListing, newMsg, currentUser);
+
     // Save to Firestore
     try {
       // Upsert conversation metadata
@@ -182,7 +196,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         newMsg
       );
     } catch (e) {
-      console.warn("Saved message locally:", e);
+      handleFirestoreError(e, OperationType.WRITE, `conversations/${conversationId}/messages`);
     }
   };
 

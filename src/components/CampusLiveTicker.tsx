@@ -6,7 +6,6 @@ import {
   Radio,
   Sparkles,
   BookOpen,
-  MapPin,
   TrendingUp,
   ShieldCheck,
   Tag,
@@ -76,12 +75,10 @@ const TICKER_EVENTS: CampusTickerItem[] = [
 
 interface CampusLiveTickerProps {
   onSelectItem?: (query: string) => void;
-  onOpenBlueprint?: () => void;
 }
 
 export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
   onSelectItem,
-  onOpenBlueprint,
 }) => {
   const { isDark } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -191,19 +188,6 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
 
         {/* Right Quick Controls */}
         <div className="flex items-center gap-2 shrink-0 text-xs">
-          {onOpenBlueprint && (
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={onOpenBlueprint}
-              className="px-2.5 py-1 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <MapPin className="w-3 h-3" />
-              <span className="hidden sm:inline">Handover Blueprint</span>
-            </motion.button>
-          )}
-
           {/* Dots Pager Indicator */}
           <div className="flex items-center gap-1">
             {TICKER_EVENTS.map((item, idx) => (

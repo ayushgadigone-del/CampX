@@ -4,7 +4,6 @@ import {
   Sparkles,
   PlusCircle,
   Calendar as CalendarIcon,
-  Search,
   BookOpen,
   LogOut,
   BadgeCheck,
@@ -12,11 +11,6 @@ import {
   ChevronDown,
   Heart,
   Bell,
-  Clock,
-  History,
-  X,
-  ArrowRight,
-  Wifi,
   WifiOff,
   GraduationCap,
   Sun,
@@ -25,10 +19,11 @@ import {
   Zap,
   Leaf,
   MapPin,
+  MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
-import { ThemeSelector } from "./ThemeSelector";
 
 interface NavbarProps {
   currentUser: User | null;
@@ -45,9 +40,10 @@ interface NavbarProps {
   upcomingHandoversCount: number;
   wishlistCount?: number;
   onOpenWishlist: () => void;
+  chatsCount?: number;
+  onOpenYourChats: () => void;
   alertsCount?: number;
   onOpenAlerts: () => void;
-  onOpenBlueprint?: () => void;
   isOnline?: boolean;
   isSimulatedOffline?: boolean;
   onToggleSimulateOffline?: () => void;
@@ -67,229 +63,338 @@ export const Navbar: React.FC<NavbarProps> = ({
   upcomingHandoversCount,
   wishlistCount = 0,
   onOpenWishlist,
+  chatsCount = 0,
+  onOpenYourChats,
   alertsCount = 0,
   onOpenAlerts,
-  onOpenBlueprint,
   isOnline = true,
   isSimulatedOffline = false,
   onToggleSimulateOffline,
-  onShowToast,
 }) => {
   const { isDark, toggleTheme } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close profile menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header
       className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors duration-200 ${
         isDark
-          ? "bg-slate-950/95 border-indigo-500/40 shadow-xl shadow-black/40"
+          ? "bg-[#0B0F19]/95 border-slate-800/80 shadow-lg shadow-black/30"
           : "bg-white/95 border-slate-200/90 shadow-xs"
       }`}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-        <div className="flex items-center justify-between h-16 gap-3">
-          {/* Brand Logo & College Marker */}
-          <div className="flex items-center gap-3 shrink-0">
+      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-1.5 sm:gap-3 w-full">
+          {/* ================= LEFT: Brand Logo & Title ================= */}
+          <div className="flex items-center gap-2.5 shrink-0">
             <div
               onClick={onOpenPBLInfo}
-              className="flex items-center gap-2.5 cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group"
+              title="PVG's COET Campus Resale & Exchange • Click for PBL Info (Shortcut: P)"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex items-center justify-center font-black text-lg shadow-md group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black shadow-sm group-hover:scale-105 transition-transform duration-200 shrink-0">
                 <Building2 className="w-5 h-5" />
               </div>
-              <div className="hidden sm:block">
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-base font-extrabold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
+
+              <div>
+                <div className="flex items-center gap-1 leading-none">
+                  <span
+                    className={`text-sm sm:text-base font-extrabold tracking-tight ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     Campus Resale
                   </span>
-                  <span className="text-xs font-bold text-purple-500">&</span>
-                  <span className={`text-base font-extrabold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
+                  <span className="text-xs font-bold text-indigo-500">&</span>
+                  <span
+                    className={`text-sm sm:text-base font-extrabold tracking-tight ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     Exchange
                   </span>
                 </div>
-                <div className={`flex items-center gap-1 text-[10px] font-medium -mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                  <span>PVG's COET Marketplace</span>
-                  <span>•</span>
-                  <span className="text-purple-600 dark:text-indigo-400 font-bold">PBL 2026</span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span
+                    className={`text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0.2 rounded border ${
+                      isDark
+                        ? "bg-slate-900 text-indigo-300 border-indigo-500/30"
+                        : "bg-indigo-50 text-indigo-700 border-indigo-200/80"
+                    }`}
+                  >
+                    PVG's COET
+                  </span>
+                  <span
+                    className={`hidden lg:inline text-[10px] font-medium ${
+                      isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
+                    PBL 2026
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Action Icons & User Info */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* AI Inspector button */}
+          {/* ================= CENTER / MIDDLE: Evenly Spaced Header Actions ================= */}
+          <nav
+            aria-label="Campus Navigation"
+            className="flex-1 flex items-center justify-center px-1 sm:px-2 md:px-4 max-w-2xl mx-auto"
+          >
+            <div className="flex items-center justify-evenly w-full gap-1 sm:gap-2">
+              {/* 1. Free Topper Notes Vault */}
+              <motion.button
+                id="navbar-topper-notes-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onOpenTopperNotes}
+                aria-keyshortcuts="T"
+                title="Free Topper Notes Vault (Shortcut: T)"
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+                  isDark
+                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                    : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="hidden sm:inline">Topper Vault</span>
+                <span className="inline sm:hidden">Vault</span>
+                <span
+                  className={`hidden md:inline px-1 py-0.2 rounded text-[9px] font-black uppercase tracking-wider ${
+                    isDark
+                      ? "bg-emerald-500/25 text-emerald-300"
+                      : "bg-emerald-200/80 text-emerald-800"
+                  }`}
+                >
+                  Free
+                </span>
+              </motion.button>
+
+              {/* 2. AI Inspector Button */}
+              <motion.button
+                id="navbar-ai-inspector-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onOpenAIInspector}
+                aria-keyshortcuts="I"
+                title="Inspect item condition with Gemini AI (Shortcut: I)"
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                  isDark
+                    ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                    : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                <span className="hidden sm:inline">AI Inspector</span>
+                <span className="inline sm:hidden">AI Scan</span>
+              </motion.button>
+
+              {/* 3. Handovers Button (Separate Dedicated Button) */}
+              <motion.button
+                id="navbar-handovers-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onOpenHandovers}
+                aria-keyshortcuts="H"
+                title={`Campus Handover Schedule & Google Calendar Sync (Shortcut: H)${
+                  upcomingHandoversCount > 0 ? ` • ${upcomingHandoversCount} scheduled` : ""
+                }`}
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                  upcomingHandoversCount > 0
+                    ? isDark
+                      ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
+                      : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
+                    : isDark
+                    ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                    : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                }`}
+              >
+                <CalendarIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <span>Handovers</span>
+                {upcomingHandoversCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-white font-black text-[10px] shadow-2xs">
+                    {upcomingHandoversCount}
+                  </span>
+                )}
+              </motion.button>
+
+              {/* 4. PBL Report Button (Separate Dedicated Button) */}
+              <motion.button
+                id="navbar-pbl-report-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onOpenPBLInfo}
+                aria-keyshortcuts="P"
+                title="PVG's COET Project Based Learning Report & System Specs (Shortcut: P)"
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                  isDark
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                    : "bg-purple-50 hover:bg-purple-100/80 text-purple-700 border-purple-200 shadow-2xs"
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                <span className="hidden sm:inline">PBL Report</span>
+                <span className="inline sm:hidden">PBL</span>
+              </motion.button>
+            </div>
+          </nav>
+
+          {/* ================= RIGHT: User Actions, Primary CTA & Profile ================= */}
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
+            {/* Your Chats Button */}
             <button
-              id="navbar-ai-inspector-btn"
-              onClick={onOpenAIInspector}
-              aria-keyshortcuts="I"
-              title="Inspect item condition with Gemini AI (Shortcut: I)"
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-2xs cursor-pointer ${
+              id="navbar-your-chats-button"
+              onClick={onOpenYourChats}
+              aria-keyshortcuts="C"
+              title={`Your Chats with Sellers (Shortcut: C)${
+                chatsCount > 0 ? ` • ${chatsCount} active` : ""
+              }`}
+              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isDark
-                  ? "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30"
-                  : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 shadow-xs"
+                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-indigo-600 border-slate-200 shadow-2xs"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-500 dark:text-indigo-400" />
-              <span className="hidden md:inline">AI Inspector</span>
-              <kbd
-                className={`hidden lg:inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
-                  isDark
-                    ? "bg-indigo-950/60 text-indigo-300 border-indigo-700/50"
-                    : "bg-purple-100 text-purple-700 border-purple-200"
+              <MessageSquare className="w-4 h-4 text-indigo-500 shrink-0" />
+              <span className="inline text-xs font-medium">Chats</span>
+              {chatsCount > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center shadow-2xs">
+                  {chatsCount}
+                </span>
+              )}
+            </button>
+
+            {/* Wishlist Button */}
+            <button
+              id="navbar-wishlist-button"
+              onClick={onOpenWishlist}
+              aria-keyshortcuts="W"
+              title={`Saved Wishlist (Shortcut: W)${
+                wishlistCount > 0 ? ` • ${wishlistCount} items` : ""
+              }`}
+              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-rose-600 border-slate-200 shadow-2xs"
+              }`}
+            >
+              <Heart
+                className={`w-4 h-4 shrink-0 ${
+                  wishlistCount > 0
+                    ? "fill-rose-500 text-rose-500"
+                    : "text-rose-500 dark:text-rose-400"
                 }`}
-                title="Shortcut: I"
-              >
-                I
-              </kbd>
+              />
+              <span className="inline text-xs font-medium">Saved</span>
+              {wishlistCount > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center shadow-2xs">
+                  {wishlistCount}
+                </span>
+              )}
             </button>
 
             {/* Notify Me / Alerts Button */}
             <button
               id="navbar-alerts-button"
               onClick={onOpenAlerts}
-              title="Set 'Notify Me' alerts for calculators, books, and keywords"
-              className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-2xs ${
+              title={`Keyword & Item Alerts${
+                alertsCount > 0 ? ` • ${alertsCount} active` : ""
+              }`}
+              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isDark
-                  ? "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
-                  : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 shadow-xs"
+                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-amber-600 border-slate-200 shadow-2xs"
               }`}
             >
               <Bell
-                className={`w-3.5 h-3.5 ${
+                className={`w-4 h-4 shrink-0 ${
                   alertsCount > 0
-                    ? "text-amber-500 fill-amber-500"
-                    : "text-amber-500"
+                    ? "fill-amber-500 text-amber-500"
+                    : "text-amber-500 dark:text-amber-400"
                 }`}
               />
-              <span className="hidden md:inline">Notify Me</span>
+              <span className="inline text-xs font-medium">Alerts</span>
               {alertsCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold flex items-center justify-center">
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-2xs">
                   {alertsCount}
                 </span>
               )}
             </button>
 
-            {/* Wishlist Button */}
-            <motion.button
-              id="navbar-wishlist-button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onOpenWishlist}
-              aria-keyshortcuts="W"
-              title="View Saved Wishlist (Shortcut: W)"
-              className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-2xs cursor-pointer ${
-                isDark
-                  ? "bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30"
-                  : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-xs"
+            {/* Network Status Dot / Badge (Unclickable indicator reflecting true internet connectivity) */}
+            <div
+              id="navbar-network-status-indicator"
+              role="status"
+              aria-live="polite"
+              title={
+                isOnline
+                  ? "Network Status: Connected to Internet"
+                  : "Network Status: Offline (No Internet Connection)"
+              }
+              className={`h-9 px-2.5 rounded-xl border transition-all flex items-center justify-center cursor-default select-none pointer-events-none ${
+                isOnline
+                  ? isDark
+                    ? "bg-slate-900/80 border-slate-800 text-slate-300"
+                    : "bg-slate-50 border-slate-200 text-slate-700 shadow-2xs"
+                  : "bg-rose-500/15 border-rose-500/40 text-rose-500 dark:text-rose-400 animate-pulse"
               }`}
             >
-              <Heart
-                className={`w-3.5 h-3.5 ${
-                  wishlistCount > 0
-                    ? "fill-rose-500 text-rose-500"
-                    : "text-rose-500"
-                }`}
-              />
-              <span className="hidden md:inline">Wishlist</span>
-              {wishlistCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center">
-                  {wishlistCount}
-                </span>
+              {isOnline ? (
+                <div className="flex items-center gap-1.5" title="Online">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hidden xl:inline">
+                    Online
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-500 dark:text-rose-400">
+                  <WifiOff className="w-3.5 h-3.5 shrink-0" />
+                  <span className="inline">Offline</span>
+                </div>
               )}
-              <kbd
-                className={`hidden sm:inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-mono font-bold rounded border shadow-2xs select-none ${
-                  isDark
-                    ? "bg-rose-950/60 text-rose-300 border-rose-700/50"
-                    : "bg-rose-100 text-rose-700 border-rose-200"
-                }`}
-                title="Shortcut: W"
-              >
-                W
-              </kbd>
-            </motion.button>
+            </div>
 
-            {/* Google Calendar Handover link */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onOpenHandovers}
-              title="View Scheduled Campus Handovers"
-              className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-2xs ${
+            {/* Theme Toggle Button (Clean Sun/Moon) */}
+            <button
+              onClick={toggleTheme}
+              aria-label={`Switch to ${isDark ? "Light" : "Dark"} mode`}
+              title={`Switch to ${isDark ? "Light" : "Dark"} mode (Shortcut: D)`}
+              className={`h-9 w-9 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
                 isDark
-                  ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
-                  : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-xs"
+                  ? "bg-slate-900/80 border-slate-800 text-amber-400 hover:bg-slate-800 hover:text-amber-300"
+                  : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-indigo-600"
               }`}
             >
-              <CalendarIcon className="w-3.5 h-3.5 text-blue-500" />
-              <span className="hidden lg:inline">Handovers</span>
-              {upcomingHandoversCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
-                  {upcomingHandoversCount}
-                </span>
+              {isDark ? (
+                <Sun className="w-4 h-4 shrink-0" />
+              ) : (
+                <Moon className="w-4 h-4 shrink-0" />
               )}
-            </motion.button>
+            </button>
 
-            {/* Campus Blueprint Map Button */}
-            {onOpenBlueprint && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onOpenBlueprint}
-                title="Interactive Campus Handover Blueprint & Map"
-                className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-2xs cursor-pointer ${
-                  isDark
-                    ? "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30"
-                    : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 shadow-xs"
-                }`}
-              >
-                <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-indigo-400" />
-                <span className="hidden xl:inline">Campus Map</span>
-              </motion.button>
-            )}
-
-            {/* Network Status Indicator */}
-            {onToggleSimulateOffline && (
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                id="navbar-network-status-indicator"
-                onClick={onToggleSimulateOffline}
-                title={
-                  isOnline
-                    ? "Network: Online (window.navigator.onLine) • Click to simulate offline mode"
-                    : "Network: Offline • Click to resume online mode"
-                }
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-colors shadow-2xs select-none ${
-                  isOnline
-                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
-                    : "bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/25"
-                }`}
-              >
-                <span className="flex h-2 w-2 relative">
-                  {!isOnline && (
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  )}
-                  <span
-                    className={`relative inline-flex rounded-full h-2 w-2 ${
-                      isOnline ? "bg-emerald-400" : "bg-rose-400"
-                    }`}
-                  ></span>
-                </span>
-                {isOnline ? (
-                  <span className="hidden xl:inline">Online</span>
-                ) : (
-                  <span className="inline font-extrabold text-rose-300">Offline</span>
-                )}
-              </motion.button>
-            )}
-
-            {/* Post Item Button */}
+            {/* Primary Action: + Post Item CTA */}
             <motion.button
               id="navbar-post-item-btn"
-              whileHover={isOnline ? { scale: 1.05 } : {}}
-              whileTap={isOnline ? { scale: 0.95 } : {}}
+              whileHover={isOnline ? { scale: 1.02 } : {}}
+              whileTap={isOnline ? { scale: 0.98 } : {}}
               onClick={() => {
                 if (!isOnline) return;
                 onOpenCreateModal();
@@ -298,291 +403,271 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-keyshortcuts="N"
               title={
                 !isOnline
-                  ? "Offline mode: Creating listings is disabled while disconnected"
-                  : "Create Listing / Post Item (Shortcut: N)"
+                  ? "Listing creation is disabled while offline"
+                  : "Post an item for sale / swap (Shortcut: N)"
               }
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all select-none ${
+              className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-bold transition-all select-none shadow-sm whitespace-nowrap shrink-0 ${
                 !isOnline
-                  ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none"
-                  : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md hover:shadow-indigo-500/20 cursor-pointer"
+                  ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white cursor-pointer hover:shadow-indigo-500/20"
               }`}
             >
-              {!isOnline ? (
-                <WifiOff className="w-4 h-4 text-slate-500 shrink-0" />
-              ) : (
-                <PlusCircle className="w-4 h-4 shrink-0" />
-              )}
-              <span className="hidden sm:inline">
-                {!isOnline ? "Post Disabled (Offline)" : "Post Item"}
-              </span>
-              <span className="sm:hidden">
-                {!isOnline ? "Offline" : "Post"}
-              </span>
-              <kbd
-                className="hidden sm:inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-mono font-bold rounded bg-white/20 text-white border border-white/30 shadow-2xs select-none"
-                title="Shortcut: N"
-              >
+              <PlusCircle className="w-4 h-4 shrink-0" />
+              <span className="font-bold">Post Item</span>
+              <kbd className="hidden lg:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-mono font-bold rounded bg-white/20 text-white select-none">
                 N
               </kbd>
             </motion.button>
 
-            {/* Free Topper Notes Vault Button */}
-            <motion.button
-              id="navbar-topper-notes-btn"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onOpenTopperNotes}
-              aria-keyshortcuts="T"
-              title="Free Topper Notes Vault (Shortcut: T)"
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm cursor-pointer select-none ${
-                isDark
-                  ? "bg-gradient-to-r from-emerald-600/25 via-teal-600/20 to-emerald-600/25 hover:from-emerald-600/35 hover:to-teal-600/30 border-emerald-500/40 text-emerald-300 shadow-emerald-950/20"
-                  : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border-emerald-600 text-white shadow-emerald-600/25"
-              }`}
-            >
-              <GraduationCap className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-300" : "text-white"}`} />
-              <span className="hidden md:inline">Topper Notes</span>
-              <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                  isDark
-                    ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/30"
-                    : "bg-white/25 text-white border border-white/30"
-                }`}
-              >
-                Free
-              </span>
-              <kbd
-                className={`hidden lg:inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
-                  isDark
-                    ? "bg-emerald-950/60 text-emerald-300 border-emerald-700/50"
-                    : "bg-white/25 text-white border border-white/30"
-                }`}
-                title="Shortcut: T"
-              >
-                T
-              </kbd>
-            </motion.button>
-
-            {/* Light / Dark Mode Selector */}
-            <div className="hidden sm:inline-flex">
-              <ThemeSelector variant="segmented" />
-            </div>
-            <div className="sm:hidden inline-flex">
-              <ThemeSelector variant="button" />
-            </div>
-
-            {/* Compact Group for PBL Info and User Profile */}
-            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 mr-1 sm:mr-2">
-              {/* PBL Info Button */}
-              <button
-                onClick={onOpenPBLInfo}
-                title="PBL Project Scope & Team Info"
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${
-                  isDark
-                    ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-              </button>
-
-              {/* Auth / Profile Area */}
-              {currentUser ? (
-                <div className="relative shrink-0">
-                  <button
-                    onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    aria-label="User Profile and Account Menu"
-                    className={`flex items-center gap-1 p-0.5 rounded-full transition-colors cursor-pointer shrink-0 ${
-                      isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"
+            {/* Profile Menu or Sign In */}
+            {currentUser ? (
+              <div className="relative shrink-0 flex items-center h-9" ref={profileMenuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  aria-label="User Account Menu"
+                  className={`flex items-center gap-1 p-0.5 rounded-full transition-colors cursor-pointer shrink-0 ${
+                    isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-full p-0.5 border-2 border-indigo-500/80 bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                    {currentUser.photoURL ? (
+                      <img
+                        src={currentUser.photoURL}
+                        alt={currentUser.displayName || "User"}
+                        className="w-full h-full rounded-full object-cover shrink-0 block"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-indigo-600 text-white font-black flex items-center justify-center text-xs shrink-0">
+                        {currentUser.displayName?.charAt(0) || "S"}
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown
+                    className={`w-3 h-3 shrink-0 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
                     }`}
-                  >
-                    <div className="w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full p-0.5 border-2 border-indigo-500/70 bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 aspect-square overflow-hidden shadow-xs">
-                      {currentUser.photoURL ? (
-                        <img
-                          src={currentUser.photoURL}
-                          alt={currentUser.displayName || "User"}
-                          className="w-full h-full rounded-full object-cover shrink-0 aspect-square block"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-full h-full rounded-full bg-indigo-600 text-white font-black flex items-center justify-center text-xs shrink-0 aspect-square">
-                          {currentUser.displayName?.charAt(0) || "S"}
-                        </div>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 shrink-0 ${
-                        isDark ? "text-slate-400" : "text-slate-600"
-                      }`}
-                    />
-                  </button>
+                  />
+                </button>
 
-                  <AnimatePresence>
-                    {showProfileMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -6 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-56 rounded-2xl shadow-2xl border border-slate-700 py-2 z-50 text-xs backdrop-blur-xl bg-slate-800/95 text-slate-200"
-                      >
+                <AnimatePresence>
+                  {showProfileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                      transition={{ duration: 0.15 }}
+                      className={`absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl border py-2 z-50 text-xs backdrop-blur-xl ${
+                        isDark
+                          ? "bg-[#0B0F19] border-slate-800 text-slate-200 shadow-black/80"
+                          : "bg-white border-slate-200 text-slate-700 shadow-slate-200/80"
+                      }`}
+                    >
+                      {/* User Header */}
                       <div
-                        className="px-4 py-2 border-b border-slate-700/80"
+                        className={`px-4 py-2.5 border-b ${
+                          isDark ? "border-slate-800" : "border-slate-200/80"
+                        }`}
                       >
                         <div
-                          className="font-bold flex items-center gap-1 text-white"
+                          className={`font-bold flex items-center gap-1.5 ${
+                            isDark ? "text-white" : "text-slate-900"
+                          }`}
                         >
-                          {currentUser.displayName || "Student User"}
-                          <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />
+                          <span>{currentUser.displayName || "Student User"}</span>
+                          <BadgeCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                         </div>
                         <span
-                          className="text-[11px] truncate block font-mono text-slate-400"
+                          className={`text-[11px] truncate block font-mono mt-0.5 ${
+                            isDark ? "text-slate-400" : "text-slate-500"
+                          }`}
                         >
                           {currentUser.email}
                         </span>
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        <div className="mt-1.5">
                           <span
-                            className="inline-block px-2 py-0.5 rounded-md font-semibold text-[10px] border bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                              isDark
+                                ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/60"
+                                : "bg-emerald-500/15 text-emerald-700 border-emerald-500/20"
+                            }`}
                           >
-                            ✓ @pvgcoet.ac.in Verified
+                            ✓ Verified Student
                           </span>
                         </div>
 
-                        {/* Student Milestones Badges */}
-                        <div className="mt-2 pt-2 border-t border-slate-700/60">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
-                            <Trophy className="w-3 h-3 text-amber-400" />
-                            <span>Campus Milestones</span>
+                        {/* Campus Milestones Badges */}
+                        <div
+                          className={`mt-2.5 pt-2 border-t ${
+                            isDark ? "border-slate-800/80" : "border-slate-200/60"
+                          }`}
+                        >
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                            <Trophy className="w-3 h-3 text-amber-500" />
+                            <span>Milestones</span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            <span
-                              title="Top Seller: 3+ completed campus handovers"
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 select-none"
-                            >
-                              <Trophy className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                              <Trophy className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
                               Top Seller
                             </span>
-                            <span
-                              title="Quick Responder: Average response under 15 minutes"
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 select-none"
-                            >
-                              <Zap className="w-2.5 h-2.5 fill-sky-400 text-sky-400" />
-                              Quick Responder
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/25">
+                              <Zap className="w-2.5 h-2.5 fill-sky-500 text-sky-500" />
+                              Fast Reply
                             </span>
-                            <span
-                              title="Eco-Friendly Exchanger: Active in direct student swaps & zero-waste circular trade"
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 select-none"
-                            >
-                              <Leaf className="w-2.5 h-2.5 fill-emerald-400 text-emerald-400" />
-                              Eco-Friendly
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
+                              <Leaf className="w-2.5 h-2.5 fill-emerald-500 text-emerald-500" />
+                              Circular
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Dark/Light Mode toggle option in dropdown */}
-                      <ThemeSelector variant="dropdown-item" />
-
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenAlerts();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Bell className="w-3.5 h-3.5 text-amber-400" />
-                          'Notify Me' Alerts
-                        </span>
-                        {alertsCount > 0 && (
-                          <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
-                            {alertsCount}
+                      {/* Dropdown Menu Items */}
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenYourChats();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-medium">
+                            <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                            Your Chats
                           </span>
-                        )}
-                      </button>
+                          {chatsCount > 0 && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-bold text-[10px]">
+                              {chatsCount}
+                            </span>
+                          )}
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenWishlist();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Heart className="w-3.5 h-3.5 text-rose-400" />
-                          My Saved Wishlist
-                        </span>
-                        {wishlistCount > 0 && (
-                          <span className="px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">
-                            {wishlistCount}
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenWishlist();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-medium">
+                            <Heart className="w-3.5 h-3.5 text-rose-500" />
+                            Saved Wishlist
                           </span>
-                        )}
-                      </button>
+                          {wishlistCount > 0 && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-300 font-bold text-[10px]">
+                              {wishlistCount}
+                            </span>
+                          )}
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenHandovers();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                      >
-                        <CalendarIcon className="w-3.5 h-3.5 text-blue-400" />
-                        Calendar Handovers
-                      </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenAlerts();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-medium">
+                            <Bell className="w-3.5 h-3.5 text-amber-500" />
+                            Notify Me Alerts
+                          </span>
+                          {alertsCount > 0 && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-300 font-bold text-[10px]">
+                              {alertsCount}
+                            </span>
+                          )}
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenTopperNotes();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                      >
-                        <span className="flex items-center gap-2">
-                          <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                          Topper Notes Vault
-                        </span>
-                        <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
-                          Free
-                        </span>
-                      </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenHandovers();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center gap-2 font-medium transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <CalendarIcon className="w-3.5 h-3.5 text-blue-500" />
+                          <span>Handover Schedule</span>
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenPBLInfo();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer hover:bg-slate-700/60 text-slate-300 hover:text-white"
-                      >
-                        <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                        PBL Project Report
-                      </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenTopperNotes();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-medium">
+                            <GraduationCap className="w-3.5 h-3.5 text-emerald-500" />
+                            Topper Notes Vault
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold text-[10px]">
+                            Free
+                          </span>
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onLogout();
-                        }}
-                        className="w-full text-left px-4 py-2 flex items-center gap-2 font-semibold border-t border-slate-700/80 hover:bg-rose-500/20 text-rose-300 transition-colors cursor-pointer"
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenPBLInfo();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center gap-2 font-medium transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <BookOpen className="w-3.5 h-3.5 text-purple-500" />
+                          <span>PBL Project Info</span>
+                        </button>
+                      </div>
+
+                      <div
+                        className={`pt-1 border-t ${
+                          isDark ? "border-slate-800" : "border-slate-200/80"
+                        }`}
                       >
-                        <LogOut className="w-3.5 h-3.5" />
-                        Sign Out
-                      </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onLogout();
+                          }}
+                          className={`w-full text-left px-4 py-2 flex items-center gap-2 font-semibold text-rose-600 dark:text-rose-400 transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-rose-500/20" : "hover:bg-rose-50"
+                          }`}
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2 h-9 shrink-0">
                 <button
                   onClick={onLogin}
                   title="Sign in with your Google account"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shadow-md transition-all cursor-pointer"
+                  className={`h-9 flex items-center gap-2 px-3 rounded-xl border text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                    isDark
+                      ? "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-750"
+                      : "bg-white hover:bg-slate-50 text-slate-800 border-slate-300"
+                  }`}
                 >
                   <svg
                     version="1.1"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 48 48"
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5 shrink-0"
                   >
                     <path
                       fill="#EA4335"
@@ -601,21 +686,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">Sign In with Google</span>
-                  <span className="sm:hidden">Sign In</span>
+                  <span className="inline font-semibold">Sign In</span>
                 </button>
                 {onDemoLogin && (
                   <button
                     onClick={onDemoLogin}
                     title="1-Click verified student account for testing without Google popup"
-                    className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-400 text-xs font-semibold transition-all cursor-pointer"
+                    className="h-9 inline-flex items-center px-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0"
                   >
-                    <span>Demo Student</span>
+                    <span>Demo</span>
                   </button>
                 )}
               </div>
             )}
-            </div>
           </div>
         </div>
       </div>

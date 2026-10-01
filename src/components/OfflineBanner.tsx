@@ -111,7 +111,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
                   Offline Mode Active
                 </span>
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-black/25 text-amber-200 border border-amber-300/30">
-                  {isSimulatedOffline ? "Simulated Disconnect" : "window.navigator.onLine: false"}
+                  No Internet Connection
                 </span>
               </div>
               <p className="text-xs text-amber-100/90 leading-normal">
@@ -138,7 +138,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
               <span>Data Protection</span>
             </div>
 
-            {onRetry && !isSimulatedOffline && (
+            {onRetry && (
               <button
                 type="button"
                 onClick={onRetry}
@@ -149,17 +149,6 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
                 <span>Retry Connection</span>
               </button>
             )}
-
-            <button
-              id="toggle-offline-simulation-btn"
-              type="button"
-              onClick={onToggleSimulateOffline}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-slate-900 hover:bg-amber-50 text-xs font-bold shadow-sm transition-all cursor-pointer select-none"
-              title={isSimulatedOffline ? "Switch back to online mode" : "Simulate reconnecting online"}
-            >
-              <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{isSimulatedOffline ? "Resume Online Mode" : "Simulate Online"}</span>
-            </button>
           </div>
         </div>
       </div>

@@ -58,7 +58,6 @@ interface ListingDetailModalProps {
   isOnline?: boolean;
   onOpenPassport?: (listing: Listing) => void;
   onOpenBarter?: (listing: Listing) => void;
-  onOpenBlueprint?: (locationName?: string) => void;
 }
 
 export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
@@ -80,16 +79,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   isOnline = true,
   onOpenPassport,
   onOpenBarter,
-  onOpenBlueprint,
 }) => {
   const lastListingRef = React.useRef<Listing | null>(incomingListing);
   if (incomingListing) {
     lastListingRef.current = incomingListing;
   }
   const listing = incomingListing || lastListingRef.current;
-  if (!listing) return null;
 
-  const isSeller = currentUserId === listing.sellerId;
+  // ALL HOOKS MUST RUN UNCONDITIONALLY ON EVERY RENDER BEFORE ANY RETURN
   const [isShared, setIsShared] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
 
@@ -103,8 +100,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   const [reportDetails, setReportDetails] = useState<string>("");
   const [isReportSubmitted, setIsReportSubmitted] = useState<boolean>(false);
   const [reportSuccessToast, setReportSuccessToast] = useState<string | null>(null);
-  const isReported = Boolean(listing.isReported || isReportSubmitted);
-  const expiryInfo = formatExpiryInfo(listing);
 
   // Review submission state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -122,12 +117,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   );
   const [yearInput, setYearInput] = useState<string>("2nd Year");
   const [handoverLocationInput, setHandoverLocationInput] = useState<string>(
-    listing.handoverDetails?.location || listing.locationPreference || "Central Library Quad"
+    listing?.handoverDetails?.location || listing?.locationPreference || "Central Library Quad"
   );
   const [conditionMatchedInput, setConditionMatchedInput] = useState<boolean>(true);
   const [commentInput, setCommentInput] = useState<string>("");
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
   const [reviewSuccessMessage, setReviewSuccessMessage] = useState<string | null>(null);
+
+  // Safe early return ONLY after all hooks have executed unconditionally
+  if (!listing) return null;
+
+  const isSeller = currentUserId === listing.sellerId;
+  const isReported = Boolean(listing.isReported || isReportSubmitted);
+  const expiryInfo = formatExpiryInfo(listing);
 
   const reviewsList = listing.reviews || [];
   const totalReviewsCount = reviewsList.length || listing.totalReviews || 0;
@@ -534,12 +536,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               </div>
 
               <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenBlueprint?.(listing.locationPreference);
-                }}
-                className="absolute bottom-3 left-3 bg-black/75 hover:bg-black/90 backdrop-blur-xs text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 cursor-pointer border border-white/10 hover:border-indigo-400/50 transition-colors shadow-md"
-                title={`View ${listing.locationPreference || "Campus Handover"} on Blueprint Map`}
+                className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-xs text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 border border-white/10 shadow-md"
+                title={`Preferred handover spot: ${listing.locationPreference || "Campus Handover"}`}
               >
                 <MapPin className="w-3.5 h-3.5 text-red-400" />
                 <span>{listing.locationPreference || "Campus Handover"}</span>

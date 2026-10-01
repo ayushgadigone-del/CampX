@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
@@ -32,6 +32,8 @@ import {
   X,
   ArrowUpNarrowWide,
   ArrowDownWideNarrow,
+  MessageSquare,
+  History,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import {
@@ -53,9 +55,18 @@ import {
   AlertSubscription,
   AlertMatchEvent,
   Review,
+  Conversation,
 } from "./types";
 import { INITIAL_SEED_LISTINGS } from "./data/seedListings";
-import { db, initAuth, googleSignIn, demoStudentSignIn, logout } from "./lib/firebase";
+import {
+  db,
+  initAuth,
+  googleSignIn,
+  demoStudentSignIn,
+  logout,
+  handleFirestoreError,
+  OperationType,
+} from "./lib/firebase";
 import { GoogleCalendarEventResponse } from "./lib/calendar";
 
 import { Navbar } from "./components/Navbar";
@@ -71,6 +82,15 @@ import { ChatDrawer } from "./components/ChatDrawer";
 import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
 import { PBLProjectInfoModal } from "./components/PBLProjectInfoModal";
 import { WishlistModal } from "./components/WishlistModal";
+import { YourChatsModal } from "./components/YourChatsModal";
+import { YourChatsSection } from "./components/YourChatsSection";
+import {
+  getStoredChats,
+  deleteStoredChat,
+  clearAllStoredChats,
+  recordChatMessage,
+  CHATS_UPDATED_EVENT,
+} from "./utils/chatStorage";
 import { TopperNotesModal } from "./components/TopperNotesModal";
 import { TopperNote } from "./types";
 import {
@@ -105,9 +125,10 @@ import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
 import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
 import { CampusLiveTicker } from "./components/CampusLiveTicker";
-import { CampusHandoverBlueprintModal } from "./components/CampusHandoverBlueprintModal";
 import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
 import { StudentPassportModal } from "./components/StudentPassportModal";
+import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
+import { calculateSmartSortScore } from "./utils/smartSort";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
   "All",
@@ -158,7 +179,7 @@ export default function App() {
   const [selectedType, setSelectedType] = useState<ListingType | "all">("all");
   const [selectedCondition, setSelectedCondition] = useState<ItemCondition | "all">("all");
   const [includeSoldItems, setIncludeSoldItems] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<"newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("newest");
+  const [sortBy, setSortBy] = useState<"smart_sort" | "newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("smart_sort");
   const [layoutMode, setLayoutMode] = useState<"grid" | "detailed">("grid");
   const [isFullScreenMode, setIsFullScreenMode] = useState<boolean>(false);
 
@@ -203,6 +224,99 @@ export default function App() {
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
   const [wishlistOnlyFilter, setWishlistOnlyFilter] = useState(false);
 
+  // Success Notification Toast
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  }, []);
+
+  // Recently Viewed state & persistence (tracks last 5 clicked listings)
+  const [recentlyViewed, setRecentlyViewed] = useState<Listing[]>(() => {
+    try {
+      const saved = localStorage.getItem("campus_marketplace_recently_viewed");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Track clicked listing into Recently Viewed (max 5 items, newest at index 0)
+  const trackRecentlyViewed = useCallback((item: Listing) => {
+    setRecentlyViewed((prev) => {
+      const filtered = prev.filter((i) => i.id !== item.id);
+      const updated = [item, ...filtered].slice(0, 5);
+      try {
+        localStorage.setItem(
+          "campus_marketplace_recently_viewed",
+          JSON.stringify(updated)
+        );
+      } catch (e) {
+        console.warn("Could not save recently viewed item to localStorage:", e);
+      }
+      return updated;
+    });
+  }, []);
+
+  const handleClearRecentlyViewed = useCallback(() => {
+    setRecentlyViewed([]);
+    try {
+      localStorage.removeItem("campus_marketplace_recently_viewed");
+      showToast("🗑️ Recently viewed history cleared");
+    } catch (e) {
+      console.warn("Could not clear recently viewed items:", e);
+    }
+  }, [showToast]);
+
+  const handleRemoveRecentlyViewedItem = useCallback((itemId: string) => {
+    setRecentlyViewed((prev) => {
+      const updated = prev.filter((i) => i.id !== itemId);
+      try {
+        localStorage.setItem(
+          "campus_marketplace_recently_viewed",
+          JSON.stringify(updated)
+        );
+      } catch (e) {
+        console.warn("Could not update recently viewed items:", e);
+      }
+      return updated;
+    });
+  }, []);
+
+  // Sync recently viewed items with updated live data from listings
+  useEffect(() => {
+    if (listings.length === 0) return;
+    setRecentlyViewed((prev) => {
+      let hasUpdate = false;
+      const synced = prev.map((item) => {
+        const live = listings.find((l) => l.id === item.id);
+        if (
+          live &&
+          (live.price !== item.price ||
+            live.status !== item.status ||
+            live.title !== item.title ||
+            live.imageUrl !== item.imageUrl)
+        ) {
+          hasUpdate = true;
+          return { ...item, ...live };
+        }
+        return item;
+      });
+      if (hasUpdate) {
+        try {
+          localStorage.setItem(
+            "campus_marketplace_recently_viewed",
+            JSON.stringify(synced)
+          );
+        } catch (e) {
+          console.warn("Could not sync recently viewed storage:", e);
+        }
+        return synced;
+      }
+      return prev;
+    });
+  }, [listings]);
+
   const [isAIInspectorOpen, setIsAIInspectorOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [prefilledInspection, setPrefilledInspection] = useState<AIInspectionResult | null>(null);
@@ -218,6 +332,23 @@ export default function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatListing, setChatListing] = useState<Listing | null>(null);
   const [chatInitialMessage, setChatInitialMessage] = useState<string>("");
+
+  // "Your Chats" state & reactive persistence
+  const [isYourChatsModalOpen, setIsYourChatsModalOpen] = useState(false);
+  const [storedChats, setStoredChats] = useState<Conversation[]>(() => getStoredChats());
+
+  // Listen for chat storage updates across components and tabs
+  useEffect(() => {
+    const handleChatUpdate = () => {
+      setStoredChats(getStoredChats());
+    };
+    window.addEventListener(CHATS_UPDATED_EVENT, handleChatUpdate);
+    window.addEventListener("storage", handleChatUpdate);
+    return () => {
+      window.removeEventListener(CHATS_UPDATED_EVENT, handleChatUpdate);
+      window.removeEventListener("storage", handleChatUpdate);
+    };
+  }, []);
 
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
   const [isPBLModalOpen, setIsPBLModalOpen] = useState(false);
@@ -239,21 +370,11 @@ export default function App() {
   const { isOnline, isSimulatedOffline, toggleSimulateOffline, reconnect } =
     useOnlineStatus();
 
-  // Success Notification Toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   // Visual Innovation States
-  const [isBlueprintModalOpen, setIsBlueprintModalOpen] = useState(false);
-  const [blueprintPreselectedLocation, setBlueprintPreselectedLocation] = useState<string | undefined>(undefined);
   const [isBarterDrawerOpen, setIsBarterDrawerOpen] = useState(false);
   const [barterListing, setBarterListing] = useState<Listing | null>(null);
   const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
   const [passportListing, setPassportListing] = useState<Listing | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4500);
-  };
 
   // 1. Initialize Auth
   useEffect(() => {
@@ -291,24 +412,20 @@ export default function App() {
   useEffect(() => {
     let unsubscribe: () => void = () => {};
 
-    const syncListings = async () => {
+    const syncListings = () => {
       try {
         const listingsCol = collection(db, "listings");
 
-        // Check if initial seeding is needed
-        const snapshot = await getDocs(listingsCol);
-        if (snapshot.empty) {
-          // Seed the initial representative items
-          for (const item of INITIAL_SEED_LISTINGS) {
-            const docRef = doc(listingsCol, item.id);
-            await setDoc(docRef, item);
-          }
-        }
-
-        // Live real-time sync with onSnapshot
+        // Live real-time sync with onSnapshot (resilient to offline / reconnect)
         unsubscribe = onSnapshot(
           listingsCol,
           (querySnapshot) => {
+            if (querySnapshot.empty) {
+              setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
+              setIsLoadingListings(false);
+              return;
+            }
+
             const fetched: Listing[] = [];
             querySnapshot.forEach((docSnap) => {
               const data = docSnap.data() as any;
@@ -322,6 +439,7 @@ export default function App() {
                 totalReviews: data.totalReviews ?? (data.reviews ? data.reviews.length : seedMatch?.totalReviews || 0),
               });
             });
+
             if (fetched.length > 0) {
               setListings(checkAndMarkInactiveListings(fetched).updatedListings);
             } else {
@@ -344,14 +462,15 @@ export default function App() {
             }
           },
           (err) => {
-            console.warn("Firestore snapshot error, using initial listings:", err);
-            setListings(INITIAL_SEED_LISTINGS);
+            handleFirestoreError(err, OperationType.GET, "listings");
+            console.info("Firestore live listener operating in offline mode, showing local catalog.");
+            setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
             setIsLoadingListings(false);
           }
         );
       } catch (err) {
-        console.warn("Could not connect to Firestore, using offline seed:", err);
-        setListings(INITIAL_SEED_LISTINGS);
+        handleFirestoreError(err, OperationType.GET, "listings");
+        setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
         setIsLoadingListings(false);
       }
     };
@@ -420,12 +539,15 @@ export default function App() {
         updateDoc(docRef, {
           views: increment(1),
         }).catch((err) => {
-          console.warn("Could not sync view increment to Firestore:", err);
+          handleFirestoreError(err, OperationType.UPDATE, `listings/${item.id}`);
         });
       } catch (e) {
-        // Fallback for offline mode
+        handleFirestoreError(e, OperationType.UPDATE, `listings/${item.id}`);
       }
     }
+
+    // Track listing in Recently Viewed (max 5 items, latest clicked at the front)
+    trackRecentlyViewed(updatedItem);
 
     setSelectedListing(updatedItem);
     setIsDetailModalOpen(true);
@@ -496,6 +618,15 @@ export default function App() {
         return true;
       })
       .sort((a, b) => {
+        if (sortBy === "smart_sort") {
+          const scoreA = calculateSmartSortScore(a, listings);
+          const scoreB = calculateSmartSortScore(b, listings);
+          if (scoreB !== scoreA) {
+            return scoreB - scoreA;
+          }
+          // Tie-breaker: Recency
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
         if (sortBy === "views_desc") {
           const viewsA = a.views || 0;
           const viewsB = b.views || 0;
@@ -633,6 +764,32 @@ export default function App() {
     setIsCalendarModalOpen(true);
   };
 
+  const handleOpenChat = (item: Listing, initialMessage?: string) => {
+    if (!isOnline) {
+      showToast("⚠️ Chat is disabled while offline to prevent data loss.");
+      return;
+    }
+    if (initialMessage) {
+      recordChatMessage(
+        item,
+        {
+          id: `msg_init_${Date.now()}`,
+          conversationId: `conv_${item.id}_${currentUser?.uid || "guest"}`,
+          senderId: currentUser?.uid || "current-user",
+          senderName: currentUser?.displayName || "You",
+          senderEmail: currentUser?.email || "student@college.edu.in",
+          text: initialMessage,
+          type: "text",
+          timestamp: Date.now(),
+        },
+        currentUser
+      );
+    }
+    setChatListing(item);
+    setChatInitialMessage(initialMessage || "");
+    setIsChatOpen(true);
+  };
+
   const handleCalendarEventCreated = async (
     event: GoogleCalendarEventResponse,
     location: string,
@@ -666,7 +823,7 @@ export default function App() {
         handoverDetails,
       });
     } catch (e) {
-      console.warn("Updated locally, firestore sync failed:", e);
+      handleFirestoreError(e, OperationType.UPDATE, `listings/${calendarTargetListing.id}`);
     }
 
     showToast("🤝 Handover event scheduled and synced to your Google Calendar!");
@@ -711,10 +868,10 @@ export default function App() {
             totalReviews,
             averageRating,
           }).catch((err) => {
-            console.warn("Could not sync review to Firestore:", err);
+            handleFirestoreError(err, OperationType.UPDATE, `listings/${listingId}`);
           });
         } catch (e) {
-          // offline fallback
+          handleFirestoreError(e, OperationType.UPDATE, `listings/${listingId}`);
         }
 
         return updatedListing;
@@ -885,7 +1042,7 @@ export default function App() {
       const docRef = doc(db, "listings", listingId);
       await updateDoc(docRef, { status: newStatus });
     } catch (e) {
-      console.warn("Status updated locally:", e);
+      handleFirestoreError(e, OperationType.UPDATE, `listings/${listingId}`);
     }
     showToast(`Listing status updated to ${newStatus}.`);
   };
@@ -927,7 +1084,7 @@ export default function App() {
         reportDetails: details,
       });
     } catch (e) {
-      console.warn("Report updated locally:", e);
+      handleFirestoreError(e, OperationType.UPDATE, `listings/${listingId}`);
     }
     showToast("⚠️ Listing reported to campus moderators for review.");
   };
@@ -963,7 +1120,7 @@ export default function App() {
         expiryDate: renewedExpiry,
       });
     } catch (e) {
-      console.warn("Renewal updated locally:", e);
+      handleFirestoreError(e, OperationType.UPDATE, `listings/${listingId}`);
     }
     showToast("🎉 Listing renewed! Active for another 30 days.");
   };
@@ -1014,6 +1171,9 @@ export default function App() {
       } else if ((e.key === "w" || e.key === "W") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         setIsWishlistModalOpen(true);
+      } else if ((e.key === "c" || e.key === "C") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setIsYourChatsModalOpen(true);
       } else if ((e.key === "d" || e.key === "D") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         toggleTheme();
@@ -1155,15 +1315,13 @@ export default function App() {
         upcomingHandoversCount={upcomingHandoversCount}
         wishlistCount={wishlistIds.length}
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
+        chatsCount={storedChats.length}
+        onOpenYourChats={() => setIsYourChatsModalOpen(true)}
         alertsCount={alerts.filter((a) => a.active).length}
         onOpenAlerts={() => {
           setPrefilledAlertKeyword("");
           setPrefilledAlertCategory("All");
           setIsAlertsModalOpen(true);
-        }}
-        onOpenBlueprint={() => {
-          setBlueprintPreselectedLocation(undefined);
-          setIsBlueprintModalOpen(true);
         }}
         isOnline={isOnline}
         isSimulatedOffline={isSimulatedOffline}
@@ -1175,9 +1333,6 @@ export default function App() {
       <CampusLiveTicker
         onSelectItem={(query) => {
           if (query) setSearchQuery(query);
-        }}
-        onOpenBlueprint={() => {
-          setIsBlueprintModalOpen(true);
         }}
       />
 
@@ -1215,6 +1370,7 @@ export default function App() {
         }}
         onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
+        onOpenYourChats={() => setIsYourChatsModalOpen(true)}
         onOpenPBLInfo={() => setIsPBLModalOpen(true)}
         onFocusSearch={() => {
           const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
@@ -1401,6 +1557,31 @@ export default function App() {
               </kbd>
             </button>
 
+            {/* Your Chats Quick Access */}
+            <button
+              id="filter-your-chats-toggle"
+              onClick={() => setIsYourChatsModalOpen(true)}
+              aria-keyshortcuts="C"
+              title="View Your Chats with sellers (Shortcut: C)"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
+                isDark
+                  ? "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30"
+                  : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 shadow-2xs"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Your Chats ({storedChats.length})</span>
+              <kbd
+                className={`hidden sm:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
+                  isDark
+                    ? "bg-indigo-950/60 text-indigo-300 border-indigo-700/50"
+                    : "bg-indigo-100 text-indigo-700 border-indigo-200"
+                }`}
+              >
+                C
+              </kbd>
+            </button>
+
             {/* Include Sold Items Toggle */}
             <button
               id="filter-include-sold-toggle"
@@ -1581,7 +1762,11 @@ export default function App() {
             <div
               id="marketplace-sort-container"
               className={`flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-xl border transition-all select-none ${
-                sortBy !== "newest"
+                sortBy === "smart_sort"
+                  ? isDark
+                    ? "bg-purple-950/70 border-purple-500/50 shadow-xs ring-1 ring-purple-500/30"
+                    : "bg-purple-50/90 border-purple-300 shadow-xs ring-1 ring-purple-200"
+                  : sortBy !== "newest"
                   ? isDark
                     ? "bg-indigo-950/70 border-indigo-500/50 shadow-xs ring-1 ring-indigo-500/30"
                     : "bg-indigo-50/90 border-indigo-300 shadow-xs ring-1 ring-indigo-200"
@@ -1601,6 +1786,9 @@ export default function App() {
                     transition={{ type: "spring", stiffness: 500, damping: 28 }}
                     className="flex items-center justify-center"
                   >
+                    {sortBy === "smart_sort" && (
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400 fill-purple-400/30" />
+                    )}
                     {sortBy === "newest" && (
                       <Clock className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
                     )}
@@ -1622,15 +1810,23 @@ export default function App() {
                 {/* Pulsing indicator when a non-default sorting state is active */}
                 {sortBy !== "newest" && (
                   <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                      sortBy === "smart_sort" ? "bg-purple-400" : "bg-indigo-400"
+                    }`}></span>
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                      sortBy === "smart_sort" ? "bg-purple-500" : "bg-indigo-500"
+                    }`}></span>
                   </span>
                 )}
               </div>
 
               <span
                 className={`text-xs font-bold hidden sm:inline ${
-                  sortBy !== "newest"
+                  sortBy === "smart_sort"
+                    ? isDark
+                      ? "text-purple-300"
+                      : "text-purple-700"
+                    : sortBy !== "newest"
                     ? isDark
                       ? "text-indigo-300"
                       : "text-indigo-700"
@@ -1648,7 +1844,11 @@ export default function App() {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 aria-label="Sort listings"
                 className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1 ${
-                  sortBy !== "newest"
+                  sortBy === "smart_sort"
+                    ? isDark
+                      ? "text-purple-200"
+                      : "text-purple-900"
+                    : sortBy !== "newest"
                     ? isDark
                       ? "text-indigo-200"
                       : "text-indigo-900"
@@ -1657,6 +1857,9 @@ export default function App() {
                     : "text-slate-800"
                 }`}
               >
+                <option value="smart_sort" className={isDark ? "bg-slate-900 text-purple-300 font-bold" : "bg-white text-purple-700 font-bold"}>
+                  ✨ Smart Sort (Recency + AI + Trust)
+                </option>
                 <option value="newest" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
                   Recently Listed
                 </option>
@@ -1675,19 +1878,19 @@ export default function App() {
               </select>
 
               {/* Quick Reset Button when an active sort filter is selected */}
-              {sortBy !== "newest" && (
+              {sortBy !== "smart_sort" && (
                 <motion.button
                   type="button"
                   initial={{ opacity: 0, scale: 0.7 }}
                   animate={{ opacity: 1, scale: 1 }}
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.85 }}
-                  onClick={() => setSortBy("newest")}
-                  title="Reset sort to Recently Listed"
+                  onClick={() => setSortBy("smart_sort")}
+                  title="Switch to Smart Sort"
                   className={`p-0.5 rounded-full cursor-pointer transition-colors ${
                     isDark
-                      ? "hover:bg-indigo-900/80 text-indigo-300"
-                      : "hover:bg-indigo-200 text-indigo-700"
+                      ? "hover:bg-purple-900/80 text-purple-300"
+                      : "hover:bg-purple-200 text-purple-700"
                   }`}
                 >
                   <X className="w-3 h-3" />
@@ -1696,6 +1899,20 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Dedicated "Your Chats" Section */}
+        {storedChats.length > 0 && (
+          <YourChatsSection
+            chats={storedChats}
+            allListings={listings}
+            onOpenChat={handleOpenChat}
+            onOpenDetails={(item) => {
+              handleOpenDetails(item);
+            }}
+            onOpenCalendar={handleOpenCalendar}
+            onOpenFullModal={() => setIsYourChatsModalOpen(true)}
+          />
+        )}
 
         {/* Campus Marketplace Items Section */}
         <section
@@ -1759,6 +1976,36 @@ export default function App() {
                   <span>Transaction History Included</span>
                 </span>
               )}
+
+              {sortBy === "smart_sort" && (
+                <span
+                  id="header-smart-sort-badge"
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 animate-in fade-in ${
+                    isDark
+                      ? "bg-purple-950/60 text-purple-300 border-purple-500/40"
+                      : "bg-purple-50 text-purple-800 border-purple-200"
+                  }`}
+                  title="Smart Sort: Ranking by Recency, AI Inspection Score, and Seller Trust Rating"
+                >
+                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  <span>Smart Ranked (AI + Trust + Recency)</span>
+                </span>
+              )}
+
+              {recentlyViewed.length > 0 && (
+                <span
+                  id="header-recently-viewed-badge"
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 animate-in fade-in ${
+                    isDark
+                      ? "bg-indigo-950/60 text-indigo-300 border-indigo-500/40"
+                      : "bg-indigo-50 text-indigo-800 border-indigo-200"
+                  }`}
+                  title={`${recentlyViewed.length} recently viewed items tracked`}
+                >
+                  <History className="w-3 h-3 text-indigo-400" />
+                  <span>{recentlyViewed.length} Recently Viewed</span>
+                </span>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
@@ -1769,6 +2016,15 @@ export default function App() {
               </span>
             </div>
           </div>
+
+          {/* 'Recently Viewed' Section in the marketplace header */}
+          <RecentlyViewedSection
+            recentlyViewed={recentlyViewed}
+            onOpenDetails={handleOpenDetails}
+            onClearHistory={handleClearRecentlyViewed}
+            onRemoveItem={handleRemoveRecentlyViewedItem}
+            isDark={isDark}
+          />
 
           {/* Listings Grid */}
           {isLoadingListings ? (
@@ -1793,17 +2049,17 @@ export default function App() {
                   }
                 >
                   <AnimatePresence mode="popLayout">
-                    {filteredListings.map((listing) => (
+                    {filteredListings.map((listing, index) => (
                       <motion.div
                         key={listing.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        initial={{ opacity: 0, scale: 0.96, y: 14 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                        exit={{ opacity: 0, scale: 0.94, y: -8 }}
                         transition={{
-                          opacity: { duration: 0.22 },
-                          scale: { duration: 0.22 },
-                          y: { duration: 0.22 },
+                          opacity: { duration: 0.24, delay: Math.min(index * 0.03, 0.2) },
+                          scale: { duration: 0.24, delay: Math.min(index * 0.03, 0.2) },
+                          y: { duration: 0.26, delay: Math.min(index * 0.03, 0.2), ease: "easeOut" },
                           layout: {
                             type: "spring",
                             stiffness: 380,
@@ -1813,6 +2069,7 @@ export default function App() {
                         className="h-full flex flex-col"
                       >
                         <ListingCard
+                          index={index}
                           listing={listing}
                           allListings={listings}
                           isWishlisted={wishlistIds.includes(listing.id)}
@@ -1823,14 +2080,7 @@ export default function App() {
                           onOpenLightbox={(item) => {
                             setLightboxListing(item);
                           }}
-                          onOpenChat={(item) => {
-                            if (!isOnline) {
-                              showToast("⚠️ Chat is disabled while offline to prevent data loss.");
-                              return;
-                            }
-                            setChatListing(item);
-                            setIsChatOpen(true);
-                          }}
+                          onOpenChat={handleOpenChat}
                           onOpenCalendar={handleOpenCalendar}
                           onShowToast={showToast}
                           onOpenPassport={(item) => {
@@ -1840,10 +2090,6 @@ export default function App() {
                           onOpenBarter={(item) => {
                             setBarterListing(item);
                             setIsBarterDrawerOpen(true);
-                          }}
-                          onOpenBlueprint={(loc) => {
-                            setBlueprintPreselectedLocation(loc);
-                            setIsBlueprintModalOpen(true);
                           }}
                           isOnline={isOnline}
                           layoutMode={layoutMode}
@@ -1968,15 +2214,7 @@ export default function App() {
           setIsDetailModalOpen(false);
           setTimeout(() => setSelectedListing(null), 300);
         }}
-        onOpenChat={(item, initialQuestion) => {
-          if (!isOnline) {
-            showToast("⚠️ Chat is disabled while offline to prevent data loss.");
-            return;
-          }
-          setChatListing(item);
-          setChatInitialMessage(initialQuestion || "");
-          setIsChatOpen(true);
-        }}
+        onOpenChat={handleOpenChat}
         onOpenCalendar={handleOpenCalendar}
         onUpdateStatus={handleUpdateStatus}
         currentUserId={currentUser?.uid}
@@ -1997,10 +2235,6 @@ export default function App() {
           setBarterListing(item);
           setIsBarterDrawerOpen(true);
         }}
-        onOpenBlueprint={(loc) => {
-          setBlueprintPreselectedLocation(loc);
-          setIsBlueprintModalOpen(true);
-        }}
         isOnline={isOnline}
       />
 
@@ -2011,21 +2245,42 @@ export default function App() {
         onRemoveFromWishlist={handleToggleWishlist}
         onClearWishlist={handleClearWishlist}
         onOpenDetails={(item) => {
-          setSelectedListing(item);
-          setIsDetailModalOpen(true);
+          handleOpenDetails(item);
         }}
         onOpenLightbox={(item) => {
           setLightboxListing(item);
         }}
-        onOpenChat={(item) => {
-          if (!isOnline) {
-            showToast("⚠️ Chat is disabled while offline to prevent data loss.");
-            return;
-          }
-          setChatListing(item);
-          setIsChatOpen(true);
-        }}
+        onOpenChat={handleOpenChat}
         onOpenCalendar={handleOpenCalendar}
+        isOnline={isOnline}
+      />
+
+      {/* Dedicated Your Chats Modal */}
+      <YourChatsModal
+        isOpen={isYourChatsModalOpen}
+        onClose={() => setIsYourChatsModalOpen(false)}
+        chats={storedChats}
+        allListings={listings}
+        onOpenChat={handleOpenChat}
+        onOpenDetails={(item) => {
+          handleOpenDetails(item);
+        }}
+        onOpenCalendar={(item, otherPartyName, otherPartyEmail) => {
+          setCalendarTargetListing(item);
+          setCalendarOtherParty({
+            name: otherPartyName || item.sellerName || "Campus Seller",
+            email: otherPartyEmail || item.sellerEmail || "",
+          });
+          setIsCalendarModalOpen(true);
+        }}
+        onDeleteChat={(conversationId) => {
+          deleteStoredChat(conversationId);
+          showToast("Chat thread removed from Your Chats");
+        }}
+        onClearAllChats={() => {
+          clearAllStoredChats();
+          showToast("All chats cleared from Your Chats");
+        }}
         isOnline={isOnline}
       />
 
@@ -2091,8 +2346,7 @@ export default function App() {
         listings={listings}
         onSelectListingForCalendar={handleOpenCalendar}
         onOpenDetails={(item) => {
-          setSelectedListing(item);
-          setIsDetailModalOpen(true);
+          handleOpenDetails(item);
         }}
       />
 
@@ -2106,8 +2360,7 @@ export default function App() {
         matchEvent={currentAlertToast}
         onDismiss={() => setCurrentAlertToast(null)}
         onViewListing={(item) => {
-          setSelectedListing(item);
-          setIsDetailModalOpen(true);
+          handleOpenDetails(item);
         }}
       />
 
@@ -2121,8 +2374,7 @@ export default function App() {
         prefilledKeyword={prefilledAlertKeyword}
         prefilledCategory={prefilledAlertCategory}
         onViewListing={(item) => {
-          setSelectedListing(item);
-          setIsDetailModalOpen(true);
+          handleOpenDetails(item);
         }}
         alertHistory={alertHistory}
         onClearHistory={handleClearAlertHistory}
@@ -2160,23 +2412,6 @@ export default function App() {
         onOpenCalendar={(item) => {
           setLightboxListing(null);
           handleOpenCalendar(item);
-        }}
-      />
-
-      {/* Campus Handover Blueprint & Interactive Map */}
-      <CampusHandoverBlueprintModal
-        isOpen={isBlueprintModalOpen}
-        onClose={() => {
-          setIsBlueprintModalOpen(false);
-          setBlueprintPreselectedLocation(undefined);
-        }}
-        onFilterByLocation={(locationName) => {
-          setSearchQuery(locationName);
-          showToast(`Filtered listings for campus spot: "${locationName}"`);
-        }}
-        onSelectMeetingPoint={(spotName) => {
-          setSearchQuery(spotName);
-          showToast(`Selected campus handover spot: "${spotName}"`);
         }}
       />
 

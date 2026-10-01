@@ -72,9 +72,9 @@ export const StudentPassportModal: React.FC<StudentPassportModalProps> = ({
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full max-w-md rounded-3xl border-2 overflow-hidden shadow-2xl ${
+            className={`relative w-full max-w-md rounded-3xl border overflow-hidden shadow-2xl ${
               isDark
-                ? "bg-slate-900 border-slate-700/80 text-white shadow-indigo-950/50"
+                ? "bg-[#0B0F19] border-slate-800 text-white shadow-indigo-950/50"
                 : "bg-white border-slate-200 text-slate-900 shadow-slate-300"
             }`}
           >

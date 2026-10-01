@@ -1,4 +1,5 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
+import type { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
@@ -9,10 +10,11 @@ dotenv.config();
 const app = express();
 const isProduction =
   process.env.NODE_ENV === "production" ||
-  process.argv.some((arg) => arg.includes("server.cjs") || arg.includes("dist"));
+  process.argv.some((arg) => arg.includes("server.js") || arg.includes("server.cjs") || arg.includes("dist"));
 
-// Port 3000 is hardcoded by the infrastructure behind the Nginx reverse proxy layer.
-const PORT = 3000;
+// Nginx reverse proxy in AI Studio's container listens on port 8080 and forwards to 3000.
+// Node server must bind to 3000 so Nginx can proxy traffic to it.
+const PORT = process.env.PORT && process.env.PORT !== "8080" ? parseInt(process.env.PORT, 10) : 3000;
 
 // Security: Disable X-Powered-By header to prevent server technology fingerprinting
 app.disable("x-powered-by");

@@ -23,7 +23,9 @@ export function useOnlineStatus(): OnlineStatus {
     return true;
   });
 
-  const [isSimulatedOffline, setIsSimulatedOffline] = useState<boolean>(false);
+  // Offline state should strictly reflect actual internet connectivity.
+  // Simulation is disabled to ensure offline mode only triggers on real network loss.
+  const isSimulatedOffline = false;
   const [wasOffline, setWasOffline] = useState<boolean>(false);
 
   useEffect(() => {
@@ -54,26 +56,18 @@ export function useOnlineStatus(): OnlineStatus {
     };
   }, []);
 
-  // Effective online status combines navigator.onLine and simulation mode
-  const isOnline = isNavigatorOnline && !isSimulatedOffline;
+  // Effective online status reflects genuine navigator connectivity
+  const isOnline = isNavigatorOnline;
 
   const toggleSimulateOffline = useCallback(() => {
-    setIsSimulatedOffline((prev) => {
-      const next = !prev;
-      if (!next && isNavigatorOnline) {
-        // Transitioning back to online
-        setWasOffline(true);
-      }
-      return next;
-    });
-  }, [isNavigatorOnline]);
+    // No-op: Users cannot manually force the app offline
+  }, []);
 
   const resetWasOffline = useCallback(() => {
     setWasOffline(false);
   }, []);
 
   const reconnect = useCallback(() => {
-    setIsSimulatedOffline(false);
     if (typeof window !== "undefined" && typeof window.navigator !== "undefined") {
       setIsNavigatorOnline(window.navigator.onLine);
     }

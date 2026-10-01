@@ -30,6 +30,7 @@ interface EngineeringBentoHeroProps {
   onOpenAIInspector: () => void;
   onOpenTopperNotes: () => void;
   onOpenWishlist?: () => void;
+  onOpenYourChats?: () => void;
   onOpenAlerts?: () => void;
   onOpenPBLInfo?: () => void;
   onFocusSearch?: () => void;
@@ -49,6 +50,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
   onOpenAIInspector,
   onOpenTopperNotes,
   onOpenWishlist,
+  onOpenYourChats,
   onOpenAlerts,
   onOpenPBLInfo,
   onFocusSearch,
@@ -130,6 +132,19 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
               title="Open saved wishlist"
             >
               <kbd className="font-bold">W</kbd> Wishlist
+            </button>
+          )}
+          {onOpenYourChats && (
+            <button
+              onClick={onOpenYourChats}
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+                isDark
+                  ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
+                  : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
+              }`}
+              title="Open chats with sellers"
+            >
+              <kbd className="font-bold">C</kbd> Chat
             </button>
           )}
           <button
@@ -571,7 +586,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                     isDark ? "text-white" : "text-slate-900"
                   }`}
                 >
-                  64%
+                  50%
                 </span>
                 <span className="text-[11px] text-emerald-500 font-bold">
                   vs Retail MRP

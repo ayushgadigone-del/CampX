@@ -1,7 +1,7 @@
 import { TopperNote } from "../types";
 import { initialTopperNotes, APP_OWNER_EMAIL } from "../data/topperNotesData";
 
-const STORAGE_KEY = "campus_topper_notes_vault_v1";
+const STORAGE_KEY = "campus_topper_notes_vault_v2";
 
 /**
  * Returns whether a given user email is the authorized App Owner.

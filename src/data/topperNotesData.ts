@@ -232,4 +232,137 @@ Master the candidate key closure algorithm: to find candidate keys, compute attr
 - Is every determinant a super key? If YES, relation is in **BCNF**!
 - Are there transitive dependencies? If NO, relation is in **3NF**!`,
   },
+  {
+    id: "note-aids-deep-learning",
+    title: "Deep Learning & Neural Networks: Backprop Derivations & CNN Architecture",
+    subject: "Deep Learning & AI",
+    branch: "AI-DS",
+    semester: "Sem 5",
+    author: "Ayush G. (App Owner)",
+    authorRank: "AI-DS Dept Rank 1 (9.94 CGPA)",
+    authorCollege: "Department of Artificial Intelligence & Data Science",
+    description: "Complete mathematical derivations for gradient descent, backpropagation chain rule, cross-entropy loss, and convolutional layer dimension formulas.",
+    isFree: true,
+    pagesCount: 42,
+    readTimeMinutes: 28,
+    tags: ["AI-DS", "Deep Learning", "CNN", "Backpropagation", "Neural Networks"],
+    lastUpdated: "2026-09-18",
+    featured: true,
+    chapters: [
+      {
+        title: "Unit 1: Backpropagation & Chain Rule Calculus",
+        summary: "Step-by-step weight update derivations for multi-layer perceptrons with Sigmoid, ReLU, and Softmax.",
+        keyFormulasOrTips: [
+          "Weight Update: W_new = W_old - η * (∂Loss / ∂W)",
+          "ReLU derivative: f'(x) = 1 if x > 0 else 0 (mitigates vanishing gradients)",
+          "Softmax + Cross-Entropy gradient simplifies cleanly to (p_i - y_i)",
+        ],
+      },
+      {
+        title: "Unit 2: Convolutional Neural Networks (CNN) Dimension Math",
+        summary: "Receptive fields, padding, stride output feature map dimensions, and parameter count calculation.",
+        keyFormulasOrTips: [
+          "Output size = floor((Input_size - Kernel_size + 2*Padding) / Stride) + 1",
+          "Conv Layer Parameters = (Kernel_W * Kernel_H * Input_Channels + 1) * Output_Channels",
+        ],
+      },
+    ],
+    content: `## 🧠 AI-DS Deep Learning Master Guide
+Master the output dimension formula for CNNs and backprop Jacobian matrices. University theory exams always test a 3-layer backprop numerical step.
+
+---
+
+### Key Formulas:
+- **Binary Cross-Entropy Loss**: $\\mathcal{L} = -\\frac{1}{N} \\sum [y \\log(\\hat{y}) + (1 - y) \\log(1 - \\hat{y})]$
+- **Conv Output Dim**: $O = \\left\\lfloor \\frac{W - K + 2P}{S} \\right\\rfloor + 1$`,
+  },
+  {
+    id: "note-etc-signals-systems",
+    title: "Signals & Systems: Z-Transforms, DTFT, FFT & Frequency Response",
+    subject: "Signals & Systems",
+    branch: "E&TC",
+    semester: "Sem 4",
+    author: "Ayush G. (App Owner)",
+    authorRank: "E&TC Gold Medalist (10.0 in Signals)",
+    authorCollege: "Department of Electronics & Telecommunication",
+    description: "ROC properties of bilateral Z-transforms, stability criteria, circular convolution vs linear convolution, and Bode plot gain/phase margins.",
+    isFree: true,
+    pagesCount: 48,
+    readTimeMinutes: 32,
+    tags: ["E&TC", "Signals", "Z-Transform", "FFT", "Bode Plot"],
+    lastUpdated: "2026-09-15",
+    featured: true,
+    chapters: [
+      {
+        title: "Unit 1: Z-Transform Region of Convergence (ROC) Rules",
+        summary: "Bilateral transforms, poles/zeros mapping, and BIBO stability condition.",
+        keyFormulasOrTips: [
+          "A LTI system is BIBO stable if and only if the ROC of H(z) includes the unit circle (|z| = 1)",
+          "Right-sided sequence: ROC is outside outermost pole |z| > |a|",
+          "Left-sided sequence: ROC is inside innermost pole |z| < |a|",
+        ],
+      },
+      {
+        title: "Unit 2: DTFT & Radix-2 FFT Butterfly Computation",
+        summary: "Decimation-in-Time (DIT-FFT) butterfly diagrams and twiddle factor periodicity.",
+        keyFormulasOrTips: [
+          "Radix-2 FFT reduces computation from O(N^2) to O(N log2 N)",
+          "Twiddle Factor: W_N^k = e^(-j 2π k / N)",
+        ],
+      },
+    ],
+    content: `## 📡 E&TC Signals & Systems Exam Guide
+When solving Z-transform questions, never write the transform without explicitly stating its ROC; half the marks are allocated to the ROC diagram!
+
+---
+
+### Stability & Causality Rules:
+1. **Causal & Stable**: All poles must strictly lie inside unit circle $(|p_i| < 1)$.
+2. **Convolution in time domain**: $y[n] = x[n] * h[n] \\longleftrightarrow Y(z) = X(z) H(z)$.`,
+  },
+  {
+    id: "note-electrical-machines",
+    title: "Electrical Machines: Transformers, 3-Phase Induction Motors & Alternators",
+    subject: "Electrical Machines",
+    branch: "Electrical",
+    semester: "Sem 4",
+    author: "Ayush G. (App Owner)",
+    authorRank: "Electrical Dept Rank 1 (9.86 CGPA)",
+    authorCollege: "Department of Electrical Engineering",
+    description: "Equivalent circuit derivations, open circuit & short circuit tests, voltage regulation, torque-slip characteristics, and V-curves of synchronous motors.",
+    isFree: true,
+    pagesCount: 45,
+    readTimeMinutes: 30,
+    tags: ["Electrical", "Transformers", "Induction Motor", "Alternators", "Machines"],
+    lastUpdated: "2026-09-12",
+    featured: false,
+    chapters: [
+      {
+        title: "Unit 1: Single Phase Transformers & OC/SC Testing",
+        summary: "Core losses (hysteresis + eddy current) and copper loss parameter separation.",
+        keyFormulasOrTips: [
+          "OC Test gives shunt branch parameters: R_0 (core loss) and X_0 (magnetizing reactance)",
+          "SC Test gives series branch parameters: R_eq and X_eq referenced to HV/LV side",
+          "Condition for Maximum Efficiency: Copper Loss = Constant Iron Loss (P_cu = P_i)",
+        ],
+      },
+      {
+        title: "Unit 2: 3-Phase Induction Motors & Torque-Slip Relations",
+        summary: "Starting torque, maximum breakdown torque, and rotor resistance starter calculations.",
+        keyFormulasOrTips: [
+          "Synchronous Speed: N_s = 120 * f / P",
+          "Slip s = (N_s - N_r) / N_s",
+          "Maximum torque is independent of rotor resistance, but slip at which it occurs is directly proportional to R2",
+        ],
+      },
+    ],
+    content: `## ⚡ Electrical Machines Quick Revision
+Always sketch the phasor diagram alongside the transformer efficiency or voltage regulation numericals.
+
+---
+
+### Efficiency Formula:
+$$\\eta = \\frac{x \\cdot S \\cos\\phi}{x \\cdot S \\cos\\phi + P_i + x^2 P_{cu}} \\times 100\\%$$
+Where $x$ is the fraction of full load and $S$ is the rated kVA capacity.`,
+  },
 ];

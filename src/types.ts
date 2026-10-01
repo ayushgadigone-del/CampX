@@ -120,6 +120,8 @@ export interface Conversation {
   listingTitle: string;
   listingPrice: number;
   listingImage: string;
+  listingCategory?: string;
+  listingCondition?: string;
   sellerId: string;
   buyerId: string;
   buyerName?: string;
@@ -129,6 +131,9 @@ export interface Conversation {
   participants: string[];
   lastMessage: string;
   lastMessageTimestamp: number;
+  status?: "active" | "deal_proposed" | "handover_scheduled" | "completed";
+  messages?: ChatMessage[];
+  unread?: boolean;
   updatedAt?: string;
 }
 
@@ -187,7 +192,14 @@ export interface TopperNote {
   id: string;
   title: string;
   subject: string;
-  branch: "Computer Science" | "Information Technology" | "Mechanical" | "Civil" | "Electronics" | "Common 1st Year";
+  branch:
+    | "Computer Science"
+    | "Information Technology"
+    | "AI-DS"
+    | "E&TC"
+    | "Electrical"
+    | "Mechanical"
+    | "Common 1st Year";
   semester: "Sem 1" | "Sem 2" | "Sem 3" | "Sem 4" | "Sem 5" | "Sem 6" | "Sem 7" | "Sem 8";
   author: string;
   authorRank?: string; // e.g., "Branch Rank 1 (9.84 CGPA)"

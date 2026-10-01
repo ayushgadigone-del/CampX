@@ -9,7 +9,12 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { getFirestore, doc, getDocFromServer } from "firebase/firestore";
+import {
+  getFirestore,
+  initializeFirestore,
+  doc,
+  getDocFromServer,
+} from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
 import { isValidCollegeEmail, ALLOWED_COLLEGE_DOMAIN } from "../utils/collegeAuth";
 
@@ -28,27 +33,100 @@ googleProvider.setCustomParameters({
 });
 
 // Primary Firestore Database ID for this applet
-const FIRESTORE_DB_ID = "ai-studio-campusresaleexch-f68635d5-915d-4859-b9cf-6705adcd3715";
+const FIRESTORE_DB_ID =
+  firebaseConfig.firestoreDatabaseId ||
+  "ai-studio-campusresaleexch-f68635d5-915d-4859-b9cf-6705adcd3715";
 
 let firestoreInstance;
 try {
-  firestoreInstance = getFirestore(app, FIRESTORE_DB_ID);
+  firestoreInstance = initializeFirestore(
+    app,
+    {
+      experimentalAutoDetectLongPolling: true,
+    },
+    FIRESTORE_DB_ID
+  );
 } catch {
-  firestoreInstance = getFirestore(app);
+  try {
+    firestoreInstance = getFirestore(app, FIRESTORE_DB_ID);
+  } catch {
+    firestoreInstance = getFirestore(app);
+  }
 }
 export const db = firestoreInstance;
+
+// Error Handling per Firebase Integration Skill specification
+export enum OperationType {
+  CREATE = "create",
+  UPDATE = "update",
+  DELETE = "delete",
+  LIST = "list",
+  GET = "get",
+  WRITE = "write",
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  };
+}
+
+export function handleFirestoreError(
+  error: unknown,
+  operationType: OperationType,
+  path: string | null
+): FirestoreErrorInfo {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo:
+        auth.currentUser?.providerData?.map((provider) => ({
+          providerId: provider.providerId,
+          email: provider.email,
+        })) || [],
+    },
+    operationType,
+    path,
+  };
+  console.warn("Firestore Error: ", JSON.stringify(errInfo));
+  return errInfo;
+}
 
 // In-memory access token cache for Google Workspace (Calendar) API calls
 let cachedAccessToken: string | null = null;
 let isSigningIn = false;
 
-// Test connection on boot per Firebase guidelines
+// Test connection on boot per Firebase guidelines with graceful offline awareness
 export async function testConnection() {
   try {
     await getDocFromServer(doc(db, "test", "connection"));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("the client is offline")) {
-      console.warn("Client offline or initial connection check pending.");
+  } catch (error: any) {
+    if (
+      (error instanceof Error &&
+        (error.message.includes("the client is offline") ||
+          error.message.includes("unavailable") ||
+          error.message.includes("offline"))) ||
+      error?.code === "unavailable"
+    ) {
+      console.info("Firestore: Operating in offline mode or syncing with backend.");
+    } else {
+      console.warn("Firestore connection check info:", error?.message || error);
     }
   }
 }
