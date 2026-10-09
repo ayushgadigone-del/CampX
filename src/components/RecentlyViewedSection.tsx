@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Listing } from "../types";
+import { HorizontalSlider } from "./HorizontalSlider";
 
 interface RecentlyViewedSectionProps {
   recentlyViewed: Listing[];
@@ -153,8 +154,17 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                   </span>
                 </div>
               ) : (
-                /* 1 to 5 Items Grid */
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                /* 1 to 5 Items Horizontal Slider (Smooth mobile swiping and desktop sliding) */
+                <HorizontalSlider
+                  id="recently-viewed-slider"
+                  showArrows={true}
+                  showProgress={true}
+                  showMobileHint={true}
+                  scrollStep={210}
+                  itemSnap={true}
+                  ariaLabel="Recently Viewed Listings Slider"
+                  trackClassName="gap-3 py-1"
+                >
                   <AnimatePresence mode="popLayout">
                     {recentlyViewed.map((item, index) => {
                       const hasAi = Boolean(item.aiInspection);
@@ -168,7 +178,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.85 }}
                           transition={{ duration: 0.2 }}
-                          className="group relative"
+                          className="group relative w-[185px] sm:w-[210px] md:w-[220px] lg:w-[230px] shrink-0 snap-start"
                         >
                           <div
                             onClick={() => onOpenDetails(item)}
@@ -298,7 +308,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                             }}
                             title={`Remove "${item.title}" from recently viewed`}
                             aria-label={`Remove "${item.title}" from recently viewed`}
-                            className={`absolute top-1 right-1 p-1 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10 cursor-pointer ${
+                            className={`absolute top-1 right-1 p-1 rounded-full shadow-md transition-all opacity-100 sm:opacity-0 group-hover:opacity-100 z-10 cursor-pointer ${
                               isDark
                                 ? "bg-slate-900/90 text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-slate-700"
                                 : "bg-white/95 text-slate-500 hover:text-rose-600 hover:bg-slate-100 border border-slate-200"
@@ -310,7 +320,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                       );
                     })}
                   </AnimatePresence>
-                </div>
+                </HorizontalSlider>
               )}
             </div>
           </motion.div>

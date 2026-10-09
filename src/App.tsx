@@ -128,6 +128,7 @@ import { CampusLiveTicker } from "./components/CampusLiveTicker";
 import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
 import { StudentPassportModal } from "./components/StudentPassportModal";
 import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
+import { HorizontalSlider } from "./components/HorizontalSlider";
 import { calculateSmartSortScore } from "./utils/smartSort";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
@@ -1397,105 +1398,125 @@ export default function App() {
           categoryStockCounts={categoryStockCounts}
         />
 
-        {/* Category Filter Pills */}
+        {/* Category Filter Pills (Slideable on mobile) */}
         <div
           role="tablist"
           aria-label="Filter listings by category"
-          className="relative flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 no-scrollbar scroll-smooth"
+          className="w-full"
         >
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            const Icon = getCategoryIcon(cat);
-            const count = categoryCounts[cat] ?? 0;
+          <HorizontalSlider
+            id="category-pills-slider"
+            showArrows={true}
+            showProgress={true}
+            showMobileHint={true}
+            scrollStep={220}
+            itemSnap={true}
+            ariaLabel="Category Filter Tabs Slider"
+            trackClassName="gap-2.5 py-1.5 px-0.5"
+          >
+            {CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              const Icon = getCategoryIcon(cat);
+              const count = categoryCounts[cat] ?? 0;
 
-            return (
-              <motion.button
-                key={cat}
-                id={`category-pill-${cat.toLowerCase().replace(/\s+/g, "-")}`}
-                role="tab"
-                aria-selected={isSelected}
-                onClick={() => setSelectedCategory(cat)}
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 450, damping: 28 }}
-                className={`relative px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer select-none transition-all duration-200 overflow-hidden ${
-                  isSelected
-                    ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-lg shadow-purple-600/40 ring-2 ring-purple-400 border border-purple-400"
-                    : isDark
-                    ? "text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
-                    : "text-slate-700 hover:text-purple-950 bg-white hover:bg-purple-50/60 border border-slate-200 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
-                }`}
-              >
-                {/* Active Sliding Pill Background */}
-                {isSelected && (
-                  <motion.div
-                    layoutId="activeCategoryPillHighlight"
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 shadow-md shadow-purple-600/30 z-0"
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 32,
-                    }}
-                  />
-                )}
-
-                {/* Animated Category Icon */}
-                <motion.span
-                  animate={
+              return (
+                <motion.button
+                  key={cat}
+                  id={`category-pill-${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setSelectedCategory(cat)}
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 28 }}
+                  className={`relative px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer select-none transition-all duration-200 overflow-hidden shrink-0 snap-start ${
                     isSelected
-                      ? { scale: [1, 1.2, 1], rotate: [0, -6, 6, 0] }
-                      : { scale: 1, rotate: 0 }
-                  }
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="relative z-10 flex items-center justify-center shrink-0"
-                >
-                  <Icon
-                    className={`w-3.5 h-3.5 transition-colors ${
-                      isSelected ? "text-white" : isDark ? "text-slate-400 group-hover:text-indigo-400" : "text-slate-500 group-hover:text-indigo-600"
-                    }`}
-                  />
-                </motion.span>
-
-                {/* Category Label (shows Total: for All) */}
-                <span className={`relative z-10 font-bold ${isSelected ? "text-white font-extrabold" : ""}`}>
-                  {cat === "All" ? "Total:" : cat}
-                </span>
-
-                {/* Item Counter Badge */}
-                <span
-                  className={`relative z-10 ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
-                    count === 0
-                      ? isSelected
-                        ? "bg-rose-500 text-white ring-1 ring-white/40 shadow-xs"
-                        : isDark
-                        ? "bg-rose-950/80 text-rose-300 border border-rose-800/80"
-                        : "bg-rose-100 text-rose-700 border border-rose-200"
-                      : isSelected
-                      ? "bg-emerald-500 text-white ring-1 ring-white/40 shadow-xs"
+                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-lg shadow-purple-600/40 ring-2 ring-purple-400 border border-purple-400"
                       : isDark
-                      ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/80"
-                      : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                      ? "text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
+                      : "text-slate-700 hover:text-purple-950 bg-white hover:bg-purple-50/60 border border-slate-200 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:ring-2 hover:ring-purple-400/40 shadow-xs"
                   }`}
                 >
-                  {count}
-                </span>
-              </motion.button>
-            );
-          })}
+                  {/* Active Sliding Pill Background */}
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeCategoryPillHighlight"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 shadow-md shadow-purple-600/30 z-0"
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 32,
+                      }}
+                    />
+                  )}
+
+                  {/* Animated Category Icon */}
+                  <motion.span
+                    animate={
+                      isSelected
+                        ? { scale: [1, 1.2, 1], rotate: [0, -6, 6, 0] }
+                        : { scale: 1, rotate: 0 }
+                    }
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="relative z-10 flex items-center justify-center shrink-0"
+                  >
+                    <Icon
+                      className={`w-3.5 h-3.5 transition-colors ${
+                        isSelected ? "text-white" : isDark ? "text-slate-400 group-hover:text-indigo-400" : "text-slate-500 group-hover:text-indigo-600"
+                      }`}
+                    />
+                  </motion.span>
+
+                  {/* Category Label (shows Total: for All) */}
+                  <span className={`relative z-10 font-bold ${isSelected ? "text-white font-extrabold" : ""}`}>
+                    {cat === "All" ? "Total:" : cat}
+                  </span>
+
+                  {/* Item Counter Badge */}
+                  <span
+                    className={`relative z-10 ml-0.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
+                      count === 0
+                        ? isSelected
+                          ? "bg-rose-500 text-white ring-1 ring-white/40 shadow-xs"
+                          : isDark
+                          ? "bg-rose-950/80 text-rose-300 border border-rose-800/80"
+                          : "bg-rose-100 text-rose-700 border border-rose-200"
+                        : isSelected
+                        ? "bg-emerald-500 text-white ring-1 ring-white/40 shadow-xs"
+                        : isDark
+                        ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/80"
+                        : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </HorizontalSlider>
         </div>
 
         {/* Secondary Filter & Sorting Controls */}
         <div
-          className={`p-4 rounded-2xl border shadow-md backdrop-blur-xl flex flex-wrap items-center justify-between gap-4 text-xs ${
+          className={`p-3 sm:p-4 rounded-2xl border shadow-md backdrop-blur-xl text-xs overflow-hidden ${
             isDark
               ? "bg-slate-800/90 border-slate-700/80 text-slate-200"
               : "bg-white border-slate-200 text-slate-800 shadow-slate-200/60"
           }`}
         >
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Listing Type Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Type:</span>
+          <HorizontalSlider
+            id="marketplace-filters-slider"
+            showArrows={true}
+            showProgress={true}
+            showMobileHint={true}
+            scrollStep={280}
+            ariaLabel="Marketplace Filters & Sorting Slider"
+            trackClassName="gap-4 py-1 items-center justify-between min-w-full"
+          >
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Listing Type Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Type:</span>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as any)}
@@ -1665,7 +1686,7 @@ export default function App() {
           </div>
 
           {/* View Mode Switcher & Full Screen Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {/* View Mode Segmented Control */}
             <div
               className={`p-1 rounded-xl border flex items-center gap-1 ${
@@ -1898,7 +1919,8 @@ export default function App() {
               )}
             </div>
           </div>
-        </div>
+        </HorizontalSlider>
+      </div>
 
         {/* Dedicated "Your Chats" Section */}
         {storedChats.length > 0 && (
@@ -2053,17 +2075,11 @@ export default function App() {
                       <motion.div
                         key={listing.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.96, y: 14 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.94, y: -8 }}
                         transition={{
-                          opacity: { duration: 0.24, delay: Math.min(index * 0.03, 0.2) },
-                          scale: { duration: 0.24, delay: Math.min(index * 0.03, 0.2) },
-                          y: { duration: 0.26, delay: Math.min(index * 0.03, 0.2), ease: "easeOut" },
                           layout: {
                             type: "spring",
-                            stiffness: 380,
-                            damping: 32,
+                            stiffness: 350,
+                            damping: 30,
                           },
                         }}
                         className="h-full flex flex-col"

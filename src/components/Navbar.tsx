@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
+import { HorizontalSlider } from "./HorizontalSlider";
 
 interface NavbarProps {
   currentUser: User | null;
@@ -151,10 +152,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* ================= CENTER / MIDDLE: Evenly Spaced Header Actions ================= */}
+          {/* ================= CENTER / MIDDLE: Evenly Spaced Header Actions (Desktop xl) ================= */}
           <nav
             aria-label="Campus Navigation"
-            className="flex-1 flex items-center justify-center px-1 sm:px-2 md:px-4 max-w-2xl mx-auto"
+            className="hidden xl:flex flex-1 items-center justify-center px-1 sm:px-2 md:px-4 max-w-2xl mx-auto"
           >
             <div className="flex items-center justify-evenly w-full gap-1 sm:gap-2">
               {/* 1. Free Topper Notes Vault */}
@@ -204,7 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="inline sm:hidden">AI Scan</span>
               </motion.button>
 
-              {/* 3. Handovers Button (Separate Dedicated Button) */}
+              {/* 3. Handovers Button */}
               <motion.button
                 id="navbar-handovers-btn"
                 whileHover={{ scale: 1.02 }}
@@ -233,7 +234,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </motion.button>
 
-              {/* 4. PBL Report Button (Separate Dedicated Button) */}
+              {/* 4. PBL Report Button */}
               <motion.button
                 id="navbar-pbl-report-btn"
                 whileHover={{ scale: 1.02 }}
@@ -256,7 +257,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* ================= RIGHT: User Actions, Primary CTA & Profile ================= */}
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
-            {/* Your Chats Button */}
+            {/* Your Chats Button (Desktop xl) */}
             <button
               id="navbar-your-chats-button"
               onClick={onOpenYourChats}
@@ -264,7 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title={`Your Chats with Sellers (Shortcut: C)${
                 chatsCount > 0 ? ` • ${chatsCount} active` : ""
               }`}
-              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isDark
                   ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-indigo-600 border-slate-200 shadow-2xs"
@@ -279,7 +280,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Wishlist Button */}
+            {/* Wishlist Button (Desktop xl) */}
             <button
               id="navbar-wishlist-button"
               onClick={onOpenWishlist}
@@ -287,7 +288,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title={`Saved Wishlist (Shortcut: W)${
                 wishlistCount > 0 ? ` • ${wishlistCount} items` : ""
               }`}
-              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isDark
                   ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-rose-600 border-slate-200 shadow-2xs"
@@ -308,14 +309,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Notify Me / Alerts Button */}
+            {/* Notify Me / Alerts Button (Desktop xl) */}
             <button
               id="navbar-alerts-button"
               onClick={onOpenAlerts}
               title={`Keyword & Item Alerts${
                 alertsCount > 0 ? ` • ${alertsCount} active` : ""
               }`}
-              className={`h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isDark
                   ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-amber-600 border-slate-200 shadow-2xs"
@@ -700,6 +701,158 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
           </div>
+        </div>
+
+        {/* ================= MOBILE / TABLET HORIZONTAL ACTIONS SLIDER ================= */}
+        <div className="xl:hidden w-full border-t border-slate-200/80 dark:border-slate-800/80 py-2">
+          <HorizontalSlider
+            id="navbar-mobile-actions-slider"
+            showArrows={true}
+            showProgress={false}
+            showMobileHint={false}
+            scrollStep={180}
+            ariaLabel="Mobile Campus Tools Slider"
+            trackClassName="gap-2 px-1"
+          >
+            {/* 1. Topper Notes Vault */}
+            <button
+              id="mobile-nav-topper-notes-btn"
+              onClick={onOpenTopperNotes}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                  : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span>Topper Vault</span>
+              <span
+                className={`px-1 py-0.2 rounded text-[9px] font-black uppercase tracking-wider ${
+                  isDark
+                    ? "bg-emerald-500/25 text-emerald-300"
+                    : "bg-emerald-200/80 text-emerald-800"
+                }`}
+              >
+                Free
+              </span>
+            </button>
+
+            {/* 2. AI Inspector */}
+            <button
+              id="mobile-nav-ai-inspector-btn"
+              onClick={onOpenAIInspector}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+              <span>AI Inspector</span>
+            </button>
+
+            {/* 3. Handovers */}
+            <button
+              id="mobile-nav-handovers-btn"
+              onClick={onOpenHandovers}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                upcomingHandoversCount > 0
+                  ? isDark
+                    ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
+                    : "bg-blue-50 text-blue-700 border-blue-200 shadow-2xs"
+                  : isDark
+                  ? "bg-slate-900/70 text-slate-300 border-slate-800"
+                  : "bg-slate-50 text-slate-700 border-slate-200"
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <span>Handovers</span>
+              {upcomingHandoversCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-white font-black text-[10px]">
+                  {upcomingHandoversCount}
+                </span>
+              )}
+            </button>
+
+            {/* 4. Your Chats */}
+            <button
+              id="mobile-nav-chats-btn"
+              onClick={onOpenYourChats}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-slate-900/80 text-slate-300 border-slate-800"
+                  : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+              <span>Chats</span>
+              {chatsCount > 0 && (
+                <span className="min-w-[16px] h-4 px-1 rounded-full bg-indigo-600 text-white font-black text-[10px] flex items-center justify-center">
+                  {chatsCount}
+                </span>
+              )}
+            </button>
+
+            {/* 5. Wishlist */}
+            <button
+              id="mobile-nav-wishlist-btn"
+              onClick={onOpenWishlist}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-slate-900/80 text-slate-300 border-slate-800"
+                  : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
+              }`}
+            >
+              <Heart
+                className={`w-3.5 h-3.5 shrink-0 ${
+                  wishlistCount > 0 ? "fill-rose-500 text-rose-500" : "text-rose-500"
+                }`}
+              />
+              <span>Saved</span>
+              {wishlistCount > 0 && (
+                <span className="min-w-[16px] h-4 px-1 rounded-full bg-rose-600 text-white font-black text-[10px] flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
+
+            {/* 6. Alerts */}
+            <button
+              id="mobile-nav-alerts-btn"
+              onClick={onOpenAlerts}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-slate-900/80 text-slate-300 border-slate-800"
+                  : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
+              }`}
+            >
+              <Bell
+                className={`w-3.5 h-3.5 shrink-0 ${
+                  alertsCount > 0 ? "fill-amber-500 text-amber-500" : "text-amber-500"
+                }`}
+              />
+              <span>Alerts</span>
+              {alertsCount > 0 && (
+                <span className="min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center">
+                  {alertsCount}
+                </span>
+              )}
+            </button>
+
+            {/* 7. PBL Report */}
+            <button
+              id="mobile-nav-pbl-btn"
+              onClick={onOpenPBLInfo}
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                isDark
+                  ? "bg-indigo-500/10 text-indigo-300 border-indigo-500/30"
+                  : "bg-purple-50 text-purple-700 border-purple-200 shadow-2xs"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+              <span>PBL Report</span>
+            </button>
+          </HorizontalSlider>
         </div>
       </div>
     </header>

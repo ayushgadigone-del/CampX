@@ -17,6 +17,7 @@ import {
   Tag,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { HorizontalSlider } from "./HorizontalSlider";
 
 interface EngineeringBentoHeroProps {
   totalListingsCount: number;
@@ -251,39 +252,49 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                 </p>
               </div>
 
-              {/* Quick Department / Subject Filter Shortcuts */}
-              <div className="pt-2 flex flex-wrap items-center gap-2">
-                <span
-                  className={`text-[11px] font-mono font-semibold flex items-center gap-1 ${
-                    isDark ? "text-zinc-400" : "text-slate-500"
-                  }`}
+              {/* Quick Department / Subject Filter Shortcuts (Slideable on mobile) */}
+              <div className="pt-2">
+                <HorizontalSlider
+                  id="bento-quick-tags-slider"
+                  showArrows={true}
+                  showProgress={false}
+                  showMobileHint={false}
+                  scrollStep={180}
+                  ariaLabel="Campus quick search tags slider"
+                  trackClassName="gap-2 py-1 items-center"
                 >
-                  <Tag className="w-3 h-3 text-indigo-400" />
-                  <span>Quick Tags:</span>
-                </span>
-                {[
-                  { label: "Casio fx-991", cat: "Calculators" as const },
-                  { label: "SPPU Textbooks", cat: "Books" as const },
-                  { label: "Mini Drafters", cat: "Lab Equipment" as const },
-                  { label: "Campus Cycles", cat: "Cycles" as const },
-                ].map((t) => {
-                  const isSelected = selectedCategory === t.cat;
-                  return (
-                    <button
-                      key={t.label}
-                      onClick={() => onSelectCategory(t.cat)}
-                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all duration-200 cursor-pointer select-none hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/40 ${
-                        isSelected
-                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500 shadow-md shadow-purple-600/30 ring-2 ring-purple-400/40"
-                          : isDark
-                          ? "bg-zinc-800/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white"
-                          : "bg-white hover:bg-purple-50/60 border-slate-200 text-slate-700 hover:text-purple-700 shadow-2xs"
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  );
-                })}
+                  <span
+                    className={`text-[11px] font-mono font-semibold flex items-center gap-1 shrink-0 ${
+                      isDark ? "text-zinc-400" : "text-slate-500"
+                    }`}
+                  >
+                    <Tag className="w-3 h-3 text-indigo-400" />
+                    <span>Quick Tags:</span>
+                  </span>
+                  {[
+                    { label: "Casio fx-991", cat: "Calculators" as const },
+                    { label: "SPPU Textbooks", cat: "Books" as const },
+                    { label: "Mini Drafters", cat: "Lab Equipment" as const },
+                    { label: "Campus Cycles", cat: "Cycles" as const },
+                  ].map((t) => {
+                    const isSelected = selectedCategory === t.cat;
+                    return (
+                      <button
+                        key={t.label}
+                        onClick={() => onSelectCategory(t.cat)}
+                        className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/40 ${
+                          isSelected
+                            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500 shadow-md shadow-purple-600/30 ring-2 ring-purple-400/40"
+                            : isDark
+                            ? "bg-zinc-800/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white"
+                            : "bg-white hover:bg-purple-50/60 border-slate-200 text-slate-700 hover:text-purple-700 shadow-2xs"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    );
+                  })}
+                </HorizontalSlider>
               </div>
             </div>
 
@@ -517,172 +528,183 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
           </motion.div>
         </div>
 
-        {/* SECTION 3: Micro Stats Tiles (Full Width 4-Column Grid) */}
+        {/* SECTION 3: Micro Stats Tiles (Slideable on mobile, 4-column on desktop) */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1"
+          className="pt-1 w-full"
         >
-          {/* Stat 1: Verified Items Available */}
-          <div
-            className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-              isDark
-                ? "bg-zinc-900/70 border-zinc-800/80"
-                : "bg-white border-slate-200 shadow-2xs"
-            }`}
+          <HorizontalSlider
+            id="bento-stats-slider"
+            showArrows={true}
+            showProgress={true}
+            showMobileHint={true}
+            scrollStep={260}
+            itemSnap={true}
+            ariaLabel="Campus Live Key Stats Slider"
+            trackClassName="gap-3 py-1"
           >
-            <div className="space-y-0.5">
-              <span
-                className={`text-[11px] font-mono uppercase tracking-wider block ${
-                  isDark ? "text-zinc-500" : "text-slate-500"
-                }`}
-              >
-                Active Campus Gear
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className={`text-xl font-black ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  {totalActiveStock !== undefined ? totalActiveStock : totalListingsCount}
-                </span>
-                <span className="text-[11px] text-emerald-500 font-bold">
-                  Verified In Stock
-                </span>
-              </div>
-            </div>
+            {/* Stat 1: Verified Items Available */}
             <div
-              className={`p-2.5 rounded-xl ${
+              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-indigo-500/15 text-indigo-400"
-                  : "bg-indigo-50 text-indigo-600"
+                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
-              <Cpu className="w-5 h-5" />
+              <div className="space-y-0.5">
+                <span
+                  className={`text-[11px] font-mono uppercase tracking-wider block ${
+                    isDark ? "text-zinc-500" : "text-slate-500"
+                  }`}
+                >
+                  Active Campus Gear
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className={`text-xl font-black ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    {totalActiveStock !== undefined ? totalActiveStock : totalListingsCount}
+                  </span>
+                  <span className="text-[11px] text-emerald-500 font-bold">
+                    Verified In Stock
+                  </span>
+                </div>
+              </div>
+              <div
+                className={`p-2.5 rounded-xl shrink-0 ${
+                  isDark
+                    ? "bg-indigo-500/15 text-indigo-400"
+                    : "bg-indigo-50 text-indigo-600"
+                }`}
+              >
+                <Cpu className="w-5 h-5" />
+              </div>
             </div>
-          </div>
 
-          {/* Stat 2: Student Savings */}
-          <div
-            className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-              isDark
-                ? "bg-zinc-900/70 border-zinc-800/80"
-                : "bg-white border-slate-200 shadow-2xs"
-            }`}
-          >
-            <div className="space-y-0.5">
-              <span
-                className={`text-[11px] font-mono uppercase tracking-wider block ${
-                  isDark ? "text-zinc-500" : "text-slate-500"
-                }`}
-              >
-                Avg Student Savings
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className={`text-xl font-black ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  50%
-                </span>
-                <span className="text-[11px] text-emerald-500 font-bold">
-                  vs Retail MRP
-                </span>
-              </div>
-            </div>
+            {/* Stat 2: Student Savings */}
             <div
-              className={`p-2.5 rounded-xl ${
+              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "bg-emerald-50 text-emerald-600"
+                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
-              <TrendingDown className="w-5 h-5" />
+              <div className="space-y-0.5">
+                <span
+                  className={`text-[11px] font-mono uppercase tracking-wider block ${
+                    isDark ? "text-zinc-500" : "text-slate-500"
+                  }`}
+                >
+                  Avg Student Savings
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className={`text-xl font-black ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    50%
+                  </span>
+                  <span className="text-[11px] text-emerald-500 font-bold">
+                    vs Retail MRP
+                  </span>
+                </div>
+              </div>
+              <div
+                className={`p-2.5 rounded-xl shrink-0 ${
+                  isDark
+                    ? "bg-emerald-500/15 text-emerald-400"
+                    : "bg-emerald-50 text-emerald-600"
+                }`}
+              >
+                <TrendingDown className="w-5 h-5" />
+              </div>
             </div>
-          </div>
 
-          {/* Stat 3: Safe Handover Hotspots */}
-          <div
-            className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-              isDark
-                ? "bg-zinc-900/70 border-zinc-800/80"
-                : "bg-white border-slate-200 shadow-2xs"
-            }`}
-          >
-            <div className="space-y-0.5">
-              <span
-                className={`text-[11px] font-mono uppercase tracking-wider block ${
-                  isDark ? "text-zinc-500" : "text-slate-500"
-                }`}
-              >
-                Handover Locations
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className={`text-xl font-black ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  4 Spots
-                </span>
-                <span className="text-[11px] text-blue-400 font-bold">
-                  Quad &amp; Library
-                </span>
-              </div>
-            </div>
+            {/* Stat 3: Safe Handover Hotspots */}
             <div
-              className={`p-2.5 rounded-xl ${
+              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-blue-500/15 text-blue-400"
-                  : "bg-blue-50 text-blue-600"
+                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
-              <CalendarCheck className="w-5 h-5" />
+              <div className="space-y-0.5">
+                <span
+                  className={`text-[11px] font-mono uppercase tracking-wider block ${
+                    isDark ? "text-zinc-500" : "text-slate-500"
+                  }`}
+                >
+                  Handover Locations
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className={`text-xl font-black ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    4 Spots
+                  </span>
+                  <span className="text-[11px] text-blue-400 font-bold">
+                    Quad &amp; Library
+                  </span>
+                </div>
+              </div>
+              <div
+                className={`p-2.5 rounded-xl shrink-0 ${
+                  isDark
+                    ? "bg-blue-500/15 text-blue-400"
+                    : "bg-blue-50 text-blue-600"
+                }`}
+              >
+                <CalendarCheck className="w-5 h-5" />
+              </div>
             </div>
-          </div>
 
-          {/* Stat 4: Authentication Security */}
-          <div
-            className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-              isDark
-                ? "bg-zinc-900/70 border-zinc-800/80"
-                : "bg-white border-slate-200 shadow-2xs"
-            }`}
-          >
-            <div className="space-y-0.5">
-              <span
-                className={`text-[11px] font-mono uppercase tracking-wider block ${
-                  isDark ? "text-zinc-500" : "text-slate-500"
-                }`}
-              >
-                Domain Restriction
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className={`text-sm sm:text-base font-black truncate max-w-[130px] ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  @pvgcoet.ac.in
-                </span>
-                <span className="text-[11px] text-emerald-500 font-bold">
-                  Enforced
-                </span>
-              </div>
-            </div>
+            {/* Stat 4: Authentication Security */}
             <div
-              className={`p-2.5 rounded-xl ${
+              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-amber-500/15 text-amber-400"
-                  : "bg-amber-50 text-amber-600"
+                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
-              <ShieldCheck className="w-5 h-5" />
+              <div className="space-y-0.5">
+                <span
+                  className={`text-[11px] font-mono uppercase tracking-wider block ${
+                    isDark ? "text-zinc-500" : "text-slate-500"
+                  }`}
+                >
+                  Domain Restriction
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className={`text-sm sm:text-base font-black truncate max-w-[130px] ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    @pvgcoet.ac.in
+                  </span>
+                  <span className="text-[11px] text-emerald-500 font-bold">
+                    Enforced
+                  </span>
+                </div>
+              </div>
+              <div
+                className={`p-2.5 rounded-xl shrink-0 ${
+                  isDark
+                    ? "bg-amber-500/15 text-amber-400"
+                    : "bg-amber-50 text-amber-600"
+                }`}
+              >
+                <ShieldCheck className="w-5 h-5" />
+              </div>
             </div>
-          </div>
+          </HorizontalSlider>
         </motion.div>
       </div>
     </div>

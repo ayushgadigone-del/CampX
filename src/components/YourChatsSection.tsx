@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Conversation, Listing } from "../types";
 import { useTheme } from "../context/ThemeContext";
+import { HorizontalSlider } from "./HorizontalSlider";
 
 interface YourChatsSectionProps {
   chats: Conversation[];
@@ -186,7 +187,16 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <HorizontalSlider
+                id="your-chats-slider"
+                showArrows={true}
+                showProgress={true}
+                showMobileHint={true}
+                scrollStep={300}
+                itemSnap={true}
+                ariaLabel="Your Chats Conversations Slider"
+                trackClassName="gap-4 py-1"
+              >
                 {chats.slice(0, 6).map((chat) => {
                   const statusBadge = getStatusBadge(chat.status);
                   const StatusIcon = statusBadge.icon;
@@ -218,7 +228,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                       key={chat.id}
                       whileHover={{ y: -3, scale: 1.01 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className={`group rounded-2xl border p-4 flex flex-col justify-between transition-all duration-200 relative ${
+                      className={`group w-[290px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 flex flex-col justify-between transition-all duration-200 relative ${
                         isDark
                           ? "bg-slate-800/80 hover:bg-slate-800 border-slate-700/80 hover:border-indigo-500/50 shadow-md"
                           : "bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300 shadow-xs"
@@ -317,7 +327,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                     </motion.div>
                   );
                 })}
-              </div>
+              </HorizontalSlider>
             )}
 
             {/* Bottom info link if more chats exist */}

@@ -1,5 +1,33 @@
 import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+
+// Subtle entry animation variants using framer-motion for grid items
+const listingCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+    scale: 0.97,
+  },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.36,
+      delay: Math.min(i * 0.04, 0.24),
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  }),
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: -8,
+    transition: {
+      duration: 0.18,
+      ease: "easeInOut",
+    },
+  },
+};
 import {
   Sparkles,
   MapPin,
@@ -222,35 +250,32 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   if (isDetailedView) {
     return (
       <motion.div
-        ref={cardRef}
         id={`listing-card-${listing.id}`}
-        initial={{ opacity: 0, y: 14, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -8, scale: 0.96 }}
-        transition={{
-          opacity: { duration: 0.28, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0 },
-          scale: { duration: 0.28, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0 },
-          y: { duration: 0.32, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0, ease: "easeOut" },
-          type: "spring",
-          stiffness: 350,
-          damping: 26,
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={handleMouseLeave}
-        whileHover={{ y: -4 }}
-        style={{
-          transform: isHovered
-            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
-            : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
-          transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
-        }}
-        className={`group relative flex flex-col md:flex-row rounded-3xl border-2 backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg ${
-          isDark
-            ? "bg-slate-900/95 border-slate-800/90 shadow-slate-950/80 hover:border-indigo-500/60 hover:shadow-indigo-500/10"
-            : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
-        }`}
+        variants={listingCardVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        custom={index}
+        whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
+        className="h-full w-full flex flex-col"
       >
+        <div
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            transform: isHovered
+              ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
+              : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
+            transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+          }}
+          className={`group relative flex flex-col md:flex-row rounded-3xl border-2 backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg h-full ${
+            isDark
+              ? "bg-slate-900/95 border-slate-800/90 shadow-slate-950/80 hover:border-indigo-500/60 hover:shadow-indigo-500/10"
+              : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
+          }`}
+        >
         {/* Realistic Spotlight Highlight */}
         {isHovered && (
           <div
@@ -803,6 +828,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             </div>
           </div>
         </div>
+        </div>
       </motion.div>
     );
   }
@@ -812,35 +838,32 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   /* ========================================================================= */
   return (
     <motion.div
-      ref={cardRef}
       id={`listing-card-${listing.id}`}
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -8, scale: 0.96 }}
-      transition={{
-        opacity: { duration: 0.28, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0 },
-        scale: { duration: 0.28, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0 },
-        y: { duration: 0.32, delay: index !== undefined ? Math.min(index * 0.035, 0.22) : 0, ease: "easeOut" },
-        type: "spring",
-        stiffness: 400,
-        damping: 25,
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ y: -5 }}
-      style={{
-        transform: isHovered
-          ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
-          : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
-        transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
-      }}
-      className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full hover:shadow-[0_12px_32px_rgba(168,85,247,0.22)] hover:border-purple-400 ${
-        isDark
-          ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-purple-400"
-          : "bg-white border-slate-200/90 shadow-md hover:border-purple-400"
-      }`}
+      variants={listingCardVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      custom={index}
+      whileHover={{ y: -5, transition: { duration: 0.2, ease: "easeOut" } }}
+      className="h-full w-full flex flex-col"
     >
+      <div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transform: isHovered
+            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
+            : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
+          transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+        }}
+        className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full hover:shadow-[0_12px_32px_rgba(168,85,247,0.22)] hover:border-purple-400 ${
+          isDark
+            ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-purple-400"
+            : "bg-white border-slate-200/90 shadow-md hover:border-purple-400"
+        }`}
+      >
       {/* Realistic Spotlight Gradient */}
       {isHovered && (
         <div
@@ -1559,6 +1582,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               </motion.button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </motion.div>

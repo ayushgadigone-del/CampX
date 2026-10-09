@@ -18,6 +18,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { HorizontalSlider } from "./HorizontalSlider";
 
 interface DedicatedSearchBarProps {
   searchQuery: string;
@@ -234,7 +235,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                 setIsDropdownOpen(true);
               }}
               onBlur={() => setIsFocused(false)}
-              placeholder="Search by gear name, model, SPPU course code (e.g. Casio fx-991CW, M3 Maths, Mini Drafter, Cycle)..."
+              placeholder="Search gear, Casio fx-991, SPPU books, cycles, drafters..."
               className={`w-full pl-12 sm:pl-13 pr-28 sm:pr-32 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium outline-none transition-all ${
                 isDark
                   ? "bg-slate-950/80 text-white placeholder:text-slate-500 border border-slate-800 focus:border-indigo-500"
@@ -406,7 +407,16 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
             </span>
           </div>
 
-          <div className="w-full flex flex-wrap items-center justify-between gap-2 sm:gap-2.5">
+          <HorizontalSlider
+            id="search-console-stock-slider"
+            showArrows={true}
+            showProgress={true}
+            showMobileHint={true}
+            scrollStep={220}
+            itemSnap={true}
+            ariaLabel="Campus Categories Available Stock Slider"
+            trackClassName="gap-2 sm:gap-2.5 py-1"
+          >
             {CATEGORY_ITEMS.map((cat) => {
               const Icon = cat.icon;
               const isSelected = selectedCategory === cat.key;
@@ -421,7 +431,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                   type="button"
                   id={`search-console-category-${cat.key.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => onSelectCategory && onSelectCategory(cat.key)}
-                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 hover:shadow-[0_0_22px_rgba(168,85,247,0.65)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/50 ${
+                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_22px_rgba(168,85,247,0.65)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/50 ${
                     isSelected
                       ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white border-purple-400 ring-2 ring-purple-400/60 shadow-lg shadow-purple-600/30 scale-[1.02]"
                       : isDark
@@ -460,41 +470,51 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                 </button>
               );
             })}
-          </div>
+          </HorizontalSlider>
         </div>
 
-        {/* Dedicated Popular Campus Search Shortcuts */}
-        <div className="pt-3 mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <span
-            className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mr-1 ${
-              isDark ? "text-slate-400" : "text-slate-500"
-            }`}
+        {/* Dedicated Popular Campus Search Shortcuts (Slideable on mobile) */}
+        <div className="pt-3 mt-2">
+          <HorizontalSlider
+            id="search-console-popular-slider"
+            showArrows={true}
+            showProgress={false}
+            showMobileHint={false}
+            scrollStep={180}
+            ariaLabel="Popular campus searches slider"
+            trackClassName="gap-1.5 sm:gap-2 py-1 items-center"
           >
-            <Tag className="w-3 h-3 text-indigo-400" />
-            <span>Popular:</span>
-          </span>
-
-          {POPULAR_CAMPUS_SEARCHES.map((item) => (
-            <motion.button
-              key={item.label}
-              type="button"
-              whileHover={{ scale: 1.05, y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                onSearchChange(item.label);
-                addRecentSearch(item.label);
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 hover:shadow-[0_0_18px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-1 hover:ring-purple-400/40 ${
-                searchQuery.toLowerCase().includes(item.label.toLowerCase())
-                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-xs"
-                  : isDark
-                  ? "bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700/80"
-                  : "bg-slate-100/90 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border-slate-200"
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0 ${
+                isDark ? "text-slate-400" : "text-slate-500"
               }`}
             >
-              <span>{item.label}</span>
-            </motion.button>
-          ))}
+              <Tag className="w-3 h-3 text-indigo-400" />
+              <span>Popular:</span>
+            </span>
+
+            {POPULAR_CAMPUS_SEARCHES.map((item) => (
+              <motion.button
+                key={item.label}
+                type="button"
+                whileHover={{ scale: 1.05, y: -1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  onSearchChange(item.label);
+                  addRecentSearch(item.label);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_18px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-1 hover:ring-purple-400/40 ${
+                  searchQuery.toLowerCase().includes(item.label.toLowerCase())
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-xs"
+                    : isDark
+                    ? "bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700/80"
+                    : "bg-slate-100/90 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border-slate-200"
+                }`}
+              >
+                <span>{item.label}</span>
+              </motion.button>
+            ))}
+          </HorizontalSlider>
         </div>
       </div>
     </section>
