@@ -36,7 +36,6 @@ interface NavbarProps {
   onOpenCreateModal: () => void;
   onOpenAIInspector: () => void;
   onOpenHandovers: () => void;
-  onOpenPBLInfo: () => void;
   onOpenTopperNotes: () => void;
   upcomingHandoversCount: number;
   wishlistCount?: number;
@@ -59,7 +58,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCreateModal,
   onOpenAIInspector,
   onOpenHandovers,
-  onOpenPBLInfo,
   onOpenTopperNotes,
   upcomingHandoversCount,
   wishlistCount = 0,
@@ -104,9 +102,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* ================= LEFT: Brand Logo & Title ================= */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div
-              onClick={onOpenPBLInfo}
-              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group"
-              title="PVG's COET Campus Resale & Exchange • Click for PBL Info (Shortcut: P)"
+              className="flex items-center gap-2 sm:gap-2.5 group"
+              title="PVG's COET Campus Resale & Exchange"
             >
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black shadow-sm group-hover:scale-105 transition-transform duration-200 shrink-0">
                 <Building2 className="w-5 h-5" />
@@ -145,198 +142,181 @@ export const Navbar: React.FC<NavbarProps> = ({
                       isDark ? "text-slate-400" : "text-slate-500"
                     }`}
                   >
-                    PBL 2026
+                    Pune Campus
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ================= CENTER / MIDDLE: Evenly Spaced Header Actions (Desktop xl) ================= */}
+          {/* ================= CENTER / MIDDLE: Evenly Spaced Navigation Buttons (Desktop xl) ================= */}
           <nav
             aria-label="Campus Navigation"
-            className="hidden xl:flex flex-1 items-center justify-center px-1 sm:px-2 md:px-4 max-w-2xl mx-auto"
+            className="hidden xl:flex items-center justify-center gap-2 lg:gap-2.5 mx-auto"
           >
-            <div className="flex items-center justify-evenly w-full gap-1 sm:gap-2">
-              {/* 1. Free Topper Notes Vault */}
-              <motion.button
-                id="navbar-topper-notes-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onOpenTopperNotes}
-                aria-keyshortcuts="T"
-                title="Free Topper Notes Vault (Shortcut: T)"
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+            {/* 1. Free Topper Notes Vault */}
+            <motion.button
+              id="navbar-topper-notes-btn"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onOpenTopperNotes}
+              aria-keyshortcuts="T"
+              title="Free Topper Notes Vault (Shortcut: T)"
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+                isDark
+                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                  : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span>Topper Vault</span>
+              <span
+                className={`px-1 py-0.2 rounded text-[9px] font-black uppercase tracking-wider ${
                   isDark
-                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-                    : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
+                    ? "bg-emerald-500/25 text-emerald-300"
+                    : "bg-emerald-200/80 text-emerald-800"
                 }`}
               >
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span className="hidden sm:inline">Topper Vault</span>
-                <span className="inline sm:hidden">Vault</span>
-                <span
-                  className={`hidden md:inline px-1 py-0.2 rounded text-[9px] font-black uppercase tracking-wider ${
-                    isDark
-                      ? "bg-emerald-500/25 text-emerald-300"
-                      : "bg-emerald-200/80 text-emerald-800"
-                  }`}
-                >
-                  Free
+                Free
+              </span>
+            </motion.button>
+
+            {/* 2. AI Inspector Button */}
+            <motion.button
+              id="navbar-ai-inspector-btn"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onOpenAIInspector}
+              aria-keyshortcuts="I"
+              title="Inspect item condition with Gemini AI (Shortcut: I)"
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                isDark
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+              <span>AI Inspector</span>
+            </motion.button>
+
+            {/* 3. Handovers Button */}
+            <motion.button
+              id="navbar-handovers-btn"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onOpenHandovers}
+              aria-keyshortcuts="H"
+              title={`Campus Handover Schedule & Google Calendar Sync (Shortcut: H)${
+                upcomingHandoversCount > 0 ? ` • ${upcomingHandoversCount} scheduled` : ""
+              }`}
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                upcomingHandoversCount > 0
+                  ? isDark
+                    ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
+                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
+                  : isDark
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <span>Handovers</span>
+              {upcomingHandoversCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-white font-black text-[10px] shadow-2xs">
+                  {upcomingHandoversCount}
                 </span>
-              </motion.button>
+              )}
+            </motion.button>
 
-              {/* 2. AI Inspector Button */}
-              <motion.button
-                id="navbar-ai-inspector-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onOpenAIInspector}
-                aria-keyshortcuts="I"
-                title="Inspect item condition with Gemini AI (Shortcut: I)"
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
-                  isDark
-                    ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
-                    : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                <span className="hidden sm:inline">AI Inspector</span>
-                <span className="inline sm:hidden">AI Scan</span>
-              </motion.button>
-
-              {/* 3. Handovers Button */}
-              <motion.button
-                id="navbar-handovers-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onOpenHandovers}
-                aria-keyshortcuts="H"
-                title={`Campus Handover Schedule & Google Calendar Sync (Shortcut: H)${
-                  upcomingHandoversCount > 0 ? ` • ${upcomingHandoversCount} scheduled` : ""
-                }`}
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
-                  upcomingHandoversCount > 0
-                    ? isDark
-                      ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
-                      : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
-                    : isDark
-                    ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
-                    : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                }`}
-              >
-                <CalendarIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                <span>Handovers</span>
-                {upcomingHandoversCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-white font-black text-[10px] shadow-2xs">
-                    {upcomingHandoversCount}
-                  </span>
-                )}
-              </motion.button>
-
-              {/* 4. PBL Report Button */}
-              <motion.button
-                id="navbar-pbl-report-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onOpenPBLInfo}
-                aria-keyshortcuts="P"
-                title="PVG's COET Project Based Learning Report & System Specs (Shortcut: P)"
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
-                  isDark
-                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
-                    : "bg-purple-50 hover:bg-purple-100/80 text-purple-700 border-purple-200 shadow-2xs"
-                }`}
-              >
-                <BookOpen className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                <span className="hidden sm:inline">PBL Report</span>
-                <span className="inline sm:hidden">PBL</span>
-              </motion.button>
-            </div>
-          </nav>
-
-          {/* ================= RIGHT: User Actions, Primary CTA & Profile ================= */}
-          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
-            {/* Your Chats Button (Desktop xl) */}
-            <button
+            {/* 4. Your Chats Button */}
+            <motion.button
               id="navbar-your-chats-button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onOpenYourChats}
               aria-keyshortcuts="C"
               title={`Your Chats with Sellers (Shortcut: C)${
                 chatsCount > 0 ? ` • ${chatsCount} active` : ""
               }`}
-              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 isDark
-                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-indigo-600 border-slate-200 shadow-2xs"
               }`}
             >
-              <MessageSquare className="w-4 h-4 text-indigo-500 shrink-0" />
-              <span className="inline text-xs font-medium">Chats</span>
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+              <span>Chats</span>
               {chatsCount > 0 && (
                 <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center shadow-2xs">
                   {chatsCount}
                 </span>
               )}
-            </button>
+            </motion.button>
 
-            {/* Wishlist Button (Desktop xl) */}
-            <button
+            {/* 5. Wishlist Button */}
+            <motion.button
               id="navbar-wishlist-button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onOpenWishlist}
               aria-keyshortcuts="W"
               title={`Saved Wishlist (Shortcut: W)${
                 wishlistCount > 0 ? ` • ${wishlistCount} items` : ""
               }`}
-              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 isDark
-                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-rose-600 border-slate-200 shadow-2xs"
               }`}
             >
               <Heart
-                className={`w-4 h-4 shrink-0 ${
+                className={`w-3.5 h-3.5 shrink-0 ${
                   wishlistCount > 0
                     ? "fill-rose-500 text-rose-500"
                     : "text-rose-500 dark:text-rose-400"
                 }`}
               />
-              <span className="inline text-xs font-medium">Saved</span>
+              <span>Saved</span>
               {wishlistCount > 0 && (
                 <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center shadow-2xs">
                   {wishlistCount}
                 </span>
               )}
-            </button>
+            </motion.button>
 
-            {/* Notify Me / Alerts Button (Desktop xl) */}
-            <button
+            {/* 6. Notify Me / Alerts Button */}
+            <motion.button
               id="navbar-alerts-button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onOpenAlerts}
               title={`Keyword & Item Alerts${
                 alertsCount > 0 ? ` • ${alertsCount} active` : ""
               }`}
-              className={`hidden xl:flex h-9 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 isDark
-                  ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
+                  ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-amber-600 border-slate-200 shadow-2xs"
               }`}
             >
               <Bell
-                className={`w-4 h-4 shrink-0 ${
+                className={`w-3.5 h-3.5 shrink-0 ${
                   alertsCount > 0
                     ? "fill-amber-500 text-amber-500"
                     : "text-amber-500 dark:text-amber-400"
                 }`}
               />
-              <span className="inline text-xs font-medium">Alerts</span>
+              <span>Alerts</span>
               {alertsCount > 0 && (
                 <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-2xs">
                   {alertsCount}
                 </span>
               )}
-            </button>
+            </motion.button>
+          </nav>
 
+          {/* ================= RIGHT: User Actions, Primary CTA & Profile ================= */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Network Status Dot / Badge (Unclickable indicator reflecting true internet connectivity) */}
             <div
               id="navbar-network-status-indicator"
@@ -616,19 +596,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                             Free
                           </span>
                         </button>
-
-                        <button
-                          onClick={() => {
-                            setShowProfileMenu(false);
-                            onOpenPBLInfo();
-                          }}
-                          className={`w-full text-left px-4 py-2 flex items-center gap-2 font-medium transition-colors cursor-pointer ${
-                            isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
-                          }`}
-                        >
-                          <BookOpen className="w-3.5 h-3.5 text-purple-500" />
-                          <span>PBL Project Info</span>
-                        </button>
                       </div>
 
                       <div
@@ -837,20 +804,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {alertsCount}
                 </span>
               )}
-            </button>
-
-            {/* 7. PBL Report */}
-            <button
-              id="mobile-nav-pbl-btn"
-              onClick={onOpenPBLInfo}
-              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                isDark
-                  ? "bg-indigo-500/10 text-indigo-300 border-indigo-500/30"
-                  : "bg-purple-50 text-purple-700 border-purple-200 shadow-2xs"
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-              <span>PBL Report</span>
             </button>
           </HorizontalSlider>
         </div>

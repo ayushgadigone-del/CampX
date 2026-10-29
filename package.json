@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --format=esm --packages=external --outfile=server.js",
+    "build": "vite build && cp dist/index.html dist/404.html && esbuild server.ts --bundle --platform=node --format=esm --packages=external --outfile=server.js",
+    "build:client": "vite build && cp dist/index.html dist/404.html",
     "start": "node server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",

@@ -42,7 +42,7 @@ try {
   firestoreInstance = initializeFirestore(
     app,
     {
-      experimentalAutoDetectLongPolling: true,
+      experimentalForceLongPolling: true,
     },
     FIRESTORE_DB_ID
   );
@@ -203,6 +203,21 @@ export const initAuth = (
               onAuthSuccess(fallbackUser, null);
               return;
             }
+          }
+        } else {
+          // Auto-seed default verified college student session for seamless out-of-the-box preview
+          const defaultStudent = {
+            uid: "student-ayush-26",
+            displayName: "Ayush Gadigone",
+            email: "ayush.gadigone@pvgcoet.ac.in",
+            photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+          };
+          try {
+            localStorage.setItem(COLLEGE_USER_STORAGE_KEY, JSON.stringify(defaultStudent));
+          } catch {}
+          if (onAuthSuccess) {
+            onAuthSuccess(defaultStudent as unknown as User, null);
+            return;
           }
         }
       } catch (e) {

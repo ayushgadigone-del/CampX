@@ -33,7 +33,6 @@ interface EngineeringBentoHeroProps {
   onOpenWishlist?: () => void;
   onOpenYourChats?: () => void;
   onOpenAlerts?: () => void;
-  onOpenPBLInfo?: () => void;
   onFocusSearch?: () => void;
   onSelectCategory: (cat: any) => void;
   selectedCategory?: string;
@@ -53,7 +52,6 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
   onOpenWishlist,
   onOpenYourChats,
   onOpenAlerts,
-  onOpenPBLInfo,
   onFocusSearch,
   onSelectCategory,
   selectedCategory = "All",

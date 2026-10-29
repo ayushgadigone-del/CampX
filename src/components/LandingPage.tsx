@@ -29,12 +29,10 @@ import { ALLOWED_COLLEGE_DOMAIN } from "../utils/collegeAuth";
 
 interface LandingPageProps {
   onProceedToSignIn: () => void;
-  onOpenPBLInfo?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onProceedToSignIn,
-  onOpenPBLInfo,
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
@@ -141,8 +139,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       a: "The Topper Notes Vault is a free peer-to-peer repository where high-scoring students share comprehensive handwritten notes, solved university question sets, and practical viva guides across all engineering branches.",
     },
     {
-      q: "Is this an official college project?",
-      a: "Yes, this application was developed as a Project Based Learning (PBL) initiative by 2nd Year Computer Science & Engineering students of PVG's COET, Pune, under the mentorship of Prof. Snehal Kokil.",
+      q: "Is this platform exclusively for PVG's COET students?",
+      a: "Yes, this application is restricted to verified institutional domain accounts (@pvgcoet.ac.in) to guarantee safe and authenticated on-campus peer-to-peer exchanges.",
     },
   ];
 
@@ -202,15 +200,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               FAQ
             </button>
-            {onOpenPBLInfo && (
-              <button
-                onClick={onOpenPBLInfo}
-                className="hover:text-amber-300 text-amber-400/90 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Award className="w-3.5 h-3.5" />
-                <span>PBL Info</span>
-              </button>
-            )}
           </div>
 
           <button
@@ -503,33 +492,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </section>
 
-        {/* Section: Project Based Learning (PBL) Accreditation */}
-        <section className="py-14 px-4 sm:px-8 border-t border-slate-800/80 bg-gradient-to-b from-indigo-950/20 to-slate-900/60">
-          <div className="max-w-4xl mx-auto rounded-3xl bg-slate-800/80 border border-slate-700/80 p-6 sm:p-8 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Project Based Learning (PBL) Initiative</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-black text-white">
-                2nd Year Computer Science & Engineering • PVG's COET
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-                Mentored by <strong className="text-white">Prof. Snehal Kokil</strong>. Engineered by students Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), and Krishna Gopnarayan (35).
-              </p>
-            </div>
-
-            {onOpenPBLInfo && (
-              <button
-                onClick={onOpenPBLInfo}
-                className="shrink-0 px-4 py-2.5 rounded-xl bg-slate-700/80 hover:bg-slate-700 border border-slate-600 text-slate-100 font-semibold text-xs transition-colors cursor-pointer"
-              >
-                View Full PBL Documentation
-              </button>
-            )}
-          </div>
-        </section>
-
         {/* Section: Frequently Asked Questions */}
         <section id="faq" className="py-16 px-4 sm:px-8 border-t border-slate-800/80">
           <div className="max-w-4xl mx-auto space-y-8">
@@ -607,7 +569,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <span>PVG's COET Campus Resale & Exchange</span>
           </div>
           <div>
-            Project Based Learning (PBL) • 2nd Year Computer Science & Engineering
+            Official Student-to-Student Resale & Exchange Network • Pune
           </div>
         </div>
       </footer>

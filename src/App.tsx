@@ -44,6 +44,7 @@ import {
   setDoc,
   getDocs,
   increment,
+  deleteDoc,
 } from "firebase/firestore";
 
 import {
@@ -80,7 +81,6 @@ import { CreateListingModal } from "./components/CreateListingModal";
 import { CalendarHandoverModal } from "./components/CalendarHandoverModal";
 import { ChatDrawer } from "./components/ChatDrawer";
 import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
-import { PBLProjectInfoModal } from "./components/PBLProjectInfoModal";
 import { WishlistModal } from "./components/WishlistModal";
 import { YourChatsModal } from "./components/YourChatsModal";
 import { YourChatsSection } from "./components/YourChatsSection";
@@ -120,6 +120,8 @@ import {
 import {
   calculateNewExpiryDate,
   checkAndMarkInactiveListings,
+  purgeExpiredListings,
+  isListingExpired,
 } from "./utils/expiryUtils";
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
@@ -170,8 +172,8 @@ export default function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
 
-  // Listings state
-  const [listings, setListings] = useState<Listing[]>(INITIAL_SEED_LISTINGS);
+  // Listings state (automatically purges any expired items on load)
+  const [listings, setListings] = useState<Listing[]>(() => purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
   const [isLoadingListings, setIsLoadingListings] = useState(true);
 
   // Filter & Search states
@@ -352,8 +354,8 @@ export default function App() {
   }, []);
 
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
-  const [isPBLModalOpen, setIsPBLModalOpen] = useState(false);
-  const [authView, setAuthView] = useState<"landing" | "login">("landing");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(false);
   const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
   const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
 
@@ -379,8 +381,13 @@ export default function App() {
 
   // 1. Initialize Auth
   useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 300);
+
     const unsubscribe = initAuth(
       async (user) => {
+        clearTimeout(safetyTimer);
         // Enforce @pvgcoet.ac.in college domain on re-hydration
         if (user && user.email) {
           if (!isValidCollegeEmail(user.email)) {
@@ -400,11 +407,13 @@ export default function App() {
         setIsAuthLoading(false);
       },
       () => {
+        clearTimeout(safetyTimer);
         setCurrentUser(null);
         setIsAuthLoading(false);
       }
     );
     return () => {
+      clearTimeout(safetyTimer);
       if (unsubscribe) unsubscribe();
     };
   }, []);
@@ -422,7 +431,8 @@ export default function App() {
           listingsCol,
           (querySnapshot) => {
             if (querySnapshot.empty) {
-              setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
+              const { activeListings } = purgeExpiredListings(INITIAL_SEED_LISTINGS);
+              setListings(activeListings);
               setIsLoadingListings(false);
               return;
             }
@@ -441,20 +451,31 @@ export default function App() {
               });
             });
 
-            if (fetched.length > 0) {
-              setListings(checkAndMarkInactiveListings(fetched).updatedListings);
-            } else {
-              setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
+            const sourceList = fetched.length > 0 ? fetched : INITIAL_SEED_LISTINGS;
+            const { activeListings, purgedIds } = purgeExpiredListings(sourceList);
+            setListings(activeListings);
+
+            // Automatically delete expired listings from Firestore
+            if (purgedIds.length > 0) {
+              purgedIds.forEach(async (id) => {
+                try {
+                  await deleteDoc(doc(db, "listings", id));
+                  console.info(`Auto-deleted expired listing from database: ${id}`);
+                } catch {
+                  // Benign ignore if already removed or operating offline
+                }
+              });
             }
+
             setIsLoadingListings(false);
 
             // Real-time alert check for newly added documents
             if (isInitialSnapshotRef.current) {
-              fetched.forEach((item) => knownListingIdsRef.current.add(item.id));
+              activeListings.forEach((item) => knownListingIdsRef.current.add(item.id));
               INITIAL_SEED_LISTINGS.forEach((item) => knownListingIdsRef.current.add(item.id));
               isInitialSnapshotRef.current = false;
             } else {
-              fetched.forEach((item) => {
+              activeListings.forEach((item) => {
                 if (!knownListingIdsRef.current.has(item.id)) {
                   knownListingIdsRef.current.add(item.id);
                   processNewListingForAlerts(item);
@@ -465,13 +486,13 @@ export default function App() {
           (err) => {
             handleFirestoreError(err, OperationType.GET, "listings");
             console.info("Firestore live listener operating in offline mode, showing local catalog.");
-            setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
+            setListings(purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
             setIsLoadingListings(false);
           }
         );
       } catch (err) {
         handleFirestoreError(err, OperationType.GET, "listings");
-        setListings(checkAndMarkInactiveListings(INITIAL_SEED_LISTINGS).updatedListings);
+        setListings(purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
         setIsLoadingListings(false);
       }
     };
@@ -481,6 +502,29 @@ export default function App() {
     return () => {
       if (unsubscribe) unsubscribe();
     };
+  }, []);
+
+  // Regularly check and permanently delete any listings that pass their expiry date
+  useEffect(() => {
+    const purgeInterval = setInterval(() => {
+      setListings((currentListings) => {
+        const { activeListings, purgedIds } = purgeExpiredListings(currentListings);
+        if (purgedIds.length > 0) {
+          purgedIds.forEach(async (id) => {
+            try {
+              await deleteDoc(doc(db, "listings", id));
+              console.info(`Auto-deleted expired listing during interval check: ${id}`);
+            } catch {
+              // Benign
+            }
+          });
+          return activeListings;
+        }
+        return currentListings;
+      });
+    }, 30000);
+
+    return () => clearInterval(purgeInterval);
   }, []);
 
   // Wishlist Handlers & Logic
@@ -1209,40 +1253,15 @@ export default function App() {
     );
   }
 
-  // 2. First-View Enforced Gate: If not logged in with verified college email, show LandingPage first (or CollegeLoginPage)
-  if (!currentUser || !isValidCollegeEmail(currentUser.email)) {
+  // Optional Full Landing Page View (can be opened via footer / about action)
+  if (showLandingPage) {
     return (
-      <>
-        {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-            <div className="px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-slate-800 flex items-center gap-2 max-w-md">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{toastMessage}</span>
-            </div>
-          </div>
-        )}
-
-        {authView === "landing" ? (
-          <LandingPage
-            onProceedToSignIn={() => setAuthView("login")}
-            onOpenPBLInfo={() => setIsPBLModalOpen(true)}
-          />
-        ) : (
-          <CollegeLoginPage
-            onGoogleSignIn={handleLogin}
-            onDemoCollegeSignIn={handleDemoCollegeLogin}
-            authErrorMessage={authErrorMessage}
-            onClearError={() => setAuthErrorMessage(null)}
-            onBackToLanding={() => setAuthView("landing")}
-          />
-        )}
-
-        {/* PBL Documentation Modal accessible before sign-in */}
-        <PBLProjectInfoModal
-          isOpen={isPBLModalOpen}
-          onClose={() => setIsPBLModalOpen(false)}
-        />
-      </>
+      <LandingPage
+        onProceedToSignIn={() => {
+          setShowLandingPage(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
     );
   }
 
@@ -1289,12 +1308,16 @@ export default function App() {
       {/* Navigation Header */}
       <Navbar
         currentUser={currentUser}
-        onLogin={handleLogin}
+        onLogin={() => setIsLoginModalOpen(true)}
         onDemoLogin={() => handleDemoCollegeLogin()}
         onLogout={handleLogout}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenCreateModal={() => {
+          if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+          }
           if (!isOnline) {
             showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
             return;
@@ -1311,7 +1334,6 @@ export default function App() {
           setIsAIInspectorOpen(true);
         }}
         onOpenHandovers={() => setIsHandoversModalOpen(true)}
-        onOpenPBLInfo={() => setIsPBLModalOpen(true)}
         onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
         upcomingHandoversCount={upcomingHandoversCount}
         wishlistCount={wishlistIds.length}
@@ -1372,7 +1394,6 @@ export default function App() {
         onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
         onOpenYourChats={() => setIsYourChatsModalOpen(true)}
-        onOpenPBLInfo={() => setIsPBLModalOpen(true)}
         onFocusSearch={() => {
           const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
           input?.focus();
@@ -2195,21 +2216,12 @@ export default function App() {
               PVG's COET Campus Resale & Exchange Platform
             </div>
             <p className={isDark ? "text-slate-400" : "text-slate-300"}>
-              Project Based Learning (PBL) • 2nd Year Computer Science & Engineering
-            </p>
-            <p className={isDark ? "text-slate-400" : "text-slate-300"}>
-              Guided by: <strong className="text-white">Prof. Snehal Kokil</strong> | Team: Ayush Gadigone (26), Parshwa Gandhi (28), Omkar Ghadashi (32), Krishna Gopnarayan (35)
+              Official Student-to-Student Resale & Exchange • Pune Campus
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <ThemeSelector variant="segmented" />
-            <button
-              onClick={() => setIsPBLModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-200 font-semibold transition-colors cursor-pointer shadow-2xs"
-            >
-              PBL Documentation & Milestones
-            </button>
             <button
               onClick={() => setIsAIInspectorOpen(true)}
               className="px-3 py-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
@@ -2366,11 +2378,6 @@ export default function App() {
         }}
       />
 
-      <PBLProjectInfoModal
-        isOpen={isPBLModalOpen}
-        onClose={() => setIsPBLModalOpen(false)}
-      />
-
       {/* On-Screen Toast Notification for Matched Listing Alert */}
       <AlertToastNotification
         matchEvent={currentAlertToast}
@@ -2469,6 +2476,34 @@ export default function App() {
         }}
         onShowToast={showToast}
       />
+
+      {/* College Login Modal */}
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl border border-slate-700 bg-slate-900">
+            <button
+              onClick={() => setIsLoginModalOpen(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <CollegeLoginPage
+              onGoogleSignIn={async () => {
+                await handleLogin();
+                setIsLoginModalOpen(false);
+              }}
+              onDemoCollegeSignIn={async (email, name) => {
+                await handleDemoCollegeLogin(email, name);
+                setIsLoginModalOpen(false);
+              }}
+              authErrorMessage={authErrorMessage}
+              onClearError={() => setAuthErrorMessage(null)}
+              onBackToLanding={() => setIsLoginModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

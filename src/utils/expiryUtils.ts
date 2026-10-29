@@ -76,24 +76,36 @@ export const calculateNewExpiryDate = (days: number = DEFAULT_EXPIRY_DAYS): stri
 };
 
 /**
- * Automatically marks listings older than 30 days as 'inactive' to keep marketplace fresh
+ * Automatically purges and deletes listings that have passed their expiry date.
+ * Returns the filtered active listings, count of deleted items, and the list of deleted IDs.
+ */
+export const purgeExpiredListings = (
+  listings: Listing[]
+): { activeListings: Listing[]; purgedCount: number; purgedIds: string[] } => {
+  const purgedIds: string[] = [];
+  const activeListings = listings.filter((listing) => {
+    // A listing is deleted if it has expired past its validity date or is marked inactive due to expiry
+    if (isListingExpired(listing) || listing.status === "inactive") {
+      purgedIds.push(listing.id);
+      return false;
+    }
+    return true;
+  });
+
+  return { activeListings, purgedCount: purgedIds.length, purgedIds };
+};
+
+/**
+ * Automatically deletes listings older than their expiry threshold to keep the marketplace clean.
+ * Backwards compatible with checkAndMarkInactiveListings: updatedListings now only contains valid, non-expired listings.
  */
 export const checkAndMarkInactiveListings = (
   listings: Listing[]
-): { updatedListings: Listing[]; newlyExpiredCount: number } => {
-  let newlyExpiredCount = 0;
-
-  const updatedListings = listings.map((listing) => {
-    // Only auto-mark as inactive if currently available and past expiry
-    if (listing.status === "available" && isListingExpired(listing)) {
-      newlyExpiredCount++;
-      return {
-        ...listing,
-        status: "inactive" as const,
-      };
-    }
-    return listing;
-  });
-
-  return { updatedListings, newlyExpiredCount };
+): { updatedListings: Listing[]; newlyExpiredCount: number; deletedIds: string[] } => {
+  const { activeListings, purgedCount, purgedIds } = purgeExpiredListings(listings);
+  return {
+    updatedListings: activeListings,
+    newlyExpiredCount: purgedCount,
+    deletedIds: purgedIds,
+  };
 };

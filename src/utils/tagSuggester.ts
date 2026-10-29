@@ -191,6 +191,32 @@ const CATEGORY_DEFAULTS: Record<ItemCategory, string[]> = {
   Other: ["Campus Gear", "Student Deal"],
 };
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function matchesKeyword(text: string, kw: string): boolean {
+  const normalizedKw = kw.trim().toLowerCase();
+  if (!normalizedKw) return false;
+
+  // Quick inclusion check
+  if (!text.includes(normalizedKw)) return false;
+
+  // If keyword contains non-word characters (like 'c++', 'ti-84', 'fx-991')
+  if (/[^\w]/.test(normalizedKw)) {
+    return true;
+  }
+
+  // Word boundary regex for standard alphanumeric words
+  try {
+    const escaped = escapeRegex(normalizedKw);
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
+    return regex.test(text);
+  } catch {
+    return text.includes(normalizedKw);
+  }
+}
+
 /**
  * Generates an array of suggested search tags based on item title, category, and existing tags.
  */
@@ -207,11 +233,7 @@ export function generateSuggestedTags(
   // 1. Check keyword rules
   if (cleanTitle) {
     for (const rule of KEYWORD_RULES) {
-      const matched = rule.keywords.some((kw) => {
-        // match word boundary or contains
-        const regex = new RegExp(`\\b${kw}`, "i");
-        return regex.test(cleanTitle) || cleanTitle.includes(kw);
-      });
+      const matched = rule.keywords.some((kw) => matchesKeyword(cleanTitle, kw));
 
       if (matched) {
         for (const tag of rule.suggestedTags) {

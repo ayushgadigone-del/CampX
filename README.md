@@ -123,9 +123,29 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🚢 How to Deploy from GitHub
+### Quick Fix: Deploying to GitHub Pages (`ayushgadigone-del.github.io/CampX`)
 
-You can deploy this full-stack application for free or low cost using any of the options below.
+If your site at `https://ayushgadigone-del.github.io/CampX/` shows a **blank white page**, it is caused by two common GitHub Pages configuration issues:
+
+1. **Asset Base Path 404 (Fixed)**: 
+   - By default, Vite generates asset links starting with `/assets/...`. When hosted under a repository subfolder (`/CampX/`), the browser tries to fetch `https://ayushgadigone-del.github.io/assets/...` (which doesn't exist) instead of `https://ayushgadigone-del.github.io/CampX/assets/...`.
+   - **Fix applied**: `vite.config.ts` has been configured with `base: './'`, ensuring all scripts and stylesheets load relative to the `/CampX/` folder.
+
+2. **GitHub Pages Source Setting (Needs 1-click update on GitHub)**:
+   - If GitHub Pages is set to **"Deploy from a branch (main / root)"**, GitHub Pages serves raw files directly from the repository, including unbundled `<script src="/src/main.tsx">`, which browsers cannot execute.
+   - **How to fix in 30 seconds**:
+     1. Go to your repository: **`https://github.com/ayushgadigone-del/CampX`**
+     2. Click **Settings** (top navigation tab) &rarr; **Pages** (in the left sidebar).
+     3. Under **Build and deployment &rarr; Source**, click the dropdown and change it from *"Deploy from a branch"* to **"GitHub Actions"**.
+     4. Push the latest code (including the `.github/workflows/deploy.yml` workflow provided in this repository):
+        ```bash
+        git add .
+        git commit -m "Configure GitHub Pages workflow with relative base"
+        git push origin main
+        ```
+     5. Go to the **Actions** tab on your repository to watch the build finish (~60 seconds). Once the checkmark turns green, refresh `https://ayushgadigone-del.github.io/CampX/` and the marketplace will appear!
+
+> **Note on Static Hosting vs Backend Services**: GitHub Pages is a static file host (runs HTML, CSS, JavaScript in the browser). All marketplace features, listings, filters, local state, and UI work directly on GitHub Pages. For the multimodal Gemini AI inspection (`/api/analyze-item`), which uses a secure server-side Node.js environment to protect your Gemini API key, use **Option 1 (Render)** or **Option 2 (Railway)** below.
 
 ---
 

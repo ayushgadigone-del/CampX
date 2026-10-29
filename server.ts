@@ -12,12 +12,36 @@ const isProduction =
   process.env.NODE_ENV === "production" ||
   process.argv.some((arg) => arg.includes("server.js") || arg.includes("server.cjs") || arg.includes("dist"));
 
-// Nginx reverse proxy in AI Studio's container listens on port 8080 and forwards to 3000.
-// Node server must bind to 3000 so Nginx can proxy traffic to it.
-const PORT = process.env.PORT && process.env.PORT !== "8080" ? parseInt(process.env.PORT, 10) : 3000;
+// Support both CLI flags (--port 3000, --host 0.0.0.0) and environment variables
+let port = 3000;
+const portArgIndex = process.argv.findIndex((arg) => arg === "--port" || arg === "-p");
+if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
+  const parsed = parseInt(process.argv[portArgIndex + 1], 10);
+  if (!isNaN(parsed) && parsed > 0) {
+    port = parsed;
+  }
+} else if (process.env.PORT && process.env.PORT !== "8080") {
+  port = parseInt(process.env.PORT, 10);
+}
+const PORT = port;
+
+let host = "0.0.0.0";
+const hostArgIndex = process.argv.findIndex((arg) => arg === "--host" || arg === "-h");
+if (hostArgIndex !== -1 && process.argv[hostArgIndex + 1]) {
+  host = process.argv[hostArgIndex + 1];
+}
+const HOST = host;
 
 // Security: Disable X-Powered-By header to prevent server technology fingerprinting
 app.disable("x-powered-by");
+
+// Process-level error resilience to keep dev server robust
+process.on("unhandledRejection", (reason, promise) => {
+  console.warn("Dev server unhandled rejection caught:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("Dev server uncaught exception caught:", err?.message || err);
+});
 
 // Security: HTTP Security & Privacy Headers Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -371,8 +395,8 @@ async function setupApp() {
     });
   }
 
-  const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Campus Resale & Exchange server listening on http://0.0.0.0:${PORT} (NODE_ENV=${process.env.NODE_ENV || 'development'})`);
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`Campus Resale & Exchange server listening on http://${HOST}:${PORT} (NODE_ENV=${process.env.NODE_ENV || 'development'})`);
   });
 
   server.on("error", (err: any) => {
@@ -389,4 +413,6 @@ async function setupApp() {
   process.on("SIGINT", shutdown);
 }
 
-setupApp();
+setupApp().catch((err) => {
+  console.error("Critical failure during setupApp:", err);
+});
