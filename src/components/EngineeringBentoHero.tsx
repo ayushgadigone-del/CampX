@@ -65,7 +65,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
       <div
         className={`w-full mb-4 px-3.5 sm:px-4 py-2 rounded-xl text-xs flex flex-wrap items-center justify-between gap-3 border transition-colors ${
           isDark
-            ? "bg-zinc-950/80 border-zinc-800 text-zinc-400"
+            ? "bg-[#0F172A]/85 border-slate-800/90 text-slate-300 ring-1 ring-white/5"
             : "bg-white/90 border-slate-200 text-slate-600 shadow-2xs"
         }`}
       >
@@ -74,7 +74,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
           <span className="font-mono text-[11px] font-semibold tracking-tight">
-            <strong className={isDark ? "text-zinc-200" : "text-slate-900"}>
+            <strong className={isDark ? "text-slate-100" : "text-slate-900"}>
               PVG&apos;s COET Terminal Node:
             </strong>{" "}
             Pune Campus Network Online
@@ -83,13 +83,13 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
 
         {/* Keyboard Shortcut Cheatsheet Pills */}
         <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono">
-          <span className="text-zinc-500">Shortcuts:</span>
+          <span className={isDark ? "text-slate-400" : "text-slate-500"}>Shortcuts:</span>
           {onFocusSearch && (
             <button
               onClick={onFocusSearch}
               className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
                 isDark
-                  ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
+                  ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
                   : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
               }`}
               title="Focus search input"
@@ -101,7 +101,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             onClick={handleCreate}
             className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
               isDark
-                ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
+                ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
                 : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
             }`}
             title="Create new listing"
@@ -177,7 +177,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             transition={{ duration: 0.3 }}
             className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
               isDark
-                ? "bg-gradient-to-br from-zinc-900/95 via-zinc-900/85 to-zinc-950/95 border-zinc-800/90 shadow-xl"
+                ? "bg-gradient-to-br from-[#0F172A] via-[#0F172A]/90 to-[#0A0E17] border-slate-800/90 shadow-xl ring-1 ring-white/5"
                 : "bg-gradient-to-br from-white via-slate-50 to-indigo-50/40 border-slate-200/90 shadow-md"
             }`}
           >
@@ -340,7 +340,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             transition={{ duration: 0.3, delay: 0.05 }}
             className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
               isDark
-                ? "bg-gradient-to-br from-zinc-900/95 via-indigo-950/40 to-zinc-900/95 border-indigo-500/35 shadow-xl"
+                ? "bg-gradient-to-br from-[#0F172A] via-indigo-950/25 to-[#0A0E17] border-indigo-500/30 shadow-xl ring-1 ring-white/5"
                 : "bg-gradient-to-br from-indigo-50/80 via-white to-indigo-50/50 border-indigo-200/90 shadow-md"
             }`}
           >
@@ -545,14 +545,14 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <div
               className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
                   : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
               <div className="space-y-0.5">
                 <span
                   className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-zinc-500" : "text-slate-500"
+                    isDark ? "text-slate-400" : "text-slate-500"
                   }`}
                 >
                   Active Campus Gear
@@ -585,14 +585,14 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <div
               className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
                   : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
               <div className="space-y-0.5">
                 <span
                   className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-zinc-500" : "text-slate-500"
+                    isDark ? "text-slate-400" : "text-slate-500"
                   }`}
                 >
                   Avg Student Savings
@@ -625,14 +625,14 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <div
               className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
                   : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
               <div className="space-y-0.5">
                 <span
                   className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-zinc-500" : "text-slate-500"
+                    isDark ? "text-slate-400" : "text-slate-500"
                   }`}
                 >
                   Handover Locations
@@ -665,14 +665,14 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <div
               className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
                 isDark
-                  ? "bg-zinc-900/70 border-zinc-800/80"
+                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
                   : "bg-white border-slate-200 shadow-2xs"
               }`}
             >
               <div className="space-y-0.5">
                 <span
                   className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-zinc-500" : "text-slate-500"
+                    isDark ? "text-slate-400" : "text-slate-500"
                   }`}
                 >
                   Domain Restriction

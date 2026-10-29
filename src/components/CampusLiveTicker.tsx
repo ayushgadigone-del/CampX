@@ -122,7 +122,7 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
       onMouseLeave={() => setIsPaused(false)}
       className={`relative w-full border-y transition-colors select-none text-xs ${
         isDark
-          ? "bg-slate-900/90 border-slate-800 text-slate-200"
+          ? "bg-[#0A0E17]/95 border-slate-800/80 text-slate-200"
           : "bg-white/95 border-slate-200 text-slate-800 shadow-2xs"
       }`}
     >

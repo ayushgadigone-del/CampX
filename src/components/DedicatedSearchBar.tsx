@@ -147,8 +147,8 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
         className={`w-full rounded-2xl p-4 sm:p-5 border transition-all duration-200 shadow-sm relative overflow-visible ${
           isDark
             ? isFocused
-              ? "bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/40 border-indigo-500/80 ring-2 ring-indigo-500/20 shadow-indigo-950/50"
-              : "bg-slate-900/90 hover:bg-slate-900 border-slate-800"
+              ? "bg-[#0F172A] border-indigo-500/80 ring-2 ring-indigo-500/20 shadow-lg shadow-indigo-950/40"
+              : "bg-[#0F172A]/85 hover:bg-[#0F172A] border-slate-800/90 ring-1 ring-white/5"
             : isFocused
             ? "bg-white border-indigo-400 ring-2 ring-indigo-500/15 shadow-md shadow-indigo-100"
             : "bg-white hover:bg-slate-50/80 border-slate-200"

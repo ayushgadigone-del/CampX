@@ -1269,31 +1269,23 @@ export default function App() {
     <div
       className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-500 ease-in-out ${
         isDark
-          ? "bg-[#0B0F19] text-slate-100 selection:bg-indigo-500 selection:text-white"
-          : "bg-[#F4F5F9] text-slate-800 selection:bg-purple-100 selection:text-purple-900"
+          ? "bg-[#090D16] text-slate-100 selection:bg-indigo-500 selection:text-white"
+          : "bg-[#F8FAFC] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900"
       }`}
     >
-      {/* Ambient background glows matching CollegeLoginPage */}
-      <div
-        className={`absolute -top-40 -left-40 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
-          isDark ? "bg-indigo-600/20" : "bg-indigo-300/30"
-        }`}
-      />
-      <div
-        className={`absolute top-1/4 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
-          isDark ? "bg-amber-500/10" : "bg-amber-300/20"
-        }`}
-      />
-      <div
-        className={`absolute bottom-1/3 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
-          isDark ? "bg-blue-600/15" : "bg-blue-300/20"
-        }`}
-      />
-      <div
-        className={`absolute -bottom-40 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none -z-10 transition-colors duration-500 ease-in-out ${
-          isDark ? "bg-indigo-500/15" : "bg-indigo-300/25"
-        }`}
-      />
+      {/* Refined ambient architectural lighting */}
+      {isDark ? (
+        <>
+          <div className="absolute top-0 inset-x-0 h-[480px] bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(99,102,241,0.14),transparent)] pointer-events-none -z-10" />
+          <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.06),transparent_70%)] pointer-events-none -z-10" />
+          <div className="absolute bottom-0 inset-x-0 h-[420px] bg-[radial-gradient(ellipse_70%_40%_at_50%_115%,rgba(99,102,241,0.08),transparent)] pointer-events-none -z-10" />
+        </>
+      ) : (
+        <>
+          <div className="absolute top-0 inset-x-0 h-[400px] bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] pointer-events-none -z-10" />
+          <div className="absolute bottom-0 inset-x-0 h-[350px] bg-[radial-gradient(ellipse_70%_35%_at_50%_110%,rgba(244,114,182,0.05),transparent)] pointer-events-none -z-10" />
+        </>
+      )}
 
       {/* Toast Notification */}
       {toastMessage && (
@@ -2189,9 +2181,9 @@ export default function App() {
 
       {/* Footer with Mentorship & PBL Credits (Full Width) */}
       <footer
-        className={`mt-16 border-t-2 py-10 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 text-xs transition-colors duration-200 ${
+        className={`mt-16 border-t py-10 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 text-xs transition-colors duration-200 ${
           isDark
-            ? "bg-[#060911] border-slate-800/90 text-slate-400 shadow-2xl"
+            ? "bg-[#090D16] border-slate-800/80 text-slate-400 shadow-2xl"
             : "bg-slate-900 border-slate-800 text-slate-300 shadow-inner"
         }`}
       >

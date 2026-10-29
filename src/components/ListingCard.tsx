@@ -264,9 +264,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
             transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
           }}
-          className={`group relative flex flex-col md:flex-row rounded-3xl border-2 backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg h-full ${
+          className={`group relative flex flex-col md:flex-row rounded-3xl border backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg h-full ${
             isDark
-              ? "bg-slate-900/95 border-slate-800/90 shadow-slate-950/80 hover:border-indigo-500/60 hover:shadow-indigo-500/10"
+              ? "bg-[#0F172A]/90 border-slate-800/80 shadow-xl shadow-black/40 hover:border-indigo-500/60 ring-1 ring-white/5 hover:shadow-indigo-500/10"
               : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
           }`}
         >
@@ -852,10 +852,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
           transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
         }}
-        className={`group relative flex flex-col rounded-2xl border-2 backdrop-blur-xl transition-all duration-300 overflow-hidden h-full hover:shadow-[0_12px_32px_rgba(168,85,247,0.22)] hover:border-purple-400 ${
+        className={`group relative flex flex-col rounded-2xl border backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
           isDark
-            ? "bg-slate-800/95 border-slate-700/90 shadow-2xl hover:border-purple-400"
-            : "bg-white border-slate-200/90 shadow-md hover:border-purple-400"
+            ? "bg-[#0F172A]/90 border-slate-800/80 shadow-xl shadow-black/40 hover:border-indigo-500/60 ring-1 ring-white/5 hover:shadow-indigo-500/10"
+            : "bg-white border-slate-200/90 shadow-md hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
         }`}
       >
       {/* Realistic Spotlight Gradient */}
