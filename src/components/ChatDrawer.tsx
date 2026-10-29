@@ -217,7 +217,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 {otherPartyName}
               </h3>
               <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Verified Student on Campus
               </span>
             </div>

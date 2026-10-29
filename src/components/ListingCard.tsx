@@ -1,29 +1,23 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
-// Subtle entry animation variants using framer-motion for grid items
+// Stable listing card variants (prevents blinking or flashing on re-renders)
 const listingCardVariants: Variants = {
   hidden: {
-    opacity: 0,
-    y: 18,
-    scale: 0.97,
-  },
-  visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      duration: 0.36,
-      delay: Math.min(i * 0.04, 0.24),
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+  },
   exit: {
     opacity: 0,
-    scale: 0.95,
-    y: -8,
+    scale: 0.98,
     transition: {
-      duration: 0.18,
+      duration: 0.15,
       ease: "easeInOut",
     },
   },
@@ -383,7 +377,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               ) : null}
 
               {listing.isReported && (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1 animate-pulse">
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1">
                   <Flag className="w-3 h-3 fill-white" />
                   Reported
                 </span>
@@ -440,7 +434,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             <div className="absolute bottom-3 inset-x-3 z-10 flex items-center justify-between gap-2">
               {listing.aiInspection ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-slate-950 text-white border border-slate-700/80 backdrop-blur-md shadow-lg select-none">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span className="text-slate-100 font-bold">AI Score:</span>
                   <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
                 </span>
@@ -981,7 +975,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {listing.isReported && (
             <span
               id={`reported-badge-${listing.id}`}
-              className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1 animate-pulse"
+              className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1"
               title="This listing has been reported for campus moderator review"
             >
               <Flag className="w-3 h-3 fill-white" />

@@ -59,8 +59,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         <div className="w-full flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
           <div className="flex items-center gap-2.5">
             <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-100"></span>
+              <span className="inline-flex rounded-full h-2.5 w-2.5 bg-emerald-100"></span>
             </span>
             <Wifi className="w-4 h-4 text-emerald-100 shrink-0" />
             <span>
@@ -104,8 +103,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
             <div className="space-y-0.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-400"></span>
+                  <span className="inline-flex rounded-full h-2 w-2 bg-rose-400"></span>
                 </span>
                 <span className="font-extrabold text-sm tracking-tight text-white">
                   Offline Mode Active

@@ -1849,13 +1849,10 @@ export default function App() {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Pulsing indicator when a non-default sorting state is active */}
+                {/* Steady indicator when a non-default sorting state is active */}
                 {sortBy !== "newest" && (
                   <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                      sortBy === "smart_sort" ? "bg-purple-400" : "bg-indigo-400"
-                    }`}></span>
-                    <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                    <span className={`inline-flex rounded-full h-2 w-2 ${
                       sortBy === "smart_sort" ? "bg-purple-500" : "bg-indigo-500"
                     }`}></span>
                   </span>
@@ -1978,7 +1975,7 @@ export default function App() {
               }`}
             >
               <div className="flex items-center gap-2 text-xs font-semibold">
-                <Maximize2 className="w-4 h-4 text-indigo-400 animate-pulse shrink-0" />
+                <Maximize2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>
                   <strong>Theater Mode Active:</strong> Wide multi-column inspection view with AI scores, condition metrics, swap conditions, and seller credentials visible simultaneously.
                 </span>
@@ -2075,23 +2072,14 @@ export default function App() {
               count={8}
               layoutMode={layoutMode}
             />
-          ) : (
-            <AnimatePresence mode="wait">
-              {filteredListings.length > 0 ? (
-                <motion.div
-                  key={`${layoutMode}-${isFullScreenMode ? "fullscreen" : "window"}`}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className={
-                    layoutMode === "detailed"
-                      ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
-                      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
-                  }
-                >
-                  <AnimatePresence mode="popLayout">
+          ) : filteredListings.length > 0 ? (
+            <div
+              className={
+                  layoutMode === "detailed"
+                    ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+                    : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
+                }
+              >
                     {filteredListings.map((listing, index) => (
                       <motion.div
                         key={listing.id}
@@ -2135,9 +2123,8 @@ export default function App() {
                         />
                       </motion.div>
                     ))}
-                  </AnimatePresence>
-                </motion.div>
-              ) : (
+              </div>
+            ) : (
                 <motion.div
                   key="empty-state"
                   initial={{ opacity: 0, scale: 0.96, y: 10 }}
@@ -2197,8 +2184,6 @@ export default function App() {
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
-          )}
         </section>
       </main>
 

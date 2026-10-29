@@ -337,7 +337,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             {isReported && (
               <span
                 id={`detail-reported-badge-${listing.id}`}
-                className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 shadow-2xs animate-pulse"
+                className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 shadow-2xs"
                 title="This listing has been reported for campus moderator review"
               >
                 <Flag className="w-3.5 h-3.5 fill-rose-600 text-rose-600" />

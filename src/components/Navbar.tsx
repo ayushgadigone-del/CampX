@@ -332,14 +332,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? isDark
                     ? "bg-slate-900/80 border-slate-800 text-slate-300"
                     : "bg-slate-50 border-slate-200 text-slate-700 shadow-2xs"
-                  : "bg-rose-500/15 border-rose-500/40 text-rose-500 dark:text-rose-400 animate-pulse"
+                  : "bg-rose-500/15 border-rose-500/40 text-rose-500 dark:text-rose-400"
               }`}
             >
               {isOnline ? (
                 <div className="flex items-center gap-1.5" title="Online">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
                   <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hidden xl:inline">
                     Online

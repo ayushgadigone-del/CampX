@@ -71,8 +71,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
       >
         <div className="flex items-center gap-2">
           <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
           <span className="font-mono text-[11px] font-semibold tracking-tight">
             <strong className={isDark ? "text-zinc-200" : "text-slate-900"}>
@@ -355,7 +354,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                         : "bg-indigo-100 text-indigo-800 border-indigo-200"
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                     <span>Gemini 3.8 Flash</span>
                   </span>
                   <span
@@ -503,8 +502,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
             <div className="pt-3.5 mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-indigo-500/20">
               <div className="flex items-center gap-1.5 text-xs">
                 <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  <span className="inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                 </span>
                 <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
                   Live camera snap or image upload

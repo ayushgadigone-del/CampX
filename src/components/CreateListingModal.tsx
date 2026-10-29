@@ -650,7 +650,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
           {isAnalyzingImage && (
             <div
-              className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 animate-pulse ${
+              className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 ${
                 isDark
                   ? "bg-indigo-950/40 border-indigo-500/30 text-indigo-200"
                   : "bg-indigo-50 border-indigo-200 text-indigo-900"

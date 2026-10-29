@@ -105,7 +105,7 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
   const getBadgeStyle = (type: CampusTickerItem["type"]) => {
     switch (type) {
       case "exam_rush":
-        return "bg-rose-500 text-white shadow-xs animate-pulse";
+        return "bg-rose-500 text-white shadow-xs font-black";
       case "hot":
         return "bg-amber-500 text-slate-950 font-black";
       case "handover":
@@ -131,8 +131,7 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
         <div className="flex items-center gap-2.5 shrink-0">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px]">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             <span>CAMPUS BEACON</span>
           </div>
