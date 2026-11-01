@@ -1,32 +1,95 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Authentication Helpers
     function isSignedIn() {
       return request.auth != null;
     }
 
-    match /test/{docId} {
-      allow read, write: if true;
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
+    // 1. Campus Listings Collection
     match /listings/{listingId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+
+      // Only signed-in students can create listings, binding their UID & email
+      allow create: if isSignedIn()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 150
+        && request.resource.data.category is string
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.price <= 500000
+        && request.resource.data.sellerId == request.auth.uid;
+
+      // Listing owners can edit their listings; or specific permitted field updates
+      allow update: if (isSignedIn() && resource.data.sellerId == request.auth.uid)
+        // Public/peer view count increment
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        // Student reporting suspicious listing for moderation
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isReported', 'reportReason', 'reportDetails'])
+        // Handover feedback and rating submission
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews', 'averageRating', 'totalReviews'])
+        // Scheduling handover meeting
+        || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'handoverDetails']));
+
+      // Only the listing owner can delete their listing
       allow delete: if isSignedIn() && (resource.data.sellerId == request.auth.uid);
     }
 
+    // 2. Student Conversations & Negotiations (Strict Participant Privacy)
     match /conversations/{conversationId} {
-      allow read, write: if isSignedIn();
+      // Students can only read or modify conversations where they are the buyer or seller
+      allow read: if isSignedIn() && (
+        resource == null 
+        || request.auth.uid == resource.data.buyerId 
+        || request.auth.uid == resource.data.sellerId
+        || (resource.data.keys().hasAny(['participantIds']) && request.auth.uid in resource.data.participantIds)
+      );
+
+      allow create: if isSignedIn() && (
+        request.auth.uid == request.resource.data.buyerId 
+        || request.auth.uid == request.resource.data.sellerId
+      );
+
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.buyerId 
+        || request.auth.uid == resource.data.sellerId
+      );
+
+      allow delete: if isSignedIn() && (
+        request.auth.uid == resource.data.buyerId 
+        || request.auth.uid == resource.data.sellerId
+      );
 
       match /messages/{messageId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if isSignedIn() && (
+          request.auth.uid == get(/databases/$(database)/documents/conversations/$(conversationId)).data.buyerId
+          || request.auth.uid == get(/databases/$(database)/documents/conversations/$(conversationId)).data.sellerId
+        );
       }
     }
 
+    // 3. User Profiles Collection
     match /users/{userId} {
       allow read: if true;
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow write: if isOwner(userId);
+    }
+
+    // 4. Topper Notes Archive
+    match /topper_notes/{noteId} {
+      allow read: if true;
+      allow create: if isSignedIn() 
+        && request.resource.data.title is string
+        && request.resource.data.subject is string;
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && (
+        resource.data.uploadedByEmail == request.auth.token.email
+        || request.auth.token.email == 'ayushgadigone@gmail.com'
+      );
     }
   }
 }

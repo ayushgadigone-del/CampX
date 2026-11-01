@@ -136,6 +136,7 @@ import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
 import { CampusLiveTicker } from "./components/CampusLiveTicker";
 import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
 import { StudentPassportModal } from "./components/StudentPassportModal";
+import { CampusSecurityCenterModal } from "./components/CampusSecurityCenterModal";
 import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
 import { HorizontalSlider } from "./components/HorizontalSlider";
 import { calculateSmartSortScore } from "./utils/smartSort";
@@ -241,6 +242,7 @@ export default function App() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [lightboxListing, setLightboxListing] = useState<Listing | null>(null);
+  const [isSecurityCenterOpen, setIsSecurityCenterOpen] = useState(false);
 
   // Wishlist state & persistence
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
@@ -1434,6 +1436,10 @@ export default function App() {
           setActiveSectionTab("saved");
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
+        onOpenSecurity={() => {
+          triggerHaptic("medium");
+          setIsSecurityCenterOpen(true);
+        }}
         isOnline={isOnline}
         isSimulatedOffline={isSimulatedOffline}
         onToggleSimulateOffline={toggleSimulateOffline}
@@ -2434,6 +2440,13 @@ export default function App() {
               <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
               Gemini 3.8 Flash
             </button>
+            <button
+              onClick={() => setIsSecurityCenterOpen(true)}
+              className="px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Trust &amp; Security</span>
+            </button>
           </div>
         </div>
       </footer>
@@ -2721,6 +2734,13 @@ export default function App() {
           setChatListing(item);
           setIsChatOpen(true);
         }}
+        onShowToast={showToast}
+      />
+
+      {/* Campus Security & Trust Center Modal */}
+      <CampusSecurityCenterModal
+        isOpen={isSecurityCenterOpen}
+        onClose={() => setIsSecurityCenterOpen(false)}
         onShowToast={showToast}
       />
 

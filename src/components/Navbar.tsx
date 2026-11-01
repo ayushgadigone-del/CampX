@@ -24,6 +24,7 @@ import {
   HardDrive,
   LayoutGrid,
   SlidersHorizontal,
+  ShieldCheck,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
@@ -42,6 +43,7 @@ interface NavbarProps {
   onOpenHandovers: () => void;
   onOpenTopperNotes: () => void;
   onOpenGoogleDrive?: () => void;
+  onOpenSecurity?: () => void;
   upcomingHandoversCount: number;
   wishlistCount?: number;
   onOpenWishlist: () => void;
@@ -65,6 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenHandovers,
   onOpenTopperNotes,
   onOpenGoogleDrive,
+  onOpenSecurity,
   upcomingHandoversCount,
   wishlistCount = 0,
   onOpenWishlist,
@@ -342,6 +345,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               )}
             </motion.button>
+
+            {/* 7. Security & Trust Shield Button */}
+            {onOpenSecurity && (
+              <motion.button
+                id="navbar-security-shield-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onOpenSecurity}
+                title="Campus Trust & Security Shield: EXIF stripping, domain lockdown, and safe campus zones"
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  isDark
+                    ? "bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-300 border-emerald-800/60"
+                    : "bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-800 border-emerald-200/80 shadow-2xs"
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Security</span>
+              </motion.button>
+            )}
           </nav>
 
           {/* ================= RIGHT: User Actions, Primary CTA & Profile ================= */}
@@ -632,6 +654,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                             Free
                           </span>
                         </button>
+
+                        {onOpenSecurity && (
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              onOpenSecurity();
+                            }}
+                            className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                              isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-medium">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                              Security &amp; Privacy Shield
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
+                              Active
+                            </span>
+                          </button>
+                        )}
                       </div>
 
                       <div
@@ -922,6 +964,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 )}
               </button>
+
+              {/* 8. Security & Trust */}
+              {onOpenSecurity && (
+                <button
+                  id="mobile-nav-security-btn"
+                  onClick={onOpenSecurity}
+                  className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                    isDark
+                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
+                      : "bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs"
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Security</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                </button>
+              )}
             </HorizontalSlider>
           ) : (
             /* MODE 2: Completely Visible Multi-Col Grid */
@@ -1093,6 +1152,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 )}
               </button>
+
+              {/* 8. Security & Trust */}
+              {onOpenSecurity && (
+                <button
+                  onClick={onOpenSecurity}
+                  title="Campus Security & Privacy Shield"
+                  className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                    isDark
+                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
+                      : "bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 truncate">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="truncate">Security</span>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                </button>
+              )}
             </div>
           )}
         </div>

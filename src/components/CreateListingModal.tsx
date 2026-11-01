@@ -15,6 +15,7 @@ import {
   Plus,
   Clock,
   WifiOff,
+  ShieldCheck,
 } from "lucide-react";
 import {
   ItemCategory,
@@ -28,6 +29,14 @@ import { collection, addDoc } from "firebase/firestore";
 import { generateSuggestedTags } from "../utils/tagSuggester";
 import { calculateNewExpiryDate, DEFAULT_EXPIRY_DAYS } from "../utils/expiryUtils";
 import { useTheme } from "../context/ThemeContext";
+import {
+  sanitizeText,
+  validateFileUpload,
+  sanitizeImageForPrivacy,
+  rateLimiter,
+  ALLOWED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_SIZE_BYTES,
+} from "../utils/security";
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -272,13 +281,25 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 15 * 1024 * 1024) {
-        setError("Image exceeds 15MB limit. Please choose a smaller photo.");
-        return;
+    if (!file) return;
+
+    const validation = validateFileUpload(file, ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_SIZE_BYTES);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid image file format or size.");
+      return;
+    }
+
+    try {
+      // Strip EXIF / GPS metadata locally before storing to safeguard student privacy
+      const sanitizedBase64 = await sanitizeImageForPrivacy(file);
+      setImageUrl(sanitizedBase64);
+      if (isOnline) {
+        analyzeImageAndSuggestFields(sanitizedBase64);
       }
+    } catch (err) {
+      console.warn("Privacy strip fallback:", err);
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result as string;
@@ -306,11 +327,32 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
       return;
     }
 
+    // Rate limiting check to prevent listing spam / bot submissions
+    const rateCheck = rateLimiter.checkRateLimit(
+      `create_listing_${currentUser?.uid || "anon"}`,
+      5,
+      60000
+    );
+    if (!rateCheck.allowed) {
+      setError(
+        `🛡️ Security rate limit active: Please wait ${Math.ceil(
+          rateCheck.retryAfterMs / 1000
+        )}s before publishing another listing.`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
+    // Sanitize user text inputs to prevent XSS and script injections
+    const sanitizedTitle = sanitizeText(title.trim()).slice(0, 150);
+    const sanitizedDesc = sanitizeText(description.trim()).slice(0, 3000);
+    const sanitizedExchange = exchangeFor ? sanitizeText(exchangeFor.trim()).slice(0, 150) : undefined;
+    const sanitizedTags = tags.map((t) => sanitizeText(t.trim())).filter(Boolean).slice(0, 10);
+
     const newListingData: Omit<Listing, "id"> = {
-      title: title.trim(),
+      title: sanitizedTitle,
       category,
       condition,
       listingType,
@@ -319,8 +361,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
         listingType !== "exchange" && originalPrice && Number(originalPrice) > 0
           ? Number(originalPrice)
           : undefined,
-      exchangeFor: listingType !== "sell" ? exchangeFor : undefined,
-      description: description.trim(),
+      exchangeFor: listingType !== "sell" ? sanitizedExchange : undefined,
+      description: sanitizedDesc,
       imageUrl,
       sellerId: currentUser?.uid || "student-pvgcoet-id",
       sellerName: currentUser?.displayName || "Verified Student",
@@ -330,7 +372,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
       year: "Student",
       status: "available",
       locationPreference,
-      tags: tags.length > 0 ? tags : undefined,
+      tags: sanitizedTags.length > 0 ? sanitizedTags : undefined,
       aiInspection: aiInspectionData || undefined,
       expiryDate: calculateNewExpiryDate(validityDays),
       sellerRating: 5.0,
@@ -412,18 +454,24 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               </p>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className={`p-2 rounded-lg transition-colors cursor-pointer ${
-              isDark
-                ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
-            }`}
-          >
-            <X className="w-5 h-5" />
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>EXIF Stripped</span>
+            </span>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                isDark
+                  ? "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+              }`}
+            >
+              <X className="w-5 h-5" />
+            </motion.button>
+          </div>
         </div>
 
         {/* AI Scanner Banner */}

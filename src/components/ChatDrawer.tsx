@@ -15,10 +15,13 @@ import {
   HelpCircle,
   ChevronRight,
   WifiOff,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { Conversation, ChatMessage, Listing } from "../types";
 import { recordChatMessage, getStoredChats, saveStoredChat } from "../utils/chatStorage";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { sanitizeText, detectSuspiciousChatContent } from "../utils/security";
 import {
   collection,
   doc,
@@ -148,8 +151,9 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
   const handleSendMessage = async (customText?: string, type: ChatMessage["type"] = "text", offer?: number) => {
     if (!isOnline) return;
-    const textToSend = (customText || inputText).trim();
-    if (!textToSend && !offer) return;
+    const rawText = (customText || inputText).trim();
+    if (!rawText && !offer) return;
+    const textToSend = sanitizeText(rawText);
 
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
@@ -258,6 +262,17 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           </button>
         </div>
 
+        {/* Campus Safe Handover & Anti-Scam Shield Banner */}
+        <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 text-[11px] flex items-center gap-2 shadow-2xs">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <div className="leading-tight">
+            <span className="font-bold">Campus Security: </span>
+            <span className="text-emerald-800 dark:text-emerald-300">
+              Handover on campus. Never share UPI PINs or send advance payments.
+            </span>
+          </div>
+        </div>
+
         {/* Offline Banner Inside Drawer */}
         {!isOnline && (
           <div
@@ -278,6 +293,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         <div className="flex-1 p-4 overflow-y-auto space-y-3">
           {messages.map((msg) => {
             const isMe = msg.senderId === (currentUser?.uid || "current-user");
+            const scamCheck = detectSuspiciousChatContent(msg.text);
+
             return (
               <div
                 key={msg.id}
@@ -298,6 +315,17 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   )}
                   <p>{msg.text}</p>
                 </div>
+
+                {/* Inline Suspicious Behavior Alert */}
+                {scamCheck.isSuspicious && (
+                  <div className="max-w-[85%] mt-1 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 text-[10px] flex items-start gap-1.5 font-medium">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Safety Alert:</strong> {scamCheck.reason}. Do not transfer advance money or enter your UPI PIN.
+                    </span>
+                  </div>
+                )}
+
                 <span className="text-[10px] text-slate-400 mt-1 px-1">
                   {new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
