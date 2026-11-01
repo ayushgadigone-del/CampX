@@ -92,6 +92,7 @@ import {
   CHATS_UPDATED_EVENT,
 } from "./utils/chatStorage";
 import { TopperNotesModal } from "./components/TopperNotesModal";
+import { GoogleDriveModal } from "./components/GoogleDriveModal";
 import { TopperNote } from "./types";
 import {
   getStoredTopperNotes,
@@ -357,6 +358,7 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(false);
   const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
+  const [isGoogleDriveModalOpen, setIsGoogleDriveModalOpen] = useState(false);
   const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
 
   // Alerts & 'Notify Me' feature state
@@ -1182,7 +1184,7 @@ export default function App() {
     }, 0);
   }, [listings]);
 
-  // Global Terminal Keyboard Shortcuts (Style 1 ergonomics)
+  // Global Terminal Keyboard Shortcuts (Style 1 ergonomics with mobile haptic feedback)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -1195,14 +1197,27 @@ export default function App() {
         return;
       }
 
+      // Safe haptic feedback trigger using Web Vibration API
+      const vibrate = (pattern: number | number[]) => {
+        try {
+          if (typeof navigator !== "undefined" && "vibrate" in navigator && typeof navigator.vibrate === "function") {
+            navigator.vibrate(pattern);
+          }
+        } catch {
+          // Benign ignore if permission denied or unsupported
+        }
+      };
+
       if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(15);
         const searchInput = document.getElementById(
           "dedicated-search-bar-input"
         ) as HTMLInputElement | null;
         searchInput?.focus();
-      } else if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
+      } else if ((e.key === "p" || e.key === "P") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(30);
         if (isOnline) {
           setPrefilledInspection(null);
           setPrefilledImage(null);
@@ -1210,23 +1225,29 @@ export default function App() {
         } else {
           showToast("⚠️ Offline: Creating listings is disabled.");
         }
-      } else if ((e.key === "t" || e.key === "T") && !e.ctrlKey && !e.metaKey) {
+      } else if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(22);
         setIsTopperNotesModalOpen(true);
       } else if ((e.key === "w" || e.key === "W") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(20);
         setIsWishlistModalOpen(true);
       } else if ((e.key === "c" || e.key === "C") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(20);
         setIsYourChatsModalOpen(true);
-      } else if ((e.key === "d" || e.key === "D") && !e.ctrlKey && !e.metaKey) {
+      } else if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(20);
         toggleTheme();
       } else if ((e.key === "f" || e.key === "F") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(18);
         toggleFullScreen();
       } else if ((e.key === "i" || e.key === "I") && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
+        vibrate(25);
         if (isOnline) {
           setIsAIInspectorOpen(true);
         } else {
@@ -1269,7 +1290,7 @@ export default function App() {
     <div
       className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-500 ease-in-out ${
         isDark
-          ? "bg-[#090D16] text-slate-100 selection:bg-indigo-500 selection:text-white"
+          ? "bg-[#040711] text-slate-100 selection:bg-indigo-500 selection:text-white"
           : "bg-[#F8FAFC] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900"
       }`}
     >
@@ -1327,6 +1348,7 @@ export default function App() {
         }}
         onOpenHandovers={() => setIsHandoversModalOpen(true)}
         onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
+        onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
         upcomingHandoversCount={upcomingHandoversCount}
         wishlistCount={wishlistIds.length}
         onOpenWishlist={() => setIsWishlistModalOpen(true)}
@@ -1581,7 +1603,7 @@ export default function App() {
               />
               <span>Wishlist ({wishlistIds.length})</span>
               <kbd
-                className={`hidden sm:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
+                className={`inline-flex items-center justify-center min-w-[14px] h-[14px] sm:min-w-[16px] sm:h-[16px] px-1 text-[9px] sm:text-[10px] font-mono font-bold rounded border select-none ${
                   wishlistOnlyFilter
                     ? "bg-white/25 text-white border-white/30"
                     : "bg-rose-500/20 text-rose-300 border-rose-500/30"
@@ -1606,7 +1628,7 @@ export default function App() {
               <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
               <span>Your Chats ({storedChats.length})</span>
               <kbd
-                className={`hidden sm:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
+                className={`inline-flex items-center justify-center min-w-[14px] h-[14px] sm:min-w-[16px] sm:h-[16px] px-1 text-[9px] sm:text-[10px] font-mono font-bold rounded border select-none ${
                   isDark
                     ? "bg-indigo-950/60 text-indigo-300 border-indigo-700/50"
                     : "bg-indigo-100 text-indigo-700 border-indigo-200"
@@ -2392,6 +2414,48 @@ export default function App() {
           saveStoredTopperNotes(updated);
         }}
         onShowToast={showToast}
+      />
+
+      {/* Google Drive, Picker & Docs Modal */}
+      <GoogleDriveModal
+        isOpen={isGoogleDriveModalOpen}
+        onClose={() => setIsGoogleDriveModalOpen(false)}
+        currentUserEmail={currentUser?.email}
+        onShowToast={showToast}
+        onSelectDocForTopperVault={(doc) => {
+          const newDocNote: TopperNote = {
+            id: `note-drive-${Date.now()}`,
+            title: doc.title,
+            subject: "Google Drive Study Notes",
+            branch: "Computer Science",
+            semester: "Sem 4",
+            author: currentUser?.displayName || "Campus Student",
+            authorRank: "Verified Contributor",
+            authorCollege: "Government College of Engineering",
+            description: `Imported directly from Google Drive: ${doc.fileName}`,
+            isFree: true,
+            pagesCount: 18,
+            readTimeMinutes: 20,
+            tags: ["Google Drive", "Study Guide", "Imported"],
+            lastUpdated: new Date().toISOString().split("T")[0],
+            content: `## 📄 ${doc.title}\n\n**File Name:** ${doc.fileName}\n**Source:** Google Drive\n\n*Click the 'Download Document' button above to access this document offline or in Google Drive.*`,
+            chapters: [
+              {
+                title: "Google Drive Document",
+                summary: `Synced with Google Drive file: ${doc.fileName}`,
+                keyFormulasOrTips: ["Saved to campus cloud vault for easy revision"],
+              },
+            ],
+            fileUrl: doc.fileUrl,
+            fileName: doc.fileName,
+            fileSize: doc.fileSize,
+            uploadedByEmail: currentUser?.email || undefined,
+          };
+          const updated = [newDocNote, ...topperNotes];
+          setTopperNotes(updated);
+          saveStoredTopperNotes(updated);
+          setIsTopperNotesModalOpen(true);
+        }}
       />
 
       {/* Item Image Inspection Lightbox Modal */}

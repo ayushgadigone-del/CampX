@@ -266,7 +266,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           }}
           className={`group relative flex flex-col md:flex-row rounded-3xl border backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg h-full ${
             isDark
-              ? "bg-[#0F172A]/90 border-slate-800/80 shadow-xl shadow-black/40 hover:border-indigo-500/60 ring-1 ring-white/5 hover:shadow-indigo-500/10"
+              ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10 hover:shadow-indigo-500/20"
               : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
           }`}
         >
@@ -678,22 +678,37 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 </div>
               </div>
 
-              {/* Price Display */}
+              {/* Price Display with Comparison */}
               <div className="sm:text-right">
                 {listing.listingType === "exchange" ? (
                   <div className="text-base font-extrabold text-purple-500">
                     Open for Exchange
                   </div>
                 ) : (
-                  <div className="flex items-baseline sm:justify-end gap-1">
-                    <span className="text-sm font-bold text-slate-500">₹</span>
-                    <span className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                      {listing.price}
-                    </span>
-                    {listing.listingType === "both" && (
-                      <span className="text-xs font-semibold text-indigo-500 ml-1">
-                        (or Swap)
+                  <div className="space-y-0.5">
+                    <div className="flex items-baseline sm:justify-end gap-1.5 flex-wrap">
+                      <span className="text-sm font-bold text-slate-500">₹</span>
+                      <span className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                        {listing.price}
                       </span>
+                      {listing.originalPrice && listing.originalPrice > listing.price && (
+                        <span className="line-through text-xs font-semibold text-slate-400 dark:text-slate-500">
+                          MRP ₹{listing.originalPrice}
+                        </span>
+                      )}
+                      {listing.listingType === "both" && (
+                        <span className="text-xs font-semibold text-indigo-500 ml-1">
+                          (or Swap)
+                        </span>
+                      )}
+                    </div>
+                    {listing.originalPrice && listing.originalPrice > listing.price && (
+                      <div className="flex items-center sm:justify-end gap-1.5 text-xs font-bold text-emerald-500">
+                        <span>Save ₹{listing.originalPrice - listing.price}</span>
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30">
+                          {Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -854,7 +869,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         }}
         className={`group relative flex flex-col rounded-2xl border backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
           isDark
-            ? "bg-[#0F172A]/90 border-slate-800/80 shadow-xl shadow-black/40 hover:border-indigo-500/60 ring-1 ring-white/5 hover:shadow-indigo-500/10"
+            ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10 hover:shadow-indigo-500/20"
             : "bg-white border-slate-200/90 shadow-md hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
         }`}
       >
@@ -1384,13 +1399,28 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   Open for Exchange
                 </div>
               ) : (
-                <div className="flex items-baseline gap-1">
-                  <span className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>₹</span>
-                  <span className={`text-lg font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                    {listing.price}
-                  </span>
-                  {listing.listingType === "both" && (
-                    <span className={`text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>or Swap</span>
+                <div>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>₹</span>
+                    <span className={`text-lg font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                      {listing.price}
+                    </span>
+                    {listing.originalPrice && listing.originalPrice > listing.price && (
+                      <span className="line-through text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                        ₹{listing.originalPrice}
+                      </span>
+                    )}
+                    {listing.listingType === "both" && (
+                      <span className={`text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>or Swap</span>
+                    )}
+                  </div>
+                  {listing.originalPrice && listing.originalPrice > listing.price && (
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+                      <span>Save ₹{listing.originalPrice - listing.price}</span>
+                      <span className="px-1 py-0.2 rounded text-[9px] bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25">
+                        {Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF
+                      </span>
+                    </div>
                   )}
                 </div>
               )}

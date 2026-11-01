@@ -81,80 +81,80 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
           </span>
         </div>
 
-        {/* Keyboard Shortcut Cheatsheet Pills */}
-        <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono">
-          <span className={isDark ? "text-slate-400" : "text-slate-500"}>Shortcuts:</span>
+        {/* Keyboard Shortcut Cheatsheet Pills (Visible on Mobile & Desktop) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono overflow-x-auto no-scrollbar py-0.5 max-w-full">
+          <span className={`shrink-0 ${isDark ? "text-slate-400" : "text-slate-500"}`}>Shortcuts:</span>
           {onFocusSearch && (
             <button
               onClick={onFocusSearch}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
                 isDark
                   ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
                   : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
               }`}
-              title="Focus search input"
+              title="Focus search input (Shortcut: /)"
             >
               <kbd className="font-bold">/</kbd> Search
             </button>
           )}
           <button
             onClick={handleCreate}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
               isDark
                 ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
                 : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
             }`}
-            title="Create new listing"
+            title="Create new listing (Shortcut: P)"
           >
-            <kbd className="font-bold">N</kbd> Post
+            <kbd className="font-bold text-indigo-400">P</kbd> Post
           </button>
           <button
             onClick={onOpenTopperNotes}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
               isDark
                 ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
                 : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
             }`}
-            title="Open Topper Notes vault"
+            title="Open Topper Notes vault (Shortcut: N)"
           >
-            <kbd className="font-bold">T</kbd> Notes
+            <kbd className="font-bold text-emerald-400">N</kbd> Notes
           </button>
           {onOpenWishlist && (
             <button
               onClick={onOpenWishlist}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
                 isDark
                   ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
                   : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
               }`}
-              title="Open saved wishlist"
+              title="Open saved wishlist (Shortcut: W)"
             >
-              <kbd className="font-bold">W</kbd> Wishlist
+              <kbd className="font-bold text-rose-400">W</kbd> Wishlist
             </button>
           )}
           {onOpenYourChats && (
             <button
               onClick={onOpenYourChats}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
                 isDark
                   ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
                   : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
               }`}
-              title="Open chats with sellers"
+              title="Open chats with sellers (Shortcut: C)"
             >
-              <kbd className="font-bold">C</kbd> Chat
+              <kbd className="font-bold text-sky-400">C</kbd> Chat
             </button>
           )}
           <button
             onClick={toggleTheme}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer flex items-center gap-1 ${
+            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer flex items-center gap-1 shrink-0 ${
               isDark
                 ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-amber-400"
                 : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
             }`}
-            title="Toggle Dark / Light Mode"
+            title="Toggle Dark / Light Mode (Shortcut: M)"
           >
-            <kbd className="font-bold">D</kbd> {isDark ? "Light" : "Dark"}
+            <kbd className="font-bold text-amber-400">M</kbd> {isDark ? "Light" : "Dark"}
           </button>
         </div>
 

@@ -13,10 +13,13 @@ interface HorizontalSliderProps {
   trackClassName?: string;
   headerActions?: React.ReactNode;
   showArrows?: boolean;
+  arrowPosition?: "header" | "inline";
   showProgress?: boolean;
+  showDots?: boolean;
   showMobileHint?: boolean;
   scrollStep?: number;
   itemSnap?: boolean;
+  hideFadeScrim?: boolean;
   ariaLabel?: string;
 }
 
@@ -31,10 +34,13 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   trackClassName = "",
   headerActions,
   showArrows = true,
+  arrowPosition = "header",
   showProgress = true,
+  showDots = false,
   showMobileHint = true,
   scrollStep = 300,
   itemSnap = false,
+  hideFadeScrim = false,
   ariaLabel = "Horizontal scrollable section",
 }) => {
   const { isDark } = useTheme();
@@ -42,6 +48,8 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeftState] = useState(0);
@@ -60,8 +68,15 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     if (maxScroll > 0) {
       const pct = Math.min(100, Math.max(0, (currentScroll / maxScroll) * 100));
       setScrollProgress(pct);
+      const approxPageWidth = Math.max(1, el.clientWidth * 0.8);
+      const pages = Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth)));
+      setTotalPages(pages);
+      const active = Math.min(pages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth)));
+      setCurrentPage(active);
     } else {
       setScrollProgress(0);
+      setTotalPages(1);
+      setCurrentPage(0);
     }
   }, []);
 
@@ -109,6 +124,16 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     });
   };
 
+  // Jump to specific page
+  const scrollToPage = (pageIndex: number) => {
+    if (!trackRef.current) return;
+    const targetScroll = pageIndex * (trackRef.current.clientWidth * 0.85);
+    trackRef.current.scrollTo({
+      left: targetScroll,
+      behavior: "smooth",
+    });
+  };
+
   // Mouse drag support for desktop/trackpad preview
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!trackRef.current) return;
@@ -149,8 +174,8 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
       className={`relative w-full ${className}`}
       aria-label={ariaLabel}
     >
-      {/* Optional Slider Header with Title, Badge, Mobile Slide Hint & Controls */}
-      {(title || headerActions || showArrows) && (
+      {/* Optional Slider Header with Title, Badge, Mobile Slide Hint & Controls (when arrowPosition is 'header') */}
+      {(title || headerActions || (showArrows && arrowPosition === "header")) && (
         <div className="flex items-center justify-between gap-2.5 mb-2.5 px-0.5">
           {/* Left Title / Badge */}
           {title ? (
@@ -212,8 +237,8 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               </span>
             )}
 
-            {/* Previous & Next Slider Buttons */}
-            {showArrows && (
+            {/* Previous & Next Slider Buttons (header mode) */}
+            {showArrows && arrowPosition === "header" && (
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -258,47 +283,157 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
         </div>
       )}
 
-      {/* Slider Viewport Container */}
-      <div className="relative group/slider w-full">
-        {/* Subtle Edge Fade Scrims (Left & Right) */}
-        {canScrollLeft && (
-          <div
-            className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r transition-opacity duration-200 ${
-              isDark
-                ? "from-[#0B0F19] to-transparent"
-                : "from-white to-transparent"
-            }`}
-          />
-        )}
-        {canScrollRight && (
-          <div
-            className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l transition-opacity duration-200 ${
-              isDark
-                ? "from-[#0B0F19] to-transparent"
-                : "from-white to-transparent"
-            }`}
-          />
-        )}
+      {/* Main Track Container with Inline Arrows option */}
+      {arrowPosition === "inline" ? (
+        <div className="flex items-center gap-1 sm:gap-1.5 w-full">
+          {showArrows && (
+            <button
+              type="button"
+              onClick={handleScrollLeft}
+              disabled={!canScrollLeft}
+              aria-label="Slide left"
+              title="Slide left"
+              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none shrink-0 ${
+                canScrollLeft
+                  ? isDark
+                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                  : isDark
+                  ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
+                  : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
+              }`}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
 
-        {/* Scrollable Track */}
-        <div
-          ref={trackRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseLeave={handleMouseUpOrLeave}
-          className={`flex items-center gap-3 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
-            itemSnap ? "snap-x snap-mandatory" : ""
-          } ${trackClassName}`}
-          style={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
-          {children}
+          {/* Slider Viewport Container */}
+          <div className="relative group/slider flex-1 min-w-0">
+            {/* Subtle Edge Fade Scrims (Left & Right) */}
+            {!hideFadeScrim && canScrollLeft && (
+              <div
+                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-r transition-opacity duration-200 ${
+                  isDark
+                    ? "from-[#090D16] to-transparent"
+                    : "from-white to-transparent"
+                }`}
+              />
+            )}
+            {!hideFadeScrim && canScrollRight && (
+              <div
+                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-l transition-opacity duration-200 ${
+                  isDark
+                    ? "from-[#090D16] to-transparent"
+                    : "from-white to-transparent"
+                }`}
+              />
+            )}
+
+            {/* Scrollable Track */}
+            <div
+              ref={trackRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
+                itemSnap ? "snap-x snap-mandatory" : ""
+              } ${trackClassName}`}
+              style={{
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {children}
+            </div>
+          </div>
+
+          {showArrows && (
+            <button
+              type="button"
+              onClick={handleScrollRight}
+              disabled={!canScrollRight}
+              aria-label="Slide right"
+              title="Slide right"
+              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none shrink-0 ${
+                canScrollRight
+                  ? isDark
+                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                  : isDark
+                  ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
+                  : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
+              }`}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-      </div>
+      ) : (
+        /* Standard Header Mode Viewport */
+        <div className="relative group/slider w-full">
+          {/* Subtle Edge Fade Scrims (Left & Right) */}
+          {!hideFadeScrim && canScrollLeft && (
+            <div
+              className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r transition-opacity duration-200 ${
+                isDark
+                  ? "from-[#0B0F19] to-transparent"
+                  : "from-white to-transparent"
+              }`}
+            />
+          )}
+          {!hideFadeScrim && canScrollRight && (
+            <div
+              className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l transition-opacity duration-200 ${
+                isDark
+                  ? "from-[#0B0F19] to-transparent"
+                  : "from-white to-transparent"
+              }`}
+            />
+          )}
+
+          {/* Scrollable Track */}
+          <div
+            ref={trackRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            className={`flex items-center gap-3 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
+              itemSnap ? "snap-x snap-mandatory" : ""
+            } ${trackClassName}`}
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      )}
+
+      {/* Slide Pagination Dots */}
+      {showDots && totalPages > 1 && (
+        <div className="mt-1.5 flex items-center justify-center gap-1.5 py-0.5">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => scrollToPage(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                currentPage === idx
+                  ? "w-4 bg-gradient-to-r from-indigo-500 to-purple-500 shadow-2xs"
+                  : isDark
+                  ? "w-1.5 bg-slate-700 hover:bg-slate-600"
+                  : "w-1.5 bg-slate-300 hover:bg-slate-400"
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Progress Track & Mobile Swipe Affordance */}
       {showProgress && (canScrollLeft || canScrollRight) && (

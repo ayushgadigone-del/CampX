@@ -84,6 +84,7 @@ export interface Listing {
   condition: ItemCondition;
   listingType: ListingType;
   price: number;
+  originalPrice?: number;
   exchangeFor?: string;
   imageUrl: string;
   sellerId: string;
@@ -217,5 +218,10 @@ export interface TopperNote {
     keyFormulasOrTips: string[];
   }[];
   featured?: boolean;
+  fileUrl?: string; // Data URL or direct file download/preview URL
+  fileName?: string; // e.g. "Data_Structures_Topper_Notes_Unit1_4.pdf"
+  fileSize?: string; // e.g. "3.2 MB"
+  fileType?: string; // e.g. "application/pdf"
+  uploadedByEmail?: string;
 }
 

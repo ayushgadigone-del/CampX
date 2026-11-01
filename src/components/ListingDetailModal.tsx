@@ -564,7 +564,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 <h1 className="text-xl font-bold text-slate-900 leading-snug">
                   {listing.title}
                 </h1>
-                <div className="flex items-baseline gap-2 mt-2">
+                <div className="flex flex-wrap items-baseline gap-2 mt-2">
                   {listing.listingType === "exchange" ? (
                     <span className="text-lg font-bold text-purple-700">
                       Exchange Only
@@ -574,6 +574,16 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       <span className="text-2xl font-extrabold text-slate-950">
                         ₹{listing.price}
                       </span>
+                      {listing.originalPrice && listing.originalPrice > listing.price && (
+                        <span className="line-through text-sm font-semibold text-slate-500">
+                          MRP ₹{listing.originalPrice}
+                        </span>
+                      )}
+                      {listing.originalPrice && listing.originalPrice > listing.price && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          Save ₹{listing.originalPrice - listing.price} ({Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF)
+                        </span>
+                      )}
                       {listing.listingType === "both" && (
                         <span className="text-xs font-semibold text-slate-500">
                           (or Open to Swap)

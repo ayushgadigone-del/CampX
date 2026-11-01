@@ -92,6 +92,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   const [price, setPrice] = useState<number>(
     initialInspection?.suggestedPriceMin || 350
   );
+  const [originalPrice, setOriginalPrice] = useState<number | "">("");
   const [exchangeFor, setExchangeFor] = useState<string>("");
   const [locationPreference, setLocationPreference] = useState<string>(
     "Central Library Quad"
@@ -314,6 +315,10 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
       condition,
       listingType,
       price: listingType === "exchange" ? 0 : Number(price),
+      originalPrice:
+        listingType !== "exchange" && originalPrice && Number(originalPrice) > 0
+          ? Number(originalPrice)
+          : undefined,
       exchangeFor: listingType !== "sell" ? exchangeFor : undefined,
       description: description.trim(),
       imageUrl,
@@ -986,40 +991,113 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               </div>
             </div>
 
-            <div>
-              <label
-                className={`block text-xs font-bold mb-1 flex items-center justify-between ${
-                  isDark ? "text-slate-200" : "text-slate-700"
-                }`}
-              >
-                <span>Price (₹ INR) *</span>
-                {aiInspectionData && (
-                  <span className="text-[10px] text-indigo-400 font-semibold">
-                    AI Suggested: ₹{aiInspectionData.suggestedPriceMin}–₹{aiInspectionData.suggestedPriceMax}
+            {/* Price inputs: Actual/Original MRP vs Resale Price */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Resale Price */}
+                <div>
+                  <label
+                    className={`block text-xs font-bold mb-1 flex items-center justify-between ${
+                      isDark ? "text-slate-200" : "text-slate-700"
+                    }`}
+                  >
+                    <span>Resale Price (₹) *</span>
+                    {aiInspectionData && (
+                      <span className="text-[10px] text-indigo-400 font-semibold">
+                        AI: ₹{aiInspectionData.suggestedPriceMin}–₹{aiInspectionData.suggestedPriceMax}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <span
+                      className={`absolute left-3 top-2.5 font-bold text-sm ${
+                        isDark ? "text-slate-500" : "text-slate-400"
+                      }`}
+                    >
+                      ₹
+                    </span>
+                    <input
+                      id="listing-resale-price-input"
+                      type="number"
+                      min="0"
+                      disabled={listingType === "exchange"}
+                      value={listingType === "exchange" ? 0 : price}
+                      onChange={(e) => setPrice(Number(e.target.value))}
+                      placeholder="e.g. 350"
+                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                        isDark
+                          ? "bg-slate-900 border-slate-700 text-slate-100 disabled:bg-slate-950 disabled:text-slate-600"
+                          : "bg-white border-slate-300 text-slate-900 disabled:bg-slate-100 disabled:text-slate-400"
+                      }`}
+                    />
+                  </div>
+                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    Amount student buyer pays
                   </span>
-                )}
-              </label>
-              <div className="relative">
-                <span
-                  className={`absolute left-3 top-2.5 font-bold text-sm ${
-                    isDark ? "text-slate-500" : "text-slate-400"
-                  }`}
-                >
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  disabled={listingType === "exchange"}
-                  value={listingType === "exchange" ? 0 : price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100 disabled:bg-slate-950 disabled:text-slate-600"
-                      : "bg-white border-slate-300 text-slate-900 disabled:bg-slate-100 disabled:text-slate-400"
-                  }`}
-                />
+                </div>
+
+                {/* Actual / Original MRP Price */}
+                <div>
+                  <label
+                    className={`block text-xs font-bold mb-1 flex items-center justify-between ${
+                      isDark ? "text-slate-200" : "text-slate-700"
+                    }`}
+                  >
+                    <span>Actual / Original Price (₹)</span>
+                    <span className="text-[10px] text-slate-400 font-normal">Optional MRP</span>
+                  </label>
+                  <div className="relative">
+                    <span
+                      className={`absolute left-3 top-2.5 font-bold text-sm ${
+                        isDark ? "text-slate-500" : "text-slate-400"
+                      }`}
+                    >
+                      ₹
+                    </span>
+                    <input
+                      id="listing-original-price-input"
+                      type="number"
+                      min="0"
+                      disabled={listingType === "exchange"}
+                      value={originalPrice}
+                      onChange={(e) =>
+                        setOriginalPrice(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                      placeholder="e.g. 899 (Store MRP)"
+                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                        isDark
+                          ? "bg-slate-900 border-slate-700 text-slate-100 disabled:bg-slate-950 disabled:text-slate-600 placeholder:text-slate-600"
+                          : "bg-white border-slate-300 text-slate-900 disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-400"
+                      }`}
+                    />
+                  </div>
+                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    Original retail/purchase MRP for comparison
+                  </span>
+                </div>
               </div>
+
+              {/* Live Price Comparison & Student Savings Banner */}
+              {listingType !== "exchange" &&
+                originalPrice &&
+                Number(originalPrice) > Number(price) &&
+                Number(price) > 0 && (
+                  <div
+                    className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-medium animate-in fade-in duration-200 ${
+                      isDark
+                        ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                      Student Deal: Save ₹{Number(originalPrice) - Number(price)}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-black text-[11px] shadow-xs">
+                      {Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)}% OFF
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
 

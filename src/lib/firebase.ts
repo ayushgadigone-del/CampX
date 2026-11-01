@@ -25,16 +25,25 @@ export const auth = getAuth(app);
 // Local storage key for verified college user session persistence
 export const COLLEGE_USER_STORAGE_KEY = "campus_verified_college_user";
 
-// Google Auth Provider with Google Calendar Scope
+// Google Auth Provider with Google Calendar, Drive, Picker, and Docs Scopes
+export const WORKSPACE_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/drive.metadata.readonly",
+  "https://www.googleapis.com/auth/documents",
+  "https://www.googleapis.com/auth/documents.readonly",
+];
+
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope("https://www.googleapis.com/auth/calendar.events");
+WORKSPACE_SCOPES.forEach((scope) => googleProvider.addScope(scope));
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
 
 // Primary Firestore Database ID for this applet
 const FIRESTORE_DB_ID =
-  firebaseConfig.firestoreDatabaseId ||
+  (firebaseConfig as Record<string, any>).firestoreDatabaseId ||
   "ai-studio-campusresaleexch-f68635d5-915d-4859-b9cf-6705adcd3715";
 
 let firestoreInstance;
