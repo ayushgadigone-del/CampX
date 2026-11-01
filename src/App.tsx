@@ -84,6 +84,12 @@ import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
 import { WishlistModal } from "./components/WishlistModal";
 import { YourChatsModal } from "./components/YourChatsModal";
 import { YourChatsSection } from "./components/YourChatsSection";
+import { SectionNavigationTabs, SectionTabId } from "./components/SectionNavigationTabs";
+import { MobileBottomNav } from "./components/MobileBottomNav";
+import { TopperVaultSection } from "./components/TopperVaultSection";
+import { BeaconHandoversSection } from "./components/BeaconHandoversSection";
+import { SavedSection } from "./components/SavedSection";
+import { triggerHaptic } from "./utils/haptics";
 import {
   getStoredChats,
   deleteStoredChat,
@@ -186,6 +192,26 @@ export default function App() {
   const [sortBy, setSortBy] = useState<"smart_sort" | "newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("smart_sort");
   const [layoutMode, setLayoutMode] = useState<"grid" | "detailed">("grid");
   const [isFullScreenMode, setIsFullScreenMode] = useState<boolean>(false);
+
+  // Section Navigation Tab State (Marketplace, Topper Vault, Beacon & Handovers, Chats, Saved)
+  const [activeSectionTab, setActiveSectionTab] = useState<SectionTabId>("marketplace");
+
+  // Performance Optimization: Mobile-optimized pagination to eliminate scroll lag
+  const [visibleListingsCount, setVisibleListingsCount] = useState<number>(12);
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Reset pagination when search / filter changes
+  useEffect(() => {
+    setVisibleListingsCount(12);
+  }, [searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, includeSoldItems]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -690,6 +716,11 @@ export default function App() {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
   }, [listings, includeSoldItems, searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, wishlistOnlyFilter, wishlistIds]);
+
+  // Performance-optimized pagination slice for smooth 60fps rendering without lag
+  const displayedListings = useMemo(() => {
+    return filteredListings.slice(0, visibleListingsCount);
+  }, [filteredListings, visibleListingsCount]);
 
   const soldItemsCount = useMemo(() => {
     return listings.filter((item) => item.status === "completed").length;
@@ -1208,9 +1239,36 @@ export default function App() {
         }
       };
 
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+      // Instant Section Tab Switching via Keys 1 - 5
+      if (e.key === "1" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
+        setActiveSectionTab("marketplace");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (e.key === "2" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        vibrate(15);
+        setActiveSectionTab("topper_vault");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (e.key === "3" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        vibrate(15);
+        setActiveSectionTab("beacon_handovers");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (e.key === "4" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        vibrate(15);
+        setActiveSectionTab("chats");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (e.key === "5" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        vibrate(15);
+        setActiveSectionTab("saved");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        vibrate(15);
+        setActiveSectionTab("marketplace");
         const searchInput = document.getElementById(
           "dedicated-search-bar-input"
         ) as HTMLInputElement | null;
@@ -1346,19 +1404,35 @@ export default function App() {
           }
           setIsAIInspectorOpen(true);
         }}
-        onOpenHandovers={() => setIsHandoversModalOpen(true)}
-        onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
+        onOpenHandovers={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("beacon_handovers");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        onOpenTopperNotes={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("topper_vault");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
         onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
         upcomingHandoversCount={upcomingHandoversCount}
         wishlistCount={wishlistIds.length}
-        onOpenWishlist={() => setIsWishlistModalOpen(true)}
+        onOpenWishlist={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("saved");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
         chatsCount={storedChats.length}
-        onOpenYourChats={() => setIsYourChatsModalOpen(true)}
+        onOpenYourChats={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("chats");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
         alertsCount={alerts.filter((a) => a.active).length}
         onOpenAlerts={() => {
-          setPrefilledAlertKeyword("");
-          setPrefilledAlertCategory("All");
-          setIsAlertsModalOpen(true);
+          triggerHaptic("medium");
+          setActiveSectionTab("saved");
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }}
         isOnline={isOnline}
         isSimulatedOffline={isSimulatedOffline}
@@ -1370,6 +1444,7 @@ export default function App() {
       <CampusLiveTicker
         onSelectItem={(query) => {
           if (query) setSearchQuery(query);
+          setActiveSectionTab("marketplace");
         }}
       />
 
@@ -1381,50 +1456,95 @@ export default function App() {
         onRetry={reconnect}
       />
 
-      {/* Engineering Bento Terminal Hero (Style 1) */}
-      <EngineeringBentoHero
-        totalListingsCount={totalActiveStock}
-        totalActiveStock={totalActiveStock}
-        availableCount={availableListingsCount}
-        topperNotesCount={topperNotes.length}
-        upcomingHandoversCount={upcomingHandoversCount}
-        isOnline={isOnline}
-        onOpenCreateListing={() => {
-          if (!isOnline) {
-            showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
-            return;
-          }
-          setPrefilledInspection(null);
-          setPrefilledImage(null);
-          setIsCreateModalOpen(true);
-        }}
-        onOpenAIInspector={() => {
-          if (!isOnline) {
-            showToast("⚠️ Offline: AI item scanner requires an active internet connection.");
-            return;
-          }
-          setIsAIInspectorOpen(true);
-        }}
-        onOpenTopperNotes={() => setIsTopperNotesModalOpen(true)}
-        onOpenWishlist={() => setIsWishlistModalOpen(true)}
-        onOpenYourChats={() => setIsYourChatsModalOpen(true)}
-        onFocusSearch={() => {
-          const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
-          input?.focus();
-        }}
-        onOpenAlerts={() => {
-          setPrefilledAlertKeyword("");
-          setPrefilledAlertCategory("All");
-          setIsAlertsModalOpen(true);
-        }}
-        onSelectCategory={(cat) => setSelectedCategory(cat)}
-        selectedCategory={selectedCategory}
-      />
+      {/* Engineering Bento Terminal Hero (Style 1 - visible on Marketplace tab) */}
+      {activeSectionTab === "marketplace" && (
+        <EngineeringBentoHero
+          totalListingsCount={totalActiveStock}
+          totalActiveStock={totalActiveStock}
+          availableCount={availableListingsCount}
+          topperNotesCount={topperNotes.length}
+          upcomingHandoversCount={upcomingHandoversCount}
+          isOnline={isOnline}
+          onOpenCreateListing={() => {
+            if (!isOnline) {
+              showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
+              return;
+            }
+            setPrefilledInspection(null);
+            setPrefilledImage(null);
+            setIsCreateModalOpen(true);
+          }}
+          onOpenAIInspector={() => {
+            if (!isOnline) {
+              showToast("⚠️ Offline: AI item scanner requires an active internet connection.");
+              return;
+            }
+            setIsAIInspectorOpen(true);
+          }}
+          onOpenTopperNotes={() => {
+            triggerHaptic("medium");
+            setActiveSectionTab("topper_vault");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onOpenWishlist={() => {
+            triggerHaptic("medium");
+            setActiveSectionTab("saved");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onOpenYourChats={() => {
+            triggerHaptic("medium");
+            setActiveSectionTab("chats");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onFocusSearch={() => {
+            const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
+            input?.focus();
+          }}
+          onOpenAlerts={() => {
+            triggerHaptic("medium");
+            setActiveSectionTab("saved");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onSelectCategory={(cat) => setSelectedCategory(cat)}
+          selectedCategory={selectedCategory}
+        />
+      )}
 
-      {/* Main Container (Full Width Responsive) */}
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6">
-        {/* Dedicated Search Bar Section with History & Quick Tags */}
-        <DedicatedSearchBar
+      {/* Main Container (Full Width Responsive with Bottom Nav Clearance) */}
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6 pb-28 md:pb-14">
+        {/* Section Navigation Tabs (Marketplace, Topper Vault, Beacon & Handovers, Chats, Saved & Alerts) */}
+        <SectionNavigationTabs
+          activeTab={activeSectionTab}
+          onTabChange={(tab) => {
+            setActiveSectionTab(tab);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          listingsCount={filteredListings.length}
+          topperNotesCount={topperNotes.length}
+          chatsCount={storedChats.length}
+          wishlistCount={wishlistIds.length}
+          alertsCount={alerts.filter((a) => a.active).length}
+          upcomingHandoversCount={upcomingHandoversCount}
+          onOpenCreateModal={() => {
+            if (!currentUser) {
+              setIsLoginModalOpen(true);
+              return;
+            }
+            if (!isOnline) {
+              showToast("⚠️ Offline: Creating listings is disabled.");
+              return;
+            }
+            setPrefilledInspection(null);
+            setPrefilledImage(null);
+            setIsCreateModalOpen(true);
+          }}
+        />
+
+        {/* TAB 1: MARKETPLACE FEED */}
+        {activeSectionTab === "marketplace" && (
+          <div id="tab-panel-marketplace" role="tabpanel" className="space-y-6">
+            {/* Dedicated Search Bar Section with History & Quick Tags */}
+            <DedicatedSearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           totalResultsCount={filteredListings.length}
@@ -2087,58 +2207,75 @@ export default function App() {
               layoutMode={layoutMode}
             />
           ) : filteredListings.length > 0 ? (
-            <div
-              className={
+            <>
+              <div
+                className={
                   layoutMode === "detailed"
                     ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
                     : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
                 }
               >
-                    {filteredListings.map((listing, index) => (
-                      <motion.div
-                        key={listing.id}
-                        layout
-                        transition={{
-                          layout: {
-                            type: "spring",
-                            stiffness: 350,
-                            damping: 30,
-                          },
-                        }}
-                        className="h-full flex flex-col"
-                      >
-                        <ListingCard
-                          index={index}
-                          listing={listing}
-                          allListings={listings}
-                          isWishlisted={wishlistIds.includes(listing.id)}
-                          onToggleWishlist={handleToggleWishlist}
-                          onOpenDetails={(item) => {
-                            handleOpenDetails(item);
-                          }}
-                          onOpenLightbox={(item) => {
-                            setLightboxListing(item);
-                          }}
-                          onOpenChat={handleOpenChat}
-                          onOpenCalendar={handleOpenCalendar}
-                          onShowToast={showToast}
-                          onOpenPassport={(item) => {
-                            setPassportListing(item);
-                            setIsPassportModalOpen(true);
-                          }}
-                          onOpenBarter={(item) => {
-                            setBarterListing(item);
-                            setIsBarterDrawerOpen(true);
-                          }}
-                          isOnline={isOnline}
-                          layoutMode={layoutMode}
-                          isFullScreen={isFullScreenMode}
-                          onTagClick={(tag) => setSearchQuery(tag)}
-                        />
-                      </motion.div>
-                    ))}
+                {displayedListings.map((listing, index) => (
+                  <div
+                    key={listing.id}
+                    className="h-full flex flex-col"
+                  >
+                    <ListingCard
+                      index={index}
+                      listing={listing}
+                      allListings={listings}
+                      isWishlisted={wishlistIds.includes(listing.id)}
+                      onToggleWishlist={handleToggleWishlist}
+                      onOpenDetails={(item) => {
+                        handleOpenDetails(item);
+                      }}
+                      onOpenLightbox={(item) => {
+                        setLightboxListing(item);
+                      }}
+                      onOpenChat={handleOpenChat}
+                      onOpenCalendar={handleOpenCalendar}
+                      onShowToast={showToast}
+                      onOpenPassport={(item) => {
+                        setPassportListing(item);
+                        setIsPassportModalOpen(true);
+                      }}
+                      onOpenBarter={(item) => {
+                        setBarterListing(item);
+                        setIsBarterDrawerOpen(true);
+                      }}
+                      isOnline={isOnline}
+                      layoutMode={layoutMode}
+                      isFullScreen={isFullScreenMode}
+                      onTagClick={(tag) => setSearchQuery(tag)}
+                    />
+                  </div>
+                ))}
               </div>
-            ) : (
+
+              {/* Load More Pagination Button (Smooth mobile scrolling without lag) */}
+              {filteredListings.length > visibleListingsCount && (
+                <div className="flex flex-col items-center justify-center pt-6 pb-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic("light");
+                      setVisibleListingsCount((prev) => prev + 12);
+                    }}
+                    className={`px-6 py-2.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center gap-2 border ${
+                      isDark
+                        ? "bg-slate-800 hover:bg-slate-750 text-indigo-300 border-indigo-500/30"
+                        : "bg-white hover:bg-slate-50 text-indigo-700 border-indigo-200 shadow-2xs"
+                    }`}
+                  >
+                    <span>Load More Items</span>
+                    <span className="font-mono text-[11px] opacity-75">
+                      (Showing {displayedListings.length} of {filteredListings.length})
+                    </span>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
                 <motion.div
                   key="empty-state"
                   initial={{ opacity: 0, scale: 0.96, y: 10 }}
@@ -2198,7 +2335,76 @@ export default function App() {
                   </div>
                 </motion.div>
               )}
-        </section>
+            </section>
+          </div>
+        )}
+
+        {/* TAB 2: TOPPER NOTES VAULT */}
+        {activeSectionTab === "topper_vault" && (
+          <div id="tab-panel-topper_vault" role="tabpanel">
+            <TopperVaultSection
+              notes={topperNotes}
+              onOpenNotesModal={() => setIsTopperNotesModalOpen(true)}
+              onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
+              onShowToast={showToast}
+              isOnline={isOnline}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: CAMPUS BEACON & HANDOVERS */}
+        {activeSectionTab === "beacon_handovers" && (
+          <div id="tab-panel-beacon_handovers" role="tabpanel">
+            <BeaconHandoversSection
+              listings={listings}
+              onOpenDetails={handleOpenDetails}
+              onOpenCalendar={handleOpenCalendar}
+              onSelectItem={(query) => {
+                setSearchQuery(query);
+                setActiveSectionTab("marketplace");
+              }}
+              isOnline={isOnline}
+            />
+          </div>
+        )}
+
+        {/* TAB 4: YOUR CHATS */}
+        {activeSectionTab === "chats" && (
+          <div id="tab-panel-chats" role="tabpanel">
+            <YourChatsSection
+              chats={storedChats}
+              allListings={listings}
+              onOpenChat={handleOpenChat}
+              onOpenDetails={handleOpenDetails}
+              onOpenCalendar={handleOpenCalendar}
+              onOpenFullModal={() => setIsYourChatsModalOpen(true)}
+            />
+          </div>
+        )}
+
+        {/* TAB 5: SAVED & ALERTS */}
+        {activeSectionTab === "saved" && (
+          <div id="tab-panel-saved" role="tabpanel">
+            <SavedSection
+              wishlistListings={savedWishlistListings}
+              allListings={listings}
+              wishlistIds={wishlistIds}
+              onToggleWishlist={handleToggleWishlist}
+              onClearWishlist={handleClearWishlist}
+              onOpenDetails={handleOpenDetails}
+              onOpenLightbox={(item) => setLightboxListing(item)}
+              onOpenChat={handleOpenChat}
+              onOpenCalendar={handleOpenCalendar}
+              onShowToast={showToast}
+              alerts={alerts}
+              alertHistory={alertHistory}
+              onOpenAlertsModal={() => setIsAlertsModalOpen(true)}
+              recentlyViewed={recentlyViewed}
+              onClearRecentlyViewed={handleClearRecentlyViewed}
+              isOnline={isOnline}
+            />
+          </div>
+        )}
       </main>
 
       {/* Footer with Mentorship & PBL Credits (Full Width) */}
@@ -2544,6 +2750,46 @@ export default function App() {
             />
           </div>
         </div>
+      )}
+
+      {/* Mobile Bottom Sticky Navigation Bar */}
+      <MobileBottomNav
+        activeTab={activeSectionTab}
+        onTabChange={(tab) => {
+          setActiveSectionTab(tab);
+        }}
+        onOpenCreateModal={() => {
+          if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+          }
+          if (!isOnline) {
+            showToast("⚠️ Offline: Creating listings is disabled.");
+            return;
+          }
+          setPrefilledInspection(null);
+          setPrefilledImage(null);
+          setIsCreateModalOpen(true);
+        }}
+        wishlistCount={wishlistIds.length}
+        chatsCount={storedChats.length}
+        isOnline={isOnline}
+      />
+
+      {/* Floating Scroll to Top Action Button */}
+      {showScrollTop && (
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic("light");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          aria-label="Scroll to top"
+          title="Back to Top"
+          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95"
+        >
+          <ArrowUpNarrowWide className="w-5 h-5 text-indigo-400" />
+        </button>
       )}
     </div>
   );
