@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @keyframes shimmer-sweep {
   0% {
     transform: translateX(-150%) skewX(-20deg);

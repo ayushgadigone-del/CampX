@@ -137,13 +137,21 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
   const getBadgeStyle = (type: CampusTickerItem["type"]) => {
     switch (type) {
       case "exam_rush":
-        return "bg-rose-500 text-white shadow-xs font-black";
+        return isDark
+          ? "bg-rose-500 text-white shadow-xs font-black"
+          : "bg-rose-200 text-black border border-rose-300 font-black";
       case "hot":
-        return "bg-amber-500 text-slate-950 font-black";
+        return isDark
+          ? "bg-amber-500 text-slate-950 font-black"
+          : "bg-amber-300 text-black border border-amber-400 font-black";
       case "handover":
-        return "bg-emerald-500 text-white font-black";
+        return isDark
+          ? "bg-emerald-500 text-white font-black"
+          : "bg-emerald-200 text-black border border-emerald-300 font-black";
       default:
-        return "bg-indigo-600 text-white font-black";
+        return isDark
+          ? "bg-indigo-600 text-white font-black"
+          : "bg-indigo-100 text-black border border-indigo-300 font-black";
     }
   };
 
@@ -163,9 +171,15 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-3 w-full">
         {/* Left Beacon Badge */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] sm:text-[11px] whitespace-nowrap">
+          <div
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full font-extrabold text-[10px] sm:text-[11px] whitespace-nowrap border ${
+              isDark
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                : "bg-emerald-100 border-emerald-300 text-black"
+            }`}
+          >
             <span className="relative flex h-2 w-2">
-              <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className={`inline-flex rounded-full h-2 w-2 ${isDark ? "bg-emerald-500" : "bg-emerald-600"}`} />
             </span>
             <span className="hidden xs:inline">CAMPUS </span>
             <span>BEACON</span>
@@ -175,10 +189,14 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
             type="button"
             onClick={() => setIsRushMode((prev) => !prev)}
             title="Toggle Semester Rush Mode"
-            className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer border ${
               isRushMode
-                ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                : "bg-slate-200 dark:bg-slate-800 text-black dark:text-slate-200"
+                ? isDark
+                  ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                  : "bg-amber-100 text-black border-amber-300"
+                : isDark
+                ? "bg-slate-800 text-slate-200 border-slate-700"
+                : "bg-slate-200 text-black border-slate-300"
             }`}
           >
             <Flame className="w-3 h-3 text-amber-500" />
@@ -209,11 +227,19 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
                 {currentEvent.badge}
               </span>
 
-              <span className="text-[11px] sm:text-xs font-bold truncate hover:underline text-black dark:text-white">
+              <span
+                className={`text-[11px] sm:text-xs font-bold truncate hover:underline ${
+                  isDark ? "text-white" : "text-black"
+                }`}
+              >
                 {currentEvent.message}
               </span>
 
-              <span className="text-[10px] text-black/80 dark:text-slate-300 font-mono shrink-0 hidden lg:inline">
+              <span
+                className={`text-[10px] font-mono shrink-0 hidden lg:inline ${
+                  isDark ? "text-slate-300" : "text-black"
+                }`}
+              >
                 • {currentEvent.timestamp}
               </span>
             </motion.div>
@@ -268,8 +294,12 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
                 onClick={() => setCurrentIndex(idx)}
                 className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
                   currentIndex === idx
-                    ? "w-3 sm:w-4 bg-indigo-600"
-                    : "bg-black/30 dark:bg-slate-700"
+                    ? isDark
+                      ? "w-3 sm:w-4 bg-indigo-500"
+                      : "w-3 sm:w-4 bg-black"
+                    : isDark
+                    ? "bg-slate-700"
+                    : "bg-slate-400"
                 }`}
                 title={`Drop ${idx + 1}`}
               />
