@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Flame,
   Zap,
@@ -86,16 +85,16 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
 }) => {
   const { isDark } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Default to static display to prevent constant blinking/flashing
+  // Strictly static display with zero automatic blinking or cycling
   const [isPaused, setIsPaused] = useState(true);
   const [isRushMode, setIsRushMode] = useState(true);
 
-  // Auto cycle ticker events only when user explicitly enables playback
+  // Auto cycle ticker events only when user explicitly toggles play
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % TICKER_EVENTS.length);
-    }, 6000);
+    }, 12000);
     return () => clearInterval(interval);
   }, [isPaused]);
 
@@ -158,8 +157,6 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
   return (
     <div
       id="campus-live-ticker-bar"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       className={`relative w-full border-y transition-colors select-none text-xs ${
@@ -210,40 +207,31 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
           className="flex-1 min-w-0 cursor-pointer overflow-hidden flex items-center gap-1.5 sm:gap-2"
           title="Click to explore this campus drop (or swipe left/right)"
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentEvent.id}
-              initial={{ x: 6 }}
-              animate={{ x: 0 }}
-              exit={{ x: -6 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="flex items-center gap-1.5 sm:gap-2 min-w-0 w-full"
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 w-full">
+            <span
+              className={`px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] tracking-wide shrink-0 ${getBadgeStyle(
+                currentEvent.type
+              )}`}
             >
-              <span
-                className={`px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] tracking-wide shrink-0 ${getBadgeStyle(
-                  currentEvent.type
-                )}`}
-              >
-                {currentEvent.badge}
-              </span>
+              {currentEvent.badge}
+            </span>
 
-              <span
-                className={`text-[11px] sm:text-xs font-bold truncate hover:underline ${
-                  isDark ? "text-white" : "text-black"
-                }`}
-              >
-                {currentEvent.message}
-              </span>
+            <span
+              className={`text-[11px] sm:text-xs font-bold truncate hover:underline ${
+                isDark ? "text-white" : "text-black"
+              }`}
+            >
+              {currentEvent.message}
+            </span>
 
-              <span
-                className={`text-[10px] font-mono shrink-0 hidden lg:inline ${
-                  isDark ? "text-slate-300" : "text-black"
-                }`}
-              >
-                • {currentEvent.timestamp}
-              </span>
-            </motion.div>
-          </AnimatePresence>
+            <span
+              className={`text-[10px] font-mono shrink-0 hidden lg:inline ${
+                isDark ? "text-slate-300" : "text-black"
+              }`}
+            >
+              • {currentEvent.timestamp}
+            </span>
+          </div>
         </div>
 
         {/* Right Slider Controls (Arrows, Play/Pause & Pager Dots) */}
