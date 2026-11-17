@@ -45,10 +45,16 @@
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
-        "displayName": { "type": "string" },
+        "firstName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "surname": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "displayName": { "type": "string", "maxLength": 120 },
         "email": { "type": "string" },
-        "department": { "type": "string" },
-        "year": { "type": "string" }
+        "department": { "type": "string", "maxLength": 100 },
+        "branch": { "type": "string", "maxLength": 100 },
+        "year": { "type": "string", "maxLength": 50 },
+        "photoURL": { "type": "string" },
+        "profileCompleted": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
       },
       "required": ["uid", "email"]
     }

@@ -157,12 +157,17 @@ export interface ChatMessage {
 
 export interface UserProfile {
   uid: string;
+  firstName?: string;
+  surname?: string;
   displayName: string;
   email: string;
   photoURL?: string;
   collegeVerified: boolean;
   department?: string;
+  branch?: string;
   year?: string;
+  profileCompleted?: boolean;
+  updatedAt?: string;
   milestones?: UserMilestone[];
   completedHandoversCount?: number;
   averageRating?: number;

@@ -140,6 +140,15 @@ import { CampusSecurityCenterModal } from "./components/CampusSecurityCenterModa
 import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
 import { HorizontalSlider } from "./components/HorizontalSlider";
 import { calculateSmartSortScore } from "./utils/smartSort";
+import { StudentProfileModal } from "./components/StudentProfileModal";
+import { LoginProfilePayload } from "./components/CollegeLoginPage";
+import {
+  StudentProfileDetails,
+  isStudentProfileComplete,
+  loadLocalStudentProfile,
+  fetchFirestoreStudentProfile,
+  persistStudentProfile,
+} from "./utils/studentProfile";
 
 const CATEGORIES: (ItemCategory | "All")[] = [
   "All",
@@ -175,8 +184,10 @@ const getCategoryIcon = (category: ItemCategory | "All") => {
 export default function App() {
   const { theme, isDark, toggleTheme } = useTheme();
 
-  // Auth state
+  // Auth & Student Profile state
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [studentProfile, setStudentProfile] = useState<StudentProfileDetails | null>(null);
+  const [profileModalMode, setProfileModalMode] = useState<"onboarding" | "edit" | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
 
@@ -385,6 +396,7 @@ export default function App() {
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(false);
+  const [authGateView, setAuthGateView] = useState<"landing" | "login">("landing");
   const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
   const [isGoogleDriveModalOpen, setIsGoogleDriveModalOpen] = useState(false);
   const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
@@ -409,6 +421,57 @@ export default function App() {
   const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
   const [passportListing, setPassportListing] = useState<Listing | null>(null);
 
+  // Hydrate full student profile from localStorage / Firestore and enforce compulsory onboarding if incomplete
+  const hydrateAndVerifyStudentProfile = useCallback(async (user: User) => {
+    const email = user.email || "";
+    const localProfile = loadLocalStudentProfile(user.uid, email);
+    let resolvedProfile: StudentProfileDetails | null = localProfile;
+
+    if (!isStudentProfileComplete(resolvedProfile)) {
+      const firestoreProfile = await fetchFirestoreStudentProfile(user.uid);
+      if (isStudentProfileComplete(firestoreProfile)) {
+        resolvedProfile = firestoreProfile;
+      }
+    }
+
+    if (resolvedProfile && isStudentProfileComplete(resolvedProfile)) {
+      setStudentProfile(resolvedProfile);
+      setProfileModalMode((prev) => (prev === "edit" ? "edit" : null));
+      setCurrentUser((prev) => {
+        const base = prev || user;
+        try {
+          return Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
+            displayName: resolvedProfile!.displayName,
+            photoURL: resolvedProfile!.photoURL,
+          }) as User;
+        } catch {
+          return {
+            ...base,
+            displayName: resolvedProfile!.displayName,
+            photoURL: resolvedProfile!.photoURL,
+          } as User;
+        }
+      });
+    } else {
+      // Pre-fill any available name parts from OAuth/session, keeping compulsory modal open until all 5 fields are saved
+      const nameParts = (user.displayName || "").trim().split(/\s+/).filter(Boolean);
+      const prefillFirst = localProfile?.firstName || nameParts[0] || "";
+      const prefillSurname = localProfile?.surname || (nameParts.length > 1 ? nameParts.slice(1).join(" ") : "");
+      setStudentProfile({
+        uid: user.uid,
+        email,
+        firstName: prefillFirst,
+        surname: prefillSurname,
+        displayName: user.displayName || "",
+        year: localProfile?.year || "",
+        branch: localProfile?.branch || "",
+        photoURL: localProfile?.photoURL || user.photoURL || "",
+        profileCompleted: false,
+      });
+      setProfileModalMode("onboarding");
+    }
+  }, []);
+
   // 1. Initialize Auth
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
@@ -424,21 +487,28 @@ export default function App() {
             console.warn("Unauthorized domain detected during session re-hydration:", user.email);
             await logout();
             setCurrentUser(null);
+            setStudentProfile(null);
+            setProfileModalMode(null);
             setAuthErrorMessage(
               `Access Denied: The account (${user.email}) does not end with @${ALLOWED_COLLEGE_DOMAIN}. Anyone with an official college email ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
             );
           } else {
             setCurrentUser(user);
             setAuthErrorMessage(null);
+            await hydrateAndVerifyStudentProfile(user);
           }
         } else {
           setCurrentUser(null);
+          setStudentProfile(null);
+          setProfileModalMode(null);
         }
         setIsAuthLoading(false);
       },
       () => {
         clearTimeout(safetyTimer);
         setCurrentUser(null);
+        setStudentProfile(null);
+        setProfileModalMode(null);
         setIsAuthLoading(false);
       }
     );
@@ -446,7 +516,7 @@ export default function App() {
       clearTimeout(safetyTimer);
       if (unsubscribe) unsubscribe();
     };
-  }, []);
+  }, [hydrateAndVerifyStudentProfile]);
 
   // 2. Fetch and Sync Listings from Firestore with seed fallback
   useEffect(() => {
@@ -765,7 +835,7 @@ export default function App() {
   }, [listings]);
 
   // Auth Handlers
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<boolean> => {
     setAuthErrorMessage(null);
     try {
       const res = await googleSignIn();
@@ -775,57 +845,132 @@ export default function App() {
           // Immediately reject and log out
           await logout();
           setCurrentUser(null);
+          setStudentProfile(null);
+          setProfileModalMode(null);
           setAuthErrorMessage(
             `Access Denied: The Google account (${userEmail || "unknown"}) does not end with @${ALLOWED_COLLEGE_DOMAIN}. Anyone with an email ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
           );
-          return;
+          return false;
         }
 
         setCurrentUser(res.user);
         setAuthErrorMessage(null);
+        await hydrateAndVerifyStudentProfile(res.user);
         showToast(`Welcome, ${res.user.displayName || "Student"}! College account verified (@${ALLOWED_COLLEGE_DOMAIN}).`);
+        return true;
       } else {
         showToast("Google sign-in popup was closed. Please try again or use direct college ID verification.");
+        return false;
       }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
         console.warn("Login notice:", err?.message || err);
         setAuthErrorMessage(err?.message || "Google Sign-In could not complete. Please use Direct College ID verification.");
       }
+      return false;
     }
   };
 
   const handleDemoCollegeLogin = async (
     customEmail: string = "ayush.gadigone@pvgcoet.ac.in",
-    displayName?: string
-  ) => {
+    displayName?: string,
+    profileData?: LoginProfilePayload
+  ): Promise<boolean> => {
     setAuthErrorMessage(null);
     const cleanEmail = customEmail.trim().toLowerCase();
     if (!isValidCollegeEmail(cleanEmail)) {
       setAuthErrorMessage(
         `Invalid Email Domain: Only accounts ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
       );
-      return;
+      return false;
     }
 
     try {
-      const res = await demoStudentSignIn(cleanEmail, displayName);
+      const res = await demoStudentSignIn(
+        cleanEmail,
+        displayName,
+        profileData ? { ...profileData, profileCompleted: true } : undefined
+      );
       if (res?.user) {
         setCurrentUser(res.user);
         setAuthErrorMessage(null);
-        showToast(`Welcome, ${res.user.displayName || "Student"}! College account verified.`);
+
+        if (profileData) {
+          const saved = await persistStudentProfile({
+            uid: res.user.uid,
+            email: cleanEmail,
+            firstName: profileData.firstName,
+            surname: profileData.surname,
+            year: profileData.year,
+            branch: profileData.branch,
+            photoURL: profileData.photoURL,
+          });
+          setStudentProfile(saved);
+          setProfileModalMode(null);
+          setCurrentUser((prev) => {
+            const base = prev || res.user;
+            try {
+              return Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
+                displayName: saved.displayName,
+                photoURL: saved.photoURL,
+              }) as User;
+            } catch {
+              return {
+                ...base,
+                displayName: saved.displayName,
+                photoURL: saved.photoURL,
+              } as User;
+            }
+          });
+          showToast(`Welcome, ${saved.displayName}! Profile verified and saved.`);
+        } else {
+          await hydrateAndVerifyStudentProfile(res.user);
+          showToast(`Welcome, ${res.user.displayName || "Student"}! College account verified.`);
+        }
+        return true;
       }
+      return false;
     } catch (err: any) {
       console.warn("College login notice:", err);
       setAuthErrorMessage(err?.message || "Failed to log in with college account.");
+      return false;
     }
   };
 
   const handleLogout = async () => {
     await logout();
     setCurrentUser(null);
+    setStudentProfile(null);
+    setProfileModalMode(null);
     setAuthErrorMessage(null);
+    setAuthGateView("landing");
     showToast("Signed out successfully.");
+  };
+
+  const handleStudentProfileSaved = (saved: StudentProfileDetails) => {
+    setStudentProfile(saved);
+    const wasOnboarding = profileModalMode === "onboarding";
+    setProfileModalMode(null);
+    setCurrentUser((prev) => {
+      if (!prev) return prev;
+      try {
+        return Object.assign(Object.create(Object.getPrototypeOf(prev)), prev, {
+          displayName: saved.displayName,
+          photoURL: saved.photoURL,
+        }) as User;
+      } catch {
+        return {
+          ...prev,
+          displayName: saved.displayName,
+          photoURL: saved.photoURL,
+        } as User;
+      }
+    });
+    showToast(
+      wasOnboarding
+        ? `Welcome, ${saved.displayName}! Your student profile is complete.`
+        : "Student details updated successfully."
+    );
   };
 
   // Handover Calendar Schedule Handlers
@@ -1334,13 +1479,43 @@ export default function App() {
     );
   }
 
-  // Optional Full Landing Page View (can be opened via footer / about action)
+  // 2. Unauthenticated Entry Flow: App Explanation Landing Page -> College Login Page
+  if (!currentUser) {
+    if (authGateView === "login") {
+      return (
+        <CollegeLoginPage
+          onGoogleSignIn={async () => {
+            await handleLogin();
+          }}
+          onDemoCollegeSignIn={async (email, name, profileData) => {
+            await handleDemoCollegeLogin(email, name, profileData);
+          }}
+          authErrorMessage={authErrorMessage}
+          onClearError={() => setAuthErrorMessage(null)}
+          onBackToLanding={() => {
+            setAuthErrorMessage(null);
+            setAuthGateView("landing");
+          }}
+        />
+      );
+    }
+
+    return (
+      <LandingPage
+        onProceedToSignIn={() => {
+          setAuthErrorMessage(null);
+          setAuthGateView("login");
+        }}
+      />
+    );
+  }
+
+  // Optional Full Landing Page View (can be opened via footer About App button when signed in)
   if (showLandingPage) {
     return (
       <LandingPage
         onProceedToSignIn={() => {
           setShowLandingPage(false);
-          setIsLoginModalOpen(true);
         }}
       />
     );
@@ -1444,6 +1619,8 @@ export default function App() {
         isSimulatedOffline={isSimulatedOffline}
         onToggleSimulateOffline={toggleSimulateOffline}
         onShowToast={showToast}
+        studentProfile={studentProfile}
+        onEditProfileDetails={() => setProfileModalMode("edit")}
       />
 
       {/* Live Campus Ticker & Hot-Drop Beacon */}
@@ -2349,6 +2526,16 @@ export default function App() {
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>Trust &amp; Security</span>
             </button>
+            <button
+              onClick={() => {
+                setShowLandingPage(true);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+              <span>About App</span>
+            </button>
           </div>
         </div>
       </footer>
@@ -2452,6 +2639,8 @@ export default function App() {
         initialImage={prefilledImage}
         onListingCreated={handleListingCreated}
         isOnline={isOnline}
+        userBranch={studentProfile?.branch}
+        userYear={studentProfile?.year}
       />
 
       {calendarTargetListing && (
@@ -2659,12 +2848,16 @@ export default function App() {
             </button>
             <CollegeLoginPage
               onGoogleSignIn={async () => {
-                await handleLogin();
-                setIsLoginModalOpen(false);
+                const ok = await handleLogin();
+                if (ok) {
+                  setIsLoginModalOpen(false);
+                }
               }}
-              onDemoCollegeSignIn={async (email, name) => {
-                await handleDemoCollegeLogin(email, name);
-                setIsLoginModalOpen(false);
+              onDemoCollegeSignIn={async (email, name, profileData) => {
+                const ok = await handleDemoCollegeLogin(email, name, profileData);
+                if (ok) {
+                  setIsLoginModalOpen(false);
+                }
               }}
               authErrorMessage={authErrorMessage}
               onClearError={() => setAuthErrorMessage(null)}
@@ -2672,6 +2865,27 @@ export default function App() {
             />
           </div>
         </div>
+      )}
+
+      {/* Compulsory Login Onboarding & Edit Details Profile Modal */}
+      {currentUser && profileModalMode && (
+        <StudentProfileModal
+          isOpen={Boolean(profileModalMode)}
+          mode={profileModalMode}
+          uid={currentUser.uid}
+          email={currentUser.email || ""}
+          initialProfile={studentProfile}
+          onSave={handleStudentProfileSaved}
+          onClose={() => {
+            if (profileModalMode === "edit") {
+              setProfileModalMode(null);
+            }
+          }}
+          onSwitchAccount={async () => {
+            await handleLogout();
+            setIsLoginModalOpen(true);
+          }}
+        />
       )}
 
       {/* Mobile Bottom Sticky Navigation Bar */}

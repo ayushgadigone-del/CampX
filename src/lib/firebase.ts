@@ -24,6 +24,7 @@ export const auth = getAuth(app);
 
 // Local storage key for verified college user session persistence
 export const COLLEGE_USER_STORAGE_KEY = "campus_verified_college_user";
+export const EXPLICIT_LOGOUT_STORAGE_KEY = "campus_explicit_logout";
 
 // Google Auth Provider with Google Calendar, Drive, Picker, and Docs Scopes
 export const WORKSPACE_SCOPES = [
@@ -142,7 +143,7 @@ export async function testConnection() {
 
 testConnection();
 
-// Initialize auth state listener with automatic college user session re-hydration
+// Initialize auth state listener with explicit college user session re-hydration (never auto-seeds a default account)
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string | null) => void,
   onAuthFailure?: () => void
@@ -151,25 +152,52 @@ export const initAuth = (
     if (user) {
       let resolvedEmail = user.email;
       let resolvedName = user.displayName;
+      let resolvedPhoto = user.photoURL;
+      let hasExplicitLocalSession = false;
 
-      // If user signed in anonymously or lacks an email on the User object, check local storage
-      if (!resolvedEmail) {
-        try {
-          const raw = localStorage.getItem(COLLEGE_USER_STORAGE_KEY);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed.email && isValidCollegeEmail(parsed.email)) {
+      // Inspect saved college user session to hydrate email, full name, and custom profile photo
+      try {
+        const raw = localStorage.getItem(COLLEGE_USER_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const isExplicit = parsed.explicitSignIn === true;
+          const matchesSavedEmail =
+            !resolvedEmail ||
+            (parsed.email && parsed.email.toLowerCase() === resolvedEmail.toLowerCase());
+          if (isExplicit && matchesSavedEmail && parsed.email && isValidCollegeEmail(parsed.email)) {
+            hasExplicitLocalSession = true;
+            if (!resolvedEmail) {
               resolvedEmail = parsed.email;
-              resolvedName = parsed.displayName || user.displayName;
             }
+            if (parsed.displayName) {
+              resolvedName = parsed.displayName;
+            }
+            if (parsed.photoURL) {
+              resolvedPhoto = parsed.photoURL;
+            }
+          } else if (!isExplicit && parsed.uid === "student-ayush-26") {
+            // Clear legacy auto-seeded default session so app starts cleanly at Overview -> Login
+            localStorage.removeItem(COLLEGE_USER_STORAGE_KEY);
           }
-        } catch (e) {
-          console.warn("Could not parse saved college user session:", e);
         }
+      } catch (e) {
+        console.warn("Could not parse saved college user session:", e);
       }
 
-      // Attach email and displayName properties to ensure downstream components see the verified college identity
-      if (resolvedEmail) {
+      // If this is a leftover anonymous Firebase session without an explicit college sign-in, treat as signed out
+      if (user.isAnonymous && !hasExplicitLocalSession) {
+        try {
+          await signOut(auth);
+        } catch {}
+        cachedAccessToken = null;
+        if (onAuthFailure) {
+          onAuthFailure();
+        }
+        return;
+      }
+
+      // Attach email, displayName, and photoURL properties so downstream components see the complete verified profile
+      if (resolvedEmail && resolvedEmail !== user.email) {
         try {
           Object.defineProperty(user, "email", {
             value: resolvedEmail,
@@ -180,10 +208,21 @@ export const initAuth = (
         } catch {}
       }
 
-      if (resolvedName && !user.displayName) {
+      if (resolvedName && resolvedName !== user.displayName) {
         try {
           Object.defineProperty(user, "displayName", {
             value: resolvedName,
+            configurable: true,
+            enumerable: true,
+            writable: true,
+          });
+        } catch {}
+      }
+
+      if (resolvedPhoto && resolvedPhoto !== user.photoURL) {
+        try {
+          Object.defineProperty(user, "photoURL", {
+            value: resolvedPhoto,
             configurable: true,
             enumerable: true,
             writable: true,
@@ -195,42 +234,45 @@ export const initAuth = (
         onAuthSuccess(user, cachedAccessToken);
       }
     } else {
-      // If Firebase Auth is not active, check if a verified college student session exists in localStorage
+      // Only restore an explicitly signed-in college session (never auto-seed a default account)
+      let hasExplicitlyLoggedOut = false;
       try {
-        const raw = localStorage.getItem(COLLEGE_USER_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed.email && isValidCollegeEmail(parsed.email)) {
-            const fallbackUser = {
-              uid: parsed.uid || `student-${parsed.email.replace(/[^a-zA-Z0-9]/g, "_")}`,
-              displayName: parsed.displayName || parsed.email.split("@")[0].replace(".", " "),
-              email: parsed.email,
-              photoURL: parsed.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
-            } as unknown as User;
+        hasExplicitlyLoggedOut =
+          localStorage.getItem(EXPLICIT_LOGOUT_STORAGE_KEY) === "true";
+      } catch {}
 
-            if (onAuthSuccess) {
-              onAuthSuccess(fallbackUser, null);
-              return;
+      if (!hasExplicitlyLoggedOut) {
+        try {
+          const raw = localStorage.getItem(COLLEGE_USER_STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (
+              parsed.explicitSignIn === true &&
+              parsed.email &&
+              isValidCollegeEmail(parsed.email)
+            ) {
+              const fallbackUser = {
+                uid: parsed.uid || `student-${parsed.email.replace(/[^a-zA-Z0-9]/g, "_")}`,
+                displayName:
+                  parsed.displayName || parsed.email.split("@")[0].replace(".", " "),
+                email: parsed.email,
+                photoURL:
+                  parsed.photoURL ||
+                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+              } as unknown as User;
+
+              if (onAuthSuccess) {
+                onAuthSuccess(fallbackUser, null);
+                return;
+              }
+            } else {
+              // Remove any non-explicit / legacy auto-seeded session
+              localStorage.removeItem(COLLEGE_USER_STORAGE_KEY);
             }
           }
-        } else {
-          // Auto-seed default verified college student session for seamless out-of-the-box preview
-          const defaultStudent = {
-            uid: "student-ayush-26",
-            displayName: "Ayush Gadigone",
-            email: "ayush.gadigone@pvgcoet.ac.in",
-            photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
-          };
-          try {
-            localStorage.setItem(COLLEGE_USER_STORAGE_KEY, JSON.stringify(defaultStudent));
-          } catch {}
-          if (onAuthSuccess) {
-            onAuthSuccess(defaultStudent as unknown as User, null);
-            return;
-          }
+        } catch (e) {
+          console.warn("Could not restore saved college session:", e);
         }
-      } catch (e) {
-        console.warn("Could not restore saved college session:", e);
       }
 
       cachedAccessToken = null;
@@ -253,6 +295,7 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
 
     if (result.user && result.user.email && isValidCollegeEmail(result.user.email)) {
       try {
+        localStorage.removeItem(EXPLICIT_LOGOUT_STORAGE_KEY);
         localStorage.setItem(
           COLLEGE_USER_STORAGE_KEY,
           JSON.stringify({
@@ -260,6 +303,7 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
             displayName: result.user.displayName,
             email: result.user.email,
             photoURL: result.user.photoURL,
+            explicitSignIn: true,
           })
         );
       } catch {}
@@ -297,7 +341,15 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
  */
 export const collegeEmailSignIn = async (
   collegeEmail: string,
-  displayName?: string
+  displayName?: string,
+  profileData?: {
+    firstName?: string;
+    surname?: string;
+    year?: string;
+    branch?: string;
+    photoURL?: string;
+    profileCompleted?: boolean;
+  }
 ): Promise<{ user: User; accessToken: string | null }> => {
   const cleanEmail = collegeEmail.trim().toLowerCase();
   if (!isValidCollegeEmail(cleanEmail)) {
@@ -306,7 +358,17 @@ export const collegeEmailSignIn = async (
     );
   }
 
+  try {
+    localStorage.removeItem(EXPLICIT_LOGOUT_STORAGE_KEY);
+  } catch {}
+
+  const combinedNameFromParts =
+    profileData?.firstName && profileData?.surname
+      ? `${profileData.firstName.trim()} ${profileData.surname.trim()}`.trim()
+      : "";
+
   const resolvedName =
+    combinedNameFromParts ||
     displayName?.trim() ||
     cleanEmail
       .split("@")[0]
@@ -315,19 +377,49 @@ export const collegeEmailSignIn = async (
       .join(" ");
 
   const avatarUrl =
+    profileData?.photoURL ||
     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80";
+
+  const sessionPayload = {
+    displayName: resolvedName,
+    email: cleanEmail,
+    photoURL: avatarUrl,
+    explicitSignIn: true,
+    ...(profileData?.firstName ? { firstName: profileData.firstName } : {}),
+    ...(profileData?.surname ? { surname: profileData.surname } : {}),
+    ...(profileData?.year ? { year: profileData.year } : {}),
+    ...(profileData?.branch ? { branch: profileData.branch } : {}),
+    ...(profileData?.profileCompleted !== undefined
+      ? { profileCompleted: profileData.profileCompleted }
+      : {}),
+  };
 
   try {
     const cred = await signInAnonymously(auth);
     try {
-      await updateProfile(cred.user, {
+      const authProfileUpdate: { displayName?: string; photoURL?: string } = {
         displayName: resolvedName,
-        photoURL: avatarUrl,
-      });
+      };
+      if (avatarUrl.length < 1800) {
+        authProfileUpdate.photoURL = avatarUrl;
+      }
+      await updateProfile(cred.user, authProfileUpdate);
     } catch {}
 
     Object.defineProperty(cred.user, "email", {
       value: cleanEmail,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+    Object.defineProperty(cred.user, "displayName", {
+      value: resolvedName,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+    Object.defineProperty(cred.user, "photoURL", {
+      value: avatarUrl,
       configurable: true,
       enumerable: true,
       writable: true,
@@ -338,9 +430,7 @@ export const collegeEmailSignIn = async (
         COLLEGE_USER_STORAGE_KEY,
         JSON.stringify({
           uid: cred.user.uid,
-          displayName: resolvedName,
-          email: cleanEmail,
-          photoURL: avatarUrl,
+          ...sessionPayload,
         })
       );
     } catch {}
@@ -361,9 +451,7 @@ export const collegeEmailSignIn = async (
         COLLEGE_USER_STORAGE_KEY,
         JSON.stringify({
           uid: mockUid,
-          displayName: resolvedName,
-          email: cleanEmail,
-          photoURL: avatarUrl,
+          ...sessionPayload,
         })
       );
     } catch {}
@@ -385,6 +473,7 @@ export const setCachedAccessToken = (token: string | null) => {
 
 export const logout = async () => {
   try {
+    localStorage.setItem(EXPLICIT_LOGOUT_STORAGE_KEY, "true");
     localStorage.removeItem(COLLEGE_USER_STORAGE_KEY);
   } catch {}
   await signOut(auth);

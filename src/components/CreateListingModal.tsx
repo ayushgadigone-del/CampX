@@ -52,6 +52,8 @@ interface CreateListingModalProps {
   initialImage?: string | null;
   onListingCreated: (newListing: Listing) => void;
   isOnline?: boolean;
+  userBranch?: string;
+  userYear?: string;
 }
 
 const CATEGORIES: ItemCategory[] = [
@@ -88,6 +90,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   initialImage,
   onListingCreated,
   isOnline = true,
+  userBranch,
+  userYear,
 }) => {
   const { isDark } = useTheme();
   const [title, setTitle] = useState(initialInspection?.title || "");
@@ -368,8 +372,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
       sellerName: currentUser?.displayName || "Verified Student",
       sellerEmail: currentUser?.email || "student@pvgcoet.ac.in",
       sellerPhoto: currentUser?.photoURL || undefined,
-      department: "Engineering Student",
-      year: "Student",
+      department: userBranch || "Engineering Student",
+      year: userYear || "Student",
       status: "available",
       locationPreference,
       tags: sanitizedTags.length > 0 ? sanitizedTags : undefined,
