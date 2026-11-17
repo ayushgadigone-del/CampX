@@ -87,9 +87,9 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
     <section
       id="your-chats-section"
       aria-label="Your Chats Section"
-      className={`w-full rounded-3xl border shadow-lg backdrop-blur-xl transition-all duration-300 overflow-hidden ${
+      className={`w-full rounded-3xl border shadow-lg transition-colors duration-200 overflow-hidden ${
         isDark
-          ? "bg-slate-900/90 border-indigo-500/30 shadow-indigo-950/20"
+          ? "bg-slate-900/95 border-indigo-500/30 shadow-indigo-950/20"
           : "bg-white border-slate-200/90 shadow-slate-200/50"
       }`}
     >

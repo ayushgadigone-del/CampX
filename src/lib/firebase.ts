@@ -324,8 +324,10 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
       );
     }
     if (error?.code === "auth/unauthorized-domain") {
+      const currentHost =
+        typeof window !== "undefined" ? window.location.hostname : "this preview domain";
       throw new Error(
-        `This domain is not yet whitelisted in Firebase Auth for Google OAuth. Anyone with @${ALLOWED_COLLEGE_DOMAIN} can sign in using the Direct College ID option below!`
+        `Google Sign-In blocked by Firebase Authorized Domains for "${currentHost}". This dynamic preview URL is not yet allowlisted in Firebase Console (Authentication → Settings → Authorized domains). Please use Option 2 (Direct College ID) below with your @${ALLOWED_COLLEGE_DOMAIN} email to sign in immediately!`
       );
     }
     console.warn("Firebase Google sign-in notice:", error?.message || error);

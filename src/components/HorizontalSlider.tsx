@@ -54,7 +54,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeftState] = useState(0);
 
-  // Check scroll position and calculate progress percentage
+  // Check scroll position and calculate progress percentage (only updates state when changed)
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -62,25 +62,23 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     const maxScroll = el.scrollWidth - el.clientWidth;
     const currentScroll = el.scrollLeft;
 
-    setCanScrollLeft(currentScroll > 4);
-    setCanScrollRight(maxScroll > 4 && currentScroll < maxScroll - 4);
+    const nextLeft = currentScroll > 4;
+    const nextRight = maxScroll > 4 && currentScroll < maxScroll - 4;
+    const nextPct =
+      maxScroll > 0 ? Math.min(100, Math.max(0, Math.round((currentScroll / maxScroll) * 100))) : 0;
+    const approxPageWidth = Math.max(1, el.clientWidth * 0.8);
+    const nextPages = maxScroll > 0 ? Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth))) : 1;
+    const nextActive =
+      maxScroll > 0 ? Math.min(nextPages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth))) : 0;
 
-    if (maxScroll > 0) {
-      const pct = Math.min(100, Math.max(0, (currentScroll / maxScroll) * 100));
-      setScrollProgress(pct);
-      const approxPageWidth = Math.max(1, el.clientWidth * 0.8);
-      const pages = Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth)));
-      setTotalPages(pages);
-      const active = Math.min(pages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth)));
-      setCurrentPage(active);
-    } else {
-      setScrollProgress(0);
-      setTotalPages(1);
-      setCurrentPage(0);
-    }
+    setCanScrollLeft((prev) => (prev === nextLeft ? prev : nextLeft));
+    setCanScrollRight((prev) => (prev === nextRight ? prev : nextRight));
+    setScrollProgress((prev) => (prev === nextPct ? prev : nextPct));
+    setTotalPages((prev) => (prev === nextPages ? prev : nextPages));
+    setCurrentPage((prev) => (prev === nextActive ? prev : nextActive));
   }, []);
 
-  // Set up listeners for resize and scroll
+  // Set up listeners for ResizeObserver and scroll (never re-trigger on JSX children identity)
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -94,15 +92,22 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     el.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", updateScrollState);
 
-    // Initial check after short delay to allow children rendering
-    const timer = setTimeout(updateScrollState, 150);
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        updateScrollState();
+      });
+      resizeObserver.observe(el);
+    }
 
     return () => {
       el.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", updateScrollState);
-      clearTimeout(timer);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
     };
-  }, [children, updateScrollState]);
+  }, [updateScrollState]);
 
   // Smooth scroll left
   const handleScrollLeft = () => {

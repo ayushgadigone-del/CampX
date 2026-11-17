@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   GraduationCap,
   ShieldCheck,
@@ -163,12 +162,8 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
       id="college-login-container"
       className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden selection:bg-indigo-500 selection:text-white"
     >
-      {/* Background Decorative Rings & Ambient Highlights */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden pointer-events-none -z-10 opacity-35">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/30 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-24 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
-      </div>
+      {/* Background Decorative Ambient Highlights (GPU-safe subtle radial glow without blur-3xl flicker) */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.16),transparent)] pointer-events-none -z-10" />
 
       <div className="w-full max-w-xl mx-auto flex flex-col items-center">
         {onBackToLanding && (
@@ -177,7 +172,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               id="back-to-overview-btn"
               type="button"
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all cursor-pointer select-none"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-colors cursor-pointer select-none"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Overview</span>
@@ -186,13 +181,8 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
         )}
 
         {/* College Institutional Branding Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="text-center mb-6 space-y-2.5"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-xs">
+        <div className="text-center mb-6 space-y-2.5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold">
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             <span>PVG's COET, Pune</span>
             <span className="text-indigo-400">•</span>
@@ -205,15 +195,12 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
           <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
             Verified student-to-student marketplace for textbooks, calculators, lab gear, and topper revision notes.
           </p>
-        </motion.div>
+        </div>
 
         {/* Mandatory Domain Restriction Notice Banner */}
-        <motion.div
+        <div
           id="college-domain-restriction-banner"
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.05 }}
-          className="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-amber-500/15 border border-amber-400/40 backdrop-blur-md shadow-lg"
+          className="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-amber-500/15 border border-amber-400/40 shadow-lg"
         >
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 shrink-0 mt-0.5 border border-amber-500/30">
@@ -233,34 +220,26 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Error Feedback Box */}
-        <AnimatePresence>
-          {activeError && (
-            <motion.div
-              id="login-error-alert"
-              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-              animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              className="w-full p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex items-start gap-2.5"
-            >
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-bold text-rose-300">Authentication Warning</p>
-                <p className="mt-0.5 leading-relaxed">{activeError}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {activeError && (
+          <div
+            id="login-error-alert"
+            className="w-full mb-4 p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2.5"
+          >
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold text-rose-300">Authentication Warning</p>
+              <p className="mt-0.5 leading-relaxed">{activeError}</p>
+            </div>
+          </div>
+        )}
 
         {/* Main Authentication Card */}
-        <motion.div
+        <div
           id="college-login-card"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.1 }}
-          className="w-full bg-slate-800/90 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6"
+          className="w-full bg-slate-800/95 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
         >
           {/* Method 1: Google Institutional OAuth Sign-In */}
           <div className="space-y-3">
@@ -511,7 +490,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-        </motion.div>
+        </div>
 
         {/* Footer Security Badges */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-slate-500 text-xs">

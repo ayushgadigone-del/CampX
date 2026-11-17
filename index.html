@@ -45,10 +45,25 @@
         true
       );
     </script>
+    <script>
+      // Apply saved or preferred theme synchronously before first paint to prevent light/dark flash
+      (function () {
+        try {
+          var saved = localStorage.getItem("campus_marketplace_theme");
+          var prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+          var theme = saved === "light" || saved === "dark" ? saved : prefersLight ? "light" : "dark";
+          var root = document.documentElement;
+          root.classList.add(theme);
+          root.classList.remove(theme === "dark" ? "light" : "dark");
+          root.setAttribute("data-theme", theme);
+          root.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
     <!-- Google API Client for Google Picker -->
     <script src="https://apis.google.com/js/api.js" async defer></script>
   </head>
-  <body class="min-h-screen antialiased bg-slate-100 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 transition-colors duration-500">
+  <body class="min-h-screen antialiased bg-slate-100 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

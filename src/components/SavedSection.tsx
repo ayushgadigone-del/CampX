@@ -56,7 +56,7 @@ export const SavedSection: React.FC<SavedSectionProps> = ({
   return (
     <div
       id="saved-section-container"
-      className="w-full space-y-8 animate-in fade-in duration-200"
+      className="w-full space-y-8"
     >
       {/* 1. Wishlist Collection */}
       <div className="space-y-4">

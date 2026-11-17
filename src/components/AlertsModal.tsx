@@ -156,7 +156,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
         <div className="relative px-6 py-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-              <Bell className="w-5 h-5 text-white animate-bounce-subtle" />
+              <Bell className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">

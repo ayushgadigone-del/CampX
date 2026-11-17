@@ -70,46 +70,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const applyThemeWithTransition = (newTheme: ThemeMode) => {
     if (newTheme === theme) return;
-
-    if (typeof document !== "undefined") {
-      const root = document.documentElement;
-
-      // Add transitioning class to trigger global smooth CSS interpolation
-      root.classList.add("theme-transitioning");
-      setIsTransitioning(true);
-
-      if (transitionTimeoutRef.current) {
-        window.clearTimeout(transitionTimeoutRef.current);
-      }
-
-      const finishTransition = () => {
-        transitionTimeoutRef.current = window.setTimeout(() => {
-          root.classList.remove("theme-transitioning");
-          setIsTransitioning(false);
-        }, 500);
-      };
-
-      // If document.startViewTransition is supported by modern browsers, use it for zero-jank cross-fade
-      if ("startViewTransition" in document) {
-        try {
-          const transition = (document as any).startViewTransition(() => {
-            setThemeState(newTheme);
-          });
-          if (transition && typeof transition.finished?.then === "function") {
-            transition.finished.catch(() => {}).finally(finishTransition);
-            return;
-          }
-        } catch {
-          // Fallback if browser throws inside startViewTransition
-        }
-      }
-
-      // Fallback for browsers without View Transitions API
-      setThemeState(newTheme);
-      finishTransition();
-    } else {
-      setThemeState(newTheme);
+    if (transitionTimeoutRef.current) {
+      window.clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
     }
+    setIsTransitioning(false);
+    setThemeState(newTheme);
   };
 
   const toggleTheme = () => {

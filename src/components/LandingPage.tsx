@@ -146,15 +146,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white relative overflow-x-hidden font-sans">
-      {/* Background Decorative Gradient Orbs */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-amber-500/10 rounded-full blur-[130px]" />
-        <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px]" />
-      </div>
+      {/* Background Decorative Ambient Radial Glow (GPU-safe without heavy blur-[140px]) */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(99,102,241,0.14),transparent)]" />
 
       {/* Top Floating Navigation Bar */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-[#0A0E17]/80 border-b border-slate-800/80 px-4 sm:px-8 py-3.5 transition-all">
+      <header className="sticky top-0 z-40 bg-[#0A0E17]/95 border-b border-slate-800/80 px-4 sm:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-500/25 border border-indigo-400/30">
@@ -205,7 +201,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <button
             id="landing-header-signin-btn"
             onClick={onProceedToSignIn}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all cursor-pointer select-none"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-colors cursor-pointer select-none"
           >
             <span>Sign In with College ID</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -218,7 +214,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <section className="relative pt-12 pb-20 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
           {/* Institutional Badge */}
           <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/90 border border-slate-700/80 shadow-md text-slate-300 text-xs font-semibold mb-6 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-300"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/95 border border-slate-700/80 shadow-md text-slate-300 text-xs font-semibold mb-6"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Exclusively for verified <strong className="text-white">@{ALLOWED_COLLEGE_DOMAIN}</strong> students</span>
@@ -228,7 +224,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Hero Headline */}
           <h1
-            className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-400"
+            className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl"
           >
             The Verified Campus Resale & Barter Network for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-amber-300">
@@ -238,26 +234,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Subtitle */}
           <p
-            className="mt-6 text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-400"
+            className="mt-6 text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl leading-relaxed"
           >
             Buy, barter, or pass down engineering textbooks, mini-drafters, scientific calculators, lab gear, and cycles. Handover directly between lectures at the Central Library, Canteen Plaza, or Workshop.
           </p>
 
           {/* Core CTAs */}
           <div
-            className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-4 duration-400"
+            className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto"
           >
             <button
               id="landing-hero-cta-btn"
               onClick={onProceedToSignIn}
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition-all cursor-pointer active:scale-98"
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition-colors cursor-pointer"
             >
               <span>Access Campus Marketplace</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 text-slate-200 font-semibold text-sm transition-all cursor-pointer active:scale-98"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 text-slate-200 font-semibold text-sm transition-colors cursor-pointer"
             >
               <span>See How It Works</span>
               <ArrowDown className="w-4 h-4" />
@@ -266,9 +262,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Value Proof Badges Strip */}
           <div
-            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-4xl text-left animate-in fade-in duration-500"
+            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-4xl text-left"
           >
-            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
               <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Zero Outsiders</span>
@@ -278,7 +274,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
                 <Sparkles className="w-4 h-4" />
                 <span>AI Photo Inspector</span>
@@ -288,7 +284,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                 <MapPin className="w-4 h-4" />
                 <span>Campus Handovers</span>
@@ -298,7 +294,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
               <div className="flex items-center gap-2 text-rose-400 font-bold text-xs">
                 <Repeat className="w-4 h-4" />
                 <span>Barter Value Parity</span>

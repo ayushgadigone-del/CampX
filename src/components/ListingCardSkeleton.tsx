@@ -14,7 +14,7 @@ export const ListingCardSkeleton: React.FC<{ layoutMode?: "grid" | "detailed" }>
   if (layoutMode === "detailed") {
     return (
       <div
-        className={`flex flex-col md:flex-row rounded-3xl border-2 overflow-hidden h-full animate-pulse transition-all ${
+        className={`flex flex-col md:flex-row rounded-3xl border-2 overflow-hidden h-full ${
           isDark
             ? "bg-slate-800/95 border-slate-700/90 shadow-2xl"
             : "bg-white border-slate-200/90 shadow-md"
@@ -32,7 +32,7 @@ export const ListingCardSkeleton: React.FC<{ layoutMode?: "grid" | "detailed" }>
               isDark
                 ? "from-slate-900 via-slate-800/60 to-slate-900"
                 : "from-slate-100 via-slate-200/60 to-slate-100"
-            } animate-pulse`}
+            }`}
           />
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[75%]">
             <div className={`h-5 w-24 rounded-full ${isDark ? "bg-slate-700/80" : "bg-slate-200"}`} />
@@ -67,7 +67,7 @@ export const ListingCardSkeleton: React.FC<{ layoutMode?: "grid" | "detailed" }>
 
   return (
     <div
-      className={`flex flex-col rounded-2xl border-2 overflow-hidden h-full animate-pulse transition-all ${
+      className={`flex flex-col rounded-2xl border-2 overflow-hidden h-full ${
         isDark
           ? "bg-slate-800/95 border-slate-700/90 shadow-2xl"
           : "bg-white border-slate-200/90 shadow-md"
@@ -86,7 +86,7 @@ export const ListingCardSkeleton: React.FC<{ layoutMode?: "grid" | "detailed" }>
             isDark
               ? "from-slate-900 via-slate-800/60 to-slate-900"
               : "from-slate-100 via-slate-200/60 to-slate-100"
-          } animate-pulse`}
+          }`}
         />
 
         {/* Top-left Badges Placeholder */}

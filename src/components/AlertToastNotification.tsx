@@ -28,18 +28,18 @@ export const AlertToastNotification: React.FC<AlertToastNotificationProps> = ({
   return (
     <div
       id="alert-match-toast"
-      className="fixed bottom-6 right-6 z-50 max-w-md w-full animate-in fade-in slide-in-from-bottom-5 duration-300 pointer-events-auto"
+      className="fixed bottom-6 right-6 z-50 max-w-md w-full pointer-events-auto"
       role="alert"
     >
       <div className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl border border-amber-500/40 ring-2 ring-amber-500/20 overflow-hidden">
         {/* Decorative ambient glow */}
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-indigo-500/20 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/15 rounded-full pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-indigo-500/20 rounded-full pointer-events-none" />
 
         {/* Top Header Bar */}
         <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-xs animate-bounce-subtle">
+            <div className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-xs">
               <Bell className="w-3.5 h-3.5 fill-slate-950" />
             </div>
             <div className="flex items-center gap-1.5">

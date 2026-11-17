@@ -67,7 +67,7 @@ export const BeaconHandoversSection: React.FC<BeaconHandoversSectionProps> = ({
   return (
     <div
       id="beacon-handovers-section-container"
-      className="w-full space-y-6 animate-in fade-in duration-200"
+      className="w-full space-y-6"
     >
       {/* Live Campus Beacon Ticker Bar */}
       <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">

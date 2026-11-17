@@ -695,10 +695,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span
                     id={`detail-verified-student-badge-${listing.id}`}
-                    className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/90 overflow-hidden select-none transition-colors group-hover/seller:bg-blue-100 group-hover/seller:border-blue-300"
+                    className="relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/90 overflow-hidden select-none transition-colors group-hover/seller:bg-blue-100 group-hover/seller:border-blue-300"
                     title="Verified University Student Seller • Enrolled Campus Student"
                   >
-                    <span className="animate-shimmer-hover" aria-hidden="true" />
                     <BadgeCheck className="w-3 h-3 text-blue-600 shrink-0" />
                     <span>Verified Student Seller</span>
                   </span>

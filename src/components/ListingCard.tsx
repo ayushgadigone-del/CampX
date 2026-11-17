@@ -1,27 +1,5 @@
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-
-// Stable listing card variants (prevents blinking or flashing on re-renders)
-const listingCardVariants: Variants = {
-  hidden: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.98,
-    transition: {
-      duration: 0.15,
-      ease: "easeInOut",
-    },
-  },
-};
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   MapPin,
@@ -98,10 +76,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   const { isDark } = useTheme();
   const [isShared, setIsShared] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const reviewCount = listing.reviews?.length ?? listing.totalReviews ?? 0;
   const rating =
@@ -113,26 +87,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             10
         ) / 10
       : 0);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setMousePos({ x, y });
-
-    // Subtle 3D perspective tilt calculation (limit to ±5.5 degrees)
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = Math.max(-5.5, Math.min(5.5, ((y - centerY) / centerY) * -5.5));
-    const rotateY = Math.max(-5.5, Math.min(5.5, ((x - centerX) / centerX) * 5.5));
-    setTilt({ x: rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setTilt({ x: 0, y: 0 });
-  };
 
   const getConditionScore = (cond: string) => {
     switch (cond) {
@@ -243,55 +197,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   /* ========================================================================= */
   if (isDetailedView) {
     return (
-      <motion.div
+      <div
         id={`listing-card-${listing.id}`}
-        variants={listingCardVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        custom={index}
-        whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
         className="h-full w-full flex flex-col"
       >
         <div
-          ref={cardRef}
-          onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={handleMouseLeave}
-          style={{
-            transform: isHovered
-              ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
-              : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
-            transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
-          }}
-          className={`group relative flex flex-col md:flex-row rounded-3xl border backdrop-blur-xl transition-colors duration-300 overflow-hidden shadow-lg h-full ${
+          className={`group relative flex flex-col md:flex-row rounded-3xl border transition-colors duration-200 overflow-hidden shadow-lg h-full ${
             isDark
-              ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10 hover:shadow-indigo-500/20"
+              ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10"
               : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
           }`}
         >
-        {/* Realistic Spotlight Highlight */}
-        {isHovered && (
-          <div
-            className="pointer-events-none absolute -inset-px rounded-3xl opacity-100 transition-opacity duration-300 z-0"
-            style={{
-              background: isDark
-                ? `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.12), transparent 75%)`
-                : `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.08), transparent 75%)`,
-            }}
-          />
-        )}
-
-        {/* Holographic Iridescent Foil Sheen */}
-        {isHovered && (
-          <div
-            className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 mix-blend-color-dodge transition-opacity duration-300 z-10"
-            style={{
-              background: `radial-gradient(450px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.4) 0%, rgba(147,197,253,0.25) 30%, rgba(244,114,182,0.2) 60%, transparent 80%)`,
-            }}
-          />
-        )}
-
         {/* Top edge physical bevel shine */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
 
@@ -328,10 +244,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               {/* Verified Student Badge */}
               <span
                 id={`verified-student-badge-${listing.id}`}
-                className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-600/95 text-white border border-blue-400/40 backdrop-blur-md shadow-xs select-none"
+                className="relative inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-600/95 text-white border border-blue-400/40 shadow-xs select-none"
                 title="Verified Student Seller • Campus Authenticated"
               >
-                <span className="animate-shimmer-hover" aria-hidden="true" />
                 <BadgeCheck className="w-3.5 h-3.5 text-blue-200 shrink-0" />
                 <span>Verified Student</span>
               </span>
@@ -656,8 +571,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                     <span className={`text-sm font-bold group-hover/seller:text-indigo-400 transition-colors ${isDark ? "text-white" : "text-slate-900"}`}>
                       {listing.sellerName}
                     </span>
-                    <span className="badge-shimmer-hover relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30">
-                      <span className="animate-shimmer-hover" aria-hidden="true" />
+                    <span className="relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30">
                       <BadgeCheck className="w-3 h-3 text-blue-500" />
                       <span>Passport</span>
                     </span>
@@ -838,7 +752,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -846,55 +760,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   /* STANDARD DYNAMIC GRID CARD LAYOUT (WITH EXPANDABLE QUICK SPECS & REALISM) */
   /* ========================================================================= */
   return (
-    <motion.div
+    <div
       id={`listing-card-${listing.id}`}
-      variants={listingCardVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      custom={index}
-      whileHover={{ y: -5, transition: { duration: 0.2, ease: "easeOut" } }}
       className="h-full w-full flex flex-col"
     >
       <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          transform: isHovered
-            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
-            : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
-          transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
-        }}
-        className={`group relative flex flex-col rounded-2xl border backdrop-blur-xl transition-all duration-300 overflow-hidden h-full ${
+        className={`group relative flex flex-col rounded-2xl border transition-colors duration-200 overflow-hidden h-full ${
           isDark
-            ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10 hover:shadow-indigo-500/20"
+            ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10"
             : "bg-white border-slate-200/90 shadow-md hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
         }`}
       >
-      {/* Realistic Spotlight Gradient */}
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px rounded-2xl opacity-100 transition-opacity duration-300 z-0"
-          style={{
-            background: isDark
-              ? `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.14), transparent 70%)`
-              : `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.08), transparent 70%)`,
-          }}
-        />
-      )}
-
-      {/* Holographic Iridescent Foil Sheen */}
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px rounded-2xl opacity-35 mix-blend-color-dodge transition-opacity duration-300 z-10"
-          style={{
-            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.4) 0%, rgba(147,197,253,0.25) 30%, rgba(244,114,182,0.2) 60%, transparent 80%)`,
-          }}
-        />
-      )}
-
       {/* Subtle top edge bevel highlight */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
 
@@ -932,10 +808,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {/* Verified Student Badge */}
           <span
             id={`verified-student-badge-${listing.id}`}
-            className="badge-shimmer-hover relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600/95 hover:bg-blue-600 text-white border border-blue-400/40 backdrop-blur-md shadow-xs overflow-hidden select-none"
+            className="relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600/95 hover:bg-blue-600 text-white border border-blue-400/40 shadow-xs overflow-hidden select-none"
             title="Verified Student Seller • Campus Authenticated"
           >
-            <span className="animate-shimmer-hover" aria-hidden="true" />
             <BadgeCheck className="w-3 h-3 text-blue-200 shrink-0" />
             <span>Verified Student</span>
           </span>
@@ -1609,6 +1484,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

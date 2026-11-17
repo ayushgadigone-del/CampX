@@ -269,9 +269,17 @@ export default function App() {
 
   // Success Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = React.useRef<number | null>(null);
+  const hasHandledUrlParamsRef = React.useRef<boolean>(false);
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4500);
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+      toastTimerRef.current = null;
+    }, 4500);
   }, []);
 
   // Recently Viewed state & persistence (tracks last 5 clicked listings)
@@ -476,7 +484,7 @@ export default function App() {
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setIsAuthLoading(false);
-    }, 300);
+    }, 2500);
 
     const unsubscribe = initAuth(
       async (user) => {
@@ -698,23 +706,33 @@ export default function App() {
     setIsDetailModalOpen(true);
   };
 
-  // Handle shared listing URL parameter (e.g. ?item=...) or ?notes=...
+  // Handle shared listing URL parameter (e.g. ?item=...) or ?notes=... once
   useEffect(() => {
+    if (hasHandledUrlParamsRef.current) return;
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("notes")) {
+      const hasNotes = Boolean(params.get("notes"));
+      const itemId = params.get("item");
+      if (!hasNotes && !itemId) {
+        hasHandledUrlParamsRef.current = true;
+        return;
+      }
+      if (hasNotes) {
         setIsTopperNotesModalOpen(true);
       }
-      if (listings.length === 0) return;
-      const itemId = params.get("item");
-      if (itemId) {
-        const found = listings.find((l) => l.id === itemId);
-        if (found) {
-          handleOpenDetails(found);
-        }
+      if (!itemId) {
+        hasHandledUrlParamsRef.current = true;
+        return;
       }
+      if (listings.length === 0) return;
+      const found = listings.find((l) => l.id === itemId);
+      if (found) {
+        handleOpenDetails(found);
+      }
+      hasHandledUrlParamsRef.current = true;
     } catch (err) {
       console.warn("Could not read shared URL params:", err);
+      hasHandledUrlParamsRef.current = true;
     }
   }, [listings]);
 
@@ -1523,7 +1541,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-500 ease-in-out ${
+      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden ${
         isDark
           ? "bg-[#040711] text-slate-100 selection:bg-indigo-500 selection:text-white"
           : "bg-[#F8FAFC] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900"
@@ -1545,8 +1563,8 @@ export default function App() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div className="px-4 py-3 rounded-2xl bg-slate-800/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/80 backdrop-blur-xl flex items-center gap-2 max-w-md">
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="px-4 py-3 rounded-2xl bg-slate-800/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/80 flex items-center gap-2 max-w-md">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{toastMessage}</span>
           </div>
@@ -1738,9 +1756,9 @@ export default function App() {
 
         {/* Secondary Filter & Sorting Controls */}
         <div
-          className={`p-3 sm:p-4 rounded-2xl border shadow-md backdrop-blur-xl text-xs overflow-hidden ${
+          className={`p-3 sm:p-4 rounded-2xl border shadow-md text-xs overflow-hidden ${
             isDark
-              ? "bg-slate-800/90 border-slate-700/80 text-slate-200"
+              ? "bg-slate-800/95 border-slate-700/80 text-slate-200"
               : "bg-white border-slate-200 text-slate-800 shadow-slate-200/60"
           }`}
         >
@@ -2229,7 +2247,7 @@ export default function App() {
               {includeSoldItems && (
                 <span
                   id="header-history-badge"
-                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 animate-in fade-in"
+                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1"
                 >
                   <Archive className="w-3 h-3 text-emerald-400" />
                   <span>Transaction History Included</span>
@@ -2239,7 +2257,7 @@ export default function App() {
               {sortBy === "smart_sort" && (
                 <span
                   id="header-smart-sort-badge"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 animate-in fade-in ${
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                     isDark
                       ? "bg-purple-950/60 text-purple-300 border-purple-500/40"
                       : "bg-purple-50 text-purple-800 border-purple-200"
@@ -2254,7 +2272,7 @@ export default function App() {
               {recentlyViewed.length > 0 && (
                 <span
                   id="header-recently-viewed-badge"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 animate-in fade-in ${
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                     isDark
                       ? "bg-indigo-950/60 text-indigo-300 border-indigo-500/40"
                       : "bg-indigo-50 text-indigo-800 border-indigo-200"
@@ -2361,12 +2379,8 @@ export default function App() {
               )}
             </>
           ) : (
-                <motion.div
+                <div
                   key="empty-state"
-                  initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96, y: -10 }}
-                  transition={{ duration: 0.25 }}
                   className={`text-center py-16 p-8 rounded-2xl border shadow-xs space-y-4 ${
                     isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-slate-50 border-slate-200/90"
                   }`}
@@ -2418,7 +2432,7 @@ export default function App() {
                       Reset All Filters
                     </button>
                   </div>
-                </motion.div>
+                </div>
               )}
             </section>
           </div>

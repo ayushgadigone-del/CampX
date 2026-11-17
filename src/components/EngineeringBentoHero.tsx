@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 import {
   Terminal,
   Cpu,
@@ -170,11 +169,8 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
         {/* Side by Side Container: Section 1 & Section 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
           {/* SECTION 1: PVG's COET Engineering Resale & Exchange */}
-          <motion.div
+          <div
             id="pvg-engineering-resale-section"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
             className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
               isDark
                 ? "bg-gradient-to-br from-[#0F172A] via-[#0F172A]/90 to-[#0A0E17] border-slate-800/90 shadow-xl ring-1 ring-white/5"
@@ -330,14 +326,11 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                 </button>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* SECTION 2: AI Condition & Pricing Inspector (Side by Side with Section 1) */}
-          <motion.div
+          <div
             id="ai-condition-pricing-inspector-section"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.05 }}
             className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
               isDark
                 ? "bg-gradient-to-br from-[#0F172A] via-indigo-950/25 to-[#0A0E17] border-indigo-500/30 shadow-xl ring-1 ring-white/5"
@@ -521,16 +514,11 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                 <span>Launch AI Item Scanner</span>
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* SECTION 3: Micro Stats Tiles (Slideable on mobile, 4-column on desktop) */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="pt-1 w-full"
-        >
+        <div className="pt-1 w-full">
           <HorizontalSlider
             id="bento-stats-slider"
             showArrows={true}
@@ -701,7 +689,7 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
               </div>
             </div>
           </HorizontalSlider>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

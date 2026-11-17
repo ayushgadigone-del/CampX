@@ -72,7 +72,7 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
   return (
     <div
       id="topper-vault-section-container"
-      className="w-full space-y-6 animate-in fade-in duration-200"
+      className="w-full space-y-6"
     >
       {/* Banner Card */}
       <div

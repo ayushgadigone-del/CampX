@@ -273,10 +273,9 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                 <span className="flex items-center gap-1.5">
                   <span>Offered by {listing.sellerName}</span>
                   <span
-                    className="badge-shimmer-hover relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30 overflow-hidden select-none"
+                    className="relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30 overflow-hidden select-none"
                     title="Verified Student Seller"
                   >
-                    <span className="animate-shimmer-hover" aria-hidden="true" />
                     <BadgeCheck className="w-2.5 h-2.5 text-blue-400 shrink-0" />
                     <span>Verified</span>
                   </span>

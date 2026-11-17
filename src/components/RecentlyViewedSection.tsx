@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Eye,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Listing } from "../types";
 import { HorizontalSlider } from "./HorizontalSlider";
 
@@ -129,57 +128,44 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
       </div>
 
       {/* Collapsible Content */}
-      <AnimatePresence>
-        {!isCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 sm:px-5">
-              {count === 0 ? (
-                /* Empty State */
-                <div
-                  className={`p-4 rounded-xl border border-dashed flex items-center gap-3 text-xs ${
-                    isDark
-                      ? "border-slate-800 bg-slate-950/40 text-slate-400"
-                      : "border-slate-200 bg-white/70 text-slate-500"
-                  }`}
-                >
-                  <Eye className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>
-                    No recently viewed listings yet. Click on any listing below to inspect it, and it will be saved here for rapid access (tracking up to 5 items).
-                  </span>
-                </div>
-              ) : (
-                /* 1 to 5 Items Horizontal Slider (Smooth mobile swiping and desktop sliding) */
-                <HorizontalSlider
-                  id="recently-viewed-slider"
-                  showArrows={true}
-                  showProgress={true}
-                  showMobileHint={true}
-                  scrollStep={210}
-                  itemSnap={true}
-                  ariaLabel="Recently Viewed Listings Slider"
-                  trackClassName="gap-3 py-1"
-                >
-                  <AnimatePresence mode="popLayout">
-                    {recentlyViewed.map((item, index) => {
-                      const hasAi = Boolean(item.aiInspection);
-                      const isSold = item.status === "completed";
+      {!isCollapsed && (
+        <div className="overflow-hidden">
+          <div className="px-4 pb-4 sm:px-5">
+            {count === 0 ? (
+              /* Empty State */
+              <div
+                className={`p-4 rounded-xl border border-dashed flex items-center gap-3 text-xs ${
+                  isDark
+                    ? "border-slate-800 bg-slate-950/40 text-slate-400"
+                    : "border-slate-200 bg-white/70 text-slate-500"
+                }`}
+              >
+                <Eye className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span>
+                  No recently viewed listings yet. Click on any listing below to inspect it, and it will be saved here for rapid access (tracking up to 5 items).
+                </span>
+              </div>
+            ) : (
+              /* 1 to 5 Items Horizontal Slider (Smooth mobile swiping and desktop sliding) */
+              <HorizontalSlider
+                id="recently-viewed-slider"
+                showArrows={true}
+                showProgress={true}
+                showMobileHint={true}
+                scrollStep={210}
+                itemSnap={true}
+                ariaLabel="Recently Viewed Listings Slider"
+                trackClassName="gap-3 py-1"
+              >
+                {recentlyViewed.map((item) => {
+                  const hasAi = Boolean(item.aiInspection);
+                  const isSold = item.status === "completed";
 
-                      return (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.85 }}
-                          transition={{ duration: 0.2 }}
-                          className="group relative w-[185px] sm:w-[210px] md:w-[220px] lg:w-[230px] shrink-0 snap-start"
-                        >
+                  return (
+                    <div
+                      key={item.id}
+                      className="group relative w-[185px] sm:w-[210px] md:w-[220px] lg:w-[230px] shrink-0 snap-start"
+                    >
                           <div
                             onClick={() => onOpenDetails(item)}
                             role="button"
@@ -217,10 +203,10 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
 
                               {/* Category Badge */}
                               <span
-                                className={`absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-md backdrop-blur-md shadow-xs ${
+                                className={`absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs ${
                                   isDark
-                                    ? "bg-slate-900/80 text-slate-200 border border-slate-700/50"
-                                    : "bg-white/90 text-slate-800 border border-slate-200/60"
+                                    ? "bg-slate-900/90 text-slate-200 border border-slate-700/50"
+                                    : "bg-white/95 text-slate-800 border border-slate-200/60"
                                 }`}
                               >
                                 {item.category}
@@ -228,7 +214,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
 
                               {/* AI Score Badge if available */}
                               {hasAi && (
-                                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-purple-600/90 text-white backdrop-blur-md shadow-xs flex items-center gap-0.5">
+                                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-purple-600/95 text-white shadow-xs flex items-center gap-0.5">
                                   <Sparkles className="w-2.5 h-2.5" />
                                   <span>{item.aiInspection?.inspectionScore}%</span>
                                 </span>
@@ -236,7 +222,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
 
                               {/* Sold Overlay */}
                               {isSold && (
-                                <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center">
+                                <div className="absolute inset-0 bg-slate-950/75 flex items-center justify-center">
                                   <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500/40">
                                     Sold
                                   </span>
@@ -316,16 +302,14 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                           >
                             <X className="w-3 h-3" />
                           </button>
-                        </motion.div>
+                        </div>
                       );
                     })}
-                  </AnimatePresence>
                 </HorizontalSlider>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </div>
   );
 };
