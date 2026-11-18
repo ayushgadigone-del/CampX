@@ -186,7 +186,7 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
             onClick={handlePrevTab}
             aria-label="Previous Section Tab"
             title="Go to previous section (or press Left Arrow)"
-            className={`h-7 px-2 rounded-lg border text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+            className={`h-7 px-2 rounded-lg border text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer ${
               isDark
                 ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 border-slate-800"
                 : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-2xs"
@@ -211,7 +211,7 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
             onClick={handleNextTab}
             aria-label="Next Section Tab"
             title="Go to next section (or press Right Arrow)"
-            className={`h-7 px-2 rounded-lg border text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+            className={`h-7 px-2 rounded-lg border text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer ${
               isDark
                 ? "bg-slate-900/80 hover:bg-slate-800 text-slate-300 border-slate-800"
                 : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-2xs"
@@ -245,7 +245,7 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
               aria-selected={isActive}
               aria-controls={`tab-panel-${tab.id}`}
               onClick={() => handleSelectTab(tab.id)}
-              className={`relative flex-1 min-w-[130px] sm:min-w-0 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer whitespace-nowrap select-none ${
+              className={`relative flex-1 min-w-[130px] sm:min-w-0 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer whitespace-nowrap select-none ${
                 isActive
                   ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30"
                   : isDark
@@ -254,8 +254,8 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
               }`}
             >
               <Icon
-                className={`w-4 h-4 shrink-0 transition-transform ${
-                  isActive ? "scale-110 text-white" : ""
+                className={`w-4 h-4 shrink-0 ${
+                  isActive ? "text-white" : ""
                 }`}
               />
               <span className="truncate">{tab.shortLabel}</span>

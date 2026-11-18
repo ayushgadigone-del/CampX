@@ -149,6 +149,11 @@ export const initAuth = (
   onAuthFailure?: () => void
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
+    // Skip intermediate Firebase auth emissions while an explicit sign-in flow is completing
+    if (isSigningIn) {
+      return;
+    }
+
     if (user) {
       let resolvedEmail = user.email;
       let resolvedName = user.displayName;
@@ -396,6 +401,20 @@ export const collegeEmailSignIn = async (
       : {}),
   };
 
+  isSigningIn = true;
+  const fallbackUid = `student-${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+  // Pre-seed explicit local session BEFORE signInAnonymously so onAuthStateChanged never treats it as stale anonymous auth
+  try {
+    localStorage.setItem(
+      COLLEGE_USER_STORAGE_KEY,
+      JSON.stringify({
+        uid: fallbackUid,
+        ...sessionPayload,
+      })
+    );
+  } catch {}
+
   try {
     const cred = await signInAnonymously(auth);
     try {
@@ -440,9 +459,8 @@ export const collegeEmailSignIn = async (
     return { user: cred.user, accessToken: null };
   } catch (err) {
     console.info("Anonymous auth fallback to local verified session:", err);
-    const mockUid = `student-${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`;
     const mockUser = {
-      uid: mockUid,
+      uid: fallbackUid,
       displayName: resolvedName,
       email: cleanEmail,
       photoURL: avatarUrl,
@@ -452,13 +470,15 @@ export const collegeEmailSignIn = async (
       localStorage.setItem(
         COLLEGE_USER_STORAGE_KEY,
         JSON.stringify({
-          uid: mockUid,
+          uid: fallbackUid,
           ...sessionPayload,
         })
       );
     } catch {}
 
     return { user: mockUser, accessToken: null };
+  } finally {
+    isSigningIn = false;
   }
 };
 

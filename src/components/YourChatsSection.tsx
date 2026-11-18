@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   MessageSquare,
   Clock,
@@ -159,15 +158,8 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
       </div>
 
       {/* Section Content */}
-      <AnimatePresence>
-        {!isCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="p-5 sm:p-6"
-          >
+      {!isCollapsed && (
+          <div className="p-5 sm:p-6">
             {chats.length === 0 ? (
               <div className="py-8 text-center flex flex-col items-center justify-center">
                 <div
@@ -224,11 +216,9 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                   };
 
                   return (
-                    <motion.div
+                    <div
                       key={chat.id}
-                      whileHover={{ y: -3, scale: 1.01 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className={`group w-[290px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 flex flex-col justify-between transition-all duration-200 relative ${
+                      className={`group w-[290px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 flex flex-col justify-between transition-colors duration-150 relative ${
                         isDark
                           ? "bg-slate-800/80 hover:bg-slate-800 border-slate-700/80 hover:border-indigo-500/50 shadow-md"
                           : "bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300 shadow-xs"
@@ -259,9 +249,9 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                           <img
                             src={chat.listingImage}
                             alt={chat.listingTitle}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                           />
-                          <span className="absolute bottom-0.5 right-0.5 bg-black/70 backdrop-blur-xs text-white text-[8px] font-black px-1 py-0.2 rounded">
+                          <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[8px] font-black px-1 py-0.2 rounded">
                             ₹{chat.listingPrice}
                           </span>
                         </div>
@@ -306,7 +296,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                       <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-2">
                         <button
                           onClick={() => onOpenChat(listingToUse)}
-                          className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xs transition-all cursor-pointer"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xs transition-colors cursor-pointer"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>Resume Chat</span>
@@ -324,7 +314,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                           <ExternalLink className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </HorizontalSlider>
@@ -342,9 +332,8 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                 </button>
               </div>
             )}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </section>
   );
 };

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   MapPin,
@@ -227,13 +226,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             <img
               src={listing.imageUrl}
               alt={listing.title}
-              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              className="h-full w-full object-cover"
               referrerPolicy="no-referrer"
             />
 
             {/* Hover zoom affordance */}
-            <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex items-center justify-center">
-              <span className="px-3.5 py-2 rounded-full bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold flex items-center gap-2 shadow-xl border border-slate-700 transform -translate-y-1 group-hover:translate-y-0 transition-transform">
+            <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none flex items-center justify-center">
+              <span className="px-3.5 py-2 rounded-full bg-slate-900/95 text-white text-xs font-bold flex items-center gap-2 shadow-xl border border-slate-700">
                 <ZoomIn className="w-4 h-4 text-indigo-400" />
                 <span>Zoom & Inspect</span>
               </span>
@@ -253,7 +252,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
               {/* Condition Badge */}
               <span
-                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border backdrop-blur-md ${getConditionColor(
+                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${getConditionColor(
                   listing.condition
                 )}`}
               >
@@ -263,7 +262,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               {/* Available Stock Badge */}
               <span
                 id={`stock-badge-${listing.id}`}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border backdrop-blur-md shadow-xs flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border shadow-xs flex items-center gap-1 ${
                   listing.availableStock === 0 || listing.status === "completed"
                     ? "bg-slate-700 text-slate-300 border-slate-600"
                     : (listing.availableStock ?? 1) === 1
@@ -301,54 +300,50 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
             {/* Floating Top Right: Quick Share & Wishlist */}
             <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
-              <motion.button
+              <button
                 id={`listing-quick-share-${listing.id}`}
                 type="button"
                 aria-label="Share listing"
                 title="Share this listing"
-                whileHover={{ scale: 1.12 }}
-                whileTap={{ scale: 0.88 }}
                 onClick={handleShare}
-                className={`p-2.5 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+                className={`p-2.5 rounded-full shadow-sm border transition-colors cursor-pointer ${
                   isShared
                     ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
-                    : "bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-white border-slate-700"
+                    : "bg-slate-900/90 text-slate-200 hover:bg-slate-800 hover:text-white border-slate-700"
                 }`}
               >
                 {isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-              </motion.button>
+              </button>
 
               {onToggleWishlist && (
-                <motion.button
+                <button
                   id={`wishlist-toggle-${listing.id}`}
                   type="button"
                   aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
                   title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-                  whileHover={{ scale: 1.12 }}
-                  whileTap={{ scale: 0.88 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleWishlist(listing.id);
                   }}
-                  className={`p-2.5 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+                  className={`p-2.5 rounded-full shadow-sm border transition-colors cursor-pointer ${
                     isWishlisted
                       ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
-                      : "bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
+                      : "bg-slate-900/90 text-slate-200 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
                   }`}
                 >
                   <Heart
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : ""
+                    className={`w-4 h-4 ${
+                      isWishlisted ? "fill-rose-500 text-rose-500" : ""
                     }`}
                   />
-                </motion.button>
+                </button>
               )}
             </div>
 
             {/* Bottom on Image: AI Inspection & Views */}
             <div className="absolute bottom-3 inset-x-3 z-10 flex items-center justify-between gap-2">
               {listing.aiInspection ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-slate-950 text-white border border-slate-700/80 backdrop-blur-md shadow-lg select-none">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-slate-950 text-white border border-slate-700/80 shadow-lg select-none">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span className="text-slate-100 font-bold">AI Score:</span>
                   <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
@@ -358,10 +353,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               )}
 
               <span
-                className={`px-2.5 py-1 rounded-lg backdrop-blur-md text-[11px] font-bold flex items-center gap-1.5 border shadow-xs select-none ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border shadow-xs select-none ${
                   (listing.views || 0) >= 100
-                    ? "bg-slate-950/90 text-amber-300 border-amber-500/50"
-                    : "bg-slate-900/80 text-slate-200 border-slate-700/80"
+                    ? "bg-slate-950/95 text-amber-300 border-amber-500/50"
+                    : "bg-slate-900/90 text-slate-200 border-slate-700/80"
                 }`}
               >
                 {(listing.views || 0) >= 100 ? (
@@ -375,9 +370,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
             {/* Status Overlay */}
             {listing.status !== "available" && (
-              <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-20">
+              <div className="absolute inset-0 bg-slate-950/88 flex flex-col items-center justify-center p-4 text-center z-20">
                 {listing.status === "completed" ? (
-                  <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex flex-col items-center">
                     <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-2 shadow-xl">
                       <CheckCircle2 className="w-7 h-7 text-emerald-400" />
                     </div>
@@ -563,7 +558,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 className="flex items-center gap-3 cursor-pointer group/seller"
                 title="Click to inspect Verified Student Digital Passport"
               >
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-extrabold text-sm shadow-md shrink-0 group-hover/seller:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-extrabold text-sm shadow-md shrink-0">
                   {listing.sellerName.charAt(0)}
                 </div>
                 <div>
@@ -651,12 +646,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
             {/* Full-width Responsive Action Buttons */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              <motion.button
+              <button
                 id={`listing-details-btn-${listing.id}`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => onOpenDetails(listing)}
-                className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 ${
+                className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 ${
                   listing.status === "completed"
                     ? isDark
                       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
@@ -668,12 +661,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
                 <span>{listing.status === "completed" ? "History" : "Full Specs"}</span>
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 id={`listing-chat-btn-${listing.id}`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   if (listing.status === "completed") {
                     onOpenDetails(listing);
@@ -690,7 +681,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 }}
                 disabled={!isOnline && listing.status !== "completed"}
                 title={`Ask ${listing.sellerName} questions or negotiate a deal`}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs ${
                   listing.status === "completed"
                     ? isDark
                       ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
@@ -704,14 +695,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>Ask Seller</span>
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 id={`listing-meet-btn-${listing.id}`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => onOpenCalendar(listing)}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
                   isDark
                     ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40"
                     : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
@@ -720,15 +709,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               >
                 <CalendarIcon className="w-3.5 h-3.5" />
                 <span>Meetup</span>
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 id={`listing-share-btn-${listing.id}`}
                 type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={handleShare}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
                   isShared
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40"
                     : isDark
@@ -747,7 +734,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                     <span>Share</span>
                   </>
                 )}
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
@@ -791,13 +778,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <img
           src={listing.imageUrl}
           alt={listing.title}
-          className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+          className="h-full w-full object-cover"
           referrerPolicy="no-referrer"
         />
 
         {/* Hover zoom affordance badge */}
-        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex items-center justify-center z-10">
-          <span className="px-3 py-1.5 rounded-full bg-slate-900/90 text-white backdrop-blur-md text-[11px] font-bold flex items-center gap-1.5 shadow-lg transform -translate-y-1 group-hover:translate-y-0 transition-transform duration-200 border border-slate-700">
+        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none flex items-center justify-center z-10">
+          <span className="px-3 py-1.5 rounded-full bg-slate-900/95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-slate-700">
             <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
             <span>Click to Zoom</span>
           </span>
@@ -824,7 +811,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           />
 
           <span
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-xs ${getConditionColor(
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getConditionColor(
               listing.condition
             )}`}
           >
@@ -834,7 +821,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {/* Available Stock Badge */}
           <span
             id={`stock-badge-${listing.id}`}
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border backdrop-blur-md shadow-xs flex items-center gap-1 ${
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs flex items-center gap-1 ${
               listing.availableStock === 0 || listing.status === "completed"
                 ? "bg-slate-700 text-slate-300 border-slate-600"
                 : (listing.availableStock ?? 1) === 1
@@ -887,71 +874,64 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         {/* Floating Actions: Share & Wishlist */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
-          <motion.button
+          <button
             id={`listing-quick-share-${listing.id}`}
             type="button"
             aria-label="Share listing"
             title="Share this listing"
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
             onClick={handleShare}
-            className={`p-2 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+            className={`p-2 rounded-full shadow-sm border transition-colors cursor-pointer ${
               isShared
                 ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
-                : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border-slate-700"
+                : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border-slate-700"
             }`}
           >
             {isShared ? <Check className="w-4 h-4 text-white" /> : <Share2 className="w-4 h-4" />}
-          </motion.button>
+          </button>
 
           {onToggleWishlist && (
-            <motion.button
+            <button
               id={`wishlist-toggle-${listing.id}`}
               type="button"
               aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
               title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-              whileHover={{ scale: 1.12 }}
-              whileTap={{ scale: 0.88 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleWishlist(listing.id);
               }}
-              className={`p-2 rounded-full backdrop-blur-md shadow-sm border cursor-pointer ${
+              className={`p-2 rounded-full shadow-sm border transition-colors cursor-pointer ${
                 isWishlisted
                   ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
-                  : "bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
+                  : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
               }`}
             >
               <Heart
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  isWishlisted ? "fill-rose-500 text-rose-500 scale-110" : ""
+                className={`w-4 h-4 ${
+                  isWishlisted ? "fill-rose-500 text-rose-500" : ""
                 }`}
               />
-            </motion.button>
+            </button>
           )}
         </div>
 
-        {/* Interactive Holographic Condition Pass Pill */}
+        {/* Interactive Condition Pass Pill */}
         <div className="absolute bottom-2.5 left-3 z-10">
           {listing.aiInspection ? (
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenDetails(listing);
               }}
-              className="relative overflow-hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/90 text-indigo-200 border border-indigo-500/40 backdrop-blur-md shadow-md group/holo cursor-pointer"
-              title="Interactive 3D Holographic Pass • Inspected by Gemini 3.8 Flash"
+              className="relative overflow-hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/95 text-indigo-200 border border-indigo-500/40 shadow-md cursor-pointer transition-colors hover:bg-slate-800"
+              title="Interactive Condition Pass • Inspected by Gemini AI"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/holo:translate-x-full transition-transform duration-700 ease-out" />
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="text-white font-black text-xs">Pass • {listing.aiInspection.inspectionScore}% AI Score</span>
-            </motion.button>
+            </button>
           ) : (
             <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border backdrop-blur-xs shadow-md ${getConditionColor(
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border shadow-md ${getConditionColor(
                 listing.condition
               )}`}
             >
@@ -965,10 +945,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <div className="absolute bottom-2.5 right-3 z-10 flex items-center gap-1.5">
           <span
             id={`listing-thumb-views-${listing.id}`}
-            className={`px-2 py-1 rounded-lg backdrop-blur-md text-[10px] font-bold flex items-center gap-1 border shadow-xs select-none ${
+            className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 border shadow-xs select-none ${
               (listing.views || 0) >= 100
-                ? "bg-slate-950/90 text-amber-300 border-amber-500/50"
-                : "bg-slate-900/80 text-slate-200 border-slate-700/80"
+                ? "bg-slate-950/95 text-amber-300 border-amber-500/50"
+                : "bg-slate-900/90 text-slate-200 border-slate-700/80"
             }`}
             title={`${listing.views || 0} students viewed this listing`}
           >
@@ -993,7 +973,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 onOpenDetails(listing);
               }
             }}
-            className="px-2 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 border border-slate-700 opacity-90 hover:opacity-100 transition-all hover:scale-105 shadow-sm"
+            className="px-2 py-1 rounded-lg bg-slate-900/95 hover:bg-slate-800 text-white text-[10px] font-bold flex items-center gap-1 border border-slate-700 opacity-95 hover:opacity-100 transition-colors shadow-sm cursor-pointer"
           >
             <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
             <span>Zoom</span>
@@ -1002,9 +982,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         {/* Status overlay if not available or completed */}
         {listing.status !== "available" && (
-          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center z-20">
+          <div className="absolute inset-0 bg-slate-950/88 flex flex-col items-center justify-center p-3 text-center z-20">
             {listing.status === "completed" ? (
-              <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex flex-col items-center">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-1.5 shadow-lg">
                   <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                 </div>
@@ -1150,15 +1130,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden pt-2 space-y-2 text-xs"
-                >
+            {isExpanded && (
+                <div className="pt-2 space-y-2 text-xs">
                   {/* Full Description */}
                   <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
                     <div className="font-bold text-[10px] uppercase text-slate-400 mb-1">Full Description</div>
@@ -1212,9 +1185,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                       <span className="text-slate-400">{listing.department} ({listing.year || "Student"})</span>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
 
           {/* Star Rating & Review Summary */}
@@ -1326,7 +1298,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               className="flex items-center gap-1.5 text-right cursor-pointer group/seller"
               title="Click to view Verified Student Digital Passport"
             >
-              <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 group-hover/seller:scale-105 group-hover/seller:border-indigo-400 transition-all">
+              <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 group-hover/seller:border-indigo-400 transition-colors">
                 {listing.sellerName.charAt(0)}
               </div>
               <div className="text-left">
@@ -1356,10 +1328,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {/* Quick Action Buttons */}
           <div className="space-y-1.5">
             {/* Primary Action: Direct Ask Seller Button */}
-            <motion.button
+            <button
               id={`listing-chat-btn-${listing.id}`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 if (listing.status === "completed") {
                   onOpenDetails(listing);
@@ -1382,7 +1352,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   ? "Chat is disabled while offline"
                   : `Ask ${listing.sellerName} questions or negotiate a deal`
               }
-              className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-2xs select-none ${
+              className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-colors flex items-center justify-center gap-1.5 shadow-2xs select-none ${
                 listing.status === "completed"
                   ? isDark
                     ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
@@ -1412,14 +1382,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   <span>Ask Seller</span>
                 </>
               )}
-            </motion.button>
+            </button>
 
             {/* Secondary Actions: Details, Meet, Share */}
             <div className="flex items-center gap-1.5">
-              <motion.button
+              <button
                 id={`listing-details-btn-${listing.id}`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
                 onClick={() => onOpenDetails(listing)}
                 className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs ${
                   listing.status === "completed"
@@ -1432,12 +1400,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 }`}
               >
                 {listing.status === "completed" ? "History" : "Details"}
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 id={`listing-meet-btn-${listing.id}`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
                 onClick={() => onOpenCalendar(listing)}
                 className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
                   isDark
@@ -1448,15 +1414,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               >
                 <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
                 <span>Meet</span>
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 id={`listing-share-btn-${listing.id}`}
                 type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
                 onClick={handleShare}
-                className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
                   isShared
                     ? isDark
                       ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
@@ -1478,7 +1442,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                     <span>Share</span>
                   </>
                 )}
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>

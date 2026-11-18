@@ -55,6 +55,8 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   const [scrollLeft, setScrollLeftState] = useState(0);
 
   // Check scroll position and calculate progress percentage (only updates state when changed)
+  const rafRef = useRef<number | null>(null);
+
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -62,14 +64,14 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     const maxScroll = el.scrollWidth - el.clientWidth;
     const currentScroll = el.scrollLeft;
 
-    const nextLeft = currentScroll > 4;
-    const nextRight = maxScroll > 4 && currentScroll < maxScroll - 4;
+    const nextLeft = currentScroll > 8;
+    const nextRight = maxScroll > 10 && currentScroll < maxScroll - 8;
     const nextPct =
       maxScroll > 0 ? Math.min(100, Math.max(0, Math.round((currentScroll / maxScroll) * 100))) : 0;
     const approxPageWidth = Math.max(1, el.clientWidth * 0.8);
-    const nextPages = maxScroll > 0 ? Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth))) : 1;
+    const nextPages = maxScroll > 10 ? Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth))) : 1;
     const nextActive =
-      maxScroll > 0 ? Math.min(nextPages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth))) : 0;
+      maxScroll > 10 ? Math.min(nextPages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth))) : 0;
 
     setCanScrollLeft((prev) => (prev === nextLeft ? prev : nextLeft));
     setCanScrollRight((prev) => (prev === nextRight ? prev : nextRight));
@@ -78,6 +80,14 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     setCurrentPage((prev) => (prev === nextActive ? prev : nextActive));
   }, []);
 
+  const scheduleScrollStateUpdate = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = null;
+      updateScrollState();
+    });
+  }, [updateScrollState]);
+
   // Set up listeners for ResizeObserver and scroll (never re-trigger on JSX children identity)
   useEffect(() => {
     const el = trackRef.current;
@@ -85,29 +95,29 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
 
     updateScrollState();
 
-    const handleScroll = () => {
-      updateScrollState();
-    };
-
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", updateScrollState);
+    el.addEventListener("scroll", scheduleScrollStateUpdate, { passive: true });
+    window.addEventListener("resize", scheduleScrollStateUpdate);
 
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
       resizeObserver = new ResizeObserver(() => {
-        updateScrollState();
+        scheduleScrollStateUpdate();
       });
       resizeObserver.observe(el);
     }
 
     return () => {
-      el.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateScrollState);
+      el.removeEventListener("scroll", scheduleScrollStateUpdate);
+      window.removeEventListener("resize", scheduleScrollStateUpdate);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
-  }, [updateScrollState]);
+  }, [updateScrollState, scheduleScrollStateUpdate]);
 
   // Smooth scroll left
   const handleScrollLeft = () => {
@@ -315,18 +325,24 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
           {/* Slider Viewport Container */}
           <div className="relative group/slider flex-1 min-w-0">
             {/* Subtle Edge Fade Scrims (Left & Right) */}
-            {!hideFadeScrim && canScrollLeft && (
+            {!hideFadeScrim && (
               <div
+                aria-hidden="true"
                 className={`pointer-events-none absolute left-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-r transition-opacity duration-200 ${
+                  canScrollLeft ? "opacity-100" : "opacity-0"
+                } ${
                   isDark
                     ? "from-[#090D16] to-transparent"
                     : "from-white to-transparent"
                 }`}
               />
             )}
-            {!hideFadeScrim && canScrollRight && (
+            {!hideFadeScrim && (
               <div
+                aria-hidden="true"
                 className={`pointer-events-none absolute right-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-l transition-opacity duration-200 ${
+                  canScrollRight ? "opacity-100" : "opacity-0"
+                } ${
                   isDark
                     ? "from-[#090D16] to-transparent"
                     : "from-white to-transparent"
@@ -341,7 +357,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
-              className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
+              className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
                 itemSnap ? "snap-x snap-mandatory" : ""
               } ${trackClassName}`}
               style={{
@@ -379,18 +395,24 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
         /* Standard Header Mode Viewport */
         <div className="relative group/slider w-full">
           {/* Subtle Edge Fade Scrims (Left & Right) */}
-          {!hideFadeScrim && canScrollLeft && (
+          {!hideFadeScrim && (
             <div
+              aria-hidden="true"
               className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r transition-opacity duration-200 ${
+                canScrollLeft ? "opacity-100" : "opacity-0"
+              } ${
                 isDark
                   ? "from-[#0B0F19] to-transparent"
                   : "from-white to-transparent"
               }`}
             />
           )}
-          {!hideFadeScrim && canScrollRight && (
+          {!hideFadeScrim && (
             <div
+              aria-hidden="true"
               className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l transition-opacity duration-200 ${
+                canScrollRight ? "opacity-100" : "opacity-0"
+              } ${
                 isDark
                   ? "from-[#0B0F19] to-transparent"
                   : "from-white to-transparent"
@@ -405,7 +427,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
-            className={`flex items-center gap-3 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
+            className={`flex items-center gap-3 overflow-x-auto overflow-y-hidden no-scrollbar py-1 px-0.5 overscroll-x-contain select-none cursor-grab active:cursor-grabbing ${
               itemSnap ? "snap-x snap-mandatory" : ""
             } ${trackClassName}`}
             style={{

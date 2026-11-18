@@ -77,7 +77,7 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Seller Trust Score: ${rep.trustScore} out of 100 (${rep.tierLabel})`}
           title={`Click to view ${listing.sellerName}'s verified Trust Score breakdown (${rep.trustScore}/100)`}
-          className={`group/badge relative inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black border transition-all duration-200 cursor-pointer select-none shadow-xs text-white ${
+          className={`group/badge relative inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black border transition-colors duration-150 cursor-pointer select-none shadow-xs text-white ${
             rep.tier === "Elite"
               ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-500"
               : rep.tier === "Trusted"
@@ -98,7 +98,7 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Trust Score: ${rep.trustScore}/100`}
           title={`Trust Score: ${rep.trustScore}/100 • ${rep.tierLabel}`}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-transform hover:scale-105 select-none cursor-pointer shadow-xs text-white ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-colors select-none cursor-pointer shadow-xs text-white ${
             rep.tier === "Elite"
               ? "bg-emerald-600 border-emerald-500"
               : rep.tier === "Trusted"
@@ -119,7 +119,7 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
           onClick={handleBadgeClick}
           aria-label={`Seller Trust Score: ${rep.trustScore} out of 100 (${rep.tierLabel})`}
           title={`Click to view ${listing.sellerName}'s Trust Score breakdown`}
-          className={`group/trust relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer select-none shadow-sm hover:scale-[1.02] text-white ${
+          className={`group/trust relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors duration-150 cursor-pointer select-none shadow-sm text-white ${
             rep.tier === "Elite"
               ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-500 shadow-emerald-950/20"
               : rep.tier === "Trusted"
@@ -146,9 +146,9 @@ export const SellerReputationBadge: React.FC<SellerReputationBadgeProps> = ({
       {isOpen && (
         <div
           id={`trust-score-popover-${listing.id}`}
-          className={`absolute right-0 bottom-full mb-2 w-76 sm:w-80 rounded-2xl p-4 shadow-2xl border backdrop-blur-2xl z-50 text-left transition-all animate-in fade-in zoom-in-95 duration-150 ${
+          className={`absolute right-0 bottom-full mb-2 w-76 sm:w-80 rounded-2xl p-4 shadow-2xl border z-50 text-left ${
             isDark
-              ? "bg-slate-900/95 border-slate-700 text-slate-100 shadow-black/60"
+              ? "bg-slate-900 border-slate-700 text-slate-100 shadow-black/60"
               : "bg-white border-slate-200 text-slate-900 shadow-xl"
           }`}
           onClick={(e) => e.stopPropagation()}

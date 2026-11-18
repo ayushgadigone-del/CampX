@@ -118,7 +118,7 @@ export const UserMilestoneBadge: React.FC<UserMilestoneBadgeProps> = ({
         onClick={handleToggle}
         aria-label={`User Milestone Badge: ${primaryMilestone.label}. Click to view achievements.`}
         title={`User Milestone: ${primaryMilestone.label} • ${primaryMilestone.criteria} (Click to see all badges)`}
-        className={`group/badge relative inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold border transition-all duration-150 select-none cursor-pointer ${getMilestoneColors(
+        className={`group/badge relative inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold border transition-colors select-none cursor-pointer ${getMilestoneColors(
           primaryMilestone.id
         )}`}
       >
@@ -144,10 +144,10 @@ export const UserMilestoneBadge: React.FC<UserMilestoneBadgeProps> = ({
         <div
           id={`user-milestone-popover-${listing.id}`}
           onClick={(e) => e.stopPropagation()}
-          className={`absolute left-0 sm:left-auto sm:right-0 bottom-full mb-2 w-72 sm:w-80 rounded-2xl shadow-2xl border p-4 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl ${
+          className={`absolute left-0 sm:left-auto sm:right-0 bottom-full mb-2 w-72 sm:w-80 rounded-2xl shadow-2xl border p-4 z-50 ${
             isDark
-              ? "bg-slate-900/95 border-slate-700 text-slate-200 shadow-black/80"
-              : "bg-white/98 border-slate-200 text-slate-800 shadow-slate-900/20"
+              ? "bg-slate-900 border-slate-700 text-slate-200 shadow-black/80"
+              : "bg-white border-slate-200 text-slate-800 shadow-slate-900/20"
           }`}
         >
           {/* Popover Header */}

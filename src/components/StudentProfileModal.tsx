@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Camera,
@@ -143,32 +142,24 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
   const isOnboarding = mode === "onboarding";
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => {
-          if (!isOnboarding && onClose) onClose();
-        }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
+    <div
+      onClick={() => {
+        if (!isOnboarding && onClose) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 overflow-y-auto"
+    >
+      <div
+        id="student-profile-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="student-profile-modal-title"
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden my-6 ${
+          isDark
+            ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/80"
+            : "bg-white border-slate-200 text-slate-900 shadow-slate-300/40"
+        }`}
       >
-        <motion.div
-          id="student-profile-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="student-profile-modal-title"
-          initial={{ opacity: 0, scale: 0.96, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 12 }}
-          transition={{ duration: 0.18 }}
-          onClick={(e) => e.stopPropagation()}
-          className={`relative w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden my-6 ${
-            isDark
-              ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/80"
-              : "bg-white border-slate-200 text-slate-900 shadow-slate-300/40"
-          }`}
-        >
           {/* Header */}
           <div
             className={`flex items-center justify-between px-6 py-4 border-b ${
@@ -489,8 +480,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               </button>
             </div>
           </form>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
   );
 };

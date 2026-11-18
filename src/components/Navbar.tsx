@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   PlusCircle,
@@ -107,10 +106,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors duration-200 ${
+      className={`sticky top-0 z-40 w-full border-b ${
         isDark
-          ? "bg-[#090D16]/95 border-slate-800/80 shadow-lg shadow-black/40"
-          : "bg-white/95 border-slate-200/90 shadow-xs"
+          ? "bg-[#090D16] border-slate-800 shadow-lg shadow-black/40"
+          : "bg-white border-slate-200 shadow-xs"
       }`}
     >
       <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8">
@@ -121,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-1.5 sm:gap-2.5 group"
               title="PVG's COET Campus Resale & Exchange"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black shadow-sm group-hover:scale-105 transition-transform duration-200 shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black shadow-sm shrink-0">
                 <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
@@ -171,14 +170,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="hidden xl:flex items-center justify-center gap-2 lg:gap-2.5 mx-auto"
           >
             {/* 1. Free Topper Notes Vault (Shortcut: N) */}
-            <motion.button
+            <button
               id="navbar-topper-notes-btn"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenTopperNotes}
               aria-keyshortcuts="N"
               title="Free Topper Notes Vault (Shortcut: N)"
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-colors cursor-pointer select-none whitespace-nowrap ${
                 isDark
                   ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                   : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
@@ -198,17 +195,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <kbd className="inline-flex items-center justify-center min-w-[15px] h-[15px] px-1 text-[8.5px] font-mono font-bold rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 select-none">
                 N
               </kbd>
-            </motion.button>
+            </button>
 
             {/* 2. AI Inspector Button */}
-            <motion.button
+            <button
               id="navbar-ai-inspector-btn"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenAIInspector}
               aria-keyshortcuts="I"
               title="Inspect item condition with Gemini AI (Shortcut: I)"
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
                 isDark
                   ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
@@ -216,19 +211,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
               <span>AI Inspector</span>
-            </motion.button>
+            </button>
 
             {/* 3. Handovers Button */}
-            <motion.button
+            <button
               id="navbar-handovers-btn"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenHandovers}
               aria-keyshortcuts="H"
               title={`Campus Handover Schedule & Google Calendar Sync (Shortcut: H)${
                 upcomingHandoversCount > 0 ? ` • ${upcomingHandoversCount} scheduled` : ""
               }`}
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
                 upcomingHandoversCount > 0
                   ? isDark
                     ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
@@ -245,17 +238,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {upcomingHandoversCount}
                 </span>
               )}
-            </motion.button>
+            </button>
 
             {/* Google Drive & Docs Button */}
             {onOpenGoogleDrive && (
-              <motion.button
+              <button
                 id="navbar-drive-docs-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={onOpenGoogleDrive}
                 title="Google Drive, Picker & Docs Integration"
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   isDark
                     ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/30"
                     : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
@@ -263,20 +254,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <HardDrive className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 <span>Drive & Docs</span>
-              </motion.button>
+              </button>
             )}
 
             {/* 4. Your Chats Button */}
-            <motion.button
+            <button
               id="navbar-your-chats-button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenYourChats}
               aria-keyshortcuts="C"
               title={`Your Chats with Sellers (Shortcut: C)${
                 chatsCount > 0 ? ` • ${chatsCount} active` : ""
               }`}
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                 isDark
                   ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-indigo-600 border-slate-200 shadow-2xs"
@@ -289,19 +278,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {chatsCount}
                 </span>
               )}
-            </motion.button>
+            </button>
 
             {/* 5. Wishlist Button */}
-            <motion.button
+            <button
               id="navbar-wishlist-button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenWishlist}
               aria-keyshortcuts="W"
               title={`Saved Wishlist (Shortcut: W)${
                 wishlistCount > 0 ? ` • ${wishlistCount} items` : ""
               }`}
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                 isDark
                   ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-rose-600 border-slate-200 shadow-2xs"
@@ -320,18 +307,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {wishlistCount}
                 </span>
               )}
-            </motion.button>
+            </button>
 
             {/* 6. Notify Me / Alerts Button */}
-            <motion.button
+            <button
               id="navbar-alerts-button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenAlerts}
               title={`Keyword & Item Alerts${
                 alertsCount > 0 ? ` • ${alertsCount} active` : ""
               }`}
-              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                 isDark
                   ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                   : "bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-amber-600 border-slate-200 shadow-2xs"
@@ -350,17 +335,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {alertsCount}
                 </span>
               )}
-            </motion.button>
+            </button>
 
             {/* 7. Security & Trust Shield Button */}
             {onOpenSecurity && (
-              <motion.button
+              <button
                 id="navbar-security-shield-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={onOpenSecurity}
                 title="Campus Trust & Security Shield: EXIF stripping, domain lockdown, and safe campus zones"
-                className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                className={`h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   isDark
                     ? "bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-300 border-emerald-800/60"
                     : "bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-800 border-emerald-200/80 shadow-2xs"
@@ -368,7 +351,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>Security</span>
-              </motion.button>
+              </button>
             )}
           </nav>
 
@@ -384,7 +367,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? "Network Status: Connected to Internet"
                   : "Network Status: Offline (No Internet Connection)"
               }
-              className={`h-8 w-8 sm:h-9 sm:w-auto sm:px-2.5 rounded-xl border transition-all flex items-center justify-center cursor-default select-none pointer-events-none shrink-0 ${
+              className={`h-8 w-8 sm:h-9 sm:w-auto sm:px-2.5 rounded-xl border transition-colors flex items-center justify-center cursor-default select-none pointer-events-none shrink-0 ${
                 isOnline
                   ? isDark
                     ? "bg-slate-900/80 border-slate-800 text-slate-300"
@@ -434,10 +417,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Primary Action: + Post Item CTA (Shortcut: P) */}
-            <motion.button
+            <button
               id="navbar-post-item-btn"
-              whileHover={isOnline ? { scale: 1.02 } : {}}
-              whileTap={isOnline ? { scale: 0.98 } : {}}
               onClick={() => {
                 if (!isOnline) return;
                 triggerHaptic("heavy");
@@ -450,10 +431,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? "Listing creation is disabled while offline"
                   : "Post an item for sale / swap (Shortcut: P)"
               }
-              className={`h-8 sm:h-9 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-xl text-xs font-bold transition-all select-none shadow-sm whitespace-nowrap shrink-0 ${
+              className={`h-8 sm:h-9 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-xl text-xs font-bold transition-colors select-none shadow-sm whitespace-nowrap shrink-0 ${
                 !isOnline
                   ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
-                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white cursor-pointer hover:shadow-indigo-500/20"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white cursor-pointer"
               }`}
             >
               <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -462,7 +443,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <kbd className="inline-flex items-center justify-center min-w-[14px] h-[14px] sm:min-w-[16px] sm:h-[16px] px-0.5 sm:px-1 text-[8px] sm:text-[9px] font-mono font-bold rounded bg-white/25 text-white select-none">
                 P
               </kbd>
-            </motion.button>
+            </button>
 
             {/* Profile Menu or Sign In */}
             {currentUser ? (
@@ -498,15 +479,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   />
                 </button>
 
-                <AnimatePresence>
-                  {showProfileMenu && (
-                    <motion.div
+                {showProfileMenu && (
+                    <div
                       id="navbar-profile-dropdown"
-                      initial={{ opacity: 0, scale: 0.95, y: -6 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -6 }}
-                      transition={{ duration: 0.15 }}
-                      className={`absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-2xl shadow-2xl border py-2 z-50 text-xs backdrop-blur-xl ${
+                      className={`absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-2xl shadow-2xl border py-2 z-50 text-xs ${
                         isDark
                           ? "bg-[#0B0F19] border-slate-800 text-slate-200 shadow-black/80"
                           : "bg-white border-slate-200 text-slate-700 shadow-slate-200/80"
@@ -737,16 +713,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <span>Sign Out</span>
                         </button>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
               </div>
             ) : (
               <div className="flex items-center gap-1 sm:gap-2 h-8 sm:h-9 shrink-0">
                 <button
                   onClick={onLogin}
                   title="Sign in with your Google account"
-                  className={`h-8 sm:h-9 flex items-center gap-1.5 px-2 sm:px-3 rounded-xl border text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`h-8 sm:h-9 flex items-center gap-1.5 px-2 sm:px-3 rounded-xl border text-xs font-semibold shadow-xs transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     isDark
                       ? "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-750"
                       : "bg-white hover:bg-slate-50 text-slate-800 border-slate-300"
@@ -781,7 +756,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     onClick={onDemoLogin}
                     title="1-Click verified student account for testing without Google popup"
-                    className="h-8 sm:h-9 inline-flex items-center px-1.5 sm:px-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0"
+                    className="h-8 sm:h-9 inline-flex items-center px-1.5 sm:px-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 text-[11px] sm:text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0"
                   >
                     <span>Demo</span>
                   </button>
@@ -810,7 +785,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setMobileNavMode("slider")}
                 aria-label="Horizontal slider view"
                 title="Slider View: slide through tools using arrows or touch swipe"
-                className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer ${
                   mobileNavMode === "slider"
                     ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs"
                     : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
@@ -824,7 +799,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setMobileNavMode("grid")}
                 aria-label="All visible grid view"
                 title="All Visible View: see all 7 campus tools completely visible simultaneously"
-                className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer ${
                   mobileNavMode === "grid"
                     ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs"
                     : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
@@ -856,7 +831,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-topper-notes-btn"
                 onClick={onOpenTopperNotes}
                 title="Open Topper Notes Vault (Shortcut: N)"
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-xs font-bold transition-colors cursor-pointer select-none whitespace-nowrap shrink-0 snap-start ${
                   isDark
                     ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                     : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
@@ -883,7 +858,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-ai-inspector-btn"
                 onClick={onOpenAIInspector}
                 title="Inspect item condition with Gemini AI (Shortcut: I)"
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                   isDark
                     ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                     : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
@@ -900,7 +875,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="mobile-nav-handovers-btn"
                 onClick={onOpenHandovers}
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                   upcomingHandoversCount > 0
                     ? isDark
                       ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
@@ -924,7 +899,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="mobile-nav-drive-docs-btn"
                   onClick={onOpenGoogleDrive}
-                  className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                  className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                     isDark
                       ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/30"
                       : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
@@ -940,7 +915,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-chats-btn"
                 onClick={onOpenYourChats}
                 title="Your Chats with Sellers (Shortcut: C)"
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -963,7 +938,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-wishlist-btn"
                 onClick={onOpenWishlist}
                 title="Saved Wishlist (Shortcut: W)"
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -989,7 +964,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="mobile-nav-alerts-btn"
                 onClick={onOpenAlerts}
-                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -1013,7 +988,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="mobile-nav-security-btn"
                   onClick={onOpenSecurity}
-                  className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap shrink-0 snap-start ${
+                  className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 snap-start ${
                     isDark
                       ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
                       : "bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs"
@@ -1032,7 +1007,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onOpenTopperNotes}
                 title="Open Topper Notes Vault (Shortcut: N)"
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl border text-xs font-bold transition-colors cursor-pointer select-none ${
                   isDark
                     ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                     : "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-200 text-emerald-700 shadow-2xs"
@@ -1062,7 +1037,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onOpenAIInspector}
                 title="Inspect item condition with Gemini AI (Shortcut: I)"
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer truncate ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer truncate ${
                   isDark
                     ? "bg-slate-900/70 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800"
                     : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
@@ -1080,7 +1055,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* 3. Handovers */}
               <button
                 onClick={onOpenHandovers}
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
                   upcomingHandoversCount > 0
                     ? isDark
                       ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
@@ -1105,7 +1080,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {onOpenGoogleDrive && (
                 <button
                   onClick={onOpenGoogleDrive}
-                  className={`h-9 flex items-center gap-1.5 px-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer truncate ${
+                  className={`h-9 flex items-center gap-1.5 px-2.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer truncate ${
                     isDark
                       ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/30"
                       : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 shadow-2xs"
@@ -1120,7 +1095,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onOpenYourChats}
                 title="Your Chats with Sellers (Shortcut: C)"
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -1146,7 +1121,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onOpenWishlist}
                 title="Saved Wishlist (Shortcut: W)"
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -1175,7 +1150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* 7. Alerts */}
               <button
                 onClick={onOpenAlerts}
-                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
                   isDark
                     ? "bg-slate-900/80 text-slate-300 border-slate-800"
                     : "bg-slate-50 text-slate-700 border-slate-200 shadow-2xs"
@@ -1201,7 +1176,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={onOpenSecurity}
                   title="Campus Security & Privacy Shield"
-                  className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`h-9 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
                     isDark
                       ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
                       : "bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs"

@@ -205,10 +205,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/55">
       <div
         id="chat-drawer"
-        className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-300"
+        className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200"
       >
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
@@ -546,7 +546,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           {showOfferBox && (
             <div
               id="quick-reply-offer-box"
-              className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 space-y-2.5 animate-in fade-in duration-200"
+              className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 space-y-2.5"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-950">

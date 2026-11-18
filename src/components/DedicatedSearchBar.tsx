@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Search,
   X,
@@ -144,7 +143,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
       className="w-full mb-2"
     >
       <div
-        className={`w-full rounded-2xl p-4 sm:p-5 border transition-all duration-200 shadow-sm relative overflow-visible ${
+        className={`w-full rounded-2xl p-4 sm:p-5 border transition-colors duration-150 shadow-sm relative overflow-visible ${
           isDark
             ? isFocused
               ? "bg-[#0F172A] border-indigo-500/80 ring-2 ring-indigo-500/20 shadow-lg shadow-indigo-950/40"
@@ -236,7 +235,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
               }}
               onBlur={() => setIsFocused(false)}
               placeholder="Search gear, Casio fx-991, SPPU books, cycles, drafters..."
-              className={`w-full pl-12 sm:pl-13 pr-28 sm:pr-32 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium outline-none transition-all ${
+              className={`w-full pl-12 sm:pl-13 pr-28 sm:pr-32 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium outline-none transition-colors ${
                 isDark
                   ? "bg-slate-950/80 text-white placeholder:text-slate-500 border border-slate-800 focus:border-indigo-500"
                   : "bg-slate-50/90 text-slate-900 placeholder:text-slate-400 border border-slate-200 focus:border-indigo-500"
@@ -246,10 +245,8 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
             {/* Right Action Cluster in Search Bar */}
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
               {searchQuery && (
-                <motion.button
+                <button
                   type="button"
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.85 }}
                   onClick={() => {
                     onSearchChange("");
                     inputRef.current?.focus();
@@ -259,15 +256,13 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                   aria-label="Clear search text"
                 >
                   <X className="w-4 h-4" />
-                </motion.button>
+                </button>
               )}
 
-              <motion.button
+              <button
                 type="submit"
                 id="dedicated-search-submit-btn"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.94 }}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs ${
                   searchQuery.trim()
                     ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25"
                     : isDark
@@ -278,23 +273,18 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
               >
                 <span>Search</span>
                 <CornerDownLeft className="w-3.5 h-3.5" />
-              </motion.button>
+              </button>
             </div>
           </form>
 
-          {/* Search Dropdown: Query Action + Recent History with AnimatePresence */}
-          <AnimatePresence>
-            {isDropdownOpen && (
-              <motion.div
+          {/* Search Dropdown: Query Action + Recent History */}
+          {isDropdownOpen && (
+              <div
                 id="dedicated-search-dropdown"
-                initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
-                className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl overflow-hidden z-50 backdrop-blur-xl ${
+                className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl overflow-hidden z-50 ${
                   isDark
-                    ? "bg-slate-900/98 border-slate-700 text-slate-100"
-                    : "bg-white/98 border-slate-200 text-slate-900"
+                    ? "bg-slate-900 border-slate-700 text-slate-100"
+                    : "bg-white border-slate-200 text-slate-900"
                 }`}
               >
                 {searchQuery.trim() && (
@@ -380,9 +370,8 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                     ))}
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
 
         {/* Category Available Stock Console Bar */}
@@ -431,9 +420,9 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                   type="button"
                   id={`search-console-category-${cat.key.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => onSelectCategory && onSelectCategory(cat.key)}
-                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_22px_rgba(168,85,247,0.65)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/50 ${
+                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:border-purple-400 ${
                     isSelected
-                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white border-purple-400 ring-2 ring-purple-400/60 shadow-lg shadow-purple-600/30 scale-[1.02]"
+                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white border-purple-400 ring-2 ring-purple-400/60 shadow-lg shadow-purple-600/30"
                       : isDark
                       ? "bg-slate-800/85 hover:bg-slate-800 text-slate-200 hover:text-white border-slate-700/80"
                       : "bg-slate-50/90 hover:bg-purple-50/80 text-slate-700 hover:text-purple-700 border-slate-200 shadow-2xs"
@@ -451,7 +440,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-black shrink-0 whitespace-nowrap transition-all ${
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-black shrink-0 whitespace-nowrap transition-colors ${
                       stock === 0
                         ? isSelected
                           ? "bg-rose-600 text-white shadow-xs ring-1 ring-rose-300"
@@ -494,16 +483,14 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
             </span>
 
             {POPULAR_CAMPUS_SEARCHES.map((item) => (
-              <motion.button
+              <button
                 key={item.label}
                 type="button"
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   onSearchChange(item.label);
                   addRecentSearch(item.label);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_18px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-1 hover:ring-purple-400/40 ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 snap-start hover:border-purple-400 ${
                   searchQuery.toLowerCase().includes(item.label.toLowerCase())
                     ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-xs"
                     : isDark
@@ -512,7 +499,7 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
                 }`}
               >
                 <span>{item.label}</span>
-              </motion.button>
+              </button>
             ))}
           </HorizontalSlider>
         </div>

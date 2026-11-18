@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   Filter,
@@ -447,6 +446,12 @@ export default function App() {
       setProfileModalMode((prev) => (prev === "edit" ? "edit" : null));
       setCurrentUser((prev) => {
         const base = prev || user;
+        if (
+          base.displayName === resolvedProfile!.displayName &&
+          base.photoURL === resolvedProfile!.photoURL
+        ) {
+          return base;
+        }
         try {
           return Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
             displayName: resolvedProfile!.displayName,
@@ -927,6 +932,9 @@ export default function App() {
           setProfileModalMode(null);
           setCurrentUser((prev) => {
             const base = prev || res.user;
+            if (base.displayName === saved.displayName && base.photoURL === saved.photoURL) {
+              return base;
+            }
             try {
               return Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
                 displayName: saved.displayName,
@@ -1811,7 +1819,7 @@ export default function App() {
               onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
               aria-keyshortcuts="W"
               title="Show only items saved to your Wishlist (Shortcut: W)"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
                 wishlistOnlyFilter
                   ? "bg-rose-600 text-white shadow-xs border-rose-500"
                   : "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-rose-500/30"
@@ -1842,7 +1850,7 @@ export default function App() {
               onClick={() => setIsYourChatsModalOpen(true)}
               aria-keyshortcuts="C"
               title="View Your Chats with sellers (Shortcut: C)"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
                 isDark
                   ? "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30"
                   : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 shadow-2xs"
@@ -1871,7 +1879,7 @@ export default function App() {
                   ? "Currently showing all items including sold transactions. Click to hide sold items and keep marketplace clean."
                   : "Include completed transactions to browse historical student sales, prices, and handovers."
               }
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 border cursor-pointer select-none ${
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
                 includeSoldItems
                   ? isDark
                     ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-xs"
@@ -1907,7 +1915,7 @@ export default function App() {
                 setIsAlertsModalOpen(true);
               }}
               title="Set an alert to notify you when items matching this criteria are posted"
-              className="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 shadow-xs cursor-pointer"
+              className="px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 shadow-xs cursor-pointer"
             >
               <Bell className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>
@@ -1958,7 +1966,7 @@ export default function App() {
                 id="view-mode-grid-btn"
                 onClick={() => setLayoutMode("grid")}
                 title="Grid layout view with expandable details"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   layoutMode === "grid"
                     ? isDark
                       ? "bg-indigo-600 text-white shadow-xs"
@@ -1977,7 +1985,7 @@ export default function App() {
                 id="view-mode-detailed-btn"
                 onClick={() => setLayoutMode("detailed")}
                 title="Detailed full-specs layout view"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   layoutMode === "detailed"
                     ? isDark
                       ? "bg-indigo-600 text-white shadow-xs"
@@ -1993,11 +2001,9 @@ export default function App() {
             </div>
 
             {/* Full Screen Mode Toggle */}
-            <motion.button
+            <button
               type="button"
               id="fullscreen-toggle-btn"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
               onClick={toggleFullScreen}
               aria-keyshortcuts="F"
               title={
@@ -2035,12 +2041,12 @@ export default function App() {
               >
                 F
               </kbd>
-            </motion.button>
+            </button>
 
-            {/* Sort By Dropdown with Animated Visual Indicator & Icon Transition */}
+            {/* Sort By Dropdown */}
             <div
               id="marketplace-sort-container"
-              className={`flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-xl border transition-all select-none ${
+              className={`flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-xl border transition-colors select-none ${
                 sortBy === "smart_sort"
                   ? isDark
                     ? "bg-purple-950/70 border-purple-500/50 shadow-xs ring-1 ring-purple-500/30"
@@ -2054,37 +2060,28 @@ export default function App() {
                   : "bg-slate-50 border-slate-200"
               }`}
             >
-              {/* Dynamic Icon Transition signaling active sort state */}
+              {/* Active sort state icon */}
               <div className="relative flex items-center justify-center w-4 h-4 shrink-0">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={sortBy}
-                    initial={{ scale: 0.4, rotate: -30, opacity: 0 }}
-                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                    exit={{ scale: 0.4, rotate: 30, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 28 }}
-                    className="flex items-center justify-center"
-                  >
-                    {sortBy === "smart_sort" && (
-                      <Sparkles className="w-3.5 h-3.5 text-purple-400 fill-purple-400/30" />
-                    )}
-                    {sortBy === "newest" && (
-                      <Clock className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
-                    )}
-                    {sortBy === "views_desc" && (
-                      <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/30" />
-                    )}
-                    {sortBy === "price_asc" && (
-                      <ArrowUpNarrowWide className="w-3.5 h-3.5 text-emerald-500" />
-                    )}
-                    {sortBy === "price_desc" && (
-                      <ArrowDownWideNarrow className="w-3.5 h-3.5 text-blue-500" />
-                    )}
-                    {sortBy === "ai_score" && (
-                      <Sparkles className="w-3.5 h-3.5 text-purple-500" />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                <div className="flex items-center justify-center">
+                  {sortBy === "smart_sort" && (
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400 fill-purple-400/30" />
+                  )}
+                  {sortBy === "newest" && (
+                    <Clock className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
+                  )}
+                  {sortBy === "views_desc" && (
+                    <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/30" />
+                  )}
+                  {sortBy === "price_asc" && (
+                    <ArrowUpNarrowWide className="w-3.5 h-3.5 text-emerald-500" />
+                  )}
+                  {sortBy === "price_desc" && (
+                    <ArrowDownWideNarrow className="w-3.5 h-3.5 text-blue-500" />
+                  )}
+                  {sortBy === "ai_score" && (
+                    <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                  )}
+                </div>
 
                 {/* Steady indicator when a non-default sorting state is active */}
                 {sortBy !== "newest" && (
@@ -2155,12 +2152,8 @@ export default function App() {
 
               {/* Quick Reset Button when an active sort filter is selected */}
               {sortBy !== "smart_sort" && (
-                <motion.button
+                <button
                   type="button"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.85 }}
                   onClick={() => setSortBy("smart_sort")}
                   title="Switch to Smart Sort"
                   className={`p-0.5 rounded-full cursor-pointer transition-colors ${
@@ -2170,7 +2163,7 @@ export default function App() {
                   }`}
                 >
                   <X className="w-3 h-3" />
-                </motion.button>
+                </button>
               )}
             </div>
           </div>
@@ -2202,9 +2195,7 @@ export default function App() {
         >
           {/* Full Screen Notice Banner */}
           {isFullScreenMode && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
               className={`mb-6 p-3 px-4 rounded-2xl border flex items-center justify-between shadow-lg ${
                 isDark
                   ? "bg-indigo-950/70 border-indigo-500/40 text-indigo-200"
@@ -2225,7 +2216,7 @@ export default function App() {
                 <Minimize2 className="w-3.5 h-3.5" />
                 <span>Exit Fullscreen</span>
               </button>
-            </motion.div>
+            </div>
           )}
 
           {/* Listings Header & Count */}
@@ -2364,7 +2355,7 @@ export default function App() {
                       triggerHaptic("light");
                       setVisibleListingsCount((prev) => prev + 12);
                     }}
-                    className={`px-6 py-2.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center gap-2 border ${
+                    className={`px-6 py-2.5 rounded-xl font-extrabold text-xs transition-colors shadow-md cursor-pointer flex items-center gap-2 border ${
                       isDark
                         ? "bg-slate-800 hover:bg-slate-750 text-indigo-300 border-indigo-500/30"
                         : "bg-white hover:bg-slate-50 text-indigo-700 border-indigo-200 shadow-2xs"
@@ -2851,7 +2842,7 @@ export default function App() {
 
       {/* College Login Modal */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
           <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl border border-slate-700 bg-slate-900">
             <button
               onClick={() => setIsLoginModalOpen(false)}
@@ -2936,7 +2927,7 @@ export default function App() {
           }}
           aria-label="Scroll to top"
           title="Back to Top"
-          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95"
+          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center transition-colors cursor-pointer"
         >
           <ArrowUpNarrowWide className="w-5 h-5 text-indigo-400" />
         </button>

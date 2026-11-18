@@ -54,7 +54,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         id="online-restored-banner"
         role="status"
         aria-live="polite"
-        className="w-full bg-emerald-600 text-white px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-2.5 shadow-md border-b border-emerald-700 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
+        className="w-full bg-emerald-600 text-white px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-2.5 shadow-md border-b border-emerald-700"
       >
         <div className="w-full flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
           <div className="flex items-center gap-2.5">
@@ -90,7 +90,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
       id="offline-banner"
       role="alert"
       aria-live="assertive"
-      className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-rose-700 text-white shadow-lg border-b border-amber-800 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
+      className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-rose-700 text-white shadow-lg border-b border-amber-800"
     >
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -140,7 +140,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/25 hover:bg-black/35 text-white border border-white/20 text-xs font-bold transition-all cursor-pointer select-none"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/25 hover:bg-black/35 text-white border border-white/20 text-xs font-bold transition-colors cursor-pointer select-none"
                 title="Re-check network connectivity"
               >
                 <RefreshCw className="w-3.5 h-3.5" />

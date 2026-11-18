@@ -262,24 +262,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
-        >
-          <motion.div
-            id={`listing-detail-${listing.id}`}
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 26, stiffness: 360 }}
-            className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
-          >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto">
+      <div
+        id={`listing-detail-${listing.id}`}
+        className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+      >
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex flex-wrap items-center gap-2">
@@ -521,7 +511,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               />
 
               {/* Zoom Status Hint Pill */}
-              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950/85 text-white text-xs font-bold border border-slate-700/80 backdrop-blur-md shadow-md select-none pointer-events-none">
+              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950/90 text-white text-xs font-bold border border-slate-700/80 shadow-md select-none pointer-events-none">
                 {isImageZoomed ? (
                   <>
                     <ZoomOut className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -536,7 +526,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               </div>
 
               <div
-                className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-xs text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 border border-white/10 shadow-md"
+                className="absolute bottom-3 left-3 bg-black/85 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 border border-white/10 shadow-md"
                 title={`Preferred handover spot: ${listing.locationPreference || "Campus Handover"}`}
               >
                 <MapPin className="w-3.5 h-3.5 text-red-400" />
@@ -550,7 +540,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     e.stopPropagation();
                     onOpenLightbox(listing);
                   }}
-                  className="absolute bottom-3 right-3 z-10 px-2.5 py-1.5 rounded-xl bg-black/75 hover:bg-black/95 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-transform hover:scale-105 shadow-md cursor-pointer"
+                  className="absolute bottom-3 right-3 z-10 px-2.5 py-1.5 rounded-xl bg-black/85 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-colors shadow-md cursor-pointer"
                   title="Open full interactive HD inspection lightbox"
                 >
                   <Maximize2 className="w-3.5 h-3.5 text-indigo-300" />
@@ -1505,7 +1495,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
         {showReportModal && (
           <div
             id="report-modal-backdrop"
-            className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 p-4"
             onClick={() => setShowReportModal(false)}
           >
             <div
@@ -1612,9 +1602,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             </div>
           </div>
         )}
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

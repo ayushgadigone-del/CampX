@@ -46,10 +46,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     <nav
       id="mobile-bottom-navigation-bar"
       aria-label="Mobile Bottom Navigation"
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-xl transition-colors select-none shadow-[0_-4px_20px_rgba(0,0,0,0.1)] ${
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 border-t select-none shadow-[0_-4px_20px_rgba(0,0,0,0.1)] ${
         isDark
-          ? "bg-[#0A0E17]/95 border-slate-800 text-slate-300"
-          : "bg-white/95 border-slate-200 text-slate-700"
+          ? "bg-[#0A0E17] border-slate-800 text-slate-300"
+          : "bg-white border-slate-200 text-slate-700"
       }`}
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
@@ -101,7 +101,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             disabled={!isOnline}
             aria-label="Post an item for sale or swap (Shortcut: P)"
             title="Post an item (Shortcut: P)"
-            className={`w-11 h-11 -mt-5 rounded-full flex items-center justify-center text-white shadow-lg transition-transform active:scale-95 cursor-pointer relative ${
+            className={`w-11 h-11 -mt-5 rounded-full flex items-center justify-center text-white shadow-lg transition-colors cursor-pointer relative ${
               !isOnline
                 ? "bg-slate-700 text-slate-400 cursor-not-allowed"
                 : "bg-gradient-to-tr from-indigo-600 to-purple-600 shadow-indigo-600/40 ring-4 ring-white dark:ring-slate-900"

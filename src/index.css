@@ -2,11 +2,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Keep laser scan static/disabled to eliminate constant blinking/flicker */
+/* Keep decorative/flash animations disabled to eliminate constant blinking/flicker */
 .animate-gentle-float,
 .animate-radar-ping,
 .animate-laser-scan,
-.animate-shimmer-hover {
+.animate-shimmer-hover,
+.animate-pulse,
+.animate-bounce,
+.animate-ping,
+.animate-in {
   animation: none !important;
 }
 
