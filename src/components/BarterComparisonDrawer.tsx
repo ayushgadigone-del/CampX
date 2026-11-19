@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Repeat,
@@ -128,22 +127,15 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md p-0 sm:p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/65 p-0 sm:p-4 overflow-y-auto"
           onClick={onClose}
         >
-          <motion.div
+          <div
             id="barter-flow-drawer"
-            initial={{ opacity: 0, y: 60, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.95 }}
-            transition={{ type: "spring", damping: 28, stiffness: 350 }}
             onClick={(e) => e.stopPropagation()}
             className={`w-full max-w-3xl rounded-t-3xl sm:rounded-3xl border-2 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col ${
               isDark
@@ -201,16 +193,15 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                   </span>
                 </div>
 
-                {/* Animated Balance Visualizer Bar */}
+                {/* Static Balance Visualizer Bar */}
                 <div className="relative mt-3 h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden max-w-md mx-auto">
-                  <motion.div
+                  <div
                     className="absolute top-0 bottom-0 bg-gradient-to-r from-emerald-500 via-indigo-500 to-purple-500 rounded-full"
-                    animate={{
+                    style={{
                       left: `${Math.max(10, Math.min(80, 50 + (valueDelta / (targetItemValue || 1)) * 30))}%`,
                       width: "18px",
                       marginLeft: "-9px",
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
                   />
                 </div>
                 <div className="flex justify-between max-w-md mx-auto text-[10px] text-slate-400 font-bold mt-1 px-1">
@@ -455,22 +446,18 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                 >
                   Cancel
                 </button>
-                <motion.button
+                <button
                   type="button"
                   id="send-barter-proposal-btn"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={handleProposeTrade}
-                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer transition-colors"
+                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>Send Barter Proposal</span>
-                </motion.button>
+                </button>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
   );
 };

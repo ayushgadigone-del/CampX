@@ -251,7 +251,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               type="button"
               disabled={isLoading}
               onClick={handleGoogleClick}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer select-none active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm shadow-md cursor-pointer select-none disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -325,7 +325,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                 }`}
               >
                 {isProcessingPhoto ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
+                  <Loader2 className="w-5 h-5 text-indigo-400" />
                 ) : photoURL ? (
                   <img
                     src={photoURL}
@@ -484,7 +484,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               id="college-id-submit-btn"
               type="submit"
               disabled={isLoading || isProcessingPhoto}
-              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer active:scale-[0.99] disabled:opacity-60"
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md cursor-pointer disabled:opacity-60"
             >
               <span>Verify & Access Marketplace</span>
               <ArrowRight className="w-4 h-4" />

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   ZoomIn,
@@ -242,21 +241,20 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
   };
 
   return (
-    <AnimatePresence>
       <div
         id="listing-image-lightbox"
         role="dialog"
         aria-modal="true"
         aria-label={`Inspect condition of ${listing.title}`}
-        className="fixed inset-0 z-50 flex flex-col justify-between bg-slate-950/95 backdrop-blur-md text-white select-none overflow-hidden"
+        className="fixed inset-0 z-50 flex flex-col justify-between bg-slate-950/95 text-white select-none overflow-hidden"
         onMouseUp={handleMouseUp}
       >
         {/* Top Header Controls Bar */}
-        <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900/80 border-b border-slate-800/80 backdrop-blur-md">
+        <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-slate-800">
           {/* Item Meta & Condition Pill */}
           <div className="flex items-center gap-3 max-w-[65%] truncate">
             <span
-              className={`px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-xs shrink-0 ${getConditionColor(
+              className={`px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 ${getConditionColor(
                 listing.condition
               )}`}
             >
@@ -382,10 +380,9 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
 
           {/* Image Canvas */}
-          <motion.div
+          <div
             style={{
               transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
-              transition: isDragging ? "none" : "transform 0.22s cubic-bezier(0.2, 0, 0, 1)",
             }}
             onClick={handlePictureClick}
             onDoubleClick={handleDoubleTapOrClick}
@@ -404,7 +401,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               draggable={false}
               referrerPolicy="no-referrer"
               onClick={handlePictureClick}
-              className={`max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-auto select-none transition-shadow ${
+              className={`max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-auto select-none ${
                 scale > 1
                   ? isDragging
                     ? "cursor-grabbing ring-2 ring-indigo-500/50"
@@ -417,10 +414,10 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                   : "Click picture to zoom in"
               }
             />
-          </motion.div>
+          </div>
 
           {/* Floating Mobile Controls overlay */}
-          <div className="sm:hidden absolute top-4 right-4 z-20 flex items-center bg-slate-900/90 rounded-xl p-1 border border-slate-700 backdrop-blur-md">
+          <div className="sm:hidden absolute top-4 right-4 z-20 flex items-center bg-slate-900 rounded-xl p-1 border border-slate-700">
             <button
               onClick={handleZoomOut}
               disabled={scale <= 1}
@@ -443,7 +440,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           </div>
 
           {/* Condition Inspector Helper Pill */}
-          <div className="absolute top-4 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/85 border border-slate-800 text-[11px] text-slate-300 backdrop-blur-md shadow-md">
+          <div className="absolute top-4 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-300 shadow-md">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <span>
               {scale > 1
@@ -454,7 +451,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
         </main>
 
         {/* Bottom Inspection & Pre-Chat Action Deck */}
-        <footer className="relative z-20 bg-slate-900/95 border-t border-slate-800/90 px-4 sm:px-6 py-4 backdrop-blur-md">
+        <footer className="relative z-20 bg-slate-900 border-t border-slate-800 px-4 sm:px-6 py-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Condition Evaluation / AI Summary */}
             <div className="w-full md:w-auto flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs">
@@ -541,7 +538,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                   onClose();
                   onOpenChat(listing);
                 }}
-                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-extrabold transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 text-white shrink-0" />
                 <span>Chat with {listing.sellerName.split(" ")[0]}</span>
@@ -550,6 +547,5 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           </div>
         </footer>
       </div>
-    </AnimatePresence>
   );
 };

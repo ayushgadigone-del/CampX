@@ -210,7 +210,7 @@ export const SavedSection: React.FC<SavedSectionProps> = ({
               <div
                 key={item.id}
                 onClick={() => onOpenDetails(item)}
-                className={`p-2.5 rounded-xl border text-xs space-y-1.5 cursor-pointer transition-all hover:scale-[1.02] ${
+                className={`p-2.5 rounded-xl border text-xs space-y-1.5 cursor-pointer ${
                   isDark
                     ? "bg-slate-900/80 border-slate-800 hover:border-indigo-500/40"
                     : "bg-white border-slate-200 hover:border-indigo-300 shadow-2xs"

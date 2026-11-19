@@ -2,16 +2,21 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Keep decorative/flash animations disabled to eliminate constant blinking/flicker */
-.animate-gentle-float,
-.animate-radar-ping,
-.animate-laser-scan,
-.animate-shimmer-hover,
-.animate-pulse,
-.animate-bounce,
-.animate-ping,
-.animate-in {
+/* Enforce a completely static, zero-flicker, zero-layout-shift interface */
+html {
+  scroll-behavior: auto !important;
+  scrollbar-gutter: stable;
+}
+
+*,
+*::before,
+*::after {
   animation: none !important;
+  animation-duration: 0s !important;
+  transition: none !important;
+  transition-duration: 0s !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

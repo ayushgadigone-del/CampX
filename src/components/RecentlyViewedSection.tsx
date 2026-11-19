@@ -188,7 +188,7 @@ export const RecentlyViewedSection: React.FC<RecentlyViewedSectionProps> = ({
                                 <img
                                   src={item.imageUrl}
                                   alt={item.title}
-                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  className="w-full h-full object-cover"
                                   onError={(e) => {
                                     // Fallback for broken images
                                     (e.target as HTMLImageElement).src =

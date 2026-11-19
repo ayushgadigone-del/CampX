@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   ShieldCheck,
@@ -65,14 +64,9 @@ export const CampusSecurityCenterModal: React.FC<CampusSecurityCenterModalProps>
   ];
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
-        <motion.div
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto">
+        <div
           id="campus-security-center-modal"
-          initial={{ opacity: 0, scale: 0.95, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 16 }}
-          transition={{ duration: 0.2 }}
           className={`relative w-full max-w-2xl rounded-3xl border overflow-hidden shadow-2xl flex flex-col max-h-[90vh] ${
             isDark
               ? "bg-[#0c1220] border-slate-800 text-white shadow-indigo-950/40"
@@ -90,7 +84,7 @@ export const CampusSecurityCenterModal: React.FC<CampusSecurityCenterModalProps>
             />
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-md">
+                <div className="p-2.5 rounded-2xl bg-white/20 border border-white/30 text-white shadow-md">
                   <ShieldCheck className="w-6 h-6 text-emerald-200" />
                 </div>
                 <div>
@@ -372,8 +366,7 @@ export const CampusSecurityCenterModal: React.FC<CampusSecurityCenterModalProps>
               Understood
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </AnimatePresence>
   );
 };

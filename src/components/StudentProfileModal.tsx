@@ -258,7 +258,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 }`}
               >
                 {isProcessingPhoto ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                  <Loader2 className="w-6 h-6 text-indigo-500" />
                 ) : photoURL ? (
                   <img
                     src={photoURL}
@@ -471,7 +471,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               >
                 {isSaving ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4" />
                     <span>Saving Details...</span>
                   </>
                 ) : (

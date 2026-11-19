@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Bell,
@@ -127,24 +126,16 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
     onUpdateAlerts(updated);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
+        <div
           id="alerts-modal-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
           onClick={onClose}
         >
-          <motion.div
+          <div
             id="alerts-modal-content"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-2xl rounded-3xl shadow-2xl border overflow-hidden my-6 ${
               isDark
                 ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
@@ -155,7 +146,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
         {/* Modal Header */}
         <div className="relative px-6 py-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
               <Bell className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -674,9 +665,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             Done
           </button>
         </div>
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

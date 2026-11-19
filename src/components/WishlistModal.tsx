@@ -1,5 +1,4 @@
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Heart,
@@ -52,14 +51,10 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
   return (
     <div
       id="wishlist-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
     >
-      <motion.div
+      <div
         id="wishlist-modal-container"
-        initial={{ opacity: 0, scale: 0.95, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 16 }}
-        transition={{ type: "spring", damping: 25, stiffness: 350 }}
         className={`relative w-full max-w-3xl rounded-3xl shadow-2xl border overflow-hidden my-8 flex flex-col max-h-[85vh] ${
           isDark
             ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
@@ -175,19 +170,13 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                 </div>
               </div>
 
-              {/* Items List with AnimatePresence & layout animation */}
-              <motion.div layout className="space-y-3">
-                <AnimatePresence mode="popLayout">
+              {/* Static Items List */}
+              <div className="space-y-3">
                   {savedListings.map((item) => (
-                    <motion.div
+                    <div
                       key={item.id}
                       id={`wishlist-item-${item.id}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                      className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
                         isDark
                           ? "bg-slate-900/60 border-slate-800 hover:border-indigo-500/50"
                           : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-md"
@@ -207,7 +196,7 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                           <img
                             src={item.imageUrl}
                             alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
                           />
                           {item.aiInspection && (
@@ -291,14 +280,12 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                       <div className={`flex items-center gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 ${
                         isDark ? "border-slate-800" : "border-slate-100"
                       }`}>
-                        <motion.button
-                          whileHover={{ scale: 1.08 }}
-                          whileTap={{ scale: 0.92 }}
+                        <button
                           onClick={() => {
                             onClose();
                             onOpenDetails(item);
                           }}
-                          className={`p-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                          className={`p-2 rounded-xl border text-xs font-semibold cursor-pointer ${
                             isDark
                               ? "border-slate-800 hover:bg-slate-800 text-slate-300"
                               : "border-slate-200 hover:bg-slate-100 text-slate-700"
@@ -306,18 +293,16 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                           title="View Full Item Details"
                         >
                           <ExternalLink className="w-4 h-4" />
-                        </motion.button>
+                        </button>
 
-                        <motion.button
-                          whileHover={isOnline ? { scale: 1.05 } : {}}
-                          whileTap={isOnline ? { scale: 0.95 } : {}}
+                        <button
                           onClick={() => {
                             if (!isOnline) return;
                             onClose();
                             onOpenChat(item);
                           }}
                           disabled={!isOnline}
-                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition-colors select-none ${
+                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold select-none ${
                             !isOnline
                               ? "bg-slate-800 text-slate-500 border border-slate-750 cursor-not-allowed"
                               : isDark
@@ -334,16 +319,14 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                           <span className="hidden md:inline">
                             {!isOnline ? "Offline" : "Chat"}
                           </span>
-                        </motion.button>
+                        </button>
 
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                        <button
                           onClick={() => {
                             onClose();
                             onOpenCalendar(item);
                           }}
-                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer ${
                             isDark
                               ? "bg-blue-950/60 hover:bg-blue-900/60 text-blue-300 border border-blue-800/50"
                               : "bg-blue-50 hover:bg-blue-100 text-blue-700"
@@ -352,13 +335,11 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                         >
                           <CalendarIcon className="w-3.5 h-3.5" />
                           <span className="hidden md:inline">Meet</span>
-                        </motion.button>
+                        </button>
 
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                        <button
                           onClick={() => onRemoveFromWishlist(item.id)}
-                          className={`p-2 rounded-xl transition-colors cursor-pointer border ${
+                          className={`p-2 rounded-xl cursor-pointer border ${
                             isDark
                               ? "text-rose-400 hover:bg-rose-950/30 border-rose-800/40"
                               : "text-rose-500 hover:bg-rose-50 border-rose-200/60"
@@ -366,12 +347,11 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                           title="Remove from Wishlist"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </motion.button>
+                        </button>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
-                </AnimatePresence>
-              </motion.div>
+              </div>
             </>
           )}
         </div>
@@ -391,12 +371,12 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer"
           >
             Done
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

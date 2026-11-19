@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   GraduationCap,
@@ -68,23 +67,15 @@ export const StudentPassportModal: React.FC<StudentPassportModalProps> = ({
   const academicYear = listing.year || "3rd Year (TE)";
   const memberSince = "Aug 2024";
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
           onClick={onClose}
         >
-          <motion.div
+          <div
             id={`student-passport-modal-${listing.sellerId || listing.id}`}
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             onClick={(e) => e.stopPropagation()}
             className={`relative w-full max-w-md rounded-3xl border overflow-hidden shadow-2xl ${
               isDark
@@ -116,7 +107,7 @@ export const StudentPassportModal: React.FC<StudentPassportModalProps> = ({
 
               {/* Header Title */}
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30">
+                <div className="p-1.5 rounded-xl bg-white/20 border border-white/30">
                   <GraduationCap className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -519,24 +510,22 @@ export const StudentPassportModal: React.FC<StudentPassportModalProps> = ({
               {/* Action Buttons */}
               <div className="flex gap-2.5 pt-1">
                 {onOpenChat && (
-                  <motion.button
+                  <button
                     type="button"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       onClose();
                       onOpenChat(listing);
                     }}
-                    className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Message {listing.sellerName.split(" ")[0]}</span>
-                  </motion.button>
+                  </button>
                 )}
                 <button
                   type="button"
                   onClick={onClose}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer ${
                     isDark
                       ? "border-slate-700 hover:bg-slate-800 text-slate-300"
                       : "border-slate-200 hover:bg-slate-100 text-slate-700"
@@ -546,9 +535,7 @@ export const StudentPassportModal: React.FC<StudentPassportModalProps> = ({
                 </button>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
   );
 };

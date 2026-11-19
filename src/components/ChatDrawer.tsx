@@ -81,7 +81,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   }, [messages]);
 
   // Initial greeting if no messages

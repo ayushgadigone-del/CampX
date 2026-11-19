@@ -1,18 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Flame,
-  Zap,
-  Radio,
-  Sparkles,
-  BookOpen,
-  TrendingUp,
-  ShieldCheck,
-  Tag,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Play,
-  Pause,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -85,19 +75,7 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
 }) => {
   const { isDark } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Strictly static display with zero automatic blinking or cycling
-  const [isPaused, setIsPaused] = useState(true);
   const [isRushMode, setIsRushMode] = useState(true);
-
-  // Auto cycle ticker events only when user explicitly toggles play
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % TICKER_EVENTS.length);
-    }, 12000);
-    return () => clearInterval(interval);
-  }, [isPaused]);
-
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const currentEvent = TICKER_EVENTS[currentIndex];
@@ -159,10 +137,10 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
       id="campus-live-ticker-bar"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={`relative w-full border-y transition-colors select-none text-xs ${
+      className={`relative w-full border-y select-none text-xs ${
         isDark
-          ? "bg-[#0A0E17]/95 border-slate-800/80 text-slate-200"
-          : "bg-white/95 border-slate-200 text-black shadow-2xs"
+          ? "bg-[#0A0E17] border-slate-800 text-slate-200"
+          : "bg-white border-slate-200 text-black shadow-2xs"
       }`}
     >
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-3 w-full">
@@ -186,7 +164,7 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
             type="button"
             onClick={() => setIsRushMode((prev) => !prev)}
             title="Toggle Semester Rush Mode"
-            className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer border ${
+            className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider cursor-pointer border ${
               isRushMode
                 ? isDark
                   ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
@@ -197,15 +175,15 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
             }`}
           >
             <Flame className="w-3 h-3 text-amber-500" />
-            <span>Rush Mode: Active</span>
+            <span>Rush Mode: {isRushMode ? "Active" : "Standard"}</span>
           </button>
         </div>
 
-        {/* Center Live Event Stream with Non-Blinking Steady Motion */}
+        {/* Center Static Event Display */}
         <div
           onClick={handleTickerClick}
           className="flex-1 min-w-0 cursor-pointer overflow-hidden flex items-center gap-1.5 sm:gap-2"
-          title="Click to explore this campus drop (or swipe left/right)"
+          title="Click to explore this campus drop (or use arrows)"
         >
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 w-full">
             <span
@@ -234,76 +212,51 @@ export const CampusLiveTicker: React.FC<CampusLiveTickerProps> = ({
           </div>
         </div>
 
-        {/* Right Slider Controls (Arrows, Play/Pause & Pager Dots) */}
+        {/* Right Manual Controls (Arrows & Pager Dots - Strictly Static, No Auto-Cycling) */}
         <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0 text-xs">
-          {/* Pause / Play Auto-Cycle Toggle */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsPaused((prev) => !prev);
-            }}
-            aria-label={isPaused ? "Play auto-cycle" : "Pause auto-cycle"}
-            title={isPaused ? "Play live drops (auto-cycle)" : "Pause live drops (steady mode)"}
-            className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
-              isDark
-                ? "text-slate-300 hover:text-white hover:bg-slate-800"
-                : "text-black hover:text-black hover:bg-slate-200/80"
-            }`}
-          >
-            {isPaused ? (
-              <Play className="w-3 h-3 fill-current" />
-            ) : (
-              <Pause className="w-3 h-3 fill-current" />
-            )}
-          </button>
-
-          {/* Previous Event Button */}
           <button
             type="button"
             onClick={handlePrev}
             aria-label="Previous campus drop"
             title="Previous drop"
-            className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
+            className={`w-6 h-6 rounded flex items-center justify-center cursor-pointer ${
               isDark
                 ? "text-slate-300 hover:text-white hover:bg-slate-800"
-                : "text-black hover:text-black hover:bg-slate-200/80"
+                : "text-black hover:text-black hover:bg-slate-200"
             }`}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
-          {/* Dots Pager Indicator (visible on xs+ screens) */}
           <div className="hidden xs:flex items-center gap-1">
             {TICKER_EVENTS.map((item, idx) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
+                className={`h-1.5 rounded-full cursor-pointer ${
                   currentIndex === idx
                     ? isDark
                       ? "w-3 sm:w-4 bg-indigo-500"
                       : "w-3 sm:w-4 bg-black"
                     : isDark
-                    ? "bg-slate-700"
-                    : "bg-slate-400"
+                    ? "w-1.5 bg-slate-700"
+                    : "w-1.5 bg-slate-400"
                 }`}
                 title={`Drop ${idx + 1}`}
               />
             ))}
           </div>
 
-          {/* Next Event Button */}
           <button
             type="button"
             onClick={handleNext}
             aria-label="Next campus drop"
             title="Next drop"
-            className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
+            className={`w-6 h-6 rounded flex items-center justify-center cursor-pointer ${
               isDark
                 ? "text-slate-300 hover:text-white hover:bg-slate-800"
-                : "text-black hover:text-black hover:bg-slate-200/80"
+                : "text-black hover:text-black hover:bg-slate-200"
             }`}
           >
             <ChevronRight className="w-3.5 h-3.5" />

@@ -105,7 +105,7 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
             <button
               type="button"
               onClick={handleUploadClick}
-              className="h-10 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
+              className="h-10 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
             >
               <Upload className="w-4 h-4" />
               <span>Upload Document File</span>
@@ -181,7 +181,7 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
             <div
               key={note.id}
               onClick={() => handleOpenNote(note)}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between group hover:-translate-y-1 hover:shadow-lg ${
+              className={`p-4 sm:p-5 rounded-2xl border cursor-pointer flex flex-col justify-between group hover:shadow-lg ${
                 isDark
                   ? "bg-slate-900/90 hover:bg-slate-850 border-slate-800 hover:border-emerald-500/40"
                   : "bg-white hover:bg-emerald-50/20 border-slate-200 hover:border-emerald-300 shadow-xs"
@@ -236,7 +236,7 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
                   <Eye className="w-3.5 h-3.5" />
                   <span>Open Full Reader</span>
                 </span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
           );

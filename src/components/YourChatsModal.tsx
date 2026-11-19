@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   MessageSquare,
@@ -124,14 +123,10 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
   return (
     <div
       id="your-chats-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
     >
-      <motion.div
+      <div
         id="your-chats-modal-container"
-        initial={{ opacity: 0, scale: 0.95, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 16 }}
-        transition={{ type: "spring", damping: 25, stiffness: 350 }}
         className={`relative w-full max-w-4xl rounded-3xl shadow-2xl border overflow-hidden my-6 flex flex-col max-h-[88vh] ${
           isDark
             ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
@@ -171,7 +166,7 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
             {chats.length > 0 && (
               <>
                 {confirmClear ? (
-                  <div className="flex items-center gap-1.5 animate-in fade-in">
+                  <div className="flex items-center gap-1.5">
                     <span className="text-[11px] text-rose-500 font-bold">Clear all?</span>
                     <button
                       onClick={() => {
@@ -339,13 +334,9 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
                 };
 
                 return (
-                  <motion.div
+                  <div
                     key={chat.id}
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    className={`group rounded-2xl border p-4 transition-all duration-200 relative flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    className={`group rounded-2xl border p-4 relative flex flex-col md:flex-row md:items-center justify-between gap-4 ${
                       isDark
                         ? "bg-slate-800/80 hover:bg-slate-800 border-slate-700/80 hover:border-indigo-500/50 shadow-md"
                         : "bg-white hover:bg-slate-50 border-slate-200 hover:border-indigo-300 shadow-xs"
@@ -358,9 +349,9 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
                         <img
                           src={chat.listingImage}
                           alt={chat.listingTitle}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover"
                         />
-                        <span className="absolute bottom-1 right-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
+                        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
                           ₹{chat.listingPrice}
                         </span>
                       </div>
@@ -486,7 +477,7 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -511,7 +502,7 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
             PVG's COET Campus Marketplace
           </span>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

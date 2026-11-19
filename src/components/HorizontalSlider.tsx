@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, SlidersHorizontal, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 interface HorizontalSliderProps {
@@ -46,7 +46,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   const { isDark } = useTheme();
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -54,9 +54,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeftState] = useState(0);
 
-  // Check scroll position and calculate progress percentage (only updates state when changed)
-  const rafRef = useRef<number | null>(null);
-
+  // Measure horizontal scroll state safely without causing vertical layout thrash
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -67,11 +65,16 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     const nextLeft = currentScroll > 8;
     const nextRight = maxScroll > 10 && currentScroll < maxScroll - 8;
     const nextPct =
-      maxScroll > 0 ? Math.min(100, Math.max(0, Math.round((currentScroll / maxScroll) * 100))) : 0;
+      maxScroll > 0
+        ? Math.min(100, Math.max(0, Math.round((currentScroll / maxScroll) * 100)))
+        : 100;
     const approxPageWidth = Math.max(1, el.clientWidth * 0.8);
-    const nextPages = maxScroll > 10 ? Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth))) : 1;
+    const nextPages =
+      maxScroll > 10 ? Math.max(1, Math.ceil(el.scrollWidth / Math.max(1, el.clientWidth))) : 1;
     const nextActive =
-      maxScroll > 10 ? Math.min(nextPages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth))) : 0;
+      maxScroll > 10
+        ? Math.min(nextPages - 1, Math.max(0, Math.round(currentScroll / approxPageWidth)))
+        : 0;
 
     setCanScrollLeft((prev) => (prev === nextLeft ? prev : nextLeft));
     setCanScrollRight((prev) => (prev === nextRight ? prev : nextRight));
@@ -80,79 +83,63 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     setCurrentPage((prev) => (prev === nextActive ? prev : nextActive));
   }, []);
 
-  const scheduleScrollStateUpdate = useCallback(() => {
-    if (rafRef.current !== null) return;
-    rafRef.current = window.requestAnimationFrame(() => {
-      rafRef.current = null;
-      updateScrollState();
-    });
-  }, [updateScrollState]);
-
-  // Set up listeners for ResizeObserver and scroll (never re-trigger on JSX children identity)
+  // Listen only to explicit track scroll and debounced window resize (no ResizeObserver feedback loop)
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
 
     updateScrollState();
 
-    el.addEventListener("scroll", scheduleScrollStateUpdate, { passive: true });
-    window.addEventListener("resize", scheduleScrollStateUpdate);
+    let resizeTimer: number | null = null;
+    const handleResize = () => {
+      if (resizeTimer !== null) {
+        window.clearTimeout(resizeTimer);
+      }
+      resizeTimer = window.setTimeout(() => {
+        resizeTimer = null;
+        updateScrollState();
+      }, 180);
+    };
 
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        scheduleScrollStateUpdate();
-      });
-      resizeObserver.observe(el);
-    }
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      el.removeEventListener("scroll", scheduleScrollStateUpdate);
-      window.removeEventListener("resize", scheduleScrollStateUpdate);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimer !== null) {
+        window.clearTimeout(resizeTimer);
       }
     };
-  }, [updateScrollState, scheduleScrollStateUpdate]);
+  }, [updateScrollState]);
 
-  // Smooth scroll left
+  // Instant static scroll left
   const handleScrollLeft = () => {
     if (!trackRef.current) return;
     const distance = scrollStep || trackRef.current.clientWidth * 0.75;
-    trackRef.current.scrollBy({
-      left: -distance,
-      behavior: "smooth",
-    });
+    trackRef.current.scrollLeft -= distance;
+    updateScrollState();
   };
 
-  // Smooth scroll right
+  // Instant static scroll right
   const handleScrollRight = () => {
     if (!trackRef.current) return;
     const distance = scrollStep || trackRef.current.clientWidth * 0.75;
-    trackRef.current.scrollBy({
-      left: distance,
-      behavior: "smooth",
-    });
+    trackRef.current.scrollLeft += distance;
+    updateScrollState();
   };
 
-  // Jump to specific page
+  // Jump directly to specific page
   const scrollToPage = (pageIndex: number) => {
     if (!trackRef.current) return;
     const targetScroll = pageIndex * (trackRef.current.clientWidth * 0.85);
-    trackRef.current.scrollTo({
-      left: targetScroll,
-      behavior: "smooth",
-    });
+    trackRef.current.scrollLeft = targetScroll;
+    updateScrollState();
   };
 
-  // Mouse drag support for desktop/trackpad preview
+  // Mouse drag support for desktop/trackpad
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!trackRef.current) return;
-    // Don't drag if clicking interactive elements (buttons, inputs, links)
     const target = e.target as HTMLElement;
     if (
       target.tagName === "BUTTON" ||
@@ -175,7 +162,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
     if (!isDragging || !trackRef.current) return;
     e.preventDefault();
     const x = e.pageX - trackRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Drag sensitivity
+    const walk = (x - startX) * 1.5;
     trackRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -184,15 +171,10 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
   };
 
   return (
-    <div
-      id={id}
-      className={`relative w-full ${className}`}
-      aria-label={ariaLabel}
-    >
-      {/* Optional Slider Header with Title, Badge, Mobile Slide Hint & Controls (when arrowPosition is 'header') */}
+    <div id={id} className={`relative w-full ${className}`} aria-label={ariaLabel}>
+      {/* Optional Slider Header with Title, Badge, Mobile Slide Hint & Controls */}
       {(title || headerActions || (showArrows && arrowPosition === "header")) && (
         <div className="flex items-center justify-between gap-2.5 mb-2.5 px-0.5">
-          {/* Left Title / Badge */}
           {title ? (
             <div className="flex items-center gap-2 min-w-0">
               {Icon && (
@@ -215,9 +197,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                   >
                     {title}
                   </h4>
-                  {badge && (
-                    <div className="shrink-0">{badge}</div>
-                  )}
+                  {badge && <div className="shrink-0">{badge}</div>}
                 </div>
                 {subtitle && (
                   <p
@@ -238,12 +218,12 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             {headerActions}
 
-            {/* Mobile swipe hint text */}
-            {showMobileHint && (canScrollLeft || canScrollRight) && (
+            {/* Static Mobile swipe hint text (never dynamically mounts/unmounts) */}
+            {showMobileHint && (
               <span
                 className={`sm:hidden inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                   isDark
-                    ? "bg-slate-900/80 text-indigo-300 border-indigo-500/30"
+                    ? "bg-slate-900 text-indigo-300 border-indigo-500/30"
                     : "bg-indigo-50 text-indigo-700 border-indigo-200"
                 }`}
               >
@@ -261,11 +241,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                   disabled={!canScrollLeft}
                   aria-label="Slide left"
                   title="Slide left"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none ${
                     canScrollLeft
                       ? isDark
-                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
-                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
+                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                       : isDark
                       ? "bg-slate-900/40 text-slate-600 border-slate-800/60 cursor-not-allowed opacity-50"
                       : "bg-slate-100/60 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
@@ -280,11 +260,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                   disabled={!canScrollRight}
                   aria-label="Slide right"
                   title="Slide right"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none ${
                     canScrollRight
                       ? isDark
-                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
-                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
+                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                       : isDark
                       ? "bg-slate-900/40 text-slate-600 border-slate-800/60 cursor-not-allowed opacity-50"
                       : "bg-slate-100/60 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
@@ -308,11 +288,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               disabled={!canScrollLeft}
               aria-label="Slide left"
               title="Slide left"
-              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none shrink-0 ${
+              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none shrink-0 ${
                 canScrollLeft
                   ? isDark
-                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
-                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                   : isDark
                   ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
                   : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
@@ -323,34 +303,24 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
           )}
 
           {/* Slider Viewport Container */}
-          <div className="relative group/slider flex-1 min-w-0">
-            {/* Subtle Edge Fade Scrims (Left & Right) */}
-            {!hideFadeScrim && (
+          <div className="relative flex-1 min-w-0">
+            {!hideFadeScrim && canScrollLeft && (
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-r transition-opacity duration-200 ${
-                  canScrollLeft ? "opacity-100" : "opacity-0"
-                } ${
-                  isDark
-                    ? "from-[#090D16] to-transparent"
-                    : "from-white to-transparent"
+                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-r ${
+                  isDark ? "from-[#090D16] to-transparent" : "from-white to-transparent"
                 }`}
               />
             )}
-            {!hideFadeScrim && (
+            {!hideFadeScrim && canScrollRight && (
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-l transition-opacity duration-200 ${
-                  canScrollRight ? "opacity-100" : "opacity-0"
-                } ${
-                  isDark
-                    ? "from-[#090D16] to-transparent"
-                    : "from-white to-transparent"
+                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-l ${
+                  isDark ? "from-[#090D16] to-transparent" : "from-white to-transparent"
                 }`}
               />
             )}
 
-            {/* Scrollable Track */}
             <div
               ref={trackRef}
               onMouseDown={handleMouseDown}
@@ -377,11 +347,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               disabled={!canScrollRight}
               aria-label="Slide right"
               title="Slide right"
-              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border select-none shrink-0 ${
+              className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none shrink-0 ${
                 canScrollRight
                   ? isDark
-                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm active:scale-95"
-                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs active:scale-95"
+                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                   : isDark
                   ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
                   : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
@@ -392,35 +362,24 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
           )}
         </div>
       ) : (
-        /* Standard Header Mode Viewport */
-        <div className="relative group/slider w-full">
-          {/* Subtle Edge Fade Scrims (Left & Right) */}
-          {!hideFadeScrim && (
+        <div className="relative w-full">
+          {!hideFadeScrim && canScrollLeft && (
             <div
               aria-hidden="true"
-              className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r transition-opacity duration-200 ${
-                canScrollLeft ? "opacity-100" : "opacity-0"
-              } ${
-                isDark
-                  ? "from-[#0B0F19] to-transparent"
-                  : "from-white to-transparent"
+              className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r ${
+                isDark ? "from-[#0B0F19] to-transparent" : "from-white to-transparent"
               }`}
             />
           )}
-          {!hideFadeScrim && (
+          {!hideFadeScrim && canScrollRight && (
             <div
               aria-hidden="true"
-              className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l transition-opacity duration-200 ${
-                canScrollRight ? "opacity-100" : "opacity-0"
-              } ${
-                isDark
-                  ? "from-[#0B0F19] to-transparent"
-                  : "from-white to-transparent"
+              className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l ${
+                isDark ? "from-[#0B0F19] to-transparent" : "from-white to-transparent"
               }`}
             />
           )}
 
-          {/* Scrollable Track */}
           <div
             ref={trackRef}
             onMouseDown={handleMouseDown}
@@ -441,45 +400,44 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
         </div>
       )}
 
-      {/* Slide Pagination Dots */}
-      {showDots && totalPages > 1 && (
-        <div className="mt-1.5 flex items-center justify-center gap-1.5 py-0.5">
-          {Array.from({ length: totalPages }).map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => scrollToPage(idx)}
-              aria-label={`Go to slide ${idx + 1}`}
-              className={`h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-                currentPage === idx
-                  ? "w-4 bg-gradient-to-r from-indigo-500 to-purple-500 shadow-2xs"
-                  : isDark
-                  ? "w-1.5 bg-slate-700 hover:bg-slate-600"
-                  : "w-1.5 bg-slate-300 hover:bg-slate-400"
-              }`}
-            />
-          ))}
+      {/* Constant-height Slide Pagination Dots (never toggles vertical layout height) */}
+      {showDots && (
+        <div className="mt-1.5 h-3 flex items-center justify-center gap-1.5 py-0.5">
+          {totalPages > 1 &&
+            Array.from({ length: totalPages }).map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => scrollToPage(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
+                className={`h-1.5 rounded-full cursor-pointer ${
+                  currentPage === idx
+                    ? "w-4 bg-gradient-to-r from-indigo-500 to-purple-500"
+                    : isDark
+                    ? "w-1.5 bg-slate-700 hover:bg-slate-600"
+                    : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                }`}
+              />
+            ))}
         </div>
       )}
 
-      {/* Progress Track & Mobile Swipe Affordance */}
-      {showProgress && (canScrollLeft || canScrollRight) && (
-        <div className="mt-2 flex items-center justify-between gap-3 px-1">
-          {/* Subtle Progress Bar */}
+      {/* Constant-height Progress Track (always rendered when showProgress=true to prevent scrollbar-height feedback flicker) */}
+      {showProgress && (
+        <div className="mt-2 h-4 flex items-center justify-between gap-3 px-1">
           <div
             className={`flex-1 h-1.5 rounded-full overflow-hidden ${
               isDark ? "bg-slate-800" : "bg-slate-200"
             }`}
           >
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-150 rounded-full"
+              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
               style={{
                 width: `${Math.max(12, scrollProgress)}%`,
               }}
             />
           </div>
 
-          {/* Quick Slider Indicator Label */}
           <span
             className={`text-[10px] font-mono font-semibold shrink-0 ${
               isDark ? "text-slate-500" : "text-slate-400"

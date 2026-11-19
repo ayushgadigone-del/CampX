@@ -143,6 +143,41 @@ export async function testConnection() {
 
 testConnection();
 
+// Synchronously check for an explicitly signed-in college user in localStorage so Frame 1 renders without a loading flash
+export const getInitialRestoredUser = (): User | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    if (localStorage.getItem(EXPLICIT_LOGOUT_STORAGE_KEY) === "true") {
+      return null;
+    }
+    const raw = localStorage.getItem(COLLEGE_USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      parsed.explicitSignIn === true &&
+      typeof parsed.email === "string" &&
+      isValidCollegeEmail(parsed.email)
+    ) {
+      return {
+        uid: parsed.uid || `student-${parsed.email.replace(/[^a-zA-Z0-9]/g, "_")}`,
+        displayName:
+          parsed.displayName || parsed.email.split("@")[0].replace(".", " "),
+        email: parsed.email,
+        photoURL:
+          parsed.photoURL ||
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+      } as unknown as User;
+    }
+    if (parsed && !parsed.explicitSignIn && parsed.uid === "student-ayush-26") {
+      localStorage.removeItem(COLLEGE_USER_STORAGE_KEY);
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
 // Initialize auth state listener with explicit college user session re-hydration (never auto-seeds a default account)
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string | null) => void,

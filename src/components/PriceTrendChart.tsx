@@ -222,7 +222,7 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
 
       {/* Expandable Chart Body */}
       {isExpanded && (
-        <div className="p-4 sm:p-6 space-y-4 animate-in fade-in duration-200">
+        <div className="p-4 sm:p-6 space-y-4">
           {/* Summary Pills Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">

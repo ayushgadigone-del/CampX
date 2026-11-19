@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "../context/ThemeContext";
 import {
   Calendar as CalendarIcon,
@@ -107,22 +106,14 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="calendar-handover-modal"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden my-6 max-h-[92vh] flex flex-col ${
               isDark
                 ? "bg-[#0B0F19] text-slate-100 border-slate-800 shadow-black/70"
@@ -167,24 +158,22 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               </p>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors cursor-pointer ${
+            className={`p-2 rounded-lg cursor-pointer ${
               isDark
                 ? "text-slate-400 hover:text-white hover:bg-slate-800"
                 : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
             }`}
           >
             <X className="w-5 h-5" />
-          </motion.button>
+          </button>
         </div>
 
         {/* Content */}
         <div className="p-6 overflow-y-auto">
           {createdEvent ? (
-            <div className="text-center py-6 space-y-4 animate-in fade-in duration-300">
+            <div className="text-center py-6 space-y-4">
               <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
@@ -262,7 +251,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
             </div>
           ) : showExplicitConfirmation ? (
             /* Explicit User Confirmation Modal required by Workspace skill */
-            <div className="space-y-5 animate-in fade-in duration-200">
+            <div className="space-y-5">
               <div
                 className={`p-4 rounded-xl border text-sm flex items-start gap-3 ${
                   isDark
@@ -342,7 +331,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4" />
                       Adding to Calendar...
                     </>
                   ) : (
@@ -519,35 +508,29 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               )}
 
               <div className="pt-2 flex items-center gap-3">
-                <motion.button
+                <button
                   type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition-all cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md cursor-pointer"
                 >
                   <CalendarIcon className="w-4 h-4" />
                   Review & Schedule on Google Calendar
-                </motion.button>
-                <motion.button
+                </button>
+                <button
                   type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={onClose}
-                  className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors cursor-pointer ${
+                  className={`px-4 py-2.5 rounded-xl border text-sm font-medium cursor-pointer ${
                     isDark
                       ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                       : "border-slate-300 text-slate-700 hover:bg-slate-100"
                   }`}
                 >
                   Cancel
-                </motion.button>
+                </button>
               </div>
             </form>
           )}
         </div>
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   Upload,
@@ -135,22 +134,14 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="ai-inspector-modal"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-3xl rounded-3xl shadow-2xl border overflow-hidden my-8 ${
               isDark
                 ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
@@ -222,7 +213,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                   <img
                     src={item.image}
                     alt={item.label}
-                    className="w-10 h-10 rounded-lg object-cover group-hover:scale-105 transition-transform"
+                    className="w-10 h-10 rounded-lg object-cover"
                     referrerPolicy="no-referrer"
                   />
                   <span className={`text-xs font-medium ${
@@ -283,8 +274,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                 </button>
 
                 {isAnalyzing && (
-                  <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4">
-                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin mb-3" />
+                  <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-white p-4">
+                    <Loader2 className="w-8 h-8 text-indigo-400 mb-3" />
                     <span className="text-sm font-semibold">
                       Inspecting with Google Gemini 3.8 Flash...
                     </span>
@@ -347,7 +338,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                 )}
 
                 {analysisResult && (
-                  <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="space-y-4">
                     <div className={`p-4 rounded-xl border space-y-2 ${
                       isDark
                         ? "bg-emerald-950/20 border-emerald-800/50"
@@ -532,9 +523,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
             </div>
           )}
         </div>
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

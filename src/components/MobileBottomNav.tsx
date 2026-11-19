@@ -33,7 +33,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const handleSelectTab = (tab: SectionTabId) => {
     triggerHaptic("light");
     onTabChange(tab);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const handleCreateClick = () => {

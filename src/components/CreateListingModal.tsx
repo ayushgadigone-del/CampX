@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Sparkles,
@@ -411,20 +410,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="create-listing-modal"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden my-8 ${
               isDark
                 ? "bg-[#0B0F19] text-slate-100 border-slate-800 shadow-black/70"
@@ -463,18 +453,16 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>EXIF Stripped</span>
             </span>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={onClose}
-              className={`p-2 rounded-lg transition-colors cursor-pointer ${
+              className={`p-2 rounded-lg cursor-pointer ${
                 isDark
                   ? "text-slate-400 hover:text-white hover:bg-slate-800"
                   : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
               }`}
             >
               <X className="w-5 h-5" />
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -507,19 +495,17 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               </p>
             </div>
           </div>
-          <motion.button
+          <button
             type="button"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
             onClick={() => {
               onClose();
               onOpenAIInspector();
             }}
-            className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Scan Item with AI
-          </motion.button>
+          </button>
         </div>
 
         {/* Form Body */}
@@ -713,7 +699,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   : "bg-indigo-50 border-indigo-200 text-indigo-900"
               }`}
             >
-              <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+              <Loader2 className="w-4 h-4 text-indigo-500 shrink-0" />
               <span>
                 <strong>Gemini AI Visual Analysis:</strong> Scanning photo to automatically classify and suggest the most accurate Category & Condition...
               </span>
@@ -950,7 +936,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                       key={suggestion}
                       type="button"
                       onClick={() => handleSelectTag(suggestion)}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer group ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs cursor-pointer group ${
                         isDark
                           ? "bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border-slate-700 hover:border-indigo-500"
                           : "bg-white hover:bg-indigo-600 text-slate-700 hover:text-white border-slate-200 hover:border-indigo-600"
@@ -1135,7 +1121,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 Number(originalPrice) > Number(price) &&
                 Number(price) > 0 && (
                   <div
-                    className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-medium animate-in fade-in duration-200 ${
+                    className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-medium ${
                       isDark
                         ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
                         : "bg-emerald-50 border-emerald-200 text-emerald-800"
@@ -1350,7 +1336,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   >
                     {isAnalyzingImage ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 text-indigo-500 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 text-indigo-500" />
                         Analyzing...
                       </>
                     ) : (
@@ -1442,18 +1428,16 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               isDark ? "border-slate-800" : "border-slate-100"
             }`}
           >
-            <motion.button
+            <button
               id="create-modal-submit-btn"
               type="submit"
-              whileHover={isOnline && !isSubmitting ? { scale: 1.02 } : {}}
-              whileTap={isOnline && !isSubmitting ? { scale: 0.98 } : {}}
               disabled={isSubmitting || !isOnline}
               title={
                 !isOnline
                   ? "Publishing is disabled while disconnected to prevent data loss"
                   : "Publish item listing to campus marketplace"
               }
-              className={`flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all select-none ${
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm select-none ${
                 !isOnline
                   ? isDark
                     ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none"
@@ -1463,7 +1447,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4" />
                   Saving to Campus Marketplace...
                 </>
               ) : !isOnline ? (
@@ -1477,25 +1461,21 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   Publish Item Listing
                 </>
               )}
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors cursor-pointer ${
+              className={`px-4 py-2.5 rounded-xl border text-sm font-medium cursor-pointer ${
                 isDark
                   ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                   : "border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
               Cancel
-            </motion.button>
+            </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

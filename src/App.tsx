@@ -61,6 +61,7 @@ import { INITIAL_SEED_LISTINGS } from "./data/seedListings";
 import {
   db,
   initAuth,
+  getInitialRestoredUser,
   googleSignIn,
   demoStudentSignIn,
   logout,
@@ -183,16 +184,25 @@ const getCategoryIcon = (category: ItemCategory | "All") => {
 export default function App() {
   const { theme, isDark, toggleTheme } = useTheme();
 
-  // Auth & Student Profile state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [studentProfile, setStudentProfile] = useState<StudentProfileDetails | null>(null);
-  const [profileModalMode, setProfileModalMode] = useState<"onboarding" | "edit" | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  // Auth & Student Profile state (synchronously initialized from localStorage for zero initial flash)
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getInitialRestoredUser());
+  const [studentProfile, setStudentProfile] = useState<StudentProfileDetails | null>(() => {
+    const restored = getInitialRestoredUser();
+    if (!restored?.email) return null;
+    return loadLocalStudentProfile(restored.uid, restored.email);
+  });
+  const [profileModalMode, setProfileModalMode] = useState<"onboarding" | "edit" | null>(() => {
+    const restored = getInitialRestoredUser();
+    if (!restored?.email) return null;
+    const local = loadLocalStudentProfile(restored.uid, restored.email);
+    return isStudentProfileComplete(local) ? null : "onboarding";
+  });
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
 
-  // Listings state (automatically purges any expired items on load)
+  // Listings state (automatically purges any expired items on load; never flashes skeleton over existing catalog)
   const [listings, setListings] = useState<Listing[]>(() => purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
-  const [isLoadingListings, setIsLoadingListings] = useState(true);
+  const [isLoadingListings, setIsLoadingListings] = useState(false);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -213,7 +223,8 @@ export default function App() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
+      const next = window.scrollY > 400;
+      setShowScrollTop((prev) => (prev === next ? prev : next));
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -485,15 +496,10 @@ export default function App() {
     }
   }, []);
 
-  // 1. Initialize Auth
+  // 1. Initialize Auth (with equality guards to prevent flicker / redundant re-renders)
   useEffect(() => {
-    const safetyTimer = setTimeout(() => {
-      setIsAuthLoading(false);
-    }, 2500);
-
     const unsubscribe = initAuth(
       async (user) => {
-        clearTimeout(safetyTimer);
         // Enforce @pvgcoet.ac.in college domain on re-hydration
         if (user && user.email) {
           if (!isValidCollegeEmail(user.email)) {
@@ -506,27 +512,36 @@ export default function App() {
               `Access Denied: The account (${user.email}) does not end with @${ALLOWED_COLLEGE_DOMAIN}. Anyone with an official college email ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
             );
           } else {
-            setCurrentUser(user);
-            setAuthErrorMessage(null);
+            setCurrentUser((prev) => {
+              if (
+                prev &&
+                prev.uid === user.uid &&
+                prev.email === user.email &&
+                prev.displayName === user.displayName &&
+                prev.photoURL === user.photoURL
+              ) {
+                return prev;
+              }
+              return user;
+            });
+            setAuthErrorMessage((prev) => (prev === null ? prev : null));
             await hydrateAndVerifyStudentProfile(user);
           }
         } else {
-          setCurrentUser(null);
-          setStudentProfile(null);
-          setProfileModalMode(null);
+          setCurrentUser((prev) => (prev === null ? prev : null));
+          setStudentProfile((prev) => (prev === null ? prev : null));
+          setProfileModalMode((prev) => (prev === null ? prev : null));
         }
         setIsAuthLoading(false);
       },
       () => {
-        clearTimeout(safetyTimer);
-        setCurrentUser(null);
-        setStudentProfile(null);
-        setProfileModalMode(null);
+        setCurrentUser((prev) => (prev === null ? prev : null));
+        setStudentProfile((prev) => (prev === null ? prev : null));
+        setProfileModalMode((prev) => (prev === null ? prev : null));
         setIsAuthLoading(false);
       }
     );
     return () => {
-      clearTimeout(safetyTimer);
       if (unsubscribe) unsubscribe();
     };
   }, [hydrateAndVerifyStudentProfile]);
@@ -545,7 +560,12 @@ export default function App() {
           (querySnapshot) => {
             if (querySnapshot.empty) {
               const { activeListings } = purgeExpiredListings(INITIAL_SEED_LISTINGS);
-              setListings(activeListings);
+              setListings((prev) =>
+                prev.length === activeListings.length &&
+                prev.every((item, i) => item.id === activeListings[i].id)
+                  ? prev
+                  : activeListings
+              );
               setIsLoadingListings(false);
               return;
             }
@@ -566,7 +586,12 @@ export default function App() {
 
             const sourceList = fetched.length > 0 ? fetched : INITIAL_SEED_LISTINGS;
             const { activeListings, purgedIds } = purgeExpiredListings(sourceList);
-            setListings(activeListings);
+            setListings((prev) =>
+              prev.length === activeListings.length &&
+              JSON.stringify(prev) === JSON.stringify(activeListings)
+                ? prev
+                : activeListings
+            );
 
             // Automatically delete expired listings from Firestore
             if (purgedIds.length > 0) {
@@ -599,13 +624,25 @@ export default function App() {
           (err) => {
             handleFirestoreError(err, OperationType.GET, "listings");
             console.info("Firestore live listener operating in offline mode, showing local catalog.");
-            setListings(purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
+            const { activeListings } = purgeExpiredListings(INITIAL_SEED_LISTINGS);
+            setListings((prev) =>
+              prev.length === activeListings.length &&
+              prev.every((item, i) => item.id === activeListings[i].id)
+                ? prev
+                : activeListings
+            );
             setIsLoadingListings(false);
           }
         );
       } catch (err) {
         handleFirestoreError(err, OperationType.GET, "listings");
-        setListings(purgeExpiredListings(INITIAL_SEED_LISTINGS).activeListings);
+        const { activeListings } = purgeExpiredListings(INITIAL_SEED_LISTINGS);
+        setListings((prev) =>
+          prev.length === activeListings.length &&
+          prev.every((item, i) => item.id === activeListings[i].id)
+            ? prev
+            : activeListings
+        );
         setIsLoadingListings(false);
       }
     };
@@ -1417,27 +1454,27 @@ export default function App() {
         e.preventDefault();
         vibrate(15);
         setActiveSectionTab("marketplace");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo(0, 0);
       } else if (e.key === "2" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
         setActiveSectionTab("topper_vault");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo(0, 0);
       } else if (e.key === "3" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
         setActiveSectionTab("beacon_handovers");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo(0, 0);
       } else if (e.key === "4" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
         setActiveSectionTab("chats");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo(0, 0);
       } else if (e.key === "5" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
         setActiveSectionTab("saved");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo(0, 0);
       } else if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         vibrate(15);
@@ -1495,12 +1532,9 @@ export default function App() {
   if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-slate-100 p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase">
-            Verifying College Identity...
-          </p>
-        </div>
+        <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase">
+          Verifying College Identity...
+        </p>
       </div>
     );
   }
@@ -1610,12 +1644,12 @@ export default function App() {
         onOpenHandovers={() => {
           triggerHaptic("medium");
           setActiveSectionTab("beacon_handovers");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo(0, 0);
         }}
         onOpenTopperNotes={() => {
           triggerHaptic("medium");
           setActiveSectionTab("topper_vault");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo(0, 0);
         }}
         onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
         upcomingHandoversCount={upcomingHandoversCount}
@@ -1623,19 +1657,19 @@ export default function App() {
         onOpenWishlist={() => {
           triggerHaptic("medium");
           setActiveSectionTab("saved");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo(0, 0);
         }}
         chatsCount={storedChats.length}
         onOpenYourChats={() => {
           triggerHaptic("medium");
           setActiveSectionTab("chats");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo(0, 0);
         }}
         alertsCount={alerts.filter((a) => a.active).length}
         onOpenAlerts={() => {
           triggerHaptic("medium");
           setActiveSectionTab("saved");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo(0, 0);
         }}
         onOpenSecurity={() => {
           triggerHaptic("medium");
@@ -1693,17 +1727,17 @@ export default function App() {
           onOpenTopperNotes={() => {
             triggerHaptic("medium");
             setActiveSectionTab("topper_vault");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           onOpenWishlist={() => {
             triggerHaptic("medium");
             setActiveSectionTab("saved");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           onOpenYourChats={() => {
             triggerHaptic("medium");
             setActiveSectionTab("chats");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           onFocusSearch={() => {
             const input = document.getElementById("dedicated-search-bar-input") as HTMLInputElement | null;
@@ -1712,7 +1746,7 @@ export default function App() {
           onOpenAlerts={() => {
             triggerHaptic("medium");
             setActiveSectionTab("saved");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           onSelectCategory={(cat) => setSelectedCategory(cat)}
           selectedCategory={selectedCategory}
@@ -1726,7 +1760,7 @@ export default function App() {
           activeTab={activeSectionTab}
           onTabChange={(tab) => {
             setActiveSectionTab(tab);
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           listingsCount={filteredListings.length}
           topperNotesCount={topperNotes.length}
@@ -2534,7 +2568,7 @@ export default function App() {
             <button
               onClick={() => {
                 setShowLandingPage(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.scrollTo(0, 0);
               }}
               className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
@@ -2923,11 +2957,11 @@ export default function App() {
           type="button"
           onClick={() => {
             triggerHaptic("light");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.scrollTo(0, 0);
           }}
           aria-label="Scroll to top"
           title="Back to Top"
-          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center cursor-pointer"
         >
           <ArrowUpNarrowWide className="w-5 h-5 text-indigo-400" />
         </button>

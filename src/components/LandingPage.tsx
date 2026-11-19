@@ -43,7 +43,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+      el.scrollIntoView({ behavior: "auto" });
     }
   };
 
@@ -547,7 +547,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 id="landing-bottom-signin-btn"
                 onClick={onProceedToSignIn}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/40 transition-all cursor-pointer select-none"
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/40 cursor-pointer select-none"
               >
                 <span>Sign In with @{ALLOWED_COLLEGE_DOMAIN}</span>
                 <ArrowRight className="w-4 h-4" />

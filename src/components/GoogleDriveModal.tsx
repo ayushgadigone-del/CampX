@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Search,
@@ -209,21 +208,15 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
     return <FolderOpen className="w-5 h-5 text-indigo-500" />;
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
+        <div
           id="google-drive-modal-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="google-drive-modal-card"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
             className={`w-full max-w-4xl max-h-[88vh] rounded-3xl shadow-2xl flex flex-col border overflow-hidden ${
               isDark ? "bg-[#0B0F19] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
             }`}
@@ -348,7 +341,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   }`}
                   title="Refresh files"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingFiles ? "animate-spin text-indigo-400" : ""}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingFiles ? "text-indigo-400" : ""}`} />
                   <span className="hidden sm:inline">Sync</span>
                 </button>
               )}
@@ -378,7 +371,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   <button
                     onClick={handleConnectGoogle}
                     disabled={isLoadingAuth}
-                    className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md cursor-pointer transition-all hover:scale-102"
+                    className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md cursor-pointer"
                   >
                     {isLoadingAuth ? "Connecting..." : "Sign in with Google"}
                   </button>
@@ -431,7 +424,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                       {/* File Grid / List */}
                       {isLoadingFiles ? (
                         <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                          <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
+                          <RefreshCw className="w-4 h-4 text-indigo-400" />
                           <span>Loading files from Google Drive...</span>
                         </div>
                       ) : files.length === 0 ? (
@@ -670,9 +663,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                 Close
               </button>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
   );
 };

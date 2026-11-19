@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   Sparkles,
@@ -353,13 +352,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           </div>
           <div className="flex items-center gap-2">
             {/* Report Button */}
-            <motion.button
+            <button
               id={`detail-report-btn-${listing.id}`}
               type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => setShowReportModal(true)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                 isReported
                   ? "bg-rose-50 text-rose-700 border-rose-200"
                   : "bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50/60 border-slate-200"
@@ -368,15 +365,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             >
               <Flag className={`w-4 h-4 ${isReported ? "text-rose-600 fill-rose-600" : "text-slate-400"}`} />
               <span className="hidden sm:inline">{isReported ? "Reported" : "Report"}</span>
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               id={`detail-share-btn-${listing.id}`}
               type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={handleShare}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                 isShared
                   ? "bg-emerald-50 text-emerald-700 border-emerald-300"
                   : "bg-white text-slate-700 hover:text-indigo-600 hover:bg-slate-50 border-slate-200"
@@ -394,15 +389,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   <span>Share</span>
                 </>
               )}
-            </motion.button>
+            </button>
 
             {onToggleWishlist && (
-              <motion.button
+              <button
                 id={`detail-wishlist-toggle-${listing.id}`}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
                 onClick={() => onToggleWishlist(listing.id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                   isWishlisted
                     ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
                     : "bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50 border-slate-200"
@@ -417,16 +410,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 <span className="hidden sm:inline">
                   {isWishlisted ? "Saved" : "Save"}
                 </span>
-              </motion.button>
+              </button>
             )}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+              className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 cursor-pointer"
             >
               <X className="w-5 h-5" />
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -502,10 +493,10 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               <img
                 src={listing.imageUrl}
                 alt={listing.title}
-                className={`w-full h-72 transition-transform duration-300 select-none ${
+                className={`w-full h-72 select-none ${
                   isImageZoomed
                     ? "scale-175 object-contain"
-                    : "object-cover group-hover:scale-105"
+                    : "object-cover"
                 }`}
                 referrerPolicy="no-referrer"
               />
@@ -589,7 +580,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     type="button"
                     onClick={() => {
                       const el = document.getElementById("detail-reviews-section");
-                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                      if (el) el.scrollIntoView({ behavior: "auto" });
                     }}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100/90 text-amber-900 border border-amber-200/80 transition-colors text-xs font-bold shadow-2xs cursor-pointer"
                     title="View verified student handover reviews"
@@ -651,7 +642,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       setShowReviewForm(true);
                       setTimeout(() => {
                         const el = document.getElementById("detail-review-form");
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                        if (el) el.scrollIntoView({ behavior: "auto" });
                       }, 50);
                     }}
                     className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 transition-colors"
@@ -762,11 +753,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
               {/* Primary Call to actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <motion.button
+                <button
                   id="detail-chat-negotiate-btn"
                   disabled={!isOnline}
-                  whileHover={isOnline ? { scale: 1.02 } : {}}
-                  whileTap={isOnline ? { scale: 0.98 } : {}}
                   onClick={() => {
                     if (!isOnline) return;
                     onClose();
@@ -777,7 +766,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       ? "Chat is disabled while offline to prevent data loss"
                       : "Chat & negotiate with student seller"
                   }
-                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all select-none ${
+                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm select-none ${
                     !isOnline
                       ? "bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none"
                       : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer"
@@ -789,19 +778,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     <MessageCircle className="w-4 h-4 shrink-0" />
                   )}
                   <span>{!isOnline ? "Chat Disabled (Offline)" : "Chat & Negotiate"}</span>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                </button>
+                <button
                   onClick={() => {
                     onClose();
                     onOpenCalendar(listing);
                   }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition-all cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md cursor-pointer"
                 >
                   <CalendarIcon className="w-4 h-4" />
                   Schedule Handover
-                </motion.button>
+                </button>
               </div>
 
               {/* Ask Seller: Dynamic Category FAQs */}
@@ -826,19 +813,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
                   <div className="space-y-1.5">
                     {dynamicFaqs.map((faq, idx) => (
-                      <motion.button
+                      <button
                         key={faq.id || idx}
                         id={`ask-seller-faq-btn-${idx}`}
                         type="button"
-                        whileHover={isOnline ? { scale: 1.01, x: 2 } : {}}
-                        whileTap={isOnline ? { scale: 0.99 } : {}}
                         disabled={!isOnline}
                         onClick={() => {
                           if (!isOnline) return;
                           onClose();
                           onOpenChat(listing, faq.question);
                         }}
-                        className={`w-full group text-left px-3 py-2 rounded-xl border text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                        className={`w-full group text-left px-3 py-2 rounded-xl border text-xs flex items-center justify-between gap-2 cursor-pointer ${
                           !isOnline
                             ? "bg-white/60 border-slate-200 text-slate-400 cursor-not-allowed"
                             : "bg-white hover:bg-indigo-50/80 border-indigo-100 hover:border-indigo-300 text-slate-700 hover:text-indigo-900 shadow-2xs hover:shadow-xs"
@@ -862,9 +847,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                         </div>
                         <div className="flex items-center gap-1 text-indigo-600 opacity-80 group-hover:opacity-100 shrink-0 text-[11px] font-semibold">
                           <span className="hidden sm:inline">Ask</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </div>
-                      </motion.button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -1207,7 +1192,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                             onClick={() => setRatingInput(star)}
                             onMouseEnter={() => setHoverRating(star)}
                             onMouseLeave={() => setHoverRating(0)}
-                            className="p-1 hover:scale-110 transition-transform focus:outline-none cursor-pointer"
+                            className="p-1 focus:outline-none cursor-pointer"
                             title={`Rate ${star} star${star > 1 ? "s" : ""}`}
                           >
                             <Star

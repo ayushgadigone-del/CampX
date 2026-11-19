@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   BookOpen,
@@ -420,23 +419,15 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
     "Sem 8",
   ];
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
+        <div
           id="topper-notes-modal-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="topper-notes-modal-card"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`w-full max-w-6xl h-[92vh] max-h-[850px] rounded-3xl shadow-2xl flex flex-col border overflow-hidden ${
               isDark
                 ? "bg-[#0B0F19] border-slate-800 text-slate-100"
@@ -509,7 +500,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             <button
               id="header-upload-doc-btn"
               onClick={() => setIsUploadDocModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold shadow-xs cursor-pointer transition-transform hover:scale-102"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold shadow-xs cursor-pointer"
               title="Upload document file to Topper Vault"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -1054,7 +1045,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                         <button
                           onClick={() => handleDownloadFile(activeNote)}
-                          className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform hover:scale-102"
+                          className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download</span>
@@ -1065,7 +1056,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                   {/* Document Live Preview Frame */}
                   {activeNote.fileUrl && showDocPreview && (
-                    <div className="rounded-2xl border border-indigo-500/40 overflow-hidden bg-slate-950 p-2 space-y-2 animate-in fade-in duration-200">
+                    <div className="rounded-2xl border border-indigo-500/40 overflow-hidden bg-slate-950 p-2 space-y-2">
                       <div className="flex items-center justify-between px-2 text-xs text-slate-300">
                         <span className="font-bold flex items-center gap-1.5">
                           <Eye className="w-3.5 h-3.5 text-indigo-400" />
@@ -1092,7 +1083,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                   {/* App Owner Edit Form (When Active) */}
                   {ownerMode && isEditingCurrentNote && editFormData ? (
                     <div
-                      className={`p-5 rounded-2xl border-2 space-y-4 animate-in fade-in duration-150 ${
+                      className={`p-5 rounded-2xl border-2 space-y-4 ${
                         isDark
                           ? "bg-amber-950/20 border-amber-600"
                           : "bg-amber-50/80 border-amber-400"
@@ -1541,20 +1532,13 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
         </div>
 
         {/* Upload Document Modal Dialog */}
-        <AnimatePresence>
           {isUploadDocModalOpen && (
-            <motion.div
+            <div
               id="upload-doc-modal-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+              className="fixed inset-0 z-60 bg-black/75 flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
             >
-              <motion.div
+              <div
                 id="upload-doc-modal-card"
-                initial={{ opacity: 0, scale: 0.95, y: 16 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 16 }}
                 className={`w-full max-w-xl rounded-3xl shadow-2xl border overflow-hidden flex flex-col max-h-[90vh] ${
                   isDark ? "bg-[#0F172A] border-slate-700 text-slate-100" : "bg-white border-slate-200 text-slate-900"
                 }`}
@@ -1813,20 +1797,17 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold shadow-md cursor-pointer transition-transform hover:scale-102 flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold shadow-md cursor-pointer flex items-center gap-2"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>Upload & Add to Vault</span>
                     </button>
                   </div>
                 </form>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

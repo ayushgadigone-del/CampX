@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -61,22 +60,14 @@ export const UpcomingHandoversModal: React.FC<UpcomingHandoversModalProps> = ({
   // Filter listings that have local scheduled handovers
   const listingsWithHandover = listings.filter((l) => l.handoverDetails);
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
         >
-          <motion.div
+          <div
             id="upcoming-handovers-modal"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden my-8 ${
               isDark
                 ? "bg-[#0B0F19] border-slate-800 text-slate-100"
@@ -123,7 +114,7 @@ export const UpcomingHandoversModal: React.FC<UpcomingHandoversModalProps> = ({
                       : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
                   }`}
                 >
-                  <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  <RefreshCw className="w-4 h-4" />
                 </button>
                 <button
                   onClick={onClose}
@@ -326,9 +317,7 @@ export const UpcomingHandoversModal: React.FC<UpcomingHandoversModalProps> = ({
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
   );
 };
