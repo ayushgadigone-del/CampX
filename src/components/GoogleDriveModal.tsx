@@ -202,10 +202,10 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
   };
 
   const getMimeIcon = (mimeType: string) => {
-    if (mimeType.includes("document")) return <FileText className="w-5 h-5 text-blue-500" />;
+    if (mimeType.includes("document")) return <FileText className="w-5 h-5 text-[#2F5D50]" />;
     if (mimeType.includes("pdf")) return <File className="w-5 h-5 text-rose-500" />;
-    if (mimeType.includes("spreadsheet")) return <FileSpreadsheet className="w-5 h-5 text-emerald-500" />;
-    return <FolderOpen className="w-5 h-5 text-indigo-500" />;
+    if (mimeType.includes("spreadsheet")) return <FileSpreadsheet className="w-5 h-5 text-[#2F5D50]" />;
+    return <FolderOpen className="w-5 h-5 text-[#2F5D50]" />;
   };
 
   if (!isOpen) return null;
@@ -213,32 +213,32 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
   return (
         <div
           id="google-drive-modal-overlay"
-          className="fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-[#141A18] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
         >
           <div
             id="google-drive-modal-card"
             className={`w-full max-w-4xl max-h-[88vh] rounded-3xl shadow-2xl flex flex-col border overflow-hidden ${
-              isDark ? "bg-[#0B0F19] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+              isDark ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]" : "bg-white border-[#DFE6E2] text-[#18201C]"
             }`}
           >
             {/* Header */}
             <div
               className={`px-6 py-4 border-b flex items-center justify-between shrink-0 ${
-                isDark ? "border-slate-800 bg-slate-900/80" : "border-slate-200 bg-slate-50"
+                isDark ? "border-[#242E2A] bg-[#141A18]" : "border-[#DFE6E2] bg-[#F7F9F8]"
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-md">
+                <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] flex items-center justify-center text-white shadow-md">
                   <HardDrive className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-base sm:text-lg font-black">Google Drive & Docs Hub</h2>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2F5D50] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#5BA18C]">
                       Official Workspace APIs
                     </span>
                   </div>
-                  <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <p className={`text-xs ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Browse study materials, pick files with Google Picker, and create Google Docs
                   </p>
                 </div>
@@ -249,7 +249,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   <button
                     onClick={handleConnectGoogle}
                     disabled={isLoadingAuth}
-                    className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     {isLoadingAuth ? "Connecting..." : "Connect Google"}
@@ -258,7 +258,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                 <button
                   onClick={onClose}
                   className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                    isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+                    isDark ? "text-[#8FA199] hover:text-white hover:bg-[#1B2320]" : "text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2]"
                   }`}
                 >
                   <X className="w-5 h-5" />
@@ -269,7 +269,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
             {/* Sub-header Navigation Tabs */}
             <div
               className={`px-6 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-xs font-bold ${
-                isDark ? "border-slate-800 bg-slate-950/60" : "border-slate-200 bg-slate-100/60"
+                isDark ? "border-[#242E2A] bg-[#0D1110]" : "border-[#DFE6E2] bg-[#EFF4F1]"
               }`}
             >
               <div className="flex items-center gap-1.5">
@@ -277,10 +277,10 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   onClick={() => setActiveTab("browse")}
                   className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 ${
                     activeTab === "browse"
-                      ? "bg-indigo-600 text-white shadow-xs"
+                      ? "bg-[#2F5D50] text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                      ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                   }`}
                 >
                   <FolderOpen className="w-3.5 h-3.5" />
@@ -294,13 +294,13 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 ${
                     activeTab === "picker"
-                      ? "bg-indigo-600 text-white shadow-xs"
+                      ? "bg-[#2F5D50] text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                      ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#DFC29B]" />
                   <span>Google Picker</span>
                 </button>
 
@@ -308,10 +308,10 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   onClick={() => setActiveTab("create_doc")}
                   className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 ${
                     activeTab === "create_doc"
-                      ? "bg-indigo-600 text-white shadow-xs"
+                      ? "bg-[#2F5D50] text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                      ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -322,10 +322,10 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   onClick={() => setActiveTab("upload")}
                   className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 ${
                     activeTab === "upload"
-                      ? "bg-indigo-600 text-white shadow-xs"
+                      ? "bg-[#2F5D50] text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                      ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                   }`}
                 >
                   <Upload className="w-3.5 h-3.5" />
@@ -337,11 +337,11 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                 <button
                   onClick={() => fetchFiles(accessToken)}
                   className={`p-1.5 rounded-lg text-xs flex items-center gap-1 cursor-pointer transition-colors ${
-                    isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    isDark ? "text-[#8FA199] hover:text-white" : "text-[#5C6B63] hover:text-[#18201C]"
                   }`}
                   title="Refresh files"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingFiles ? "text-indigo-400" : ""}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingFiles ? "text-[#7BBFA8]" : ""}`} />
                   <span className="hidden sm:inline">Sync</span>
                 </button>
               )}
@@ -359,19 +359,19 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
             <div className="flex-1 overflow-y-auto p-6">
               {!accessToken ? (
                 <div className="text-center py-12 space-y-4 max-w-md mx-auto">
-                  <div className="w-16 h-16 rounded-3xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center mx-auto shadow-inner">
+                  <div className="w-16 h-16 rounded-3xl bg-[#2F5D50] border border-[#5BA18C] text-[#2F5D50] flex items-center justify-center mx-auto shadow-inner">
                     <HardDrive className="w-8 h-8" />
                   </div>
                   <div>
                     <h3 className="text-base font-black">Connect Your Google Drive & Docs</h3>
-                    <p className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                    <p className={`text-xs mt-1 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                       Sign in with Google to browse and import study notes, launch Google Picker, and create shared Google Docs.
                     </p>
                   </div>
                   <button
                     onClick={handleConnectGoogle}
                     disabled={isLoadingAuth}
-                    className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md cursor-pointer"
+                    className="px-5 py-2.5 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] hover:bg-[#244A3F] dark:hover:bg-[#448573] text-white font-bold text-xs shadow-md cursor-pointer"
                   >
                     {isLoadingAuth ? "Connecting..." : "Sign in with Google"}
                   </button>
@@ -384,15 +384,15 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                       {/* Search & Filters */}
                       <div className="flex flex-col sm:flex-row gap-2.5">
                         <div className="relative flex-1">
-                          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                          <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#8FA199]" />
                           <input
                             type="text"
                             placeholder="Search files in Google Drive..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && fetchFiles(accessToken)}
-                            className={`w-full pl-9 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                              isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
+                            className={`w-full pl-9 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
+                              isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#DFE6E2] text-[#18201C]"
                             }`}
                           />
                         </div>
@@ -403,8 +403,8 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                             onChange={(e) => {
                               setSelectedFilter(e.target.value);
                             }}
-                            className={`px-3 py-2 text-xs rounded-xl border focus:ring-2 focus:ring-indigo-500 ${
-                              isDark ? "bg-slate-900 border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"
+                            className={`px-3 py-2 text-xs rounded-xl border focus:ring-2 focus:ring-[#2F5D50] ${
+                              isDark ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]" : "bg-white border-[#DFE6E2] text-[#18201C]"
                             }`}
                           >
                             <option value="all">All File Types</option>
@@ -414,7 +414,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
 
                           <button
                             onClick={() => fetchFiles(accessToken)}
-                            className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer"
+                            className="px-3 py-2 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold cursor-pointer"
                           >
                             Search
                           </button>
@@ -423,21 +423,21 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
 
                       {/* File Grid / List */}
                       {isLoadingFiles ? (
-                        <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                          <RefreshCw className="w-4 h-4 text-indigo-400" />
+                        <div className="py-12 text-center text-xs text-[#8FA199] flex items-center justify-center gap-2">
+                          <RefreshCw className="w-4 h-4 text-[#7BBFA8]" />
                           <span>Loading files from Google Drive...</span>
                         </div>
                       ) : files.length === 0 ? (
                         <div className="py-12 text-center space-y-2">
-                          <FolderOpen className="w-10 h-10 mx-auto text-slate-400 opacity-60" />
-                          <p className="text-xs text-slate-400 font-semibold">No files found matching your search.</p>
+                          <FolderOpen className="w-10 h-10 mx-auto text-[#8FA199] opacity-60" />
+                          <p className="text-xs text-[#8FA199] font-semibold">No files found matching your search.</p>
                           <button
                             onClick={() => {
                               setSearchQuery("");
                               setSelectedFilter("all");
                               fetchFiles(accessToken, "");
                             }}
-                            className="text-xs text-indigo-400 font-bold hover:underline"
+                            className="text-xs text-[#7BBFA8] font-bold hover:underline"
                           >
                             Reset filters
                           </button>
@@ -448,30 +448,30 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                             <div
                               key={file.id}
                               className={`p-3.5 rounded-2xl border flex items-start gap-3 transition-all hover:shadow-md ${
-                                isDark ? "bg-slate-900/60 border-slate-800 hover:border-slate-700" : "bg-white border-slate-200 hover:border-slate-300"
+                                isDark ? "bg-[#141A18] border-[#242E2A] hover:border-[#242E2A]" : "bg-white border-[#DFE6E2] hover:border-[#C4D1CA]"
                               }`}
                             >
-                              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0">
+                              <div className="p-2 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] shrink-0">
                                 {getMimeIcon(file.mimeType)}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-xs font-bold truncate leading-tight" title={file.name}>
                                   {file.name}
                                 </h4>
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                                <div className="flex items-center gap-2 text-[10px] text-[#8FA199] mt-1">
                                   <span>{file.mimeType.split(".").pop()}</span>
                                   {file.size && <span>• {Math.round(Number(file.size) / 1024)} KB</span>}
                                   {file.modifiedTime && (
                                     <span>• {new Date(file.modifiedTime).toLocaleDateString()}</span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2 mt-2 pt-1 border-t border-slate-200/50 dark:border-slate-800/60">
+                                <div className="flex items-center gap-2 mt-2 pt-1 border-t border-[#DFE6E2] dark:border-[#242E2A]">
                                   {file.webViewLink && (
                                     <a
                                       href={file.webViewLink}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="text-[11px] font-bold text-indigo-500 hover:text-indigo-400 inline-flex items-center gap-1"
+                                      className="text-[11px] font-bold text-[#2F5D50] hover:text-[#7BBFA8] inline-flex items-center gap-1"
                                     >
                                       <ExternalLink className="w-3 h-3" />
                                       Open
@@ -489,7 +489,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                                         onClose();
                                         onShowToast(`Imported "${file.name}" into Topper Vault!`);
                                       }}
-                                      className="text-[11px] font-bold text-emerald-500 hover:text-emerald-400 ml-auto cursor-pointer"
+                                      className="text-[11px] font-bold text-[#2F5D50] hover:text-[#7BBFA8] ml-auto cursor-pointer"
                                     >
                                       + Add to Vault
                                     </button>
@@ -511,7 +511,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                       </div>
                       <div className="max-w-md mx-auto">
                         <h3 className="text-base font-black">Google Picker Interactive Dialog</h3>
-                        <p className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                        <p className={`text-xs mt-1 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                           Use the Google Picker widget to select study materials, handwritten scans, or Google Docs directly from your cloud Drive.
                         </p>
                       </div>
@@ -526,7 +526,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
 
                       {recentPickedFiles.length > 0 && (
                         <div className="text-left pt-6 max-w-xl mx-auto space-y-2">
-                          <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider">
+                          <h4 className="text-xs font-black uppercase text-[#8FA199] tracking-wider">
                             Recently Picked Documents
                           </h4>
                           <div className="space-y-2">
@@ -534,11 +534,11 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                               <div
                                 key={doc.id}
                                 className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
-                                  isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200"
+                                  isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-white border-[#DFE6E2]"
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  <FileText className="w-4 h-4 text-blue-500 shrink-0" />
+                                  <FileText className="w-4 h-4 text-[#2F5D50] shrink-0" />
                                   <span className="text-xs font-bold truncate">{doc.name}</span>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
@@ -546,7 +546,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                                     href={doc.url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-400 hover:bg-indigo-500/10 inline-flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-lg text-xs font-bold text-[#7BBFA8] hover:bg-[#244A3F] inline-flex items-center gap-1"
                                   >
                                     <ExternalLink className="w-3 h-3" />
                                     Open
@@ -564,9 +564,9 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   {activeTab === "create_doc" && (
                     <form onSubmit={handleCreateNewDoc} className="max-w-lg mx-auto space-y-4 py-4">
                       <div className="text-center space-y-1">
-                        <FileText className="w-10 h-10 text-blue-500 mx-auto" />
+                        <FileText className="w-10 h-10 text-[#2F5D50] mx-auto" />
                         <h3 className="text-base font-black">Create a New Google Doc</h3>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                        <p className={`text-xs ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                           Generates a new study guide or shared notebook in your Google Drive.
                         </p>
                       </div>
@@ -578,8 +578,8 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                           placeholder="e.g., Engineering Mathematics III Unit 2 Formulas"
                           value={newDocTitle}
                           onChange={(e) => setNewDocTitle(e.target.value)}
-                          className={`w-full p-2.5 text-xs rounded-xl border focus:ring-2 focus:ring-blue-500 ${
-                            isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900"
+                          className={`w-full p-2.5 text-xs rounded-xl border focus:ring-2 focus:ring-[#2F5D50] ${
+                            isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA] text-[#18201C]"
                           }`}
                         />
                       </div>
@@ -587,7 +587,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                       <button
                         type="submit"
                         disabled={isCreatingDoc}
-                        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md cursor-pointer transition-all flex items-center justify-center gap-2"
+                        className="w-full py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white font-bold text-xs shadow-md cursor-pointer transition-all flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         <span>{isCreatingDoc ? "Creating Google Doc..." : "Create & Open in Google Docs"}</span>
@@ -599,9 +599,9 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                   {activeTab === "upload" && (
                     <form onSubmit={handleUploadFileToDrive} className="max-w-lg mx-auto space-y-4 py-4">
                       <div className="text-center space-y-1">
-                        <Upload className="w-10 h-10 text-emerald-500 mx-auto" />
+                        <Upload className="w-10 h-10 text-[#2F5D50] mx-auto" />
                         <h3 className="text-base font-black">Upload File to Google Drive</h3>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                        <p className={`text-xs ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                           Save study PDFs, handwritten exam notes, or course files to your Google Drive.
                         </p>
                       </div>
@@ -611,8 +611,8 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                         <input
                           type="file"
                           onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                          className={`w-full p-2 text-xs rounded-xl border file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer ${
-                            isDark ? "bg-slate-900 border-slate-700 text-slate-300" : "bg-white border-slate-300 text-slate-700"
+                          className={`w-full p-2 text-xs rounded-xl border file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#2F5D50] file:text-white cursor-pointer ${
+                            isDark ? "bg-[#141A18] border-[#242E2A] text-[#C5D3CC]" : "bg-white border-[#C4D1CA] text-[#5C6B63]"
                           }`}
                         />
                       </div>
@@ -624,8 +624,8 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                           placeholder="e.g., SPPU Semester 4 Model Exam Solutions"
                           value={uploadDescription}
                           onChange={(e) => setUploadDescription(e.target.value)}
-                          className={`w-full p-2.5 text-xs rounded-xl border focus:ring-2 focus:ring-emerald-500 ${
-                            isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900"
+                          className={`w-full p-2.5 text-xs rounded-xl border focus:ring-2 focus:ring-[#2F5D50] ${
+                            isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA] text-[#18201C]"
                           }`}
                         />
                       </div>
@@ -633,7 +633,7 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
                       <button
                         type="submit"
                         disabled={isUploadingToDrive || !uploadFile}
-                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white font-bold text-xs shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         <Upload className="w-4 h-4" />
                         <span>{isUploadingToDrive ? "Uploading to Drive..." : "Upload to Google Drive"}</span>
@@ -647,17 +647,17 @@ export const GoogleDriveModal: React.FC<GoogleDriveModalProps> = ({
             {/* Footer */}
             <div
               className={`px-6 py-3 border-t flex items-center justify-between text-xs ${
-                isDark ? "border-slate-800 bg-slate-900/90 text-slate-400" : "border-slate-200 bg-slate-50 text-slate-500"
+                isDark ? "border-[#242E2A] bg-[#141A18] text-[#8FA199]" : "border-[#DFE6E2] bg-[#F7F9F8] text-[#5C6B63]"
               }`}
             >
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <ShieldCheck className="w-4 h-4 text-[#2F5D50]" />
                 <span>Protected by Google Workspace OAuth • Direct client-side access</span>
               </div>
               <button
                 onClick={onClose}
                 className={`px-3 py-1 rounded-lg font-bold ${
-                  isDark ? "hover:bg-slate-800 text-slate-200" : "hover:bg-slate-200 text-slate-700"
+                  isDark ? "hover:bg-[#1B2320] text-[#ECF2EF]" : "hover:bg-[#DFE6E2] text-[#5C6B63]"
                 }`}
               >
                 Close

@@ -3,14 +3,13 @@ import {
   ArrowRight,
   ChevronDown,
   MapPin,
-  BookOpen,
-  Calculator,
-  Compass,
-  Bike,
-  ShoppingBag,
-  FileText,
+  Search,
+  Check,
+  Recycle,
 } from "lucide-react";
 import { ALLOWED_COLLEGE_DOMAIN } from "../utils/collegeAuth";
+import { MarketplaceCategoryGrid } from "./MarketplaceCategoryGrid";
+import { SellerPromoBanner } from "./SellerPromoBanner";
 
 interface LandingPageProps {
   onProceedToSignIn: () => void;
@@ -20,6 +19,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onProceedToSignIn,
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [previewQuery, setPreviewQuery] = useState("");
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
@@ -31,39 +31,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       el.scrollIntoView({ behavior: "auto" });
     }
   };
-
-  const categories = [
-    {
-      icon: BookOpen,
-      name: "Textbooks & Notes",
-      desc: "SPPU reference books, syllabus question banks, and topper notes from FE to BE.",
-    },
-    {
-      icon: Calculator,
-      name: "Scientific Calculators",
-      desc: "Casio fx-991EX, fx-82MS, and fx-991CW calculators ready for university exams.",
-    },
-    {
-      icon: Compass,
-      name: "Drafters & Lab Gear",
-      desc: "Mini drafters, drawing boards, Vernier calipers, breadboards, and workshop aprons.",
-    },
-    {
-      icon: Bike,
-      name: "Campus Cycles",
-      desc: "Pre-owned bicycles, sturdy locks, pumps, and daily campus commute essentials.",
-    },
-    {
-      icon: ShoppingBag,
-      name: "Bags & Hostel Essentials",
-      desc: "Laptop backpacks, study lamps, desk organizers, and everyday hostel gear.",
-    },
-    {
-      icon: FileText,
-      name: "Semester Bundles & Topper Notes",
-      desc: "One-handover FE/SE kit bundles plus peer-shared PDF revision guides free for every student.",
-    },
-  ];
 
   const steps = [
     {
@@ -111,11 +78,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
   ];
 
+  const handlePreviewSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onProceedToSignIn();
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F9F8] dark:bg-[#0D1110] text-[#18201C] dark:text-[#ECF2EF] flex flex-col font-sans">
       {/* Minimal 3-Zone Header */}
       <header className="sticky top-0 z-40 bg-white dark:bg-[#0D1110] border-b border-[#DFE6E2] dark:border-[#242E2A]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-8">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-8">
           <span className="text-[15px] font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF] whitespace-nowrap shrink-0">
             Campus Resale
           </span>
@@ -123,10 +95,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-[#5C6B63] dark:text-[#8FA199]">
             <button
               type="button"
-              onClick={() => scrollToSection("about")}
+              onClick={() => scrollToSection("categories")}
               className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
-              About
+              Categories
             </button>
             <button
               type="button"
@@ -137,10 +109,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => scrollToSection("categories")}
+              onClick={() => scrollToSection("about")}
               className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
-              Categories
+              About
             </button>
             <button
               type="button"
@@ -164,37 +136,160 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </header>
 
       <main className="flex-1">
-        {/* Clean Minimal Hero */}
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 text-center space-y-6">
-          <p className="text-xs font-medium text-[#5C6B63] dark:text-[#8FA199]">
-            PVG&apos;s COET, Pune · Exclusively for @{ALLOWED_COLLEGE_DOMAIN}
-          </p>
+        {/* Hero Section matching Screenshot 1 */}
+        <section className="w-full bg-[#F3F5F2] dark:bg-[#111715] border-b border-[#DFE6E2] dark:border-[#242E2A]">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-24">
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-8">
+              {/* Left Column */}
+              <div className="lg:col-span-7 text-left space-y-6">
+                <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9E6B43] dark:text-[#C89B6E]">
+                  <span aria-hidden="true" className="text-sm leading-none">
+                    ✳
+                  </span>
+                  <span>MADE FOR CAMPUS LIFE</span>
+                </div>
 
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF] leading-[1.12] max-w-3xl mx-auto">
-            Buy, sell, and exchange student gear on campus.
-          </h1>
+                <h1 className="text-4xl sm:text-5xl lg:text-[64px] font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF] leading-[1.05]">
+                  <span className="block">Good finds.</span>
+                  <span className="block text-[#2F5D50] dark:text-[#7BBFA8]">
+                    Great campus
+                  </span>
+                  <span className="block">stories.</span>
+                </h1>
 
-          <p className="text-sm sm:text-base text-[#5C6B63] dark:text-[#8FA199] max-w-xl mx-auto leading-relaxed">
-            A calm, zero-commission marketplace for PVG&apos;s COET students to pass down textbooks, scientific calculators, mini drafters, semester-end bundle kits, cycles, and free topper notes.
-          </p>
+                <p className="text-sm sm:text-base text-[#5C6B63] dark:text-[#8FA199] max-w-lg leading-relaxed">
+                  Buy, sell and exchange the things you need with students from your own college community.
+                </p>
 
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              id="landing-hero-cta-btn"
-              type="button"
-              onClick={onProceedToSignIn}
-              className="w-full sm:w-auto h-11 px-6 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>Sign in with College ID</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection("how-it-works")}
-              className="w-full sm:w-auto h-11 px-6 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#1B2320] text-[#18201C] dark:text-[#ECF2EF] text-sm font-medium inline-flex items-center justify-center cursor-pointer"
-            >
-              How it works
-            </button>
+                {/* Preview Search Box (routes to College Sign-In) */}
+                <form
+                  onSubmit={handlePreviewSearchSubmit}
+                  className="max-w-lg w-full pt-1 flex items-center gap-2 p-1.5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] shadow-sm"
+                >
+                  <Search className="w-4 h-4 ml-3 shrink-0 text-[#5C6B63] dark:text-[#8FA199]" />
+                  <input
+                    type="text"
+                    value={previewQuery}
+                    onChange={(e) => setPreviewQuery(e.target.value)}
+                    placeholder="What are you looking for?"
+                    className="w-full bg-transparent text-sm text-[#18201C] dark:text-[#ECF2EF] placeholder:text-[#7C8B83] dark:placeholder:text-[#73847D] focus:outline-none py-2.5"
+                  />
+                  <button
+                    id="landing-hero-cta-btn"
+                    type="submit"
+                    className="h-10 px-5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-sm font-semibold shrink-0 cursor-pointer"
+                  >
+                    Search
+                  </button>
+                </form>
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5C6B63] dark:text-[#8FA199]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
+                    <span>
+                      Exclusively for your college community (@{ALLOWED_COLLEGE_DOMAIN})
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={onProceedToSignIn}
+                    className="font-semibold text-[#2F5D50] dark:text-[#7BBFA8] hover:underline underline-offset-4 cursor-pointer"
+                  >
+                    Sign in with College ID →
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Static Campus Community Visual */}
+              <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
+                <div className="relative flex items-center justify-center py-6 px-6 sm:px-12">
+                  <div className="w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-[#DDE6E0] dark:bg-[#192621] flex items-center justify-center">
+                    <div className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-[#2F5D50] dark:bg-[#244A3F] flex flex-col items-center justify-center text-center shadow-sm">
+                      <span className="text-white text-sm sm:text-[15px] font-bold tracking-[0.14em] uppercase leading-relaxed">
+                        CAMPUS
+                        <br />
+                        COMMUNITY
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Top-Left Static Card */}
+                  <div className="absolute top-2 left-0 sm:-left-2 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] px-3.5 py-3 shadow-sm flex items-center gap-3 w-52 sm:w-56">
+                    <div className="shrink-0">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 28 28"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <rect x="3" y="5" width="7" height="16" rx="1.5" fill="#4CAF50" />
+                        <rect x="9.5" y="7" width="7" height="15" rx="1.5" fill="#E53935" />
+                        <rect x="16" y="9" width="7" height="14" rx="1.5" fill="#3B82F6" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <p className="text-xs font-bold leading-tight text-[#18201C] dark:text-[#ECF2EF]">
+                        Pass it on.
+                      </p>
+                      <p className="text-[11px] leading-snug mt-0.5 text-[#5C6B63] dark:text-[#8FA199]">
+                        Give your books a new life
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom-Right Static Card */}
+                  <div className="absolute bottom-2 right-0 sm:-right-2 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] px-3.5 py-3 shadow-sm flex items-center gap-3 w-48 sm:w-52">
+                    <div className="shrink-0">
+                      <Recycle className="w-5 h-5 text-[#18201C] dark:text-[#ECF2EF]" />
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <p className="text-xs font-bold leading-tight text-[#18201C] dark:text-[#ECF2EF]">
+                        Buy smarter.
+                      </p>
+                      <p className="text-[11px] leading-snug mt-0.5 text-[#5C6B63] dark:text-[#8FA199]">
+                        Spend less, do more
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Explore Categories 3x2 Grid matching Screenshot 3 */}
+        <section
+          id="categories"
+          className="py-14 sm:py-16"
+        >
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <MarketplaceCategoryGrid
+              selectedCategory="All"
+              onSelectCategory={() => onProceedToSignIn()}
+              sectionId="landing-category-grid"
+            />
+
+            {/* Handover Checkpoints */}
+            <div className="pt-6 border-t border-[#DFE6E2] dark:border-[#242E2A]">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5C6B63] dark:text-[#8FA199]">
+                <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF] inline-flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
+                  Campus handover spots:
+                </span>
+                <span>Central Library</span>
+                <span aria-hidden="true">·</span>
+                <span>Reading Hall</span>
+                <span aria-hidden="true">·</span>
+                <span>Main Building Foyer</span>
+                <span aria-hidden="true">·</span>
+                <span>Canteen Plaza</span>
+                <span aria-hidden="true">·</span>
+                <span>Mech Workshop</span>
+                <span aria-hidden="true">·</span>
+                <span>Basketball Court</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -203,7 +298,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           id="about"
           className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
         >
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-1.5">
               <h2 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
                 Campus-only access
@@ -236,23 +331,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           id="how-it-works"
           className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
         >
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
             <div className="max-w-xl space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
-                How it works
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9E6B43] dark:text-[#C89B6E]">
+                HOW IT WORKS
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-normal tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+                Four simple steps.
               </h2>
               <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
-                From signing in to handing over your gear in four simple steps.
+                From signing in to handing over your gear between lectures.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {steps.map((step) => (
                 <div
                   key={step.stepNumber}
-                  className="p-5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] space-y-2.5"
+                  className="p-5 rounded-2xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] space-y-2.5"
                 >
-                  <div className="text-xs font-mono text-[#2F5D50] dark:text-[#7BBFA8]">{step.stepNumber}</div>
+                  <div className="text-xs font-mono text-[#2F5D50] dark:text-[#7BBFA8]">
+                    {step.stepNumber}
+                  </div>
                   <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
                     {step.title}
                   </h3>
@@ -265,61 +365,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </section>
 
-        {/* Categories */}
-        <section
-          id="categories"
-          className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
-        >
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
-            <div className="max-w-xl space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
-                Built for engineering semesters
-              </h2>
-              <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
-                Everything you need for classes, practicals, and campus life.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {categories.map((cat) => {
-                const Icon = cat.icon;
-                return (
-                  <div
-                    key={cat.name}
-                    className="p-5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] space-y-2.5"
-                  >
-                    <Icon className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
-                    <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
-                      {cat.name}
-                    </h3>
-                    <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
-                      {cat.desc}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Handover Checkpoints */}
-            <div className="pt-6 border-t border-[#DFE6E2] dark:border-[#242E2A]">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5C6B63] dark:text-[#8FA199]">
-                <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF] inline-flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
-                  Campus handover spots:
-                </span>
-                <span>Central Library</span>
-                <span aria-hidden="true">·</span>
-                <span>Reading Hall</span>
-                <span aria-hidden="true">·</span>
-                <span>Main Building Foyer</span>
-                <span aria-hidden="true">·</span>
-                <span>Canteen Plaza</span>
-                <span aria-hidden="true">·</span>
-                <span>Mech Workshop</span>
-                <span aria-hidden="true">·</span>
-                <span>Basketball Court</span>
-              </div>
-            </div>
+        {/* Seller CTA Banner matching Screenshot 2 */}
+        <section className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SellerPromoBanner
+              id="landing-seller-promo-banner"
+              onStartSelling={onProceedToSignIn}
+              buttonLabel="Start selling"
+            />
           </div>
         </section>
 
@@ -328,8 +381,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           id="faq"
           className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
         >
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+          <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
+            <h2 className="text-xl sm:text-2xl font-normal tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
               Frequently asked questions
             </h2>
 
@@ -361,33 +414,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
         </section>
-
-        {/* Bottom CTA */}
-        <section className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-16">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-4">
-            <h2 className="text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
-              Ready to explore active campus listings?
-            </h2>
-            <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
-              Sign in with your @{ALLOWED_COLLEGE_DOMAIN} account to browse, message sellers, and post items.
-            </p>
-            <div className="pt-2">
-              <button
-                id="landing-bottom-signin-btn"
-                type="button"
-                onClick={onProceedToSignIn}
-                className="h-11 px-6 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-sm font-semibold inline-flex items-center gap-2 cursor-pointer"
-              >
-                <span>Sign In with @{ALLOWED_COLLEGE_DOMAIN}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
-      <footer className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-6 px-4 sm:px-6 text-xs text-[#5C6B63] dark:text-[#8FA199]">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-6 px-4 sm:px-6 lg:px-8 text-xs text-[#5C6B63] dark:text-[#8FA199]">
+        <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="font-medium text-[#18201C] dark:text-[#ECF2EF]">
             PVG&apos;s COET Campus Resale &amp; Exchange
           </span>

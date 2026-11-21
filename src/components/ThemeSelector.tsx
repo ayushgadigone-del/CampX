@@ -19,22 +19,24 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         id="theme-mode-toggle-button"
         type="button"
         onClick={toggleTheme}
-        title={`Current mode: ${isDark ? "Dark" : "Light"}. Click to switch to ${isDark ? "Light" : "Dark"} mode.`}
+        title={`Current mode: ${isDark ? "Dark" : "Light"}. Click to switch to ${
+          isDark ? "Light" : "Dark"
+        } mode.`}
         aria-label={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer select-none shadow-xs ${
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer select-none ${
           isDark
-            ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-300 hover:text-amber-200"
-            : "bg-white hover:bg-slate-50 border-slate-300 text-indigo-700 hover:text-indigo-900"
+            ? "bg-[#141A18] hover:bg-[#1B2320] border-[#242E2A] text-[#ECF2EF]"
+            : "bg-white hover:bg-[#EFF4F1] border-[#DFE6E2] text-[#18201C]"
         } ${className}`}
       >
         {isDark ? (
           <span className="flex items-center gap-1.5">
-            <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+            <Sun className="w-4 h-4 text-[#DFC29B] shrink-0" />
             <span>Light Mode</span>
           </span>
         ) : (
           <span className="flex items-center gap-1.5">
-            <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
+            <Moon className="w-4 h-4 text-[#2F5D50] shrink-0" />
             <span>Dark Mode</span>
           </span>
         )}
@@ -46,17 +48,25 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     return (
       <div
         className={`px-3 py-2 border-b flex items-center justify-between ${
-          isDark ? "border-slate-700/80 bg-slate-900/40" : "border-slate-100 bg-slate-50/70"
+          isDark
+            ? "border-[#242E2A] bg-[#141A18]"
+            : "border-[#DFE6E2] bg-[#F7F9F8]"
         } ${className}`}
       >
-        <span className={`text-xs font-semibold ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+        <span
+          className={`text-xs font-semibold ${
+            isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+          }`}
+        >
           Appearance
         </span>
         <div
           role="radiogroup"
           aria-label="Theme selection"
           className={`relative flex items-center p-0.5 rounded-lg border ${
-            isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200 shadow-2xs"
+            isDark
+              ? "bg-[#0D1110] border-[#242E2A]"
+              : "bg-[#EFF4F1] border-[#DFE6E2]"
           }`}
         >
           <button
@@ -65,10 +75,10 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
             aria-checked={!isDark}
             onClick={() => setTheme("light")}
             title="Select Light Mode"
-            className={`relative z-10 flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold cursor-pointer ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer ${
               !isDark
-                ? "bg-amber-400 text-slate-950 font-extrabold shadow-xs"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-white text-[#18201C] border border-[#DFE6E2]"
+                : "text-[#8FA199] hover:text-[#ECF2EF]"
             }`}
           >
             <Sun className="w-3.5 h-3.5" />
@@ -80,10 +90,10 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
             aria-checked={isDark}
             onClick={() => setTheme("dark")}
             title="Select Dark Mode"
-            className={`relative z-10 flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold cursor-pointer ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer ${
               isDark
-                ? "bg-indigo-600 text-white font-extrabold shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#387262] text-white"
+                : "text-[#5C6B63] hover:text-[#18201C]"
             }`}
           >
             <Moon className="w-3.5 h-3.5" />
@@ -94,15 +104,14 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     );
   }
 
-  // Default: segmented selector with both Light & Dark buttons clearly visible
   return (
     <div
       role="radiogroup"
       aria-label="Theme mode selector"
-      className={`relative inline-flex items-center p-1 rounded-xl border shadow-inner ${
+      className={`relative inline-flex items-center p-1 rounded-xl border ${
         isDark
-          ? "bg-slate-900/90 border-slate-700/80"
-          : "bg-slate-200/90 border-slate-300/80"
+          ? "bg-[#0D1110] border-[#242E2A]"
+          : "bg-[#EFF4F1] border-[#DFE6E2]"
       } ${className}`}
     >
       <button
@@ -112,17 +121,15 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         aria-checked={!isDark}
         onClick={() => setTheme("light")}
         title="Select Light Mode"
-        className={`relative z-10 flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold cursor-pointer select-none ${
+        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer select-none ${
           !isDark
-            ? "bg-white border border-slate-200/90 shadow-sm text-slate-950 font-extrabold"
-            : isDark
-            ? "text-slate-400 hover:text-slate-200"
-            : "text-slate-600 hover:text-slate-900"
+            ? "bg-white border border-[#DFE6E2] text-[#18201C]"
+            : "text-[#8FA199] hover:text-[#ECF2EF]"
         }`}
       >
         <Sun
           className={`w-3.5 h-3.5 ${
-            !isDark ? "text-amber-500 fill-amber-400" : "text-slate-400"
+            !isDark ? "text-[#9E6B43]" : "text-[#8FA199]"
           }`}
         />
         <span>Light</span>
@@ -135,15 +142,15 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         aria-checked={isDark}
         onClick={() => setTheme("dark")}
         title="Select Dark Mode"
-        className={`relative z-10 flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold cursor-pointer select-none ${
+        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer select-none ${
           isDark
-            ? "bg-indigo-600 border border-indigo-400/50 shadow-md shadow-indigo-600/30 text-white font-extrabold"
-            : "text-slate-600 hover:text-slate-900"
+            ? "bg-[#387262] text-white"
+            : "text-[#5C6B63] hover:text-[#18201C]"
         }`}
       >
         <Moon
           className={`w-3.5 h-3.5 ${
-            isDark ? "text-indigo-200 fill-indigo-200" : "text-slate-500"
+            isDark ? "text-white" : "text-[#5C6B63]"
           }`}
         />
         <span>Dark</span>
@@ -151,4 +158,3 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     </div>
   );
 };
-

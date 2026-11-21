@@ -229,9 +229,9 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
   const getConditionColor = (cond: string) => {
     switch (cond) {
       case "Like New":
-        return "bg-emerald-600 text-white border-emerald-500 shadow-sm";
+        return "bg-[#2F5D50] text-white border-[#5BA18C] shadow-sm";
       case "Good":
-        return "bg-blue-600 text-white border-blue-500 shadow-sm";
+        return "bg-[#2F5D50] text-white border-[#5BA18C] shadow-sm";
       case "Fair":
         return "bg-amber-600 text-white border-amber-500 shadow-sm";
       default:
@@ -245,11 +245,11 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
         role="dialog"
         aria-modal="true"
         aria-label={`Inspect condition of ${listing.title}`}
-        className="fixed inset-0 z-50 flex flex-col justify-between bg-slate-950/95 text-white select-none overflow-hidden"
+        className="fixed inset-0 z-50 flex flex-col justify-between bg-[#0D1110] text-white select-none overflow-hidden"
         onMouseUp={handleMouseUp}
       >
         {/* Top Header Controls Bar */}
-        <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-slate-800">
+        <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#141A18] border-b border-[#242E2A]">
           {/* Item Meta & Condition Pill */}
           <div className="flex items-center gap-3 max-w-[65%] truncate">
             <span
@@ -261,17 +261,17 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
             </span>
 
             <div className="truncate">
-              <h2 className="text-sm sm:text-base font-bold text-slate-100 truncate">
+              <h2 className="text-sm sm:text-base font-bold text-[#ECF2EF] truncate">
                 {listing.title}
               </h2>
-              <p className="text-[11px] text-slate-400 truncate flex items-center gap-2">
+              <p className="text-[11px] text-[#8FA199] truncate flex items-center gap-2">
                 <span>{listing.category}</span>
                 <span>•</span>
                 <span>Offered by {listing.sellerName}</span>
                 {listing.locationPreference && (
                   <>
                     <span>•</span>
-                    <span className="flex items-center gap-0.5 text-slate-300 truncate">
+                    <span className="flex items-center gap-0.5 text-[#C5D3CC] truncate">
                       <MapPin className="w-3 h-3 text-red-400 shrink-0" />
                       {listing.locationPreference}
                     </span>
@@ -284,7 +284,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           {/* Header Action Tools */}
           <div className="flex items-center gap-2">
             {/* Zoom Controls Pill */}
-            <div className="hidden sm:flex items-center bg-slate-800/90 rounded-xl p-1 border border-slate-700/80 text-xs">
+            <div className="hidden sm:flex items-center bg-[#1B2320] rounded-xl p-1 border border-[#242E2A] text-xs">
               <button
                 id="lightbox-zoom-out-btn"
                 type="button"
@@ -292,7 +292,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                 disabled={scale <= 1}
                 aria-label="Zoom out"
                 title="Zoom out (-)"
-                className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300 disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#242E2A] text-[#C5D3CC] disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
@@ -301,7 +301,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                 type="button"
                 onClick={handleResetZoom}
                 title="Reset zoom (0)"
-                className="px-2 py-1 text-[11px] font-mono font-bold text-slate-200 hover:text-indigo-400 transition-colors"
+                className="px-2 py-1 text-[11px] font-mono font-bold text-[#ECF2EF] hover:text-[#7BBFA8] transition-colors"
               >
                 {Math.round(scale * 100)}%
               </button>
@@ -312,18 +312,18 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                 disabled={scale >= 4}
                 aria-label="Zoom in"
                 title="Zoom in (+)"
-                className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300 disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#242E2A] text-[#C5D3CC] disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
-              <div className="w-px h-4 bg-slate-700 mx-1" />
+              <div className="w-px h-4 bg-[#242E2A] mx-1" />
               <button
                 id="lightbox-rotate-btn"
                 type="button"
                 onClick={handleRotate}
                 aria-label="Rotate image"
                 title="Rotate 90° (R)"
-                className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#242E2A] text-[#C5D3CC] transition-colors"
               >
                 <RotateCw className="w-4 h-4" />
               </button>
@@ -336,7 +336,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               onClick={onClose}
               aria-label="Close image inspection"
               title="Close (Esc)"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-[#1B2320] hover:bg-[#242E2A] text-[#C5D3CC] hover:text-white border border-[#242E2A] transition-all cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -391,12 +391,12 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               draggable={false}
               referrerPolicy="no-referrer"
               onClick={handlePictureClick}
-              className={`max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-auto select-none ${
+              className={`max-h-[70vh] max-w-[90vw] object-contain rounded-xl shadow-2xl border border-[#242E2A] pointer-events-auto select-none ${
                 scale > 1
                   ? isDragging
-                    ? "cursor-grabbing ring-2 ring-indigo-500/50"
+                    ? "cursor-grabbing ring-2 ring-[#2F5D50]"
                     : "cursor-zoom-out hover:ring-2 hover:ring-amber-400/60"
-                  : "cursor-zoom-in hover:ring-2 hover:ring-indigo-400/60"
+                  : "cursor-zoom-in hover:ring-2 hover:ring-[#2F5D50]"
               }`}
               title={
                 scale > 1
@@ -407,22 +407,22 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           </div>
 
           {/* Floating Mobile Controls overlay */}
-          <div className="sm:hidden absolute top-4 right-4 z-20 flex items-center bg-slate-900 rounded-xl p-1 border border-slate-700">
+          <div className="sm:hidden absolute top-4 right-4 z-20 flex items-center bg-[#141A18] rounded-xl p-1 border border-[#242E2A]">
             <button
               onClick={handleZoomOut}
               disabled={scale <= 1}
-              className="p-2 text-slate-300 disabled:opacity-30"
+              className="p-2 text-[#C5D3CC] disabled:opacity-30"
               title="Zoom out"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="px-2 text-xs font-mono font-bold text-slate-200">
+            <span className="px-2 text-xs font-mono font-bold text-[#ECF2EF]">
               {Math.round(scale * 100)}%
             </span>
             <button
               onClick={handleZoomIn}
               disabled={scale >= 4}
-              className="p-2 text-slate-300 disabled:opacity-30"
+              className="p-2 text-[#C5D3CC] disabled:opacity-30"
               title="Zoom in"
             >
               <ZoomIn className="w-4 h-4" />
@@ -430,8 +430,8 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
           </div>
 
           {/* Condition Inspector Helper Pill */}
-          <div className="absolute top-4 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-300 shadow-md">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <div className="absolute top-4 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#141A18] border border-[#242E2A] text-[11px] text-[#C5D3CC] shadow-md">
+            <Sparkles className="w-3.5 h-3.5 text-[#7BBFA8] shrink-0" />
             <span>
               {scale > 1
                 ? "Click picture to zoom out • Drag to pan and examine details"
@@ -441,21 +441,21 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
         </main>
 
         {/* Bottom Inspection & Pre-Chat Action Deck */}
-        <footer className="relative z-20 bg-slate-900 border-t border-slate-800 px-4 sm:px-6 py-4">
+        <footer className="relative z-20 bg-[#141A18] border-t border-[#242E2A] px-4 sm:px-6 py-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Condition Evaluation / AI Summary */}
             <div className="w-full md:w-auto flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs">
               <div className="flex items-baseline gap-1.5 shrink-0">
-                <span className="text-slate-400">Price:</span>
+                <span className="text-[#8FA199]">Price:</span>
                 {listing.listingType === "exchange" ? (
-                  <span className="font-extrabold text-purple-400 text-base">
+                  <span className="font-extrabold text-[#7BBFA8] text-base">
                     Exchange Only
                   </span>
                 ) : (
                   <span className="font-extrabold text-white text-lg">
                     ₹{listing.price}
                     {listing.listingType === "both" && (
-                      <span className="text-[11px] font-normal text-slate-400 ml-1">
+                      <span className="text-[11px] font-normal text-[#8FA199] ml-1">
                         (or Swap)
                       </span>
                     )}
@@ -465,23 +465,23 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
 
               {/* AI Verification or Condition Details */}
               {listing.aiInspection ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 text-white border border-slate-700/80 shadow-md">
-                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D1110] text-white border border-[#242E2A] shadow-md">
+                  <Sparkles className="w-4 h-4 text-[#DFC29B] shrink-0" />
                   <div>
-                    <span className="font-extrabold text-slate-100 text-xs">
+                    <span className="font-extrabold text-[#ECF2EF] text-xs">
                       AI Inspection Score:{" "}
-                      <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
+                      <span className="text-[#7BBFA8] font-black">{listing.aiInspection.inspectionScore}%</span>
                     </span>
                     {listing.aiInspection.conditionDetails && (
-                      <span className="hidden lg:inline text-slate-300 ml-1.5 text-xs font-medium">
+                      <span className="hidden lg:inline text-[#C5D3CC] ml-1.5 text-xs font-medium">
                         "{listing.aiInspection.conditionDetails}"
                       </span>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#1B2320] text-[#C5D3CC]">
+                  <ShieldCheck className="w-4 h-4 text-[#7BBFA8] shrink-0" />
                   <span>Student verified item listed for campus handover</span>
                 </div>
               )}
@@ -497,9 +497,9 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                     onClose();
                     onOpenDetails(listing);
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-colors border border-slate-700 flex items-center gap-1.5"
+                  className="px-4 py-2.5 rounded-xl bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF] hover:text-white text-xs font-bold transition-colors border border-[#242E2A] flex items-center gap-1.5"
                 >
-                  <Info className="w-3.5 h-3.5 text-slate-400" />
+                  <Info className="w-3.5 h-3.5 text-[#8FA199]" />
                   <span>Full Details</span>
                 </button>
               )}
@@ -512,10 +512,10 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                     onClose();
                     onOpenCalendar(listing);
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-colors border border-slate-700 flex items-center gap-1.5"
+                  className="px-4 py-2.5 rounded-xl bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF] hover:text-white text-xs font-bold transition-colors border border-[#242E2A] flex items-center gap-1.5"
                   title="Schedule handover meeting on Google Calendar"
                 >
-                  <CalendarIcon className="w-3.5 h-3.5 text-blue-400" />
+                  <CalendarIcon className="w-3.5 h-3.5 text-[#7BBFA8]" />
                   <span className="hidden sm:inline">Meet</span>
                 </button>
               )}
@@ -528,7 +528,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
                   onClose();
                   onOpenChat(listing);
                 }}
-                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] active:bg-[#244A3F] text-white text-xs font-extrabold shadow-lg  flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 text-white shrink-0" />
                 <span>Chat with {listing.sellerName.split(" ")[0]}</span>

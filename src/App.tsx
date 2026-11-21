@@ -133,7 +133,9 @@ import {
 } from "./utils/expiryUtils";
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
-import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
+import { MarketplaceCategoryGrid } from "./components/MarketplaceCategoryGrid";
+import { SellerPromoBanner } from "./components/SellerPromoBanner";
+import { MyListingsSection } from "./components/MyListingsSection";
 import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
 import { CampusSecurityCenterModal } from "./components/CampusSecurityCenterModal";
 import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
@@ -903,9 +905,11 @@ export default function App() {
     return listings.filter((item) => item.isBundle && item.status !== "completed").length;
   }, [listings]);
 
-  const myListingsCount = useMemo(() => {
-    return listings.filter((item) => isCurrentUserListing(item)).length;
+  const myListings = useMemo(() => {
+    return listings.filter((item) => isCurrentUserListing(item));
   }, [listings, isCurrentUserListing]);
+
+  const myListingsCount = myListings.length;
 
   // Dynamic counts for each category
   const categoryCounts = useMemo(() => {
@@ -1596,8 +1600,8 @@ export default function App() {
   // 1. Initial Authentication Check / Loading
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-slate-100 p-4">
-        <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase">
+      <div className="min-h-screen bg-[#F7F9F8] dark:bg-[#0D1110] flex flex-col items-center justify-center text-[#18201C] dark:text-[#ECF2EF] p-4">
+        <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] font-semibold tracking-wider uppercase">
           Verifying College Identity...
         </p>
       </div>
@@ -1672,6 +1676,16 @@ export default function App() {
         onLogout={handleLogout}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onGoHome={() => {
+          setActiveSectionTab("marketplace");
+          window.scrollTo(0, 0);
+        }}
+        onOpenMyListings={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("my_listings");
+          window.scrollTo(0, 0);
+        }}
+        myListingsCount={myListingsCount}
         onOpenCreateModal={() => {
           if (!currentUser) {
             setIsLoginModalOpen(true);
@@ -1751,6 +1765,15 @@ export default function App() {
           topperNotesCount={topperNotes.length}
           upcomingHandoversCount={upcomingHandoversCount}
           isOnline={isOnline}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          totalResultsCount={filteredListings.length}
+          onSearchSubmit={() => {
+            const el = document.getElementById("campus-marketplace-items-section");
+            if (el) {
+              el.scrollIntoView({ behavior: "auto" });
+            }
+          }}
           onOpenCreateListing={() => {
             if (!isOnline) {
               showToast("⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss.");
@@ -1828,26 +1851,105 @@ export default function App() {
 
         {/* TAB 1: MARKETPLACE FEED */}
         {activeSectionTab === "marketplace" && (
-          <div id="tab-panel-marketplace" role="tabpanel" className="space-y-6">
-            {/* Dedicated Search Bar Section with History & Quick Tags */}
-            <DedicatedSearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          totalResultsCount={filteredListings.length}
-          selectedCategory={selectedCategory}
-          onSelectCategory={(cat) => setSelectedCategory(cat)}
-          categoryStockCounts={categoryStockCounts}
-        />
+          <div id="tab-panel-marketplace" role="tabpanel" className="space-y-10">
+            {/* Find Your Category 3x2 Grid */}
+            <MarketplaceCategoryGrid
+              selectedCategory={selectedCategory}
+              onSelectCategory={(cat) => {
+                setSelectedCategory(cat);
+                if (cat !== "All") {
+                  const el = document.getElementById("campus-marketplace-items-section");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "auto" });
+                  }
+                }
+              }}
+              categoryStockCounts={categoryStockCounts}
+              isDark={isDark}
+            />
 
-        {/* Secondary Filter & Sorting Controls */}
-        <div
-          className={`flex flex-wrap items-center justify-between gap-3 py-3 border-y text-xs ${
-            isDark
-              ? "border-[#242E2A] text-[#ECF2EF]"
-              : "border-[#DFE6E2] text-[#18201C]"
-          }`}
-        >
-          <div className="flex flex-wrap items-center gap-2">
+            {/* Currently Negotiating Section (items where buying talks have already started) */}
+            <CurrentlyNegotiatingSection
+              chats={storedChats}
+              allListings={listings}
+              onOpenChat={handleOpenChat}
+              onOpenDetails={handleOpenDetails}
+              onOpenCalendar={handleOpenCalendar}
+              onViewAllChats={() => {
+                setActiveSectionTab("chats");
+                window.scrollTo(0, 0);
+              }}
+              isOnline={isOnline}
+            />
+
+            {/* Campus Marketplace Items Section ("Fresh on campus.") */}
+            <section id="campus-marketplace-items-section" className="space-y-5">
+              {/* Editorial Listings Header */}
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                <div className="space-y-1 text-left">
+                  <p
+                    className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                      isDark ? "text-[#C89B6E]" : "text-[#9E6B43]"
+                    }`}
+                  >
+                    PRE-LOVED, READY FOR YOU
+                  </p>
+                  <div className="flex flex-wrap items-baseline gap-3">
+                    <h2
+                      className={`text-2xl sm:text-[32px] font-normal tracking-tight leading-tight ${
+                        isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                      }`}
+                    >
+                      {selectedCategory === "All"
+                        ? "Fresh on campus."
+                        : `${selectedCategory}.`}
+                    </h2>
+                    <span className="text-xs font-mono tabular-nums text-[#5C6B63] dark:text-[#8FA199]">
+                      {filteredListings.length}{" "}
+                      {filteredListings.length === 1 ? "item" : "items"}
+                      {includeSoldItems ? " · including sold" : ""}
+                    </span>
+                    {searchQuery.trim() && (
+                      <span className="text-xs text-[#2F5D50] dark:text-[#7BBFA8] font-medium">
+                        matching &ldquo;{searchQuery.trim()}&rdquo;
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4">
+                  <p
+                    className={`text-xs sm:text-sm ${
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                    }`}
+                  >
+                    Discover something useful.
+                  </p>
+                  {storedChats.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveSectionTab("chats")}
+                      className="text-xs font-medium text-[#2F5D50] dark:text-[#7BBFA8] hover:text-[#244A3F] dark:hover:text-[#ECF2EF] flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>
+                        {storedChats.length} active{" "}
+                        {storedChats.length === 1 ? "chat" : "chats"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Secondary Filter & Sorting Controls */}
+              <div
+                className={`flex flex-wrap items-center justify-between gap-3 py-3 border-y text-xs ${
+                  isDark
+                    ? "border-[#242E2A] text-[#ECF2EF]"
+                    : "border-[#DFE6E2] text-[#18201C]"
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
             {/* Listing Type Filter */}
             <select
               value={selectedType}
@@ -2096,47 +2198,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Currently Negotiating Section (items where buying talks have already started) */}
-        <CurrentlyNegotiatingSection
-          chats={storedChats}
-          allListings={listings}
-          onOpenChat={handleOpenChat}
-          onOpenDetails={handleOpenDetails}
-          onOpenCalendar={handleOpenCalendar}
-          onViewAllChats={() => {
-            setActiveSectionTab("chats");
-            window.scrollTo(0, 0);
-          }}
-          isOnline={isOnline}
-        />
-
-        {/* Campus Marketplace Items Section */}
-        <section id="campus-marketplace-items-section" className="space-y-5">
-          {/* Listings Header & Count */}
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div className="flex flex-wrap items-baseline gap-2.5">
-              <h2 className={`text-base font-semibold tracking-tight ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
-                {selectedCategory === "All" ? "All listings" : selectedCategory}
-              </h2>
-              <span className="text-xs font-mono tabular-nums text-[#5C6B63] dark:text-[#8FA199]">
-                {filteredListings.length} {filteredListings.length === 1 ? "item" : "items"}
-                {includeSoldItems ? " · including sold" : ""}
-              </span>
-            </div>
-
-            {storedChats.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setActiveSectionTab("chats")}
-                className="text-xs font-medium text-[#2F5D50] dark:text-[#7BBFA8] hover:text-[#244A3F] dark:hover:text-[#ECF2EF] flex items-center gap-1.5 cursor-pointer"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>{storedChats.length} active {storedChats.length === 1 ? "chat" : "chats"}</span>
-              </button>
-            )}
-          </div>
-
-          {/* Recently Viewed Strip (renders only when user has viewed items) */}
+              {/* Recently Viewed Strip (renders only when user has viewed items) */}
           <RecentlyViewedSection
             recentlyViewed={recentlyViewed}
             onOpenDetails={handleOpenDetails}
@@ -2278,7 +2340,26 @@ export default function App() {
               </div>
             </div>
           )}
-        </section>
+            </section>
+
+            {/* Seller CTA Banner ("HAVE SOMETHING TO PASS ON?") */}
+            <SellerPromoBanner
+              onStartSelling={() => {
+                if (!currentUser) {
+                  setIsLoginModalOpen(true);
+                  return;
+                }
+                if (!isOnline) {
+                  showToast(
+                    "⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss."
+                  );
+                  return;
+                }
+                setPrefilledInspection(null);
+                setPrefilledImage(null);
+                setIsCreateModalOpen(true);
+              }}
+            />
           </div>
         )}
 
@@ -2344,6 +2425,44 @@ export default function App() {
               onOpenAlertsModal={() => setIsAlertsModalOpen(true)}
               recentlyViewed={recentlyViewed}
               onClearRecentlyViewed={handleClearRecentlyViewed}
+              isOnline={isOnline}
+            />
+          </div>
+        )}
+
+        {/* TAB 6: MY LISTINGS (SELLER DASHBOARD — accessed via profile photo) */}
+        {activeSectionTab === "my_listings" && (
+          <div id="tab-panel-my_listings" role="tabpanel">
+            <MyListingsSection
+              myListings={myListings}
+              allListings={listings}
+              wishlistIds={wishlistIds}
+              onToggleWishlist={handleToggleWishlist}
+              onOpenCreateListing={() => {
+                if (!isOnline) {
+                  showToast(
+                    "⚠️ Offline: Creating listings is disabled while disconnected to prevent data loss."
+                  );
+                  return;
+                }
+                setPrefilledInspection(null);
+                setPrefilledImage(null);
+                setIsCreateModalOpen(true);
+              }}
+              onOpenDetails={handleOpenDetails}
+              onOpenLightbox={(item) => setLightboxListing(item)}
+              onOpenChat={handleOpenChat}
+              onOpenCalendar={handleOpenCalendar}
+              onOpenBarter={(item) => {
+                setBarterListing(item);
+                setIsBarterDrawerOpen(true);
+              }}
+              onShowToast={showToast}
+              onUpdateStatus={handleUpdateStatus}
+              onBackToMarketplace={() => {
+                setActiveSectionTab("marketplace");
+                window.scrollTo(0, 0);
+              }}
               isOnline={isOnline}
             />
           </div>

@@ -775,26 +775,26 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               id="ai-category-condition-suggestion-banner"
               className={`p-3.5 rounded-2xl border shadow-2xs space-y-2.5 ${
                 isDark
-                  ? "bg-slate-900/80 border-indigo-500/30"
-                  : "bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-indigo-50/90 border-indigo-200/80"
+                  ? "bg-[#141A18] border-[#5BA18C]"
+                  : "bg-[#F3F5F2] border-[#C4D9D1]"
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1 rounded-lg bg-indigo-600 text-white">
+                  <div className="p-1 rounded-lg bg-[#2F5D50] text-white">
                     <Sparkles className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <span
                       className={`text-xs font-bold block ${
-                        isDark ? "text-indigo-200" : "text-indigo-950"
+                        isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                       }`}
                     >
                       AI Visual Analysis Suggestions
                     </span>
                     <span
                       className={`text-[11px] font-medium ${
-                        isDark ? "text-indigo-300/80" : "text-indigo-700"
+                        isDark ? "text-[#7BBFA8]/80" : "text-[#2F5D50]"
                       }`}
                     >
                       Automatically calculated from item photo inspection
@@ -806,8 +806,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                       isDark
-                        ? "bg-indigo-900/60 text-indigo-300 border-indigo-700"
-                        : "bg-indigo-100 text-indigo-800 border-indigo-200"
+                        ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                        : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                     }`}
                   >
                     {aiInspectionData.categoryConfidence || 92}% Match
@@ -820,7 +820,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                         setCondition(aiInspectionData.condition);
                       }}
                       className={`text-[11px] font-bold underline cursor-pointer ${
-                        isDark ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-700 hover:text-indigo-900"
+                        isDark ? "text-[#7BBFA8] hover:text-[#7BBFA8]" : "text-[#2F5D50] hover:text-[#2F5D50]"
                       }`}
                     >
                       Re-apply AI Suggestions
@@ -834,25 +834,25 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 <div
                   className={`p-2.5 rounded-xl border shadow-2xs ${
                     isDark
-                      ? "bg-[#0B0F19]/90 border-slate-800"
-                      : "bg-white/80 border-indigo-100/80"
+                      ? "bg-[#141A18]/90 border-[#242E2A]"
+                      : "bg-white/80 border-[#C4D9D1]"
                   }`}
                 >
                   <div
                     className={`flex items-center justify-between text-[11px] font-bold uppercase tracking-wider ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
                     <span>Suggested Category</span>
                     {category === aiInspectionData.category ? (
-                      <span className="text-emerald-500 font-bold text-[10px] flex items-center gap-0.5">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Selected
+                      <span className="text-[#2F5D50] font-bold text-[10px] flex items-center gap-0.5">
+                        <CheckCircle2 className="w-3 h-3 text-[#2F5D50]" /> Selected
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setCategory(aiInspectionData.category)}
-                        className="text-indigo-400 hover:text-indigo-300 font-bold text-[10px] underline cursor-pointer"
+                        className="text-[#7BBFA8] hover:text-[#7BBFA8] font-bold text-[10px] underline cursor-pointer"
                       >
                         Apply "{aiInspectionData.category}"
                       </button>
@@ -860,16 +860,16 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   </div>
                   <div
                     className={`flex items-center gap-1.5 pt-1 text-sm font-bold ${
-                      isDark ? "text-indigo-300" : "text-indigo-900"
+                      isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                     }`}
                   >
-                    <Tag className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <Tag className="w-3.5 h-3.5 text-[#2F5D50] shrink-0" />
                     <span>{aiInspectionData.category}</span>
                   </div>
                   {aiInspectionData.categoryReasoning && (
                     <p
                       className={`text-[11px] mt-1 leading-tight ${
-                        isDark ? "text-slate-400" : "text-slate-600"
+                        isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                       }`}
                     >
                       {aiInspectionData.categoryReasoning}
@@ -881,25 +881,25 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 <div
                   className={`p-2.5 rounded-xl border shadow-2xs ${
                     isDark
-                      ? "bg-[#0B0F19]/90 border-slate-800"
-                      : "bg-white/80 border-indigo-100/80"
+                      ? "bg-[#141A18]/90 border-[#242E2A]"
+                      : "bg-white/80 border-[#C4D9D1]"
                   }`}
                 >
                   <div
                     className={`flex items-center justify-between text-[11px] font-bold uppercase tracking-wider ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
                     <span>Audited Condition</span>
                     {condition === aiInspectionData.condition ? (
-                      <span className="text-emerald-500 font-bold text-[10px] flex items-center gap-0.5">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Selected
+                      <span className="text-[#2F5D50] font-bold text-[10px] flex items-center gap-0.5">
+                        <CheckCircle2 className="w-3 h-3 text-[#2F5D50]" /> Selected
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setCondition(aiInspectionData.condition)}
-                        className="text-indigo-400 hover:text-indigo-300 font-bold text-[10px] underline cursor-pointer"
+                        className="text-[#7BBFA8] hover:text-[#7BBFA8] font-bold text-[10px] underline cursor-pointer"
                       >
                         Apply "{aiInspectionData.condition}"
                       </button>
@@ -907,16 +907,16 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   </div>
                   <div
                     className={`flex items-center gap-1.5 pt-1 text-sm font-bold ${
-                      isDark ? "text-slate-100" : "text-slate-900"
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                     }`}
                   >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-[#2F5D50] shrink-0" />
                     <span>{aiInspectionData.condition}</span>
                   </div>
                   {aiInspectionData.conditionReasoning && (
                     <p
                       className={`text-[11px] mt-1 leading-tight ${
-                        isDark ? "text-slate-400" : "text-slate-600"
+                        isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                       }`}
                     >
                       {aiInspectionData.conditionReasoning}
@@ -931,11 +931,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div
               className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 ${
                 isDark
-                  ? "bg-indigo-950/40 border-indigo-500/30 text-indigo-200"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-900"
+                  ? "bg-[#182823] border-[#5BA18C] text-[#7BBFA8]"
+                  : "bg-[#EFF4F1] border-[#C4D9D1] text-[#2F5D50]"
               }`}
             >
-              <Loader2 className="w-4 h-4 text-indigo-500 shrink-0" />
+              <Loader2 className="w-4 h-4 text-[#2F5D50] shrink-0" />
               <span>
                 <strong>Gemini AI Visual Analysis:</strong> Scanning photo to automatically classify and suggest the most accurate Category & Condition...
               </span>
@@ -946,11 +946,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div
               className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 ${
                 isDark
-                  ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-200"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-900"
+                  ? "bg-[#182823] border-[#5BA18C] text-[#7BBFA8]"
+                  : "bg-[#EFF4F1] border-[#C4D9D1] text-[#2F5D50]"
               }`}
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#2F5D50] shrink-0" />
               <span>{analysisNotice}</span>
             </div>
           )}
@@ -960,12 +960,12 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div>
               <label
                 className={`block text-xs font-bold mb-1 flex items-center justify-between ${
-                  isDark ? "text-slate-200" : "text-slate-700"
+                  isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                 }`}
               >
                 <span>Category *</span>
                 {aiInspectionData?.category && (
-                  <span className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5">
+                  <span className="text-[10px] font-semibold text-[#7BBFA8] flex items-center gap-0.5">
                     <Sparkles className="w-2.5 h-2.5" /> AI: {aiInspectionData.category}
                   </span>
                 )}
@@ -974,13 +974,13 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 id="create-listing-category-select"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ItemCategory)}
-                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${
+                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] transition-colors ${
                   isDark
-                    ? "bg-slate-900 text-slate-100 border-slate-700"
-                    : "bg-white text-slate-900 border-slate-300"
+                    ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A]"
+                    : "bg-white text-[#18201C] border-[#C4D1CA]"
                 } ${
                   aiInspectionData?.category === category
-                    ? "border-indigo-400 ring-1 ring-indigo-200/60"
+                    ? "border-[#5BA18C] ring-1 ring-[#2F5D50]/30 dark:ring-[#5BA18C]/40"
                     : ""
                 }`}
               >
@@ -988,7 +988,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <option
                     key={cat}
                     value={cat}
-                    className={isDark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-900"}
+                    className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}
                   >
                     {cat} {aiInspectionData?.category === cat ? "✨ (AI Recommended)" : ""}
                   </option>
@@ -998,11 +998,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               {aiInspectionData?.category && (
                 <div
                   className={`mt-1 flex items-center justify-between text-[11px] ${
-                    isDark ? "text-slate-400" : "text-slate-500"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   <span className="flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-indigo-400" />
+                    <Sparkles className="w-3 h-3 text-[#7BBFA8]" />
                     <span>
                       Visual Match: <strong>{aiInspectionData.category}</strong>
                       {aiInspectionData.categoryConfidence ? ` (${aiInspectionData.categoryConfidence}%)` : ""}
@@ -1012,7 +1012,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setCategory(aiInspectionData.category)}
-                      className="text-indigo-400 font-bold hover:underline cursor-pointer"
+                      className="text-[#7BBFA8] font-bold hover:underline cursor-pointer"
                     >
                       Restore AI Category
                     </button>
@@ -1024,12 +1024,12 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div>
               <label
                 className={`block text-xs font-bold mb-1 flex items-center justify-between ${
-                  isDark ? "text-slate-200" : "text-slate-700"
+                  isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                 }`}
               >
                 <span>Item Condition *</span>
                 {aiInspectionData?.condition && (
-                  <span className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5">
+                  <span className="text-[10px] font-semibold text-[#7BBFA8] flex items-center gap-0.5">
                     <Sparkles className="w-2.5 h-2.5" /> AI: {aiInspectionData.condition}
                   </span>
                 )}
@@ -1038,13 +1038,13 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 id="create-listing-condition-select"
                 value={condition}
                 onChange={(e) => setCondition(e.target.value as ItemCondition)}
-                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${
+                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] transition-colors ${
                   isDark
-                    ? "bg-slate-900 text-slate-100 border-slate-700"
-                    : "bg-white text-slate-900 border-slate-300"
+                    ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A]"
+                    : "bg-white text-[#18201C] border-[#C4D1CA]"
                 } ${
                   aiInspectionData?.condition === condition
-                    ? "border-indigo-400 ring-1 ring-indigo-200/60"
+                    ? "border-[#5BA18C] ring-1 ring-[#2F5D50]/30 dark:ring-[#5BA18C]/40"
                     : ""
                 }`}
               >
@@ -1052,7 +1052,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <option
                     key={c}
                     value={c}
-                    className={isDark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-900"}
+                    className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}
                   >
                     {c} {aiInspectionData?.condition === c ? "✨ (AI Detected)" : ""}
                   </option>
@@ -1062,18 +1062,18 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               {aiInspectionData?.condition && (
                 <div
                   className={`mt-1 flex items-center justify-between text-[11px] ${
-                    isDark ? "text-slate-400" : "text-slate-500"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   <span className="flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-indigo-400" />
+                    <Sparkles className="w-3 h-3 text-[#7BBFA8]" />
                     <span>Visual Audit: <strong>{aiInspectionData.condition}</strong></span>
                   </span>
                   {condition !== aiInspectionData.condition && (
                     <button
                       type="button"
                       onClick={() => setCondition(aiInspectionData.condition)}
-                      className="text-indigo-400 font-bold hover:underline cursor-pointer"
+                      className="text-[#7BBFA8] font-bold hover:underline cursor-pointer"
                     >
                       Restore AI Condition
                     </button>
@@ -1086,20 +1086,20 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           {/* Tags & Search Keywords with Auto-Suggestions based on Title */}
           <div
             className={`space-y-2.5 p-4 rounded-xl border ${
-              isDark ? "bg-slate-900/60 border-slate-800" : "bg-indigo-50/50 border-indigo-100"
+              isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#EFF4F1] border-[#C4D9D1]"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label
                 className={`text-xs font-bold flex items-center gap-1.5 ${
-                  isDark ? "text-slate-200" : "text-slate-800"
+                  isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                 }`}
               >
-                <Tag className="w-3.5 h-3.5 text-indigo-500" />
+                <Tag className="w-3.5 h-3.5 text-[#2F5D50]" />
                 <span>Search Tags & Keywords</span>
                 <span
                   className={`text-[11px] font-medium ${
-                    isDark ? "text-indigo-400" : "text-indigo-600"
+                    isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                   }`}
                 >
                   (Auto-suggested from title)
@@ -1110,7 +1110,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   type="button"
                   onClick={handleAddAllSuggestions}
                   className={`text-xs font-bold transition-colors flex items-center gap-1 hover:underline cursor-pointer ${
-                    isDark ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-800"
+                    isDark ? "text-[#7BBFA8] hover:text-[#7BBFA8]" : "text-[#2F5D50] hover:text-[#2F5D50]"
                   }`}
                 >
                   <Sparkles className="w-3 h-3 text-amber-500" />
@@ -1125,13 +1125,13 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 {tags.map((t) => (
                   <span
                     key={t}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-2xs"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#2F5D50] text-white shadow-2xs"
                   >
                     <span>#{t}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(t)}
-                      className="hover:bg-indigo-700/80 rounded-full p-0.5 transition-colors cursor-pointer"
+                      className="hover:bg-[#244A3F] rounded-full p-0.5 transition-colors cursor-pointer"
                       title="Remove tag"
                     >
                       <X className="w-3 h-3" />
@@ -1142,7 +1142,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             ) : (
               <p
                 className={`text-[11px] italic ${
-                  isDark ? "text-slate-500" : "text-slate-500"
+                  isDark ? "text-[#5C6B63]" : "text-[#5C6B63]"
                 }`}
               >
                 No tags added yet. Choose from suggestions below or type custom tags to make your listing easy to find in campus search.
@@ -1153,12 +1153,12 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             {suggestedTags.length > 0 ? (
               <div
                 className={`space-y-1.5 pt-1.5 border-t ${
-                  isDark ? "border-slate-800" : "border-indigo-100/70"
+                  isDark ? "border-[#242E2A]" : "border-[#C4D9D1]"
                 }`}
               >
                 <div
                   className={`flex items-center gap-1.5 text-[11px] font-semibold ${
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -1174,11 +1174,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                       onClick={() => handleSelectTag(suggestion)}
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs cursor-pointer group ${
                         isDark
-                          ? "bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border-slate-700 hover:border-indigo-500"
-                          : "bg-white hover:bg-indigo-600 text-slate-700 hover:text-white border-slate-200 hover:border-indigo-600"
+                          ? "bg-[#1B2320] hover:bg-[#2F5D50] text-[#ECF2EF] hover:text-white border-[#242E2A] hover:border-[#5BA18C]"
+                          : "bg-white hover:bg-[#2F5D50] text-[#5C6B63] hover:text-white border-[#DFE6E2] hover:border-[#5BA18C]"
                       }`}
                     >
-                      <Plus className="w-3 h-3 text-indigo-500 group-hover:text-white" />
+                      <Plus className="w-3 h-3 text-[#2F5D50] group-hover:text-white" />
                       <span>{suggestion}</span>
                     </button>
                   ))}
@@ -1187,7 +1187,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             ) : title.trim().length > 0 ? (
               <div
                 className={`text-[11px] font-medium flex items-center gap-1 pt-1 border-t ${
-                  isDark ? "border-slate-800 text-emerald-400" : "border-indigo-100/70 text-emerald-700"
+                  isDark ? "border-[#242E2A] text-[#7BBFA8]" : "border-[#C4D9D1] text-[#2F5D50]"
                 }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1198,7 +1198,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             {/* Manual Tag Input */}
             <div
               className={`flex items-center gap-2 pt-1 border-t ${
-                isDark ? "border-slate-800" : "border-indigo-100/70"
+                isDark ? "border-[#242E2A]" : "border-[#C4D9D1]"
               }`}
             >
               <input
@@ -1212,17 +1212,17 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                     handleAddCustomTag();
                   }
                 }}
-                className={`flex-1 px-3 py-1.5 text-xs rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                className={`flex-1 px-3 py-1.5 text-xs rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                   isDark
-                    ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                    : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                    ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63]"
+                    : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
                 }`}
               />
               <button
                 type="button"
                 onClick={handleAddCustomTag}
                 disabled={!customTagInput.trim()}
-                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-700 text-white disabled:text-slate-500 text-xs font-bold transition-colors cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] disabled:bg-[#242E2A] text-white disabled:text-[#5C6B63] text-xs font-bold transition-colors cursor-pointer shrink-0"
               >
                 Add Tag
               </button>
@@ -1234,14 +1234,14 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div>
               <label
                 className={`block text-xs font-bold mb-1 ${
-                  isDark ? "text-slate-200" : "text-slate-700"
+                  isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                 }`}
               >
                 Listing Type *
               </label>
               <div
                 className={`grid grid-cols-3 gap-1.5 p-1 rounded-xl ${
-                  isDark ? "bg-slate-900/90 border border-slate-800" : "bg-slate-100"
+                  isDark ? "bg-[#141A18] border border-[#242E2A]" : "bg-[#EFF4F1]"
                 }`}
               >
                 {(["sell", "exchange", "both"] as ListingType[]).map((t) => (
@@ -1252,11 +1252,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                     className={`py-1.5 text-xs font-semibold rounded-lg capitalize transition-all cursor-pointer ${
                       listingType === t
                         ? isDark
-                          ? "bg-indigo-600 text-white shadow-xs"
-                          : "bg-white text-indigo-700 shadow-xs"
+                          ? "bg-[#2F5D50] text-white shadow-xs"
+                          : "bg-white text-[#2F5D50] shadow-xs"
                         : isDark
-                        ? "text-slate-400 hover:text-white"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "text-[#8FA199] hover:text-white"
+                        : "text-[#5C6B63] hover:text-[#18201C]"
                     }`}
                   >
                     {t}
@@ -1272,12 +1272,12 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 <div>
                   <label
                     className={`block text-xs font-bold mb-1 flex items-center justify-between ${
-                      isDark ? "text-slate-200" : "text-slate-700"
+                      isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                     }`}
                   >
                     <span>Resale Price (₹) *</span>
                     {aiInspectionData && (
-                      <span className="text-[10px] text-indigo-400 font-semibold">
+                      <span className="text-[10px] text-[#7BBFA8] font-semibold">
                         AI: ₹{aiInspectionData.suggestedPriceMin}–₹{aiInspectionData.suggestedPriceMax}
                       </span>
                     )}
@@ -1285,7 +1285,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <div className="relative">
                     <span
                       className={`absolute left-3 top-2.5 font-bold text-sm ${
-                        isDark ? "text-slate-500" : "text-slate-400"
+                        isDark ? "text-[#5C6B63]" : "text-[#8FA199]"
                       }`}
                     >
                       ₹
@@ -1298,14 +1298,14 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                       value={listingType === "exchange" ? 0 : price}
                       onChange={(e) => setPrice(Number(e.target.value))}
                       placeholder="e.g. 350"
-                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                         isDark
-                          ? "bg-slate-900 border-slate-700 text-slate-100 disabled:bg-slate-950 disabled:text-slate-600"
-                          : "bg-white border-slate-300 text-slate-900 disabled:bg-slate-100 disabled:text-slate-400"
+                          ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] disabled:bg-[#0D1110] disabled:text-[#5C6B63]"
+                          : "bg-white border-[#C4D1CA] text-[#18201C] disabled:bg-[#EFF4F1] disabled:text-[#8FA199]"
                       }`}
                     />
                   </div>
-                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Amount student buyer pays
                   </span>
                 </div>
@@ -1314,16 +1314,16 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 <div>
                   <label
                     className={`block text-xs font-bold mb-1 flex items-center justify-between ${
-                      isDark ? "text-slate-200" : "text-slate-700"
+                      isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                     }`}
                   >
                     <span>Actual / Original Price (₹)</span>
-                    <span className="text-[10px] text-slate-400 font-normal">Optional MRP</span>
+                    <span className="text-[10px] text-[#8FA199] font-normal">Optional MRP</span>
                   </label>
                   <div className="relative">
                     <span
                       className={`absolute left-3 top-2.5 font-bold text-sm ${
-                        isDark ? "text-slate-500" : "text-slate-400"
+                        isDark ? "text-[#5C6B63]" : "text-[#8FA199]"
                       }`}
                     >
                       ₹
@@ -1338,14 +1338,14 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                         setOriginalPrice(e.target.value === "" ? "" : Number(e.target.value))
                       }
                       placeholder="e.g. 899 (Store MRP)"
-                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      className={`w-full pl-8 pr-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                         isDark
-                          ? "bg-slate-900 border-slate-700 text-slate-100 disabled:bg-slate-950 disabled:text-slate-600 placeholder:text-slate-600"
-                          : "bg-white border-slate-300 text-slate-900 disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-400"
+                          ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] disabled:bg-[#0D1110] disabled:text-[#5C6B63] placeholder:text-[#5C6B63]"
+                          : "bg-white border-[#C4D1CA] text-[#18201C] disabled:bg-[#EFF4F1] disabled:text-[#8FA199] placeholder:text-[#8FA199]"
                       }`}
                     />
                   </div>
-                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <span className={`text-[10px] block mt-0.5 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Original retail/purchase MRP for comparison
                   </span>
                 </div>
@@ -1359,15 +1359,15 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <div
                     className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-medium ${
                       isDark
-                        ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                        : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        ? "bg-[#182823] border-[#2A4A40] text-[#7BBFA8]"
+                        : "bg-[#EFF4F1] border-[#C4D9D1] text-[#2F5D50]"
                     }`}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#2F5D50]" />
                       Student Deal: Save ₹{Number(originalPrice) - Number(price)}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-black text-[11px] shadow-xs">
+                    <span className="px-2 py-0.5 rounded-full bg-[#2F5D50] text-white font-black text-[11px] shadow-xs">
                       {Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)}% OFF
                     </span>
                   </div>
@@ -1380,10 +1380,10 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div>
               <label
                 className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                  isDark ? "text-slate-200" : "text-slate-700"
+                  isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                 }`}
               >
-                <Repeat className="w-3.5 h-3.5 text-indigo-500" />
+                <Repeat className="w-3.5 h-3.5 text-[#2F5D50]" />
                 Looking to exchange for:
               </label>
               <input
@@ -1391,10 +1391,10 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 placeholder="e.g., Workshop Lab coat (Size L) or Engineering Graphics sheet tube"
                 value={exchangeFor}
                 onChange={(e) => setExchangeFor(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                   isDark
-                    ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                    : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                    ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63]"
+                    : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
                 }`}
               />
             </div>
@@ -1403,23 +1403,23 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           {/* Listing Validity / Expiry Date (30-day auto-inactive) */}
           <div
             className={`p-3.5 rounded-xl border space-y-2 ${
-              isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200"
+              isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
             }`}
           >
             <div className="flex items-center justify-between">
               <label
                 className={`text-xs font-bold flex items-center gap-1.5 ${
-                  isDark ? "text-slate-200" : "text-slate-700"
+                  isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                 }`}
               >
-                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                <Clock className="w-3.5 h-3.5 text-[#2F5D50]" />
                 <span>Listing Validity / Expiry Period</span>
               </label>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                   isDark
-                    ? "text-indigo-300 bg-indigo-950/60 border-indigo-700/60"
-                    : "text-indigo-600 bg-indigo-50 border-indigo-200"
+                    ? "text-[#7BBFA8] bg-[#182823] border-[#2A4A40]"
+                    : "text-[#2F5D50] bg-[#EFF4F1] border-[#C4D9D1]"
                 }`}
               >
                 Auto-Inactive after 30 days
@@ -1438,17 +1438,17 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
                     validityDays === opt.days
                       ? isDark
-                        ? "bg-indigo-950/80 border-indigo-500 ring-2 ring-indigo-500/30 text-indigo-200 shadow-xs"
-                        : "bg-white border-indigo-600 ring-2 ring-indigo-500/20 shadow-xs text-indigo-900"
+                        ? "bg-[#182823] border-[#5BA18C] ring-2 ring-[#2F5D50] text-[#7BBFA8] shadow-xs"
+                        : "bg-white border-[#5BA18C] ring-2 ring-[#2F5D50] shadow-xs text-[#2F5D50]"
                       : isDark
-                      ? "bg-slate-900/80 border-slate-800 hover:bg-slate-800 text-slate-400"
-                      : "bg-white/60 border-slate-200 hover:bg-white text-slate-600"
+                      ? "bg-[#141A18] border-[#242E2A] hover:bg-[#1B2320] text-[#8FA199]"
+                      : "bg-white/60 border-[#DFE6E2] hover:bg-white text-[#5C6B63]"
                   }`}
                 >
                   <span className="block text-xs font-bold">{opt.label}</span>
                   <span
                     className={`block text-[10px] font-medium ${
-                      isDark ? "text-slate-500" : "text-slate-500"
+                      isDark ? "text-[#5C6B63]" : "text-[#5C6B63]"
                     }`}
                   >
                     {opt.desc}
@@ -1458,7 +1458,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             </div>
             <p
               className={`text-[11px] leading-relaxed ${
-                isDark ? "text-slate-400" : "text-slate-500"
+                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
               }`}
             >
               🕒 Older listings automatically become <strong>inactive</strong> after 30 days to keep student marketplace searches fresh. You can re-activate or renew anytime.
@@ -1469,7 +1469,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           <div>
             <label
               className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                isDark ? "text-slate-200" : "text-slate-700"
+                isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
               }`}
             >
               <MapPin className="w-3.5 h-3.5 text-red-500" />
@@ -1478,17 +1478,17 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <select
               value={locationPreference}
               onChange={(e) => setLocationPreference(e.target.value)}
-              className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                 isDark
-                  ? "bg-slate-900 text-slate-100 border-slate-700"
-                  : "bg-white text-slate-900 border-slate-300"
+                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A]"
+                  : "bg-white text-[#18201C] border-[#C4D1CA]"
               }`}
             >
               {CAMPUS_SPOTS.map((spot) => (
                 <option
                   key={spot}
                   value={spot}
-                  className={isDark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-900"}
+                  className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}
                 >
                   {spot}
                 </option>
@@ -1500,10 +1500,10 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           <div>
             <label
               className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                isDark ? "text-slate-200" : "text-slate-700"
+                isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              <FileText className="w-3.5 h-3.5 text-[#8FA199]" />
               Item Description & Observations
             </label>
             <textarea
@@ -1511,10 +1511,10 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               placeholder="State syllabus semester, condition of pages/screens, accessories included..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                 isDark
-                  ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                  : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                  ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63]"
+                  : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
               }`}
             />
           </div>
@@ -1523,7 +1523,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           <div>
             <label
               className={`block text-xs font-bold mb-1 ${
-                isDark ? "text-slate-200" : "text-slate-700"
+                isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
               }`}
             >
               Item Photo
@@ -1531,7 +1531,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <div className="flex items-center gap-4">
               <div
                 className={`relative w-20 h-20 rounded-xl overflow-hidden border shrink-0 ${
-                  isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-slate-100"
+                  isDark ? "border-[#242E2A] bg-[#141A18]" : "border-[#DFE6E2] bg-[#EFF4F1]"
                 }`}
               >
                 <img
@@ -1546,11 +1546,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   <label
                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer ${
                       isDark
-                        ? "border-slate-700 hover:bg-slate-800 text-slate-200"
-                        : "border-slate-300 hover:bg-slate-50 text-slate-700"
+                        ? "border-[#242E2A] hover:bg-[#1B2320] text-[#ECF2EF]"
+                        : "border-[#C4D1CA] hover:bg-[#F7F9F8] text-[#5C6B63]"
                     }`}
                   >
-                    <Upload className="w-3.5 h-3.5 text-slate-400" />
+                    <Upload className="w-3.5 h-3.5 text-[#8FA199]" />
                     Upload Photo & Auto-Detect
                     <input
                       type="file"
@@ -1565,19 +1565,19 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                     disabled={!isOnline || isAnalyzingImage || !imageUrl}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                       isDark
-                        ? "bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 border-indigo-700/60"
-                        : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                        ? "bg-[#182823] hover:bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                        : "bg-[#EFF4F1] hover:bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                     }`}
                     title="Run Gemini AI visual analysis on this photo to suggest Category and Condition"
                   >
                     {isAnalyzingImage ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 text-indigo-500" />
+                        <Loader2 className="w-3.5 h-3.5 text-[#2F5D50]" />
                         Analyzing...
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#2F5D50]" />
                         Auto-Detect Category & Condition
                       </>
                     )}
@@ -1585,7 +1585,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 </div>
                 <p
                   className={`text-[11px] ${
-                    isDark ? "text-slate-500" : "text-slate-400"
+                    isDark ? "text-[#5C6B63]" : "text-[#8FA199]"
                   }`}
                 >
                   Uploading or analyzing a photo automatically selects the most accurate Category & Condition.
@@ -1598,8 +1598,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                     onChange={(e) => setImageUrl(e.target.value)}
                     className={`flex-1 px-2.5 py-1 text-xs rounded-lg border ${
                       isDark
-                        ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                        : "border-slate-200 bg-white text-slate-900"
+                        ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63]"
+                        : "border-[#DFE6E2] bg-white text-[#18201C]"
                     }`}
                   />
                   {imageUrl && imageUrl.startsWith("http") && (
@@ -1609,8 +1609,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                       disabled={!isOnline || isAnalyzingImage}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0 cursor-pointer ${
                         isDark
-                          ? "bg-slate-800 hover:bg-slate-700 text-slate-200"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          ? "bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF]"
+                          : "bg-[#EFF4F1] hover:bg-[#DFE6E2] text-[#5C6B63]"
                       }`}
                     >
                       Scan URL
@@ -1627,8 +1627,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               id="create-modal-offline-notice"
               className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 ${
                 isDark
-                  ? "bg-amber-950/40 border-amber-500/30 text-amber-200"
-                  : "bg-amber-50 border-amber-200 text-amber-900"
+                  ? "bg-[#251F15] border-amber-500/30 text-[#DFC29B]"
+                  : "bg-[#FDF6EC] border-[#EED8B8] text-[#9E6B43]"
               }`}
             >
               <WifiOff className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1636,7 +1636,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 <span className="font-bold block">Offline Mode Active</span>
                 <span
                   className={`text-[11px] ${
-                    isDark ? "text-amber-300/80" : "text-amber-800"
+                    isDark ? "text-[#DFC29B]/80" : "text-[#9E6B43]"
                   }`}
                 >
                   Publishing listings is disabled while disconnected to prevent data loss. Please reconnect to submit.

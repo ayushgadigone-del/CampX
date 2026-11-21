@@ -141,50 +141,52 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
   return (
     <div
       id={`price-trend-sparkline-${category.toLowerCase().replace(/\s+/g, "-")}`}
-      className={`p-3.5 rounded-2xl bg-gradient-to-br from-indigo-50/60 via-purple-50/30 to-white border border-indigo-200/90 shadow-2xs space-y-2.5 ${className}`}
+      className={`p-3.5 rounded-2xl bg-[#F7F9F8] dark:bg-[#141A18] border border-[#DFE6E2] dark:border-[#242E2A] space-y-2.5 ${className}`}
     >
       {/* Header: Title + Category + 6-Mo Avg */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5">
-          <div className="p-1 rounded-lg bg-indigo-600 text-white shrink-0 shadow-2xs">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-[#2F5D50] dark:bg-[#387262] text-white shrink-0">
             <TrendingUp className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="text-left">
             <div className="flex items-center gap-1.5">
-              <h4 className="text-xs font-extrabold text-slate-900 leading-none">
+              <h4 className="text-xs font-semibold text-[#18201C] dark:text-[#ECF2EF] leading-none">
                 Price Trend
               </h4>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-indigo-100 text-indigo-800 border border-indigo-200">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#EFF4F1] dark:bg-[#182823] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40]">
                 {category}
               </span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1 mt-0.5">
-              <Calendar className="w-3 h-3 text-slate-400" />
+            <span className="text-[10px] font-medium text-[#5C6B63] dark:text-[#8FA199] flex items-center gap-1 mt-0.5">
+              <Calendar className="w-3 h-3" />
               Historical avg selling price (Last 6 Months)
             </span>
           </div>
         </div>
 
         {/* 6-Month Average & Trend Pill */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="text-right">
-            <div className="text-[10px] font-bold text-slate-500 leading-none">6-Mo Avg</div>
-            <div className="text-sm font-black text-slate-900 leading-tight">
+            <div className="text-[10px] font-medium text-[#5C6B63] dark:text-[#8FA199] leading-none">
+              6-Mo Avg
+            </div>
+            <div className="text-sm font-bold font-mono text-[#18201C] dark:text-[#ECF2EF] leading-tight">
               ₹{sixMonthAvg.toLocaleString()}
             </div>
           </div>
           <span
-            className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-black border select-none ${
+            className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-semibold border select-none ${
               isUpward
-                ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                : "bg-rose-50 text-rose-800 border-rose-300"
+                ? "bg-[#EFF4F1] dark:bg-[#182823] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
+                : "bg-[#FDF2F2] dark:bg-[#261617] text-[#A63A3A] dark:text-[#E58989] border-[#F2CACA] dark:border-[#4E2628]"
             }`}
             title={`Category average price changed by ${percentChange}% over the last 6 months`}
           >
             {isUpward ? (
-              <TrendingUp className="w-3 h-3 text-emerald-600 shrink-0" />
+              <TrendingUp className="w-3 h-3 shrink-0" />
             ) : (
-              <TrendingDown className="w-3 h-3 text-rose-600 shrink-0" />
+              <TrendingDown className="w-3 h-3 shrink-0" />
             )}
             <span>{isUpward ? `+${percentChange}%` : `${percentChange}%`}</span>
           </span>
@@ -197,8 +199,8 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
           <AreaChart data={chartData} margin={{ top: 6, right: 8, left: 8, bottom: 0 }}>
             <defs>
               <linearGradient id={`priceTrendGrad-${category}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
-                <stop offset="85%" stopColor="#6366f1" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#2F5D50" stopOpacity={0.35} />
+                <stop offset="85%" stopColor="#2F5D50" stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -206,7 +208,7 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
               dataKey="month"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 10, fill: "#475569", fontWeight: 700 }}
+              tick={{ fontSize: 10, fill: "#5C6B63", fontWeight: 600 }}
               dy={3}
             />
 
@@ -217,12 +219,12 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
                 if (!active || !payload || !payload.length) return null;
                 const pt = payload[0].payload;
                 return (
-                  <div className="p-2 rounded-xl bg-slate-950 text-white shadow-xl border border-slate-800 text-[11px] space-y-0.5 select-none">
-                    <p className="font-extrabold text-indigo-300">{pt.fullMonth}</p>
-                    <p className="font-black text-emerald-400 text-xs">
+                  <div className="p-2 rounded-xl bg-[#141A18] text-[#ECF2EF] shadow-xl border border-[#242E2A] text-[11px] space-y-0.5 select-none">
+                    <p className="font-semibold text-[#DFC29B]">{pt.fullMonth}</p>
+                    <p className="font-bold font-mono text-[#7BBFA8] text-xs">
                       Avg Selling Price: ₹{pt.avgPrice.toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-semibold">
+                    <p className="text-[10px] text-[#8FA199] font-medium">
                       Campus Activity: ~{pt.volume} items transacted
                     </p>
                   </div>
@@ -233,13 +235,13 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
             <Area
               type="monotone"
               dataKey="avgPrice"
-              stroke="#4f46e5"
-              strokeWidth={2.5}
+              stroke="#2F5D50"
+              strokeWidth={2.25}
               fillOpacity={1}
               fill={`url(#priceTrendGrad-${category})`}
               activeDot={{
                 r: 4.5,
-                fill: "#4f46e5",
+                fill: "#387262",
                 stroke: "#ffffff",
                 strokeWidth: 2,
               }}
@@ -249,29 +251,29 @@ export const PriceTrendSparkline: React.FC<PriceTrendSparklineProps> = ({
       </div>
 
       {/* Range & Valuation Benchmark Footer */}
-      <div className="pt-1.5 border-t border-indigo-100 flex items-center justify-between text-[11px] flex-wrap gap-1.5">
-        <div className="flex items-center gap-1 text-slate-600 font-medium">
-          <span className="font-bold text-slate-700">6-Mo Range:</span>
-          <span className="font-extrabold text-slate-900">
+      <div className="pt-2 border-t border-[#DFE6E2] dark:border-[#242E2A] flex items-center justify-between text-[11px] flex-wrap gap-1.5">
+        <div className="flex items-center gap-1 text-[#5C6B63] dark:text-[#8FA199] font-medium">
+          <span className="font-semibold">6-Mo Range:</span>
+          <span className="font-mono font-bold text-[#18201C] dark:text-[#ECF2EF]">
             ₹{minPrice.toLocaleString()} – ₹{maxPrice.toLocaleString()}
           </span>
         </div>
 
         {priceComparison ? (
           <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] border ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[10px] border ${
               priceComparison.type === "below"
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                ? "bg-[#EFF4F1] dark:bg-[#182823] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
                 : priceComparison.type === "above"
-                ? "bg-purple-50 text-purple-800 border-purple-200"
-                : "bg-slate-100 text-slate-800 border-slate-200"
+                ? "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border-[#EED8B8] dark:border-[#4A3B23]"
+                : "bg-white dark:bg-[#1B2320] text-[#18201C] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A]"
             }`}
           >
-            <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-3 h-3 shrink-0" />
             <span>{priceComparison.label}</span>
           </span>
         ) : (
-          <span className="text-[10px] font-semibold text-slate-500">
+          <span className="text-[10px] font-medium text-[#5C6B63] dark:text-[#8FA199]">
             Benchmark for {category} exchanges
           </span>
         )}

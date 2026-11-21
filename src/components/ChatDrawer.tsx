@@ -208,33 +208,33 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
     <div className="fixed inset-0 z-50 flex justify-end bg-black/55">
       <div
         id="chat-drawer"
-        className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col justify-between border-l border-slate-200"
+        className="w-full max-w-md h-full bg-white dark:bg-[#141A18] shadow-2xl flex flex-col justify-between border-l border-[#DFE6E2] dark:border-[#242E2A]"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[#DFE6E2] dark:border-[#242E2A] bg-[#F7F9F8] dark:bg-[#111715] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-[#2F5D50] text-white flex items-center justify-center font-bold text-sm shadow-sm">
               {otherPartyName.charAt(0)}
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 leading-tight">
+              <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF] leading-tight">
                 {otherPartyName}
               </h3>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-[#5C6B63] dark:text-[#8FA199]">
                 PVG&apos;s COET Student
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2] dark:hover:bg-[#242E2A] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Listing preview card */}
-        <div className="p-3 mx-4 mt-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+        <div className="p-3 mx-4 mt-3 rounded-xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src={activeListing.imageUrl}
@@ -243,10 +243,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
               referrerPolicy="no-referrer"
             />
             <div className="min-w-0">
-              <span className="text-xs font-bold text-slate-900 truncate block">
+              <span className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF] truncate block">
                 {activeListing.title}
               </span>
-              <span className="text-xs font-extrabold text-emerald-700">
+              <span className="text-xs font-extrabold text-[#2F5D50] dark:text-[#7BBFA8]">
                 ₹{activeListing.price}
               </span>
             </div>
@@ -254,7 +254,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
           <button
             onClick={() => onOpenCalendarFromChat(activeListing, otherPartyName, otherPartyEmail)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shrink-0 shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold shrink-0 shadow-xs transition-colors cursor-pointer"
           >
             <CalendarIcon className="w-3.5 h-3.5" />
             Schedule Meet
@@ -262,11 +262,11 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         </div>
 
         {/* Campus Safe Handover & Anti-Scam Shield Banner */}
-        <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 text-[11px] flex items-center gap-2 shadow-2xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-[#EFF4F1] dark:bg-[#182823] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] text-[11px] flex items-center gap-2 shadow-2xs">
+          <ShieldCheck className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
           <div className="leading-tight">
             <span className="font-bold">Campus Security: </span>
-            <span className="text-emerald-800 dark:text-emerald-300">
+            <span className="text-[#2F5D50] dark:text-[#7BBFA8]">
               Handover on campus. Never share UPI PINs or send advance payments.
             </span>
           </div>
@@ -276,12 +276,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         {!isOnline && (
           <div
             id="chat-drawer-offline-banner"
-            className="mx-4 mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2 shadow-2xs"
+            className="mx-4 mt-2.5 p-2.5 rounded-xl bg-[#FDF6EC] dark:bg-[#251F15] border border-[#EED8B8] dark:border-[#4A3B23] text-[#9E6B43] dark:text-[#DFC29B] text-xs flex items-center gap-2 shadow-2xs"
           >
-            <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
+            <WifiOff className="w-4 h-4 text-[#9E6B43] dark:text-[#DFC29B] shrink-0" />
             <div className="leading-tight">
               <span className="font-bold block">Offline Mode Active</span>
-              <span className="text-[11px] text-amber-800">
+              <span className="text-[11px] text-[#9E6B43] dark:text-[#DFC29B]">
                 Messaging, quick replies, and offers are temporarily disabled to prevent lost messages.
               </span>
             </div>
@@ -302,8 +302,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                     isMe
-                      ? "bg-indigo-600 text-white rounded-br-xs"
-                      : "bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60"
+                      ? "bg-[#2F5D50] text-white rounded-br-xs"
+                      : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#18201C] dark:text-[#ECF2EF] rounded-bl-xs border border-[#DFE6E2] dark:border-[#242E2A]"
                   }`}
                 >
                   {msg.type === "offer" && (
@@ -317,15 +317,15 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
                 {/* Inline Suspicious Behavior Alert */}
                 {scamCheck.isSuspicious && (
-                  <div className="max-w-[85%] mt-1 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 text-[10px] flex items-start gap-1.5 font-medium">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="max-w-[85%] mt-1 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-[#9E6B43] dark:text-[#DFC29B] text-[10px] flex items-start gap-1.5 font-medium">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#9E6B43] dark:text-[#DFC29B] shrink-0 mt-0.5" />
                     <span>
                       <strong>Safety Alert:</strong> {scamCheck.reason}. Do not transfer advance money or enter your UPI PIN.
                     </span>
                   </div>
                 )}
 
-                <span className="text-[10px] text-slate-400 mt-1 px-1">
+                <span className="text-[10px] text-[#8FA199] mt-1 px-1">
                   {new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -338,15 +338,15 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         </div>
 
         {/* Quick Reply Expedite Panel */}
-        <div id="quick-replies-container" className="border-t border-slate-200/80 bg-slate-50/70 p-2.5 space-y-2">
+        <div id="quick-replies-container" className="border-t border-[#DFE6E2] dark:border-[#242E2A] bg-[#F7F9F8] dark:bg-[#111715] p-2.5 space-y-2">
           {/* Quick Replies Header & Filter Chips */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-              <span className="text-[11px] font-bold text-slate-800 tracking-tight">
+              <span className="text-[11px] font-bold text-[#18201C] dark:text-[#ECF2EF] tracking-tight">
                 Quick Replies
               </span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 hidden sm:inline-block">
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40] hidden sm:inline-block">
                 1-tap send
               </span>
             </div>
@@ -361,10 +361,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   onClick={() => setQuickReplyFilter(filter)}
                   className={`text-[10px] px-2 py-0.5 rounded-md font-medium transition-colors capitalize ${
                     !isOnline
-                      ? "text-slate-400 cursor-not-allowed"
+                      ? "text-[#8FA199] cursor-not-allowed"
                       : quickReplyFilter === filter
-                      ? "bg-indigo-600 text-white shadow-2xs cursor-pointer"
-                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 cursor-pointer"
+                      ? "bg-[#2F5D50] text-white shadow-2xs cursor-pointer"
+                      : "text-[#5C6B63] dark:text-[#8FA199] hover:text-[#18201C] dark:hover:text-[#ECF2EF] hover:bg-[#DFE6E2] dark:hover:bg-[#242E2A] cursor-pointer"
                   }`}
                 >
                   {filter}
@@ -375,8 +375,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
           {/* Quick Reply Buttons Carousel / List */}
           {!isOnline ? (
-            <div className="py-1 px-1 flex items-center gap-2 text-xs text-slate-500 italic bg-slate-100/80 rounded-lg">
-              <WifiOff className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+            <div className="py-1 px-1 flex items-center gap-2 text-xs text-[#5C6B63] dark:text-[#8FA199] italic bg-[#EFF4F1] dark:bg-[#1B2320] rounded-lg">
+              <WifiOff className="w-3.5 h-3.5 text-[#8FA199] shrink-0 ml-1" />
               <span>Quick replies are unavailable while offline.</span>
             </div>
           ) : (
@@ -387,10 +387,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 id="quick-reply-is-available"
                 type="button"
                 onClick={() => handleSendMessage("Hi! Is this still available?")}
-                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                 title="Ask if the listing is still available"
               >
-                <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                 <span>Is this still available?</span>
               </button>
             )}
@@ -401,10 +401,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 id="quick-reply-meet-library"
                 type="button"
                 onClick={() => handleSendMessage("Can we meet at the library to inspect and exchange?")}
-                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                 title="Suggest campus library as handover spot"
               >
-                <Building className="w-3 h-3 text-indigo-600 shrink-0" />
+                <Building className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                 <span>Can we meet at the library?</span>
               </button>
             )}
@@ -423,12 +423,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   }}
                   className={`px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     showOfferBox
-                      ? "bg-emerald-600 text-white border border-emerald-700"
-                      : "bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800"
+                      ? "bg-[#2F5D50] text-white border border-[#2A4A40]"
+                      : "bg-[#EFF4F1] dark:bg-[#1B2320] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8]"
                   }`}
                   title="Make a custom price counter offer"
                 >
-                  <DollarSign className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <DollarSign className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                   <span>Would you take [Price]?</span>
                 </button>
 
@@ -444,12 +444,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                         offer10
                       )
                     }
-                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                     title={`Instantly offer ₹${offer10} (10% student discount)`}
                   >
-                    <Tag className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <Tag className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                     <span>Would you take ₹{offer10}?</span>
-                    <span className="text-[9px] px-1 rounded bg-emerald-100 text-emerald-800 font-bold">
+                    <span className="text-[9px] px-1 rounded bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] font-bold">
                       -10%
                     </span>
                   </button>
@@ -466,12 +466,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                         offer20
                       )
                     }
-                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                     title={`Instantly offer ₹${offer20} (20% student discount)`}
                   >
-                    <Tag className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <Tag className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                     <span>Would you take ₹{offer20}?</span>
-                    <span className="text-[9px] px-1 rounded bg-emerald-100 text-emerald-800 font-bold">
+                    <span className="text-[9px] px-1 rounded bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] font-bold">
                       -20%
                     </span>
                   </button>
@@ -481,7 +481,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   id="quick-reply-is-negotiable"
                   type="button"
                   onClick={() => handleSendMessage("Hi! Is the price negotiable for students?")}
-                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                   title="Ask if price is negotiable"
                 >
                   <HelpCircle className="w-3 h-3 text-amber-500 shrink-0" />
@@ -502,7 +502,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                         `Can we meet at ${activeListing.locationPreference} for the exchange?`
                       )
                     }
-                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                     title={`Suggest seller's preferred location: ${activeListing.locationPreference}`}
                   >
                     <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
@@ -514,10 +514,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   id="quick-reply-meet-today"
                   type="button"
                   onClick={() => handleSendMessage("Can we meet today after classes for handover?")}
-                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                   title="Ask for handover today after classes"
                 >
-                  <Clock className="w-3 h-3 text-blue-500 shrink-0" />
+                  <Clock className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                   <span>Meet today after class?</span>
                 </button>
               </>
@@ -531,10 +531,10 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 onClick={() =>
                   handleSendMessage("Could you share a few more photos or details about the item's condition?")
                 }
-                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border border-[#DFE6E2] dark:border-[#242E2A] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] font-medium whitespace-nowrap shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                 title="Ask for condition details or more photos"
               >
-                <Sparkles className="w-3 h-3 text-indigo-500 shrink-0" />
+                <Sparkles className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                 <span>Can you share more photos?</span>
               </button>
             )}
@@ -545,17 +545,17 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           {showOfferBox && (
             <div
               id="quick-reply-offer-box"
-              className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 space-y-2.5"
+              className="p-3 bg-[#EFF4F1] dark:bg-[#1B2320] rounded-xl border border-[#C4D9D1] dark:border-[#2A4A40] space-y-2.5"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-950">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#2F5D50] dark:text-[#7BBFA8]">
+                  <DollarSign className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>Negotiation Offer: &ldquo;Would you take [Price]?&rdquo;</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowOfferBox(false)}
-                  className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+                  className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#18201C] dark:hover:text-[#ECF2EF] font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -564,25 +564,25 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
               {/* Quick discount chips */}
               {listingPrice > 0 && (
                 <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-                  <span className="text-emerald-800 font-medium">Quick presets:</span>
+                  <span className="text-[#2F5D50] dark:text-[#7BBFA8] font-medium">Quick presets:</span>
                   <button
                     type="button"
                     onClick={() => setOfferInput(String(offer10))}
-                    className="px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
+                    className="px-2 py-0.5 rounded-md bg-white dark:bg-[#141A18] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] font-bold hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] transition-colors cursor-pointer"
                   >
                     -10% (₹{offer10})
                   </button>
                   <button
                     type="button"
                     onClick={() => setOfferInput(String(offer15))}
-                    className="px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
+                    className="px-2 py-0.5 rounded-md bg-white dark:bg-[#141A18] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] font-bold hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] transition-colors cursor-pointer"
                   >
                     -15% (₹{offer15})
                   </button>
                   <button
                     type="button"
                     onClick={() => setOfferInput(String(offer20))}
-                    className="px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
+                    className="px-2 py-0.5 rounded-md bg-white dark:bg-[#141A18] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] font-bold hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] transition-colors cursor-pointer"
                   >
                     -20% (₹{offer20})
                   </button>
@@ -591,7 +591,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#5C6B63] dark:text-[#8FA199]">
                     ₹
                   </span>
                   <input
@@ -601,7 +601,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                     placeholder={`Enter your offer (e.g. ${offer10 || 250})`}
                     value={offerInput}
                     onChange={(e) => setOfferInput(e.target.value)}
-                    className="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-emerald-300 bg-white font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                    className="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-[#C4D9D1] dark:border-[#2A4A40] bg-white dark:bg-[#141A18] font-semibold text-[#18201C] dark:text-[#ECF2EF] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] disabled:bg-[#EFF4F1] disabled:text-[#8FA199] disabled:cursor-not-allowed"
                     autoFocus
                   />
                 </div>
@@ -621,8 +621,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-xs transition-colors shrink-0 flex items-center gap-1 ${
                     !isOnline
-                      ? "bg-slate-300 cursor-not-allowed opacity-60"
-                      : "bg-emerald-700 hover:bg-emerald-800 cursor-pointer"
+                      ? "bg-[#DFE6E2] dark:bg-[#242E2A] text-[#8FA199] cursor-not-allowed opacity-70"
+                      : "bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] cursor-pointer"
                   }`}
                 >
                   <Send className="w-3 h-3" />
@@ -634,7 +634,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         </div>
 
         {/* Footer Input */}
-        <div className="p-3 border-t border-slate-200 bg-white flex items-center gap-2">
+        <div className="p-3 border-t border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] flex items-center gap-2">
           <input
             id="chat-text-input"
             ref={chatInputRef}
@@ -652,8 +652,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
             }}
             className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none transition-colors ${
               !isOnline
-                ? "border-slate-200 bg-slate-50 text-slate-400 placeholder:text-slate-400 cursor-not-allowed"
-                : "border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500"
+                ? "border-[#DFE6E2] dark:border-[#242E2A] bg-[#F7F9F8] dark:bg-[#111715] text-[#8FA199] placeholder:text-[#8FA199] cursor-not-allowed"
+                : "border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] text-[#18201C] dark:text-[#ECF2EF] focus:ring-2 focus:ring-[#2F5D50]"
             }`}
           />
           <button
@@ -665,8 +665,8 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
             }}
             className={`p-2.5 rounded-xl transition-colors select-none ${
               !isOnline
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-sm"
+                ? "bg-[#DFE6E2] text-[#8FA199] cursor-not-allowed"
+                : "bg-[#2F5D50] hover:bg-[#244A3F] text-white cursor-pointer shadow-sm"
             }`}
             title={!isOnline ? "Chat is disabled while offline" : "Send message"}
           >

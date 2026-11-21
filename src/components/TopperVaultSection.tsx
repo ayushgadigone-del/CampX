@@ -1,18 +1,10 @@
 import React, { useState, useMemo } from "react";
 import {
   GraduationCap,
-  BookOpen,
   Search,
   Upload,
-  FileText,
   CheckCircle2,
-  Download,
-  Share2,
   HardDrive,
-  FileCheck,
-  Tag,
-  Clock,
-  Sparkles,
   ArrowRight,
   Eye,
   Paperclip,
@@ -33,8 +25,6 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
   notes,
   onOpenNotesModal,
   onOpenGoogleDrive,
-  onShowToast,
-  isOnline = true,
 }) => {
   const { isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,33 +60,37 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
   };
 
   return (
-    <div
-      id="topper-vault-section-container"
-      className="w-full space-y-6"
-    >
-      {/* Banner Card */}
+    <div id="topper-vault-section-container" className="w-full space-y-6">
+      {/* Nordic Pine Editorial Banner */}
       <div
-        className={`p-5 sm:p-6 rounded-2xl border shadow-sm relative overflow-hidden ${
+        className={`p-6 sm:p-8 rounded-2xl border ${
           isDark
-            ? "bg-gradient-to-br from-emerald-950/40 via-slate-900 to-indigo-950/40 border-emerald-500/30 text-white"
-            : "bg-gradient-to-br from-emerald-50 via-white to-indigo-50 border-emerald-200 text-slate-900"
+            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+            : "bg-[#F3F5F2] border-[#DFE6E2] text-[#18201C]"
         }`}
       >
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-xl">
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-emerald-500 text-white shadow-xs">
-                <GraduationCap className="w-5 h-5" />
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                100% Free Campus Archive
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-              PVG&apos;s COET Verified Topper Notes Vault
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl text-left">
+            <p
+              className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                isDark ? "text-[#C89B6E]" : "text-[#9E6B43]"
+              }`}
+            >
+              100% FREE CAMPUS ARCHIVE
+            </p>
+            <h2
+              className={`text-2xl sm:text-[30px] font-normal tracking-tight leading-tight ${
+                isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+              }`}
+            >
+              PVG&apos;s COET Topper Notes Vault.
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              SPPU syllabus-aligned handwritten notes, numerical problem walkthroughs, and previous year exam questions curated by departmental toppers.
+            <p
+              className={`text-xs sm:text-sm leading-relaxed ${
+                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+              }`}
+            >
+              SPPU syllabus-aligned handwritten notes, numerical problem walkthroughs, and previous year exam questions curated by departmental seniors.
             </p>
           </div>
 
@@ -105,7 +99,11 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
             <button
               type="button"
               onClick={handleUploadClick}
-              className="h-10 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
+              className={`h-10 px-4 rounded-xl text-white font-semibold text-xs inline-flex items-center gap-2 cursor-pointer ${
+                isDark
+                  ? "bg-[#387262] hover:bg-[#448573]"
+                  : "bg-[#2F5D50] hover:bg-[#244A3F]"
+              }`}
             >
               <Upload className="w-4 h-4" />
               <span>Upload Document File</span>
@@ -115,14 +113,18 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
               <button
                 type="button"
                 onClick={onOpenGoogleDrive}
-                className={`h-10 px-3.5 rounded-xl border text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors ${
+                className={`h-10 px-4 rounded-xl border text-xs font-semibold inline-flex items-center gap-2 cursor-pointer ${
                   isDark
-                    ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/30"
-                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                    ? "bg-[#1B2320] hover:bg-[#222D29] text-[#ECF2EF] border-[#242E2A]"
+                    : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                 }`}
               >
-                <HardDrive className="w-4 h-4 text-blue-500" />
-                <span>Drive & Docs</span>
+                <HardDrive
+                  className={`w-4 h-4 ${
+                    isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
+                  }`}
+                />
+                <span>Drive &amp; Docs</span>
               </button>
             )}
           </div>
@@ -133,16 +135,20 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search
+            className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search notes by subject, topic or author..."
-            className={`w-full pl-9 pr-3 py-2 rounded-xl border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+            className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
               isDark
-                ? "bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500"
-                : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 shadow-2xs"
+                ? "bg-[#141A18] border-[#242E2A] focus:border-[#5BA18C] text-[#ECF2EF] placeholder:text-[#73847D]"
+                : "bg-white border-[#DFE6E2] focus:border-[#2F5D50] text-[#18201C] placeholder:text-[#7C8B83]"
             }`}
           />
         </div>
@@ -157,12 +163,14 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
                 triggerHaptic("light");
                 setSelectedSemester(sem);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer whitespace-nowrap ${
                 selectedSemester === sem
-                  ? "bg-emerald-600 text-white shadow-xs"
+                  ? isDark
+                    ? "bg-[#387262] text-white border-[#387262]"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
                   : isDark
-                  ? "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
-                  : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+                  ? "bg-[#141A18] text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320] border-[#242E2A]"
+                  : "bg-white text-[#5C6B63] hover:text-[#18201C] hover:bg-[#EFF4F1] border-[#DFE6E2]"
               }`}
             >
               {sem}
@@ -181,43 +189,75 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
             <div
               key={note.id}
               onClick={() => handleOpenNote(note)}
-              className={`p-4 sm:p-5 rounded-2xl border cursor-pointer flex flex-col justify-between group hover:shadow-lg ${
+              className={`p-5 rounded-2xl border cursor-pointer flex flex-col justify-between ${
                 isDark
-                  ? "bg-slate-900/90 hover:bg-slate-850 border-slate-800 hover:border-emerald-500/40"
-                  : "bg-white hover:bg-emerald-50/20 border-slate-200 hover:border-emerald-300 shadow-xs"
+                  ? "bg-[#141A18] hover:bg-[#19211E] border-[#242E2A] hover:border-[#34433D]"
+                  : "bg-white hover:bg-[#F9FBFA] border-[#DFE6E2] hover:border-[#C4D1CA]"
               }`}
             >
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 text-left">
                 {/* Header tags */}
                 <div className="flex items-center justify-between gap-2">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
+                      isDark
+                        ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                        : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
+                    }`}
+                  >
                     {note.subject}
                   </span>
-                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                  <span
+                    className={`text-[11px] font-mono ${
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                    }`}
+                  >
                     {note.semester}
                   </span>
                 </div>
 
-                <h3 className="text-sm sm:text-base font-extrabold line-clamp-2 text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                <h3
+                  className={`text-sm sm:text-[15px] font-semibold line-clamp-2 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                  }`}
+                >
                   {note.title}
                 </h3>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                <p
+                  className={`text-xs line-clamp-2 leading-relaxed ${
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                  }`}
+                >
                   {note.description}
                 </p>
 
-                {/* Metadata pills */}
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                {/* Metadata */}
+                <div
+                  className={`flex flex-wrap items-center gap-2 pt-1 text-[11px] font-medium ${
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                  }`}
+                >
                   <span className="flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>{note.author} {note.authorRank ? `(${note.authorRank})` : ""}</span>
+                    <CheckCircle2
+                      className={`w-3.5 h-3.5 ${
+                        isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
+                      }`}
+                    />
+                    <span>
+                      {note.author} {note.authorRank ? `(${note.authorRank})` : ""}
+                    </span>
                   </span>
-                  <span>•</span>
+                  <span>·</span>
                   <span>{totalChapters} Chapters</span>
                   {hasDoc && (
                     <>
-                      <span>•</span>
-                      <span className="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-0.5">
+                      <span>·</span>
+                      <span
+                        className={`font-semibold flex items-center gap-0.5 ${
+                          isDark ? "text-[#C89B6E]" : "text-[#9E6B43]"
+                        }`}
+                      >
                         <Paperclip className="w-3 h-3" />
                         <span>{note.fileName}</span>
                       </span>
@@ -228,11 +268,13 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
 
               {/* Bottom Card Footer Action */}
               <div
-                className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-bold ${
-                  isDark ? "border-slate-800 text-emerald-400" : "border-slate-100 text-emerald-700"
+                className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold ${
+                  isDark
+                    ? "border-[#242E2A] text-[#7BBFA8]"
+                    : "border-[#DFE6E2] text-[#2F5D50]"
                 }`}
               >
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5" />
                   <span>Open Full Reader</span>
                 </span>
@@ -246,14 +288,28 @@ export const TopperVaultSection: React.FC<TopperVaultSectionProps> = ({
       {filteredNotes.length === 0 && (
         <div
           className={`text-center py-12 px-4 rounded-2xl border ${
-            isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200"
+            isDark
+              ? "bg-[#141A18] border-[#242E2A]"
+              : "bg-white border-[#DFE6E2]"
           }`}
         >
-          <GraduationCap className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+          <GraduationCap
+            className={`w-8 h-8 mx-auto mb-2 ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          />
+          <h4
+            className={`text-sm font-semibold ${
+              isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+            }`}
+          >
             No notes found matching &ldquo;{searchQuery}&rdquo;
           </h4>
-          <p className="text-xs text-slate-500 mt-1">
+          <p
+            className={`text-xs mt-1 ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          >
             Try adjusting your search terms or semester filter.
           </p>
         </div>

@@ -179,10 +179,10 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
             <div className="flex items-center gap-2 min-w-0">
               {Icon && (
                 <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border ${
                     isDark
-                      ? "bg-indigo-950/70 text-indigo-400 border border-indigo-800/40"
-                      : "bg-indigo-100 text-indigo-700 border border-indigo-200"
+                      ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                      : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -191,8 +191,8 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h4
-                    className={`text-xs sm:text-sm font-extrabold tracking-tight truncate ${
-                      isDark ? "text-white" : "text-slate-900"
+                    className={`text-xs sm:text-sm font-semibold tracking-tight truncate ${
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                     }`}
                   >
                     {title}
@@ -202,7 +202,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                 {subtitle && (
                   <p
                     className={`text-[11px] truncate ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
                     {subtitle}
@@ -218,21 +218,19 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             {headerActions}
 
-            {/* Static Mobile swipe hint text (never dynamically mounts/unmounts) */}
             {showMobileHint && (
               <span
-                className={`sm:hidden inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                className={`sm:hidden inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${
                   isDark
-                    ? "bg-slate-900 text-indigo-300 border-indigo-500/30"
-                    : "bg-indigo-50 text-indigo-700 border-indigo-200"
+                    ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                    : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                 }`}
               >
                 <span>Swipe / Slide</span>
-                <ArrowRight className="w-2.5 h-2.5 text-indigo-500" />
+                <ArrowRight className="w-2.5 h-2.5" />
               </span>
             )}
 
-            {/* Previous & Next Slider Buttons (header mode) */}
             {showArrows && arrowPosition === "header" && (
               <div className="flex items-center gap-1">
                 <button
@@ -244,11 +242,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                   className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none ${
                     canScrollLeft
                       ? isDark
-                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
-                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                        ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                        : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                       : isDark
-                      ? "bg-slate-900/40 text-slate-600 border-slate-800/60 cursor-not-allowed opacity-50"
-                      : "bg-slate-100/60 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                      ? "bg-[#141A18]/50 text-[#5C6B63] border-[#242E2A] cursor-not-allowed opacity-50"
+                      : "bg-[#F3F5F2] text-[#8FA199] border-[#DFE6E2] cursor-not-allowed opacity-50"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -263,11 +261,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                   className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none ${
                     canScrollRight
                       ? isDark
-                        ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
-                        : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                        ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                        : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                       : isDark
-                      ? "bg-slate-900/40 text-slate-600 border-slate-800/60 cursor-not-allowed opacity-50"
-                      : "bg-slate-100/60 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                      ? "bg-[#141A18]/50 text-[#5C6B63] border-[#242E2A] cursor-not-allowed opacity-50"
+                      : "bg-[#F3F5F2] text-[#8FA199] border-[#DFE6E2] cursor-not-allowed opacity-50"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -291,11 +289,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none shrink-0 ${
                 canScrollLeft
                   ? isDark
-                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
-                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                    ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                    : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                   : isDark
-                  ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
-                  : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
+                  ? "bg-[#141A18]/50 text-[#5C6B63] border-[#242E2A] cursor-not-allowed opacity-35"
+                  : "bg-[#F3F5F2] text-[#8FA199] border-[#DFE6E2] cursor-not-allowed opacity-35"
               }`}
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -308,7 +306,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               <div
                 aria-hidden="true"
                 className={`pointer-events-none absolute left-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-r ${
-                  isDark ? "from-[#090D16] to-transparent" : "from-white to-transparent"
+                  isDark ? "from-[#0D1110] to-transparent" : "from-[#F7F9F8] to-transparent"
                 }`}
               />
             )}
@@ -316,7 +314,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               <div
                 aria-hidden="true"
                 className={`pointer-events-none absolute right-0 top-0 bottom-0 w-4 z-10 bg-gradient-to-l ${
-                  isDark ? "from-[#090D16] to-transparent" : "from-white to-transparent"
+                  isDark ? "from-[#0D1110] to-transparent" : "from-[#F7F9F8] to-transparent"
                 }`}
               />
             )}
@@ -350,11 +348,11 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
               className={`w-6 sm:w-7 h-8 rounded-lg flex items-center justify-center cursor-pointer border select-none shrink-0 ${
                 canScrollRight
                   ? isDark
-                    ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700 shadow-sm"
-                    : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                    ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                    : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                   : isDark
-                  ? "bg-slate-900/30 text-slate-700 border-slate-800/40 cursor-not-allowed opacity-30"
-                  : "bg-slate-100/40 text-slate-300 border-slate-200/50 cursor-not-allowed opacity-30"
+                  ? "bg-[#141A18]/50 text-[#5C6B63] border-[#242E2A] cursor-not-allowed opacity-35"
+                  : "bg-[#F3F5F2] text-[#8FA199] border-[#DFE6E2] cursor-not-allowed opacity-35"
               }`}
             >
               <ChevronRight className="w-3.5 h-3.5" />
@@ -367,7 +365,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
             <div
               aria-hidden="true"
               className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r ${
-                isDark ? "from-[#0B0F19] to-transparent" : "from-white to-transparent"
+                isDark ? "from-[#0D1110] to-transparent" : "from-[#F7F9F8] to-transparent"
               }`}
             />
           )}
@@ -375,7 +373,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
             <div
               aria-hidden="true"
               className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l ${
-                isDark ? "from-[#0B0F19] to-transparent" : "from-white to-transparent"
+                isDark ? "from-[#0D1110] to-transparent" : "from-[#F7F9F8] to-transparent"
               }`}
             />
           )}
@@ -400,7 +398,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
         </div>
       )}
 
-      {/* Constant-height Slide Pagination Dots (never toggles vertical layout height) */}
+      {/* Constant-height Slide Pagination Dots */}
       {showDots && (
         <div className="mt-1.5 h-3 flex items-center justify-center gap-1.5 py-0.5">
           {totalPages > 1 &&
@@ -412,26 +410,30 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
                 aria-label={`Go to slide ${idx + 1}`}
                 className={`h-1.5 rounded-full cursor-pointer ${
                   currentPage === idx
-                    ? "w-4 bg-gradient-to-r from-indigo-500 to-purple-500"
+                    ? isDark
+                      ? "w-4 bg-[#5BA18C]"
+                      : "w-4 bg-[#2F5D50]"
                     : isDark
-                    ? "w-1.5 bg-slate-700 hover:bg-slate-600"
-                    : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                    ? "w-1.5 bg-[#242E2A] hover:bg-[#34433D]"
+                    : "w-1.5 bg-[#C4D1CA] hover:bg-[#9FB2A7]"
                 }`}
               />
             ))}
         </div>
       )}
 
-      {/* Constant-height Progress Track (always rendered when showProgress=true to prevent scrollbar-height feedback flicker) */}
+      {/* Constant-height Progress Track */}
       {showProgress && (
         <div className="mt-2 h-4 flex items-center justify-between gap-3 px-1">
           <div
             className={`flex-1 h-1.5 rounded-full overflow-hidden ${
-              isDark ? "bg-slate-800" : "bg-slate-200"
+              isDark ? "bg-[#1B2320]" : "bg-[#DFE6E2]"
             }`}
           >
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+              className={`h-full rounded-full ${
+                isDark ? "bg-[#5BA18C]" : "bg-[#2F5D50]"
+              }`}
               style={{
                 width: `${Math.max(12, scrollProgress)}%`,
               }}
@@ -440,7 +442,7 @@ export const HorizontalSlider: React.FC<HorizontalSliderProps> = ({
 
           <span
             className={`text-[10px] font-mono font-semibold shrink-0 ${
-              isDark ? "text-slate-500" : "text-slate-400"
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
             }`}
           >
             {Math.round(scrollProgress)}% slid

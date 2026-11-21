@@ -116,25 +116,25 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
             id="calendar-handover-modal"
             className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden my-6 max-h-[92vh] flex flex-col ${
               isDark
-                ? "bg-[#0B0F19] text-slate-100 border-slate-800 shadow-black/70"
-                : "bg-white text-slate-900 border-slate-200 shadow-slate-300/40"
+                ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] shadow-black/70"
+                : "bg-white text-[#18201C] border-[#DFE6E2] shadow-[#18201C]/10"
             }`}
           >
         {/* Header */}
         <div
           className={`flex items-center justify-between px-6 py-4 border-b shrink-0 ${
-            isDark ? "border-slate-800 bg-slate-900/80" : "border-slate-100 bg-slate-50/80"
+            isDark ? "border-[#242E2A] bg-[#141A18]" : "border-[#DFE6E2] bg-[#F7F9F8]"
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-600 text-white shadow-sm">
+            <div className="p-2 rounded-xl bg-[#2F5D50] text-white shadow-sm">
               <CalendarIcon className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2
                   className={`text-lg font-bold ${
-                    isDark ? "text-white" : "text-slate-900"
+                    isDark ? "text-white" : "text-[#18201C]"
                   }`}
                 >
                   Schedule Campus Handover
@@ -142,8 +142,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
                     isDark
-                      ? "bg-blue-950/60 text-blue-300 border-blue-800"
-                      : "bg-blue-100 text-blue-800 border-blue-200"
+                      ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                      : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                   }`}
                 >
                   Google Calendar
@@ -151,7 +151,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               </div>
               <p
                 className={`text-xs ${
-                  isDark ? "text-slate-400" : "text-slate-500"
+                  isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                 }`}
               >
                 Synchronize an in-person item inspection & handover directly to your calendar
@@ -162,8 +162,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
             onClick={onClose}
             className={`p-2 rounded-lg cursor-pointer ${
               isDark
-                ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+                ? "text-[#8FA199] hover:text-white hover:bg-[#1B2320]"
+                : "text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2]"
             }`}
           >
             <X className="w-5 h-5" />
@@ -174,20 +174,20 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
         <div className="p-6 overflow-y-auto">
           {createdEvent ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner">
+              <div className="w-14 h-14 mx-auto rounded-full bg-[#EFF4F1] dark:bg-[#182823] text-[#2F5D50] dark:text-[#7BBFA8] flex items-center justify-center shadow-inner">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div>
                 <h3
                   className={`text-xl font-bold ${
-                    isDark ? "text-white" : "text-slate-900"
+                    isDark ? "text-white" : "text-[#18201C]"
                   }`}
                 >
                   Handover Scheduled on Google Calendar!
                 </h3>
                 <p
                   className={`text-sm mt-1 max-w-md mx-auto ${
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   An event has been placed in your Google Calendar with reminders set 30 and 60 minutes prior.
@@ -196,30 +196,30 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
 
               <div
                 className={`p-4 rounded-xl border text-left text-xs space-y-2 max-w-md mx-auto ${
-                  isDark ? "bg-slate-900/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
                 }`}
               >
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Event:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Event:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {createdEvent.summary}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Date & Time:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Date & Time:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {date} at {time}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Location:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Location:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {location}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Meeting Peer:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Meeting Peer:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {otherPartyName}
                   </span>
                 </div>
@@ -231,7 +231,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                     href={createdEvent.htmlLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-sm font-semibold shadow-sm transition-all"
                   >
                     Open in Google Calendar
                     <ExternalLink className="w-4 h-4" />
@@ -241,8 +241,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   onClick={onClose}
                   className={`px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors cursor-pointer ${
                     isDark
-                      ? "border-slate-700 hover:bg-slate-800 text-slate-200 hover:text-white"
-                      : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                      ? "border-[#242E2A] hover:bg-[#1B2320] text-[#ECF2EF] hover:text-white"
+                      : "border-[#C4D1CA] hover:bg-[#EFF4F1] text-[#5C6B63]"
                   }`}
                 >
                   Done
@@ -255,8 +255,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               <div
                 className={`p-4 rounded-xl border text-sm flex items-start gap-3 ${
                   isDark
-                    ? "bg-amber-950/40 border-amber-500/30 text-amber-200"
-                    : "bg-amber-50 border-amber-200 text-amber-900"
+                    ? "bg-[#251F15] border-amber-500/30 text-[#DFC29B]"
+                    : "bg-[#FDF6EC] border-[#EED8B8] text-[#9E6B43]"
                 }`}
               >
                 <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
@@ -266,7 +266,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   </span>
                   <p
                     className={`text-xs leading-relaxed ${
-                      isDark ? "text-amber-300/80" : "text-amber-800"
+                      isDark ? "text-[#DFC29B]/80" : "text-[#9E6B43]"
                     }`}
                   >
                     With your permission, this action will create an event on your primary Google Calendar with notifications and details:
@@ -276,36 +276,36 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
 
               <div
                 className={`rounded-xl border p-4 text-xs space-y-2 ${
-                  isDark ? "bg-slate-900/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
                 }`}
               >
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Event Title:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Event Title:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     Campus Handover: {listing.title}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Date & Time:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Date & Time:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {date} ({time}) - 30 minutes
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Location:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Location:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {location}, College Campus
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Partner:</span>
-                  <span className={`font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Partner:</span>
+                  <span className={`font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                     {otherPartyName} ({otherPartyEmail || "Peer"})
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>Item Price:</span>
-                  <span className="font-semibold text-emerald-500">₹{listing.price}</span>
+                  <span className={isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}>Item Price:</span>
+                  <span className="font-semibold text-[#2F5D50]">₹{listing.price}</span>
                 </div>
               </div>
 
@@ -327,7 +327,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleConfirmCreateEvent}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white font-semibold text-sm shadow-md transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -347,8 +347,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   onClick={() => setShowExplicitConfirmation(false)}
                   className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors cursor-pointer ${
                     isDark
-                      ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                      : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                      ? "border-[#242E2A] text-[#C5D3CC] hover:bg-[#1B2320] hover:text-white"
+                      : "border-[#C4D1CA] text-[#5C6B63] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Back
@@ -360,7 +360,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               {/* Item Summary Banner */}
               <div
                 className={`flex items-center gap-3 p-3 rounded-xl border ${
-                  isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
                 }`}
               >
                 <img
@@ -372,20 +372,20 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                 <div className="min-w-0 flex-1">
                   <h4
                     className={`text-xs font-bold truncate ${
-                      isDark ? "text-slate-200" : "text-slate-800"
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                     }`}
                   >
                     {listing.title}
                   </h4>
                   <div
                     className={`flex items-center gap-2 text-xs mt-0.5 ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
-                    <span className="font-semibold text-emerald-500">₹{listing.price}</span>
+                    <span className="font-semibold text-[#2F5D50]">₹{listing.price}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <UserCheck className="w-3 h-3 text-indigo-400" />
+                      <UserCheck className="w-3 h-3 text-[#7BBFA8]" />
                       {otherPartyName}
                     </span>
                   </div>
@@ -397,10 +397,10 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                 <div>
                   <label
                     className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                      isDark ? "text-slate-200" : "text-slate-700"
+                      isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                     }`}
                   >
-                    <CalendarIcon className="w-3.5 h-3.5 text-blue-500" />
+                    <CalendarIcon className="w-3.5 h-3.5 text-[#2F5D50]" />
                     Handover Date
                   </label>
                   <input
@@ -409,10 +409,10 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                     value={date}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setDate(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                       isDark
-                        ? "bg-slate-900 border-slate-700 text-slate-100"
-                        : "bg-white border-slate-300 text-slate-900"
+                        ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                        : "bg-white border-[#C4D1CA] text-[#18201C]"
                     }`}
                   />
                 </div>
@@ -420,10 +420,10 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                 <div>
                   <label
                     className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                      isDark ? "text-slate-200" : "text-slate-700"
+                      isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                     }`}
                   >
-                    <Clock className="w-3.5 h-3.5 text-blue-500" />
+                    <Clock className="w-3.5 h-3.5 text-[#2F5D50]" />
                     Handover Time
                   </label>
                   <input
@@ -431,10 +431,10 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                     required
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                       isDark
-                        ? "bg-slate-900 border-slate-700 text-slate-100"
-                        : "bg-white border-slate-300 text-slate-900"
+                        ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                        : "bg-white border-[#C4D1CA] text-[#18201C]"
                     }`}
                   />
                 </div>
@@ -444,7 +444,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               <div>
                 <label
                   className={`block text-xs font-bold mb-1 flex items-center gap-1 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                    isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5 text-rose-500" />
@@ -454,17 +454,17 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   id="calendar-handover-spot-select"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs font-medium ${
+                  className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] shadow-2xs font-medium ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100"
-                      : "bg-white border-slate-300 text-slate-800"
+                      ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                      : "bg-white border-[#C4D1CA] text-[#18201C]"
                   }`}
                 >
                   {CAMPUS_LOCATIONS.map((loc) => (
                     <option
                       key={loc}
                       value={loc}
-                      className={isDark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-800"}
+                      className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}
                     >
                       {loc}
                     </option>
@@ -476,7 +476,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               <div>
                 <label
                   className={`block text-xs font-bold mb-1 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                    isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"
                   }`}
                 >
                   Handover Notes / Inspection Checklist
@@ -486,10 +486,10 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g., Bring UPI / cash, will test calculator functions on spot"
-                  className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                      : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                      ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63]"
+                      : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
                   }`}
                 />
               </div>
@@ -510,7 +510,7 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
               <div className="pt-2 flex items-center gap-3">
                 <button
                   type="submit"
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white font-semibold text-sm shadow-md cursor-pointer"
                 >
                   <CalendarIcon className="w-4 h-4" />
                   Review & Schedule on Google Calendar
@@ -520,8 +520,8 @@ export const CalendarHandoverModal: React.FC<CalendarHandoverModalProps> = ({
                   onClick={onClose}
                   className={`px-4 py-2.5 rounded-xl border text-sm font-medium cursor-pointer ${
                     isDark
-                      ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                      : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                      ? "border-[#242E2A] text-[#C5D3CC] hover:bg-[#1B2320] hover:text-white"
+                      : "border-[#C4D1CA] text-[#5C6B63] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Cancel

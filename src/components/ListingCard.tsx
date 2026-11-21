@@ -172,8 +172,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               onClick={handleShare}
               className={`w-8 h-8 rounded-full border flex items-center justify-center cursor-pointer ${
                 isShared
-                  ? "bg-zinc-900 text-white border-zinc-800"
-                  : "bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800"
+                  ? "bg-[#141A18] text-white border-[#242E2A]"
+                  : "bg-white/95 dark:bg-[#0D1110] text-[#5C6B63] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A]"
               }`}
             >
               {isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -187,7 +187,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   e.stopPropagation();
                   onToggleWishlist(listing.id);
                 }}
-                className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
+                className="w-8 h-8 rounded-full border bg-white/95 dark:bg-[#0D1110] text-[#5C6B63] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] flex items-center justify-center cursor-pointer"
               >
                 <Heart
                   className={`w-3.5 h-3.5 ${
@@ -219,7 +219,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             {/* Unboxed Metadata Line */}
             <div
               className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${
-                isDark ? "text-zinc-400" : "text-zinc-500"
+                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
               }`}
             >
               <span>{listing.category}</span>
@@ -257,7 +257,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             <h3
               onClick={() => onOpenDetails(listing)}
               className={`text-base sm:text-lg font-semibold leading-snug cursor-pointer hover:underline underline-offset-4 ${
-                isDark ? "text-zinc-50" : "text-zinc-950"
+                isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
               }`}
             >
               {listing.title}
@@ -306,14 +306,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {/* Footer: Seller, Price, Actions */}
           <div
             className={`pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-              isDark ? "border-zinc-800/80" : "border-zinc-100"
+              isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
             }`}
           >
             {/* Plain Seller Info (No badges) */}
             <div className="flex items-center gap-2.5 min-w-0">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-                  isDark ? "bg-zinc-800 text-zinc-200" : "bg-zinc-100 text-zinc-800"
+                  isDark ? "bg-[#1B2320] text-[#ECF2EF]" : "bg-[#EFF4F1] text-[#18201C]"
                 }`}
               >
                 {listing.sellerName.charAt(0).toUpperCase()}
@@ -321,14 +321,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               <div className="min-w-0">
                 <div
                   className={`text-xs font-medium truncate ${
-                    isDark ? "text-zinc-200" : "text-zinc-900"
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
                   {listing.sellerName}
                 </div>
                 <div
                   className={`text-[11px] truncate ${
-                    isDark ? "text-zinc-500" : "text-zinc-500"
+                    isDark ? "text-[#5C6B63]" : "text-[#5C6B63]"
                   }`}
                 >
                   {[listing.department || "Engineering", listing.year]
@@ -344,7 +344,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 {listing.listingType === "exchange" ? (
                   <div
                     className={`text-sm font-semibold ${
-                      isDark ? "text-zinc-100" : "text-zinc-950"
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                     }`}
                   >
                     Exchange
@@ -353,22 +353,22 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                   <div className="flex items-baseline gap-1.5 font-mono tabular-nums">
                     <span
                       className={`text-lg font-semibold ${
-                        isDark ? "text-zinc-50" : "text-zinc-950"
+                        isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                       }`}
                     >
                       ₹{listing.price}
                     </span>
                     {hasDiscount && (
-                      <span className="text-xs line-through text-zinc-400">
+                      <span className="text-xs line-through text-[#8FA199]">
                         ₹{listing.originalPrice}
                       </span>
                     )}
                     {listing.listingType === "both" && (
-                      <span className="text-[11px] font-sans text-zinc-500">· Swap</span>
+                      <span className="text-[11px] font-sans text-[#5C6B63]">· Swap</span>
                     )}
                   </div>
                 )}
-                <div className="text-[11px] text-zinc-500">
+                <div className="text-[11px] text-[#5C6B63]">
                   {isSoldOut ? "Sold out" : `${stockCount} available`}
                 </div>
               </div>
@@ -491,7 +491,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             aria-label="Share listing"
             title="Share listing"
             onClick={handleShare}
-            className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
+            className="w-8 h-8 rounded-full border bg-white/95 dark:bg-[#0D1110] text-[#5C6B63] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] flex items-center justify-center cursor-pointer"
           >
             {isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
           </button>
@@ -506,7 +506,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 e.stopPropagation();
                 onToggleWishlist(listing.id);
               }}
-              className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
+              className="w-8 h-8 rounded-full border bg-white/95 dark:bg-[#0D1110] text-[#5C6B63] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] flex items-center justify-center cursor-pointer"
             >
               <Heart
                 className={`w-3.5 h-3.5 ${
@@ -522,7 +522,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center p-4 text-center z-20">
             {listing.status === "completed" ? (
               <div className="flex items-center gap-1.5 text-white text-xs font-semibold">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-[#7BBFA8]" />
                 <span>Sold</span>
               </div>
             ) : (

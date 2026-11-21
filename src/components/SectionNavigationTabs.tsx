@@ -16,7 +16,8 @@ export type SectionTabId =
   | "topper_vault"
   | "beacon_handovers"
   | "chats"
-  | "saved";
+  | "saved"
+  | "my_listings";
 
 export interface SectionTabItem {
   id: SectionTabId;
@@ -103,13 +104,15 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
   const currentIndex = TABS.findIndex((t) => t.id === activeTab);
 
   const handlePrevTab = () => {
-    const nextIdx = (currentIndex - 1 + TABS.length) % TABS.length;
+    const base = currentIndex === -1 ? 0 : currentIndex;
+    const nextIdx = (base - 1 + TABS.length) % TABS.length;
     triggerHaptic("light");
     onTabChange(TABS[nextIdx].id);
   };
 
   const handleNextTab = () => {
-    const nextIdx = (currentIndex + 1) % TABS.length;
+    const base = currentIndex === -1 ? -1 : currentIndex;
+    const nextIdx = (base + 1) % TABS.length;
     triggerHaptic("light");
     onTabChange(TABS[nextIdx].id);
   };

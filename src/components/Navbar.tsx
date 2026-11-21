@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Heart,
   GraduationCap,
+  Package,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
@@ -28,6 +29,9 @@ interface NavbarProps {
   onLogout: () => void;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
+  onGoHome?: () => void;
+  onOpenMyListings?: () => void;
+  myListingsCount?: number;
   onOpenCreateModal: () => void;
   onOpenAIInspector: () => void;
   onOpenHandovers: () => void;
@@ -54,6 +58,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogin,
   onDemoLogin,
   onLogout,
+  onGoHome,
+  onOpenMyListings,
+  myListingsCount = 0,
   onOpenCreateModal,
   onOpenAIInspector,
   onOpenHandovers,
@@ -108,14 +115,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between gap-6 h-14">
           {/* Zone 1: Clean single-line wordmark */}
           <div className="flex items-center shrink-0">
-            <span
-              className={`text-[15px] sm:text-base font-bold tracking-tight whitespace-nowrap ${
+            <button
+              type="button"
+              onClick={onGoHome}
+              className={`text-[15px] sm:text-base font-bold tracking-tight whitespace-nowrap cursor-pointer ${
                 isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
               }`}
               title="PVG's COET Campus Resale & Exchange"
             >
               Campus Resale
-            </span>
+            </button>
           </div>
 
           {/* Zone 2: Minimal single-line text links (Desktop) */}
@@ -297,14 +306,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     >
                       <div
                         className={`font-semibold text-[13px] truncate ${
-                          isDark ? "text-zinc-50" : "text-zinc-950"
+                          isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                         }`}
                       >
                         {displayName}
                       </div>
                       <div
                         className={`text-[11px] truncate font-mono mt-0.5 ${
-                          isDark ? "text-zinc-400" : "text-zinc-500"
+                          isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                         }`}
                       >
                         {currentUser.email}
@@ -312,7 +321,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {(studentProfile?.year || studentProfile?.branch) && (
                         <div
                           className={`mt-1 text-[11px] ${
-                            isDark ? "text-zinc-400" : "text-zinc-600"
+                            isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                           }`}
                         >
                           {[studentProfile?.year, studentProfile?.branch]
@@ -324,6 +333,36 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     {/* Menu Items */}
                     <div className="py-1">
+                      {onOpenMyListings && (
+                        <button
+                          id="navbar-my-listings-btn"
+                          type="button"
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            onOpenMyListings();
+                          }}
+                          className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between font-semibold cursor-pointer border-b ${
+                            isDark
+                              ? "text-[#7BBFA8] hover:bg-[#182823] border-[#242E2A]"
+                              : "text-[#2F5D50] hover:bg-[#EFF4F1] border-[#DFE6E2]"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <Package className="w-3.5 h-3.5" />
+                            <span>My Listings</span>
+                          </span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono tabular-nums ${
+                              isDark
+                                ? "bg-[#182823] text-[#7BBFA8]"
+                                : "bg-[#EFF4F1] text-[#2F5D50]"
+                            }`}
+                          >
+                            {myListingsCount}
+                          </span>
+                        </button>
+                      )}
+
                       {onEditProfileDetails && (
                         <button
                           id="navbar-edit-details-btn"
@@ -334,11 +373,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                           }}
                           className={`w-full text-left px-3.5 py-2 flex items-center gap-2 font-medium cursor-pointer border-b ${
                             isDark
-                              ? "text-zinc-100 hover:bg-zinc-800/80 border-zinc-800"
-                              : "text-zinc-900 hover:bg-zinc-50 border-zinc-100"
+                              ? "text-[#ECF2EF] hover:bg-[#1B2320] border-[#242E2A]"
+                              : "text-[#18201C] hover:bg-[#EFF4F1] border-[#DFE6E2]"
                           }`}
                         >
-                          <UserCog className="w-3.5 h-3.5 text-zinc-400" />
+                          <UserCog className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Edit Details</span>
                         </button>
                       )}
@@ -350,10 +389,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenAIInspector();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                         <span>AI Photo Inspector</span>
                       </button>
 
@@ -364,15 +403,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenYourChats();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          <MessageSquare className="w-3.5 h-3.5 text-zinc-400" />
+                          <MessageSquare className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Your Chats</span>
                         </span>
                         {chatsCount > 0 && (
-                          <span className="text-[11px] font-mono text-zinc-400 tabular-nums">
+                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
                             {chatsCount}
                           </span>
                         )}
@@ -385,15 +424,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenWishlist();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          <Heart className="w-3.5 h-3.5 text-zinc-400" />
+                          <Heart className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Saved Wishlist</span>
                         </span>
                         {wishlistCount > 0 && (
-                          <span className="text-[11px] font-mono text-zinc-400 tabular-nums">
+                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
                             {wishlistCount}
                           </span>
                         )}
@@ -407,15 +446,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenAlerts();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          <Bell className="w-3.5 h-3.5 text-zinc-400" />
+                          <Bell className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Item Alerts</span>
                         </span>
                         {alertsCount > 0 && (
-                          <span className="text-[11px] font-mono text-zinc-400 tabular-nums">
+                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
                             {alertsCount}
                           </span>
                         )}
@@ -428,15 +467,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenHandovers();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          <CalendarIcon className="w-3.5 h-3.5 text-zinc-400" />
+                          <CalendarIcon className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Handovers</span>
                         </span>
                         {upcomingHandoversCount > 0 && (
-                          <span className="text-[11px] font-mono text-zinc-400 tabular-nums">
+                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
                             {upcomingHandoversCount}
                           </span>
                         )}
@@ -449,10 +488,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onOpenTopperNotes();
                         }}
                         className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                         }`}
                       >
-                        <GraduationCap className="w-3.5 h-3.5 text-zinc-400" />
+                        <GraduationCap className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                         <span>Topper Notes</span>
                       </button>
 
@@ -465,11 +504,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                             onOpenGoogleDrive();
                           }}
                           className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                            isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                            isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                           }`}
                         >
-                          <HardDrive className="w-3.5 h-3.5 text-zinc-400" />
-                          <span>Drive & Docs</span>
+                          <HardDrive className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
+                          <span>Drive &amp; Docs</span>
                         </button>
                       )}
 
@@ -482,10 +521,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                             onOpenSecurity();
                           }}
                           className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                            isDark ? "hover:bg-zinc-800/80" : "hover:bg-zinc-50"
+                            isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                           }`}
                         >
-                          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                           <span>Campus Safety</span>
                         </button>
                       )}
@@ -493,7 +532,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     <div
                       className={`pt-1 border-t ${
-                        isDark ? "border-zinc-800" : "border-zinc-100"
+                        isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
                       }`}
                     >
                       <button
@@ -502,8 +541,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setShowProfileMenu(false);
                           onLogout();
                         }}
-                        className={`w-full text-left px-3.5 py-2 flex items-center gap-2 font-medium text-rose-600 dark:text-rose-400 cursor-pointer ${
-                          isDark ? "hover:bg-zinc-800/80" : "hover:bg-rose-50"
+                        className={`w-full text-left px-3.5 py-2 flex items-center gap-2 font-medium cursor-pointer ${
+                          isDark
+                            ? "text-[#E58989] hover:bg-[#261617]"
+                            : "text-[#A63A3A] hover:bg-[#FDF2F2]"
                         }`}
                       >
                         <LogOut className="w-3.5 h-3.5" />
@@ -520,8 +561,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={onLogin}
                   className={`h-9 px-3 rounded-lg border text-xs font-medium cursor-pointer whitespace-nowrap ${
                     isDark
-                      ? "bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border-zinc-700"
-                      : "bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300"
+                      ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                      : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                   }`}
                 >
                   Sign In
@@ -532,8 +573,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={onDemoLogin}
                     className={`h-9 px-2.5 rounded-lg text-xs font-medium cursor-pointer whitespace-nowrap ${
                       isDark
-                        ? "text-zinc-400 hover:text-zinc-100"
-                        : "text-zinc-600 hover:text-zinc-950"
+                        ? "text-[#8FA199] hover:text-[#ECF2EF]"
+                        : "text-[#5C6B63] hover:text-[#18201C]"
                     }`}
                   >
                     Demo

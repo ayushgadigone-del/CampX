@@ -424,33 +424,33 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   return (
         <div
           id="topper-notes-modal-overlay"
-          className="fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-[#141A18] flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
         >
           <div
             id="topper-notes-modal-card"
             className={`w-full max-w-6xl h-[92vh] max-h-[850px] rounded-3xl shadow-2xl flex flex-col border overflow-hidden ${
               isDark
-                ? "bg-[#0B0F19] border-slate-800 text-slate-100"
-                : "bg-white border-slate-200 text-slate-900"
+                ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                : "bg-white border-[#DFE6E2] text-[#18201C]"
             }`}
           >
         {/* Header */}
         <div
           className={`px-5 py-4 border-b flex items-center justify-between shrink-0 ${
             isDark
-              ? "border-slate-800 bg-slate-900/80"
-              : "border-slate-200 bg-slate-50"
+              ? "border-[#242E2A] bg-[#141A18]"
+              : "border-[#DFE6E2] bg-[#F7F9F8]"
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-indigo-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] flex items-center justify-center text-white shadow-sm shrink-0">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2
                   className={`text-base sm:text-lg font-black ${
-                    isDark ? "text-white" : "text-slate-900"
+                    isDark ? "text-white" : "text-[#18201C]"
                   }`}
                 >
                   Campus Topper Notes Vault
@@ -458,34 +458,34 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                     isDark
-                      ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/60"
-                      : "bg-emerald-100 text-emerald-800"
+                      ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                      : "bg-[#EFF4F1] text-[#2F5D50]"
                   }`}
                 >
-                  <Sparkles className="w-3 h-3 text-emerald-500" />
+                  <Sparkles className="w-3 h-3 text-[#2F5D50]" />
                   100% Free For Students
                 </span>
               </div>
               <p
                 className={`text-xs flex items-center gap-2 ${
-                  isDark ? "text-slate-400" : "text-slate-500"
+                  isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                 }`}
               >
                 <span>Verified study materials & handwritten formula books</span>
                 <span className="hidden sm:inline">•</span>
                 <span
                   className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
-                  <Lock className="w-3 h-3 text-slate-400" />
+                  <Lock className="w-3 h-3 text-[#8FA199]" />
                   Read-only for students
                   {ownerMode ? (
                     <span
                       className={`px-1.5 py-0.2 rounded font-bold text-[10px] ml-1 ${
                         isDark
-                          ? "bg-amber-900/40 text-amber-300"
-                          : "bg-amber-100 text-amber-900"
+                          ? "bg-[#251F15] text-[#DFC29B]"
+                          : "bg-[#FDF6EC] text-[#9E6B43]"
                       }`}
                     >
                       App Owner Verified
@@ -500,7 +500,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             <button
               id="header-upload-doc-btn"
               onClick={() => setIsUploadDocModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2F5D50] dark:bg-[#387262] hover:bg-[#244A3F] dark:hover:bg-[#448573] text-white text-xs font-bold shadow-xs cursor-pointer"
               title="Upload document file to Topper Vault"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -510,7 +510,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
               <button
                 id="owner-add-note-btn"
                 onClick={handleAddNewNote}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold shadow-xs cursor-pointer"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
                 Add Pre-Uploaded Note
@@ -521,8 +521,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
               onClick={onClose}
               className={`p-2 rounded-xl transition-colors cursor-pointer ${
                 isDark
-                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-850"
-                  : "text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+                  ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#19211E]"
+                  : "text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2]"
               }`}
               title="Close modal"
             >
@@ -537,30 +537,30 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
           <div
             className={`w-full md:w-80 lg:w-96 border-r flex flex-col shrink-0 ${
               isDark
-                ? "border-slate-800 bg-slate-950/70"
-                : "border-slate-200 bg-slate-50/50"
+                ? "border-[#242E2A] bg-[#0D1110]"
+                : "border-[#DFE6E2] bg-[#F7F9F8]"
             }`}
           >
             {/* Search and Filters */}
             <div
               className={`p-3.5 border-b space-y-2.5 ${
                 isDark
-                  ? "border-slate-800 bg-slate-900/80"
-                  : "border-slate-200 bg-white"
+                  ? "border-[#242E2A] bg-[#141A18]"
+                  : "border-[#DFE6E2] bg-white"
               }`}
             >
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#8FA199]" />
                 <input
                   id="topper-notes-search-input"
                   type="text"
                   placeholder="Search subject, topic, formula..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                  className={`w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#2F5D50] transition-all ${
                     isDark
-                      ? "border-slate-700 bg-slate-800/90 text-white placeholder:text-slate-500 focus:bg-slate-800"
-                      : "border-slate-200 bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-400"
+                      ? "border-[#242E2A] bg-[#1B2320] text-white placeholder:text-[#5C6B63] focus:bg-[#1B2320]"
+                      : "border-[#DFE6E2] bg-[#F7F9F8] focus:bg-white text-[#18201C] placeholder:text-[#8FA199]"
                   }`}
                 />
               </div>
@@ -569,7 +569,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 <div>
                   <label
                     className={`font-semibold block mb-0.5 ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
                     Branch
@@ -577,10 +577,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                   <select
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
-                    className={`w-full px-2 py-1 rounded-lg border focus:ring-1 focus:ring-indigo-500 ${
+                    className={`w-full px-2 py-1 rounded-lg border focus:ring-1 focus:ring-[#2F5D50] ${
                       isDark
-                        ? "border-slate-700 bg-slate-800 text-slate-200"
-                        : "border-slate-200 bg-white text-slate-700"
+                        ? "border-[#242E2A] bg-[#1B2320] text-[#ECF2EF]"
+                        : "border-[#DFE6E2] bg-white text-[#5C6B63]"
                     }`}
                   >
                     {branches.map((b) => (
@@ -591,7 +591,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 <div>
                   <label
                     className={`font-semibold block mb-0.5 ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >
                     Semester
@@ -599,10 +599,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                   <select
                     value={selectedSemester}
                     onChange={(e) => setSelectedSemester(e.target.value)}
-                    className={`w-full px-2 py-1 rounded-lg border focus:ring-1 focus:ring-indigo-500 ${
+                    className={`w-full px-2 py-1 rounded-lg border focus:ring-1 focus:ring-[#2F5D50] ${
                       isDark
-                        ? "border-slate-700 bg-slate-800 text-slate-200"
-                        : "border-slate-200 bg-white text-slate-700"
+                        ? "border-[#242E2A] bg-[#1B2320] text-[#ECF2EF]"
+                        : "border-[#DFE6E2] bg-white text-[#5C6B63]"
                     }`}
                   >
                     {semesters.map((s) => (
@@ -620,24 +620,24 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 onClick={() => setIsUploadDocModalOpen(true)}
                 className={`w-full py-2.5 px-3 rounded-2xl border border-dashed text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
                   isDark
-                    ? "border-indigo-500/50 bg-indigo-950/30 text-indigo-300 hover:bg-indigo-950/60 hover:border-indigo-400"
-                    : "border-indigo-300 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-400"
+                    ? "border-[#5BA18C] bg-[#182823] text-[#7BBFA8] hover:bg-[#182823] hover:border-[#5BA18C]"
+                    : "border-[#C4D9D1] bg-[#EFF4F1] text-[#2F5D50] hover:bg-[#EFF4F1] hover:border-[#5BA18C]"
                 }`}
               >
-                <FileUp className="w-4 h-4 text-indigo-500" />
+                <FileUp className="w-4 h-4 text-[#2F5D50]" />
                 <span>+ Upload Document File</span>
               </button>
 
               <div
                 className={`text-[11px] font-bold uppercase tracking-wider px-1 pt-1 ${
-                  isDark ? "text-slate-500" : "text-slate-500"
+                  isDark ? "text-[#5C6B63]" : "text-[#5C6B63]"
                 }`}
               >
                 Study Vault Catalog ({filteredNotes.length})
               </div>
 
               {filteredNotes.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-400">
+                <div className="p-6 text-center text-xs text-[#8FA199]">
                   No notes match your filters.
                 </div>
               ) : (
@@ -654,19 +654,19 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                         isSelected
                           ? isDark
-                            ? "bg-indigo-950/50 border-indigo-500/60 shadow-xs ring-1 ring-indigo-500/50"
-                            : "bg-indigo-50/90 border-indigo-300 shadow-xs ring-1 ring-indigo-400"
+                            ? "bg-[#182823] border-[#5BA18C] shadow-xs ring-1 ring-[#2F5D50]"
+                            : "bg-[#EFF4F1] border-[#C4D9D1] shadow-xs ring-1 ring-[#2F5D50]"
                           : isDark
-                          ? "bg-slate-900/60 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-300"
-                          : "bg-white hover:bg-slate-100/80 border-slate-200 hover:border-slate-300"
+                          ? "bg-[#141A18] hover:bg-[#19211E] border-[#242E2A] hover:border-[#242E2A] text-[#C5D3CC]"
+                          : "bg-white hover:bg-[#EFF4F1] border-[#DFE6E2] hover:border-[#C4D1CA]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-1.5 mb-1">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                             isDark
-                              ? "bg-indigo-950/80 text-indigo-300 border border-indigo-800/40"
-                              : "bg-indigo-100 text-indigo-700"
+                              ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                              : "bg-[#EFF4F1] text-[#2F5D50]"
                           }`}
                         >
                           {note.subject}
@@ -674,8 +674,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <span
                           className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                             isDark
-                              ? "bg-emerald-950/60 text-emerald-300 border border-emerald-900/40"
-                              : "bg-emerald-50 text-emerald-700"
+                              ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                              : "bg-[#EFF4F1] text-[#2F5D50]"
                           }`}
                         >
                           Free
@@ -684,25 +684,25 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                       <h4
                         className={`text-xs font-bold line-clamp-2 leading-snug ${
-                          isDark ? "text-slate-100" : "text-slate-900"
+                          isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                         }`}
                       >
                         {note.title}
                       </h4>
 
                       {note.fileName && (
-                        <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-indigo-500 dark:text-indigo-400">
+                        <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-[#2F5D50] dark:text-[#7BBFA8]">
                           <Paperclip className="w-3 h-3 shrink-0" />
                           <span className="truncate">{note.fileName}</span>
                           {note.fileSize && (
-                            <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-500/10 dark:bg-indigo-500/20 shrink-0">
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-[#2F5D50] dark:bg-[#387262] shrink-0">
                               {note.fileSize}
                             </span>
                           )}
                         </div>
                       )}
 
-                      <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+                      <div className="mt-2 flex items-center justify-between text-[10px] text-[#5C6B63]">
                         <span className="flex items-center gap-1 font-medium">
                           <GraduationCap className="w-3 h-3 text-amber-500" />
                           {note.branch} • {note.semester}
@@ -722,11 +722,11 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             <div
               className={`p-3 border-t text-[11px] flex items-center gap-2 ${
                 isDark
-                  ? "border-slate-800 bg-slate-900/80 text-slate-400"
-                  : "border-slate-200 bg-white text-slate-600"
+                  ? "border-[#242E2A] bg-[#141A18] text-[#8FA199]"
+                  : "border-[#DFE6E2] bg-white text-[#5C6B63]"
               }`}
             >
-              <ShieldCheck className="w-4 h-4 text-indigo-500 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-[#2F5D50] shrink-0" />
               <span>
                 Curated by University Toppers. Guaranteed syllabus accurate.
               </span>
@@ -736,7 +736,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
           {/* Right Column: Note Reader & Owner Editor */}
           <div
             className={`flex-1 flex flex-col min-h-0 ${
-              isDark ? "bg-[#0B0F19]" : "bg-white"
+              isDark ? "bg-[#141A18]" : "bg-white"
             }`}
           >
             {activeNote ? (
@@ -745,8 +745,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 <div
                   className={`px-6 py-3.5 border-b flex flex-wrap items-center justify-between gap-3 shrink-0 ${
                     isDark
-                      ? "border-slate-800 bg-slate-900/60"
-                      : "border-slate-200 bg-slate-50/50"
+                      ? "border-[#242E2A] bg-[#141A18]"
+                      : "border-[#DFE6E2] bg-[#F7F9F8]"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -754,10 +754,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       onClick={() => setActiveTab("read")}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         activeTab === "read"
-                          ? "bg-indigo-600 text-white shadow-xs"
+                          ? "bg-[#2F5D50] text-white shadow-xs"
                           : isDark
-                          ? "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                          ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                          : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                       }`}
                     >
                       <span className="flex items-center gap-1.5">
@@ -769,10 +769,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       onClick={() => setActiveTab("chapters")}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         activeTab === "chapters"
-                          ? "bg-indigo-600 text-white shadow-xs"
+                          ? "bg-[#2F5D50] text-white shadow-xs"
                           : isDark
-                          ? "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                          ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                          : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#DFE6E2]"
                       }`}
                     >
                       <span className="flex items-center gap-1.5">
@@ -788,15 +788,15 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       onClick={handleCopyLink}
                       className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors ${
                         isDark
-                          ? "border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
-                          : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                          ? "border-[#242E2A] bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF]"
+                          : "border-[#DFE6E2] bg-white hover:bg-[#F7F9F8] text-[#5C6B63]"
                       }`}
                       title="Copy link to this free study guide"
                     >
                       {copiedLink ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                        <Check className="w-3.5 h-3.5 text-[#2F5D50]" />
                       ) : (
-                        <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                        <Share2 className="w-3.5 h-3.5 text-[#8FA199]" />
                       )}
                       <span>{copiedLink ? "Link Copied" : "Share"}</span>
                     </button>
@@ -805,10 +805,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       id="export-google-docs-btn"
                       onClick={() => handleExportGoogleDoc(activeNote)}
                       disabled={isExportingDoc}
-                      className="px-2.5 py-1.5 rounded-xl border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-300 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                      className="px-2.5 py-1.5 rounded-xl border border-[#5BA18C] bg-[#2F5D50] hover:bg-[#244A3F] text-[#2F5D50] dark:text-[#7BBFA8] text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                       title="Open and edit this study guide in Google Docs"
                     >
-                      <FileText className="w-3.5 h-3.5 text-blue-500" />
+                      <FileText className="w-3.5 h-3.5 text-[#2F5D50]" />
                       <span>{isExportingDoc ? "Opening..." : "Google Docs"}</span>
                     </button>
 
@@ -816,10 +816,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <button
                         id="download-note-doc-btn"
                         onClick={() => handleDownloadFile(activeNote)}
-                        className="px-2.5 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 dark:text-emerald-300 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                        className="px-2.5 py-1.5 rounded-xl border border-[#5BA18C] bg-[#2F5D50] hover:bg-[#244A3F] text-[#2F5D50] dark:text-[#7BBFA8] text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                         title="Download attached study document"
                       >
-                        <Download className="w-3.5 h-3.5 text-emerald-500" />
+                        <Download className="w-3.5 h-3.5 text-[#2F5D50]" />
                         <span>Download File</span>
                       </button>
                     )}
@@ -836,7 +836,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-all shadow-xs ${
                           isEditingCurrentNote
-                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            ? "bg-[#2F5D50] hover:bg-[#244A3F] text-white"
                             : "bg-amber-600 hover:bg-amber-700 text-white"
                         }`}
                       >
@@ -856,12 +856,12 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <div
                         className={`px-2.5 py-1 rounded-xl border text-[11px] font-semibold inline-flex items-center gap-1 select-none ${
                           isDark
-                            ? "bg-slate-800/80 border-slate-700 text-slate-400"
-                            : "bg-slate-100 border-slate-200 text-slate-500"
+                            ? "bg-[#1B2320] border-[#242E2A] text-[#8FA199]"
+                            : "bg-[#EFF4F1] border-[#DFE6E2] text-[#5C6B63]"
                         }`}
                         title="Open access student study materials."
                       >
-                        <ShieldCheck className="w-3 h-3 text-indigo-400" />
+                        <ShieldCheck className="w-3 h-3 text-[#7BBFA8]" />
                         <span>Verified Free</span>
                       </div>
                     )}
@@ -873,15 +873,15 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                   {/* Note Header Meta */}
                   <div
                     className={`space-y-2.5 pb-4 border-b ${
-                      isDark ? "border-slate-800" : "border-slate-200"
+                      isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
                     }`}
                   >
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                       <span
                         className={`px-2.5 py-0.5 rounded-full font-bold ${
                           isDark
-                            ? "bg-indigo-950/80 text-indigo-300 border border-indigo-800/40"
-                            : "bg-indigo-100 text-indigo-800"
+                            ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                            : "bg-[#EFF4F1] text-[#2F5D50]"
                         }`}
                       >
                         {activeNote.subject}
@@ -889,8 +889,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <span
                         className={`px-2 py-0.5 rounded-md font-medium ${
                           isDark
-                            ? "bg-slate-800 text-slate-300 border border-slate-700"
-                            : "bg-slate-100 text-slate-700"
+                            ? "bg-[#1B2320] text-[#C5D3CC] border border-[#242E2A]"
+                            : "bg-[#EFF4F1] text-[#5C6B63]"
                         }`}
                       >
                         {activeNote.branch} • {activeNote.semester}
@@ -898,20 +898,20 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <span
                         className={`px-2 py-0.5 rounded-md font-bold border ${
                           isDark
-                            ? "bg-emerald-950/50 text-emerald-300 border-emerald-800/50"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                            : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                         }`}
                       >
                         100% Free Open Access
                       </span>
-                      <span className="text-slate-400 ml-auto text-[11px]">
+                      <span className="text-[#8FA199] ml-auto text-[11px]">
                         Updated {activeNote.lastUpdated}
                       </span>
                     </div>
 
                     <h1
                       className={`text-xl sm:text-2xl font-black leading-tight ${
-                        isDark ? "text-white" : "text-slate-900"
+                        isDark ? "text-white" : "text-[#18201C]"
                       }`}
                     >
                       {activeNote.title}
@@ -921,8 +921,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                     <div
                       className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
                         isDark
-                          ? "bg-amber-950/20 border-amber-900/40"
-                          : "bg-amber-50/70 border-amber-200/80"
+                          ? "bg-[#251F15] border-[#4A3B23]"
+                          : "bg-[#FDF6EC] border-[#EED8B8]"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -932,15 +932,15 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div>
                           <div
                             className={`text-xs font-bold flex items-center gap-1.5 ${
-                              isDark ? "text-slate-100" : "text-slate-900"
+                              isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                             }`}
                           >
                             <span>{activeNote.author}</span>
                             <span
                               className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                                 isDark
-                                  ? "bg-amber-900/50 text-amber-300"
-                                  : "bg-amber-200/80 text-amber-900"
+                                  ? "bg-[#251F15] text-[#DFC29B]"
+                                  : "bg-amber-200/80 text-[#9E6B43]"
                               }`}
                             >
                               {activeNote.authorRank || "Branch Rank 1"}
@@ -948,7 +948,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           </div>
                           <span
                             className={`text-[11px] block ${
-                              isDark ? "text-slate-400" : "text-slate-500"
+                              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                             }`}
                           >
                             {activeNote.authorCollege || "Government College of Engineering"}
@@ -958,17 +958,17 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                       <div
                         className={`text-right text-[11px] hidden sm:block ${
-                          isDark ? "text-slate-400" : "text-slate-600"
+                          isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                         }`}
                       >
                         <div
                           className={`font-bold ${
-                            isDark ? "text-slate-200" : "text-slate-800"
+                            isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                           }`}
                         >
                           {activeNote.pagesCount} Master Pages
                         </div>
-                        <span className="text-slate-500">
+                        <span className="text-[#5C6B63]">
                           ~{activeNote.readTimeMinutes} mins revision
                         </span>
                       </div>
@@ -976,7 +976,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                     <p
                       className={`text-xs leading-relaxed ${
-                        isDark ? "text-slate-300" : "text-slate-600"
+                        isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                       }`}
                     >
                       {activeNote.description}
@@ -990,11 +990,11 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             key={i}
                             className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${
                               isDark
-                                ? "bg-slate-800 text-slate-300 border-slate-700"
-                                : "bg-slate-100 text-slate-600 border-transparent"
+                                ? "bg-[#1B2320] text-[#C5D3CC] border-[#242E2A]"
+                                : "bg-[#EFF4F1] text-[#5C6B63] border-transparent"
                             }`}
                           >
-                            <Tag className="w-2.5 h-2.5 text-slate-400" />
+                            <Tag className="w-2.5 h-2.5 text-[#8FA199]" />
                             {tag}
                           </span>
                         ))}
@@ -1007,12 +1007,12 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                     <div
                       className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs ${
                         isDark
-                          ? "bg-gradient-to-r from-indigo-950/60 to-slate-900 border-indigo-800/60"
-                          : "bg-gradient-to-r from-indigo-50/80 to-blue-50/60 border-indigo-200"
+                          ? "bg-[#111715] border-[#2A4A40]"
+                          : "bg-[#F3F5F2] border-[#C4D9D1]"
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] text-white flex items-center justify-center shrink-0 shadow-sm">
                           <FileText className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
@@ -1020,11 +1020,11 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             <span className="text-xs font-black truncate max-w-[280px]">
                               {activeNote.fileName || "Attached Study Document"}
                             </span>
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shrink-0">
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#2F5D50] text-[#7BBFA8] border border-[#5BA18C] shrink-0">
                               {activeNote.fileSize || "Document File"}
                             </span>
                           </div>
-                          <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                          <p className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                             Original document file ready for offline reading, printing, or studying
                           </p>
                         </div>
@@ -1035,17 +1035,17 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           onClick={() => setShowDocPreview(!showDocPreview)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer border ${
                             isDark
-                              ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
-                              : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+                              ? "bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF] border-[#242E2A]"
+                              : "bg-white hover:bg-[#EFF4F1] text-[#5C6B63] border-[#DFE6E2]"
                           }`}
                         >
-                          <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                          <Eye className="w-3.5 h-3.5 text-[#7BBFA8]" />
                           <span>{showDocPreview ? "Hide Preview" : "Preview"}</span>
                         </button>
 
                         <button
                           onClick={() => handleDownloadFile(activeNote)}
-                          className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download</span>
@@ -1056,17 +1056,17 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                   {/* Document Live Preview Frame */}
                   {activeNote.fileUrl && showDocPreview && (
-                    <div className="rounded-2xl border border-indigo-500/40 overflow-hidden bg-slate-950 p-2 space-y-2">
-                      <div className="flex items-center justify-between px-2 text-xs text-slate-300">
+                    <div className="rounded-2xl border border-[#5BA18C] overflow-hidden bg-[#0D1110] p-2 space-y-2">
+                      <div className="flex items-center justify-between px-2 text-xs text-[#C5D3CC]">
                         <span className="font-bold flex items-center gap-1.5">
-                          <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                          <Eye className="w-3.5 h-3.5 text-[#7BBFA8]" />
                           Live Document Preview ({activeNote.fileName})
                         </span>
                         <a
                           href={activeNote.fileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-indigo-400 hover:text-indigo-300 font-bold inline-flex items-center gap-1 text-[11px]"
+                          className="text-[#7BBFA8] hover:text-[#7BBFA8] font-bold inline-flex items-center gap-1 text-[11px]"
                         >
                           <ExternalLink className="w-3 h-3" />
                           Open in Full Window
@@ -1074,7 +1074,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       </div>
                       <iframe
                         src={activeNote.fileUrl}
-                        className="w-full h-[450px] rounded-xl border border-slate-800 bg-white"
+                        className="w-full h-[450px] rounded-xl border border-[#242E2A] bg-white"
                         title={activeNote.title}
                       />
                     </div>
@@ -1085,20 +1085,20 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                     <div
                       className={`p-5 rounded-2xl border-2 space-y-4 ${
                         isDark
-                          ? "bg-amber-950/20 border-amber-600"
-                          : "bg-amber-50/80 border-amber-400"
+                          ? "bg-[#251F15] border-amber-600"
+                          : "bg-[#FDF6EC] border-amber-400"
                       }`}
                     >
                       <div
                         className={`flex items-center justify-between border-b pb-2 ${
-                          isDark ? "border-amber-800/50" : "border-amber-200"
+                          isDark ? "border-[#4A3B23]" : "border-[#EED8B8]"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <Edit3 className="w-4 h-4 text-amber-500" />
                           <h3
                             className={`text-sm font-bold ${
-                              isDark ? "text-amber-300" : "text-amber-950"
+                              isDark ? "text-[#DFC29B]" : "text-amber-950"
                             }`}
                           >
                             App Owner Editor (Restricted Access)
@@ -1107,7 +1107,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setIsEditingCurrentNote(false)}
-                            className="px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+                            className="px-2.5 py-1 text-xs text-[#8FA199] hover:text-[#ECF2EF] cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -1124,7 +1124,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div>
                           <label
                             className={`block font-bold mb-1 ${
-                              isDark ? "text-slate-300" : "text-slate-700"
+                              isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                             }`}
                           >
                             Note Title
@@ -1137,8 +1137,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             }
                             className={`w-full p-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                               isDark
-                                ? "border-amber-700 bg-slate-900 text-white"
-                                : "border-amber-300 bg-white"
+                                ? "border-[#4A3B23] bg-[#141A18] text-white"
+                                : "border-[#EED8B8] bg-white"
                             }`}
                           />
                         </div>
@@ -1146,7 +1146,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div>
                           <label
                             className={`block font-bold mb-1 ${
-                              isDark ? "text-slate-300" : "text-slate-700"
+                              isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                             }`}
                           >
                             Subject
@@ -1159,8 +1159,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             }
                             className={`w-full p-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                               isDark
-                                ? "border-amber-700 bg-slate-900 text-white"
-                                : "border-amber-300 bg-white"
+                                ? "border-[#4A3B23] bg-[#141A18] text-white"
+                                : "border-[#EED8B8] bg-white"
                             }`}
                           />
                         </div>
@@ -1168,7 +1168,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div>
                           <label
                             className={`block font-bold mb-1 ${
-                              isDark ? "text-slate-300" : "text-slate-700"
+                              isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                             }`}
                           >
                             Branch
@@ -1183,8 +1183,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             }
                             className={`w-full p-2 rounded-xl border ${
                               isDark
-                                ? "border-amber-700 bg-slate-900 text-slate-200"
-                                : "border-amber-300 bg-white text-slate-800"
+                                ? "border-[#4A3B23] bg-[#141A18] text-[#ECF2EF]"
+                                : "border-[#EED8B8] bg-white text-[#18201C]"
                             }`}
                           >
                             {branches.filter((b) => b !== "All").map((b) => (
@@ -1196,7 +1196,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         <div>
                           <label
                             className={`block font-bold mb-1 ${
-                              isDark ? "text-slate-300" : "text-slate-700"
+                              isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                             }`}
                           >
                             Semester
@@ -1211,8 +1211,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             }
                             className={`w-full p-2 rounded-xl border ${
                               isDark
-                                ? "border-amber-700 bg-slate-900 text-slate-200"
-                                : "border-amber-300 bg-white text-slate-800"
+                                ? "border-[#4A3B23] bg-[#141A18] text-[#ECF2EF]"
+                                : "border-[#EED8B8] bg-white text-[#18201C]"
                             }`}
                           >
                             {semesters.filter((s) => s !== "All").map((s) => (
@@ -1225,7 +1225,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <div>
                         <label
                           className={`block font-bold mb-1 text-xs ${
-                            isDark ? "text-slate-300" : "text-slate-700"
+                            isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                           }`}
                         >
                           Short Description
@@ -1238,8 +1238,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           }
                           className={`w-full p-2 text-xs rounded-xl border ${
                             isDark
-                              ? "border-amber-700 bg-slate-900 text-white"
-                              : "border-amber-300 bg-white"
+                              ? "border-[#4A3B23] bg-[#141A18] text-white"
+                              : "border-[#EED8B8] bg-white"
                           }`}
                         />
                       </div>
@@ -1247,7 +1247,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <div>
                         <label
                           className={`block font-bold mb-1 text-xs ${
-                            isDark ? "text-slate-300" : "text-slate-700"
+                            isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                           }`}
                         >
                           Study Guide Content (Markdown/Notes)
@@ -1260,8 +1260,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           }
                           className={`w-full p-2.5 font-mono text-xs rounded-xl border ${
                             isDark
-                              ? "border-amber-700 bg-slate-900 text-white"
-                              : "border-amber-300 bg-white"
+                              ? "border-[#4A3B23] bg-[#141A18] text-white"
+                              : "border-[#EED8B8] bg-white"
                           }`}
                         />
                       </div>
@@ -1290,25 +1290,25 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                   {activeTab === "read" && (
                     <div
                       className={`space-y-6 leading-relaxed text-sm ${
-                        isDark ? "text-slate-200" : "text-slate-800"
+                        isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                       }`}
                     >
                       <div
                         className={`p-4 rounded-2xl border flex items-start gap-3 ${
                           isDark
-                            ? "bg-indigo-950/30 border-indigo-900/50"
-                            : "bg-indigo-50/50 border-indigo-100"
+                            ? "bg-[#182823] border-[#2A4A40]"
+                            : "bg-[#EFF4F1] border-[#C4D9D1]"
                         }`}
                       >
-                        <BookMarked className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+                        <BookMarked className="w-5 h-5 text-[#2F5D50] shrink-0 mt-0.5" />
                         <div
                           className={`text-xs space-y-1 ${
-                            isDark ? "text-slate-300" : "text-slate-700"
+                            isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                           }`}
                         >
                           <strong
                             className={`block font-bold ${
-                              isDark ? "text-indigo-300" : "text-indigo-900"
+                              isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                             }`}
                           >
                             Free Student Read Mode
@@ -1323,8 +1323,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <div
                         className={`prose max-w-none text-xs sm:text-sm p-5 rounded-2xl border whitespace-pre-line font-sans ${
                           isDark
-                            ? "bg-slate-900/60 border-slate-800 text-slate-200"
-                            : "bg-slate-50/60 border-slate-200 text-slate-800"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                            : "bg-[#F7F9F8] border-[#DFE6E2] text-[#18201C]"
                         }`}
                       >
                         {activeNote.content}
@@ -1334,10 +1334,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       <div className="space-y-3">
                         <h3
                           className={`text-sm font-black flex items-center gap-2 ${
-                            isDark ? "text-white" : "text-slate-900"
+                            isDark ? "text-white" : "text-[#18201C]"
                           }`}
                         >
-                          <Layers className="w-4 h-4 text-indigo-500" />
+                          <Layers className="w-4 h-4 text-[#2F5D50]" />
                           <span>Key Exam Formulas & Highlights</span>
                         </h3>
 
@@ -1347,14 +1347,14 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                               key={idx}
                               className={`p-4 rounded-2xl border shadow-2xs space-y-2 ${
                                 isDark
-                                  ? "border-slate-800 bg-slate-900/70"
-                                  : "border-slate-200 bg-white"
+                                  ? "border-[#242E2A] bg-[#141A18]"
+                                  : "border-[#DFE6E2] bg-white"
                               }`}
                             >
                               <div className="flex items-center justify-between">
                                 <h4
                                   className={`text-xs font-bold ${
-                                    isDark ? "text-slate-100" : "text-slate-900"
+                                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                                   }`}
                                 >
                                   {ch.title}
@@ -1362,8 +1362,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                                 <span
                                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                     isDark
-                                      ? "bg-indigo-950/80 text-indigo-300 border border-indigo-900/40"
-                                      : "bg-indigo-50 text-indigo-600"
+                                      ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                                      : "bg-[#EFF4F1] text-[#2F5D50]"
                                   }`}
                                 >
                                   Module {idx + 1}
@@ -1371,7 +1371,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                               </div>
                               <p
                                 className={`text-xs ${
-                                  isDark ? "text-slate-400" : "text-slate-600"
+                                  isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                                 }`}
                               >
                                 {ch.summary}
@@ -1380,18 +1380,18 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                                 <ul
                                   className={`mt-2 space-y-1 p-2.5 rounded-xl border ${
                                     isDark
-                                      ? "bg-slate-950/60 border-slate-800"
-                                      : "bg-slate-50 border-slate-100"
+                                      ? "bg-[#0D1110] border-[#242E2A]"
+                                      : "bg-[#F7F9F8] border-[#DFE6E2]"
                                   }`}
                                 >
                                   {ch.keyFormulasOrTips.map((tip, tIdx) => (
                                     <li
                                       key={tIdx}
                                       className={`text-[11px] flex items-start gap-1.5 font-mono ${
-                                        isDark ? "text-slate-300" : "text-slate-700"
+                                        isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                                       }`}
                                     >
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-[#2F5D50] shrink-0 mt-0.5" />
                                       <span>{tip}</span>
                                     </li>
                                   ))}
@@ -1412,22 +1412,22 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           key={idx}
                           className={`p-5 rounded-2xl border shadow-2xs space-y-3 ${
                             isDark
-                              ? "border-slate-800 bg-slate-900/70"
-                              : "border-slate-200 bg-white"
+                              ? "border-[#242E2A] bg-[#141A18]"
+                              : "border-[#DFE6E2] bg-white"
                           }`}
                         >
                           <div
                             className={`flex items-center justify-between border-b pb-2.5 ${
-                              isDark ? "border-slate-800" : "border-slate-100"
+                              isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
                             }`}
                           >
                             <div>
-                              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
+                              <span className="text-[10px] font-bold text-[#2F5D50] uppercase tracking-wider">
                                 High-Yield Module 0{idx + 1}
                               </span>
                               <h3
                                 className={`text-sm font-bold ${
-                                  isDark ? "text-white" : "text-slate-900"
+                                  isDark ? "text-white" : "text-[#18201C]"
                                 }`}
                               >
                                 {ch.title}
@@ -1436,8 +1436,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             <span
                               className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                                 isDark
-                                  ? "bg-emerald-950/60 text-emerald-300 border border-emerald-900/50"
-                                  : "bg-emerald-50 text-emerald-700"
+                                  ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                                  : "bg-[#EFF4F1] text-[#2F5D50]"
                               }`}
                             >
                               {ch.keyFormulasOrTips.length} Formulas
@@ -1446,7 +1446,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
                           <p
                             className={`text-xs leading-relaxed ${
-                              isDark ? "text-slate-400" : "text-slate-600"
+                              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                             }`}
                           >
                             {ch.summary}
@@ -1455,7 +1455,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           <div className="space-y-1.5">
                             <h5
                               className={`text-[11px] font-bold uppercase ${
-                                isDark ? "text-slate-300" : "text-slate-700"
+                                isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"
                               }`}
                             >
                               Exam Ready Formula Cards:
@@ -1466,8 +1466,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                                   key={fIdx}
                                   className={`p-2.5 rounded-xl border text-xs font-mono flex items-center justify-between gap-2 ${
                                     isDark
-                                      ? "bg-slate-950/70 border-slate-800 text-slate-200"
-                                      : "bg-slate-50 border-slate-200 text-slate-800"
+                                      ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF]"
+                                      : "bg-[#F7F9F8] border-[#DFE6E2] text-[#18201C]"
                                   }`}
                                 >
                                   <span>{formula}</span>
@@ -1478,8 +1478,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                                     }}
                                     className={`p-1 rounded transition-colors ${
                                       isDark
-                                        ? "text-slate-400 hover:text-indigo-400 hover:bg-slate-800"
-                                        : "text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60"
+                                        ? "text-[#8FA199] hover:text-[#7BBFA8] hover:bg-[#1B2320]"
+                                        : "text-[#8FA199] hover:text-[#2F5D50] hover:bg-[#DFE6E2]"
                                     }`}
                                     title="Copy formula"
                                   >
@@ -1496,7 +1496,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center p-8 text-center text-slate-400 text-xs">
+              <div className="flex-1 flex items-center justify-center p-8 text-center text-[#8FA199] text-xs">
                 Select a topper note from the catalog on the left to start reading for free.
               </div>
             )}
@@ -1507,12 +1507,12 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
         <div
           className={`px-5 py-3 border-t flex flex-wrap items-center justify-between gap-3 shrink-0 text-xs ${
             isDark
-              ? "border-slate-800 bg-slate-900/90 text-slate-400"
-              : "border-slate-200 bg-slate-50/80 text-slate-500"
+              ? "border-[#242E2A] bg-[#141A18] text-[#8FA199]"
+              : "border-[#DFE6E2] bg-[#F7F9F8] text-[#5C6B63]"
           }`}
         >
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-[#2F5D50]"></span>
             <span>Free Student Read Access Active</span>
             <span className="hidden sm:inline">•</span>
             <span className="hidden sm:inline">
@@ -1523,8 +1523,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             onClick={onClose}
             className={`px-4 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
               isDark
-                ? "bg-slate-800 hover:bg-slate-700 text-slate-200"
-                : "bg-slate-200 hover:bg-slate-300 text-slate-800"
+                ? "bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF]"
+                : "bg-[#EFF4F1] hover:bg-[#DFE6E2] text-[#18201C]"
             }`}
           >
             Close Vault
@@ -1540,22 +1540,22 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
               <div
                 id="upload-doc-modal-card"
                 className={`w-full max-w-xl rounded-3xl shadow-2xl border overflow-hidden flex flex-col max-h-[90vh] ${
-                  isDark ? "bg-[#0F172A] border-slate-700 text-slate-100" : "bg-white border-slate-200 text-slate-900"
+                  isDark ? "bg-[#0F172A] border-[#242E2A] text-[#ECF2EF]" : "bg-white border-[#DFE6E2] text-[#18201C]"
                 }`}
               >
                 {/* Header */}
                 <div
                   className={`px-5 py-4 border-b flex items-center justify-between shrink-0 ${
-                    isDark ? "border-slate-800 bg-slate-900/80" : "border-slate-200 bg-slate-50"
+                    isDark ? "border-[#242E2A] bg-[#141A18]" : "border-[#DFE6E2] bg-[#F7F9F8]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#2F5D50] text-white flex items-center justify-center shadow-xs">
                       <FileUp className="w-4 h-4" />
                     </div>
                     <div>
                       <h3 className="text-sm font-black">Upload Topper Document</h3>
-                      <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      <p className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                         Upload PDF, Word document, or pick directly from Google Drive
                       </p>
                     </div>
@@ -1566,7 +1566,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       setUploadError(null);
                     }}
                     className={`p-1.5 rounded-lg ${
-                      isDark ? "hover:bg-slate-800 text-slate-400 hover:text-white" : "hover:bg-slate-200 text-slate-500"
+                      isDark ? "hover:bg-[#1B2320] text-[#8FA199] hover:text-white" : "hover:bg-[#DFE6E2] text-[#5C6B63]"
                     }`}
                   >
                     <X className="w-4 h-4" />
@@ -1599,29 +1599,29 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       }}
                       className={`p-5 rounded-2xl border-2 border-dashed text-center transition-all ${
                         isDragging
-                          ? "border-indigo-500 bg-indigo-500/10 scale-99"
+                          ? "border-[#5BA18C] bg-[#2F5D50] scale-99"
                           : uploadedFile
                           ? isDark
-                            ? "border-emerald-500/50 bg-emerald-950/20"
-                            : "border-emerald-300 bg-emerald-50/50"
+                            ? "border-[#5BA18C] bg-[#182823]"
+                            : "border-[#C4D9D1] bg-[#EFF4F1]"
                           : isDark
-                          ? "border-slate-700 bg-slate-900/60 hover:border-indigo-500/60"
-                          : "border-slate-300 bg-slate-50 hover:border-indigo-400"
+                          ? "border-[#242E2A] bg-[#141A18] hover:border-[#5BA18C]"
+                          : "border-[#C4D1CA] bg-[#F7F9F8] hover:border-[#5BA18C]"
                       }`}
                     >
                       {uploadedFile ? (
                         <div className="space-y-2">
-                          <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-sm">
+                          <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] text-white flex items-center justify-center mx-auto shadow-sm">
                             <CheckCircle2 className="w-5 h-5" />
                           </div>
                           <div>
                             <div className="font-bold text-xs truncate max-w-sm mx-auto">{uploadedFile.name}</div>
-                            <span className="text-[11px] text-emerald-500 font-bold">
+                            <span className="text-[11px] text-[#2F5D50] font-bold">
                               {uploadedFile.size} • Ready for upload
                             </span>
                           </div>
                           <div className="flex items-center justify-center gap-2 pt-1">
-                            <label className="text-[11px] text-indigo-400 font-bold hover:underline cursor-pointer">
+                            <label className="text-[11px] text-[#7BBFA8] font-bold hover:underline cursor-pointer">
                               Replace File
                               <input
                                 type="file"
@@ -1633,11 +1633,11 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                                 className="hidden"
                               />
                             </label>
-                            <span className="text-slate-500">•</span>
+                            <span className="text-[#5C6B63]">•</span>
                             <button
                               type="button"
                               onClick={handlePickFromGoogleDrive}
-                              className="text-[11px] text-amber-400 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                              className="text-[11px] text-[#DFC29B] font-bold hover:underline cursor-pointer flex items-center gap-1"
                             >
                               <Sparkles className="w-3 h-3" />
                               Pick from Drive
@@ -1646,18 +1646,18 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         </div>
                       ) : (
                         <div className="space-y-2.5">
-                          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto">
+                          <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] text-[#2F5D50] flex items-center justify-center mx-auto">
                             <Upload className="w-5 h-5" />
                           </div>
                           <div>
                             <p className="font-bold">Drag and drop your study document here</p>
-                            <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                            <p className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                               Supports PDF, Word (DOCX), TXT, or scanned notes (up to 25MB)
                             </p>
                           </div>
 
                           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-                            <label className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+                            <label className="px-3 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
                               <FileUp className="w-3.5 h-3.5" />
                               <span>Browse Computer</span>
                               <input
@@ -1674,7 +1674,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                             <button
                               type="button"
                               onClick={handlePickFromGoogleDrive}
-                              className="px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                              className="px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-[#DFC29B] text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>Pick from Google Drive</span>
@@ -1694,8 +1694,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         placeholder="e.g. Complete Trees & Graphs Master Notes"
                         value={docTitle}
                         onChange={(e) => setDocTitle(e.target.value)}
-                        className={`w-full p-2.5 rounded-xl border focus:ring-2 focus:ring-indigo-500 ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                        className={`w-full p-2.5 rounded-xl border focus:ring-2 focus:ring-[#2F5D50] ${
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                         required
                       />
@@ -1708,8 +1708,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         placeholder="e.g. Data Structures & Algorithms"
                         value={docSubject}
                         onChange={(e) => setDocSubject(e.target.value)}
-                        className={`w-full p-2.5 rounded-xl border focus:ring-2 focus:ring-indigo-500 ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                        className={`w-full p-2.5 rounded-xl border focus:ring-2 focus:ring-[#2F5D50] ${
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                         required
                       />
@@ -1721,7 +1721,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         value={docBranch}
                         onChange={(e) => setDocBranch(e.target.value as TopperNote["branch"])}
                         className={`w-full p-2.5 rounded-xl border ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                       >
                         {branches.filter((b) => b !== "All").map((b) => (
@@ -1736,7 +1736,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         value={docSemester}
                         onChange={(e) => setDocSemester(e.target.value as TopperNote["semester"])}
                         className={`w-full p-2.5 rounded-xl border ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                       >
                         {semesters.filter((s) => s !== "All").map((s) => (
@@ -1752,7 +1752,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         value={docAuthor}
                         onChange={(e) => setDocAuthor(e.target.value)}
                         className={`w-full p-2.5 rounded-xl border ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                       />
                     </div>
@@ -1765,7 +1765,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         value={docAuthorRank}
                         onChange={(e) => setDocAuthorRank(e.target.value)}
                         className={`w-full p-2.5 rounded-xl border ${
-                          isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                          isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                         }`}
                       />
                     </div>
@@ -1779,25 +1779,25 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       value={docDescription}
                       onChange={(e) => setDocDescription(e.target.value)}
                       className={`w-full p-2.5 rounded-xl border ${
-                        isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-300"
+                        isDark ? "bg-[#141A18] border-[#242E2A] text-white" : "bg-white border-[#C4D1CA]"
                       }`}
                     />
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#DFE6E2] dark:border-[#242E2A]">
                     <button
                       type="button"
                       onClick={() => {
                         setIsUploadDocModalOpen(false);
                         setUploadError(null);
                       }}
-                      className="px-4 py-2 rounded-xl text-slate-400 hover:text-white font-bold cursor-pointer"
+                      className="px-4 py-2 rounded-xl text-[#8FA199] hover:text-white font-bold cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold shadow-md cursor-pointer flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-xl bg-[#2F5D50] dark:bg-[#387262] hover:bg-[#244A3F] dark:hover:bg-[#448573] text-white font-bold shadow-md cursor-pointer flex items-center gap-2"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>Upload & Add to Vault</span>

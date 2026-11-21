@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  WifiOff,
-  Wifi,
-  AlertTriangle,
-  ShieldCheck,
-  RefreshCw,
-  X,
-  Info,
-} from "lucide-react";
+import { WifiOff, Wifi, ShieldCheck, RefreshCw, X } from "lucide-react";
 
 interface OfflineBannerProps {
   isOnline: boolean;
@@ -21,16 +13,12 @@ interface OfflineBannerProps {
 
 export const OfflineBanner: React.FC<OfflineBannerProps> = ({
   isOnline,
-  isNavigatorOnline,
-  isSimulatedOffline,
   wasOffline = false,
-  onToggleSimulateOffline,
   onResetWasOffline = () => {},
   onRetry,
 }) => {
   const [showRestoredBanner, setShowRestoredBanner] = useState<boolean>(false);
 
-  // When connection transitions from offline to online, show reassurance banner for 5 seconds
   useEffect(() => {
     if (wasOffline && isOnline) {
       setShowRestoredBanner(true);
@@ -42,28 +30,23 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
     }
   }, [wasOffline, isOnline, onResetWasOffline]);
 
-  // If online and restored banner is not showing, don't show the offline banner
   if (isOnline && !showRestoredBanner) {
     return null;
   }
 
-  // Connection Restored Banner
   if (isOnline && showRestoredBanner) {
     return (
       <div
         id="online-restored-banner"
         role="status"
         aria-live="polite"
-        className="w-full bg-emerald-600 text-white px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-2.5 shadow-md border-b border-emerald-700"
+        className="w-full bg-[#2F5D50] dark:bg-[#1E3B33] text-white border-b border-[#244A3F] dark:border-[#2A4E43]"
       >
-        <div className="w-full flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3 text-xs sm:text-sm font-medium">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="inline-flex rounded-full h-2.5 w-2.5 bg-emerald-100"></span>
-            </span>
-            <Wifi className="w-4 h-4 text-emerald-100 shrink-0" />
+            <Wifi className="w-4 h-4 text-[#DFC29B] shrink-0" />
             <span>
-              <strong>Connection Restored:</strong> You are back online! Create Listing, live negotiation chat, and cloud sync are fully active.
+              <strong>Connection Restored:</strong> You are back online. Create Listing, live negotiation chat, and cloud sync are active.
             </span>
           </div>
 
@@ -73,7 +56,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
               setShowRestoredBanner(false);
               onResetWasOffline();
             }}
-            className="p-1 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700/60 transition-colors cursor-pointer shrink-0"
+            className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 cursor-pointer shrink-0"
             title="Dismiss notification"
             aria-label="Dismiss notification"
           >
@@ -84,55 +67,38 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
     );
   }
 
-  // Disconnected / Offline Banner
   return (
     <div
       id="offline-banner"
       role="alert"
       aria-live="assertive"
-      className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-rose-700 text-white shadow-lg border-b border-amber-800"
+      className="w-full bg-[#7A4B23] dark:bg-[#3A2714] text-white border-b border-[#5E3818] dark:border-[#5C4124]"
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-3">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          {/* Main Status Information */}
           <div className="flex items-start sm:items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-black/20 border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
-              <WifiOff className="w-5 h-5 text-amber-200" />
+            <div className="w-9 h-9 rounded-xl bg-black/20 border border-white/15 flex items-center justify-center shrink-0">
+              <WifiOff className="w-4 h-4 text-[#F4EFE6]" />
             </div>
 
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 text-left">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="flex h-2 w-2 relative">
-                  <span className="inline-flex rounded-full h-2 w-2 bg-rose-400"></span>
-                </span>
-                <span className="font-extrabold text-sm tracking-tight text-white">
+                <span className="font-semibold text-sm tracking-tight text-white">
                   Offline Mode Active
                 </span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-black/25 text-amber-200 border border-amber-300/30">
+                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-black/20 text-[#F4EFE6] border border-white/15">
                   No Internet Connection
                 </span>
               </div>
-              <p className="text-xs text-amber-100/90 leading-normal">
-                You are currently disconnected from the campus network. Cached listings remain viewable, but{" "}
-                <strong className="text-white underline decoration-amber-300 decoration-1 underline-offset-2">
-                  Create Listing
-                </strong>{" "}
-                and{" "}
-                <strong className="text-white underline decoration-amber-300 decoration-1 underline-offset-2">
-                  Live Chat
-                </strong>{" "}
-                are disabled to prevent data loss.
+              <p className="text-xs text-[#F4EFE6]/90 leading-normal">
+                Cached listings remain viewable, while <strong>Create Listing</strong> and <strong>Live Chat</strong> are paused until you reconnect.
               </p>
             </div>
           </div>
 
-          {/* Controls & Badges */}
           <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
-            <div
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/20 text-white/90 text-[11px] font-semibold border border-white/10"
-              title="Data protection prevents partial writes to Firestore or lost messages"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/20 text-white/90 text-[11px] font-medium border border-white/15">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#DFC29B]" />
               <span>Data Protection</span>
             </div>
 
@@ -140,7 +106,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/25 hover:bg-black/35 text-white border border-white/20 text-xs font-bold transition-colors cursor-pointer select-none"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F4EFE6] hover:bg-white text-[#18201C] text-xs font-semibold cursor-pointer select-none"
                 title="Re-check network connectivity"
               >
                 <RefreshCw className="w-3.5 h-3.5" />

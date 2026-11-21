@@ -93,16 +93,16 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
 
   // Parity status calculation
   let parityLabel = "Fair & Balanced Trade";
-  let parityColor = "text-emerald-500 bg-emerald-500/10 border-emerald-500/30";
+  let parityColor = "text-[#2F5D50] bg-[#2F5D50] border-[#5BA18C]";
   let parityAngle = 0;
 
   if (Math.abs(valueDelta) <= 50) {
     parityLabel = "⚖️ Perfectly Balanced Fair Swap";
-    parityColor = "text-emerald-500 bg-emerald-500/15 border-emerald-500/30";
+    parityColor = "text-[#2F5D50] bg-[#2F5D50] border-[#5BA18C]";
     parityAngle = 0;
   } else if (valueDelta > 50) {
     parityLabel = `✨ Generous Offer (Seller gains +₹${valueDelta} in value)`;
-    parityColor = "text-indigo-500 bg-indigo-500/15 border-indigo-500/30";
+    parityColor = "text-[#2F5D50] bg-[#2F5D50] border-[#5BA18C]";
     parityAngle = Math.min(15, (valueDelta / targetItemValue) * 20);
   } else {
     parityLabel = `⚠️ Gap of ₹${Math.abs(valueDelta)} (Consider adding cash to balance)`;
@@ -139,24 +139,32 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
             onClick={(e) => e.stopPropagation()}
             className={`w-full max-w-3xl rounded-t-3xl sm:rounded-3xl border-2 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col ${
               isDark
-                ? "bg-slate-900 border-slate-700/80 text-white"
-                : "bg-white border-slate-200 text-slate-900"
+                ? "bg-[#141A18] border-[#242E2A] text-white"
+                : "bg-white border-[#DFE6E2] text-[#18201C]"
             }`}
           >
             {/* Drawer Top Header */}
-            <div className="p-5 border-b flex items-center justify-between bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-indigo-600/10 border-slate-700/50">
+            <div className={`p-5 border-b flex items-center justify-between ${
+              isDark
+                ? "bg-[#111715] border-[#242E2A]"
+                : "bg-[#F7F9F8] border-[#DFE6E2]"
+            }`}>
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-2xl bg-indigo-600 text-white shadow-md">
+                <div className="p-2 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] text-white shadow-sm">
                   <ArrowLeftRight className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold flex items-center gap-1.5">
                     <span>Dynamic Campus Barter Flow</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-400 border border-indigo-400/30">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                      isDark
+                        ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                        : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
+                    }`}>
                       Split Inspection
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-[#5C6B63] dark:text-[#8FA199]">
                     Compare items side-by-side and balance peer exchange parity with cash or gear
                   </p>
                 </div>
@@ -166,7 +174,7 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                 type="button"
                 id="barter-drawer-close-btn"
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-2 rounded-full hover:bg-[#DFE6E2] dark:hover:bg-[#1B2320] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -177,12 +185,12 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
               {/* Dynamic Animated Parity Meter / Scale */}
               <div
                 className={`p-4 rounded-2xl border text-center relative overflow-hidden ${
-                  isDark ? "bg-slate-800/60 border-slate-700/80" : "bg-slate-50 border-slate-200"
+                  isDark ? "bg-[#1B2320] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
                 }`}
               >
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <Scale className="w-4 h-4 text-indigo-500" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <Scale className="w-4 h-4 text-[#2F5D50]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#8FA199]">
                     Trade Equilibrium Meter
                   </span>
                 </div>
@@ -194,9 +202,9 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                 </div>
 
                 {/* Static Balance Visualizer Bar */}
-                <div className="relative mt-3 h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden max-w-md mx-auto">
+                <div className="relative mt-3 h-2.5 bg-[#DFE6E2] dark:bg-[#242E2A] rounded-full overflow-hidden max-w-md mx-auto">
                   <div
-                    className="absolute top-0 bottom-0 bg-gradient-to-r from-emerald-500 via-indigo-500 to-purple-500 rounded-full"
+                    className="absolute top-0 bottom-0 bg-[#2F5D50] dark:bg-[#387262] rounded-full"
                     style={{
                       left: `${Math.max(10, Math.min(80, 50 + (valueDelta / (targetItemValue || 1)) * 30))}%`,
                       width: "18px",
@@ -204,7 +212,7 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                     }}
                   />
                 </div>
-                <div className="flex justify-between max-w-md mx-auto text-[10px] text-slate-400 font-bold mt-1 px-1">
+                <div className="flex justify-between max-w-md mx-auto text-[10px] text-[#8FA199] font-bold mt-1 px-1">
                   <span>Seller Advantaged</span>
                   <span>Perfect Balance</span>
                   <span>Buyer Advantaged</span>
@@ -217,16 +225,16 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                 <div
                   className={`p-4 rounded-2xl border flex flex-col justify-between ${
                     isDark
-                      ? "bg-slate-800/40 border-slate-700/80"
-                      : "bg-slate-50/80 border-slate-200"
+                      ? "bg-[#1B2320] border-[#242E2A]"
+                      : "bg-[#F7F9F8] border-[#DFE6E2]"
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#8FA199]">
                         Target Item (Seller)
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2F5D50] text-[#7BBFA8] border border-[#5BA18C]">
                         ₹{targetItemValue}
                       </span>
                     </div>
@@ -235,34 +243,34 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                       <img
                         src={listing.imageUrl}
                         alt={listing.title}
-                        className="w-16 h-16 rounded-xl object-cover border border-slate-300 dark:border-slate-700 shadow-sm shrink-0"
+                        className="w-16 h-16 rounded-xl object-cover border border-[#C4D1CA] dark:border-[#242E2A] shadow-sm shrink-0"
                       />
                       <div className="min-w-0">
                         <h4 className="text-sm font-extrabold truncate">{listing.title}</h4>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <div className="flex items-center gap-1.5 text-xs text-[#5C6B63] dark:text-[#8FA199] mt-0.5">
                           <span>{listing.category}</span>
                           <span>•</span>
-                          <span className="text-emerald-500 font-semibold">{listing.condition}</span>
+                          <span className="text-[#2F5D50] font-semibold">{listing.condition}</span>
                         </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                        <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] mt-1 line-clamp-2">
                           {listing.description}
                         </p>
                       </div>
                     </div>
 
                     {/* Seller's Swap Preference */}
-                    <div className="mt-3 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs">
-                      <div className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                    <div className="mt-3 p-2.5 rounded-xl bg-[#2F5D50] border border-[#5BA18C] text-xs">
+                      <div className="font-bold text-[#2F5D50] dark:text-[#7BBFA8] flex items-center gap-1">
                         <Repeat className="w-3.5 h-3.5" />
                         <span>Seller's Desired Exchange:</span>
                       </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                      <p className="text-[11px] text-[#5C6B63] dark:text-[#C5D3CC] mt-0.5">
                         {listing.exchangeFor || "Open to relevant engineering books, calculators, or lab kits."}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-300 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <div className="mt-4 pt-3 border-t border-[#C4D1CA] dark:border-[#242E2A] flex items-center justify-between text-xs text-[#8FA199] font-medium">
                     <span>Seller: <strong>{listing.sellerName}</strong></span>
                     <span>{listing.locationPreference || "Central Library"}</span>
                   </div>
@@ -272,29 +280,29 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                 <div
                   className={`p-4 rounded-2xl border flex flex-col justify-between ${
                     isDark
-                      ? "bg-slate-800/40 border-slate-700/80"
-                      : "bg-slate-50/80 border-slate-200"
+                      ? "bg-[#1B2320] border-[#242E2A]"
+                      : "bg-[#F7F9F8] border-[#DFE6E2]"
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#8FA199]">
                         Your Proposed Offer
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2F5D50] text-[#7BBFA8] border border-[#5BA18C]">
                         ₹{totalOfferedValue} Total
                       </span>
                     </div>
 
                     {/* Mode Toggle: Campus Preset vs Custom Gear */}
-                    <div className="flex rounded-xl p-1 bg-slate-200 dark:bg-slate-800 mb-3 text-xs font-bold">
+                    <div className="flex rounded-xl p-1 bg-[#DFE6E2] dark:bg-[#1B2320] mb-3 text-xs font-bold">
                       <button
                         type="button"
                         onClick={() => setSelectedOfferType("preset")}
                         className={`flex-1 py-1 rounded-lg transition-colors cursor-pointer ${
                           selectedOfferType === "preset"
-                            ? "bg-indigo-600 text-white shadow-xs"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                            ? "bg-[#2F5D50] text-white shadow-xs"
+                            : "text-[#5C6B63] hover:text-[#18201C] dark:hover:text-white"
                         }`}
                       >
                         Popular Campus Gear
@@ -304,8 +312,8 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                         onClick={() => setSelectedOfferType("custom")}
                         className={`flex-1 py-1 rounded-lg transition-colors cursor-pointer ${
                           selectedOfferType === "custom"
-                            ? "bg-indigo-600 text-white shadow-xs"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                            ? "bg-[#2F5D50] text-white shadow-xs"
+                            : "text-[#5C6B63] hover:text-[#18201C] dark:hover:text-white"
                         }`}
                       >
                         Custom Item
@@ -314,16 +322,16 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
 
                     {selectedOfferType === "preset" ? (
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-400">
+                        <label className="text-[11px] font-bold text-[#8FA199]">
                           Select Item to Exchange:
                         </label>
                         <select
                           value={selectedPresetId}
                           onChange={(e) => setSelectedPresetId(e.target.value)}
-                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:ring-1 focus:ring-[#2F5D50] ${
                             isDark
-                              ? "bg-slate-900 border-slate-700 text-white"
-                              : "bg-white border-slate-200 text-slate-900"
+                              ? "bg-[#141A18] border-[#242E2A] text-white"
+                              : "bg-white border-[#DFE6E2] text-[#18201C]"
                           }`}
                         >
                           {POPULAR_CAMPUS_TRADE_ITEMS.map((item) => (
@@ -336,7 +344,7 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                     ) : (
                       <div className="space-y-2">
                         <div>
-                          <label className="text-[11px] font-bold text-slate-400">
+                          <label className="text-[11px] font-bold text-[#8FA199]">
                             Your Item Name:
                           </label>
                           <input
@@ -344,15 +352,15 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                             value={customItemName}
                             onChange={(e) => setCustomItemName(e.target.value)}
                             placeholder="e.g. Workshop Tool Kit or Book"
-                            className={`w-full px-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                            className={`w-full px-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-[#2F5D50] ${
                               isDark
-                                ? "bg-slate-900 border-slate-700 text-white"
-                                : "bg-white border-slate-200 text-slate-900"
+                                ? "bg-[#141A18] border-[#242E2A] text-white"
+                                : "bg-white border-[#DFE6E2] text-[#18201C]"
                             }`}
                           />
                         </div>
                         <div>
-                          <label className="text-[11px] font-bold text-slate-400">
+                          <label className="text-[11px] font-bold text-[#8FA199]">
                             Estimated Value (₹):
                           </label>
                           <input
@@ -362,10 +370,10 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                             step="50"
                             value={customItemValue}
                             onChange={(e) => setCustomItemValue(Number(e.target.value))}
-                            className={`w-full px-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                            className={`w-full px-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-[#2F5D50] ${
                               isDark
-                                ? "bg-slate-900 border-slate-700 text-white"
-                                : "bg-white border-slate-200 text-slate-900"
+                                ? "bg-[#141A18] border-[#242E2A] text-white"
+                                : "bg-white border-[#DFE6E2] text-[#18201C]"
                             }`}
                           />
                         </div>
@@ -373,13 +381,13 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                     )}
 
                     {/* Cash Differential Adjustment */}
-                    <div className="mt-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                    <div className="mt-3 p-3 rounded-xl bg-[#EFF4F1] dark:bg-[#141A18] border border-[#DFE6E2] dark:border-[#242E2A]">
                       <div className="flex items-center justify-between text-xs font-bold mb-1.5">
                         <span className="flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                          <DollarSign className="w-3.5 h-3.5 text-[#2F5D50]" />
                           <span>Sweeten Deal with Cash:</span>
                         </span>
-                        <span className="text-emerald-500 font-extrabold">+₹{cashDifference}</span>
+                        <span className="text-[#2F5D50] font-extrabold">+₹{cashDifference}</span>
                       </div>
                       <input
                         type="range"
@@ -388,9 +396,9 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                         step="50"
                         value={cashDifference}
                         onChange={(e) => setCashDifference(Number(e.target.value))}
-                        className="w-full accent-indigo-600 cursor-pointer"
+                        className="w-full accent-[#2F5D50] dark:accent-[#5BA18C] cursor-pointer"
                       />
-                      <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
+                      <div className="flex justify-between text-[10px] text-[#8FA199] font-semibold mt-1">
                         <span>+₹0</span>
                         <span>+₹250</span>
                         <span>+₹500</span>
@@ -399,7 +407,7 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-300 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <div className="mt-4 pt-3 border-t border-[#C4D1CA] dark:border-[#242E2A] flex items-center justify-between text-xs text-[#8FA199] font-medium">
                     <span>Valuation: Item (₹{offeredItemValue}) + Cash (+₹{cashDifference})</span>
                   </div>
                 </div>
@@ -407,17 +415,17 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
 
               {/* Proposal Note Input */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                <label className="text-xs font-bold text-[#5C6B63] dark:text-[#8FA199]">
                   Custom Negotiation Message to Seller:
                 </label>
                 <textarea
                   rows={2}
                   value={tradeNotes}
                   onChange={(e) => setTradeNotes(e.target.value)}
-                  className={`w-full p-3 rounded-2xl text-xs border focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                  className={`w-full p-3 rounded-2xl text-xs border focus:outline-none focus:ring-1 focus:ring-[#2F5D50] ${
                     isDark
-                      ? "bg-slate-800/60 border-slate-700 text-white"
-                      : "bg-slate-50 border-slate-200 text-slate-900"
+                      ? "bg-[#1B2320] border-[#242E2A] text-white"
+                      : "bg-[#F7F9F8] border-[#DFE6E2] text-[#18201C]"
                   }`}
                   placeholder="Mention handover timing or test details..."
                 />
@@ -427,10 +435,10 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
             {/* Footer Action Bar */}
             <div
               className={`p-4 sm:p-5 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${
-                isDark ? "bg-slate-950/80 border-slate-800" : "bg-slate-100 border-slate-200"
+                isDark ? "bg-[#0D1110] border-[#242E2A]" : "bg-[#EFF4F1] border-[#DFE6E2]"
               }`}
             >
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-[#5C6B63]">
                 Peer proposals open directly in encrypted campus chat with structured terms.
               </div>
 
@@ -440,8 +448,8 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                   onClick={onClose}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer w-1/2 sm:w-auto ${
                     isDark
-                      ? "border-slate-700 hover:bg-slate-800 text-slate-300"
-                      : "border-slate-200 hover:bg-slate-200 text-slate-700"
+                      ? "border-[#242E2A] hover:bg-[#1B2320] text-[#C5D3CC]"
+                      : "border-[#DFE6E2] hover:bg-[#DFE6E2] text-[#5C6B63]"
                   }`}
                 >
                   Cancel
@@ -450,7 +458,7 @@ export const BarterComparisonDrawer: React.FC<BarterComparisonDrawerProps> = ({
                   type="button"
                   id="send-barter-proposal-btn"
                   onClick={handleProposeTrade}
-                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer"
+                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg  cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>Send Barter Proposal</span>

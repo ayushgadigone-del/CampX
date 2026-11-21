@@ -50,7 +50,7 @@ const getNegotiationStage = (
     case "deal_proposed":
       return {
         label: "Offer sent",
-        toneClass: "text-amber-700 dark:text-amber-400",
+        toneClass: "text-[#9E6B43] dark:text-[#DFC29B]",
       };
     default:
       return {

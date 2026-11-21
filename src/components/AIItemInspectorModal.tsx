@@ -144,36 +144,36 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
             id="ai-inspector-modal"
             className={`relative w-full max-w-3xl rounded-3xl shadow-2xl border overflow-hidden my-8 ${
               isDark
-                ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
-                : "bg-white border-slate-200 text-slate-900 shadow-slate-300/40"
+                ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] shadow-black/60"
+                : "bg-white border-[#DFE6E2] text-[#18201C] shadow-[#18201C]/10"
             }`}
           >
         {/* Header */}
         <div
           className={`flex items-center justify-between px-6 py-4 border-b ${
             isDark
-              ? "border-slate-850 bg-slate-900/90 text-slate-100"
-              : "border-slate-100 bg-slate-50/90 text-slate-900"
+              ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF]"
+              : "border-[#DFE6E2] bg-[#F7F9F8] text-[#18201C]"
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-sm">
+            <div className="p-2 rounded-xl bg-[#2F5D50] text-white shadow-sm">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                <h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#18201C]"}`}>
                   AI Item Inspector
                 </h2>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                   isDark
-                    ? "bg-indigo-950/80 text-indigo-300 border border-indigo-700/60"
-                    : "bg-indigo-100 text-indigo-700 border border-indigo-200"
+                    ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                    : "bg-[#EFF4F1] text-[#2F5D50] border border-[#C4D9D1]"
                 }`}>
                   gemini-3.8-flash
                 </span>
               </div>
-              <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              <p className={`text-xs ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                 Upload a student item photo for automated condition audit and resale price recommendation
               </p>
             </div>
@@ -182,8 +182,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
             onClick={onClose}
             className={`p-2 rounded-lg transition-colors cursor-pointer ${
               isDark
-                ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+                ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                : "text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2]"
             }`}
           >
             <X className="w-5 h-5" />
@@ -195,7 +195,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
           {/* Sample quick picks */}
           <div>
             <span className={`text-xs font-semibold uppercase tracking-wider block mb-2 ${
-              isDark ? "text-slate-400" : "text-slate-500"
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
             }`}>
               Try a sample student item or upload your own:
             </span>
@@ -206,8 +206,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                   onClick={() => handleSelectSample(item.image)}
                   className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-all group cursor-pointer ${
                     isDark
-                      ? "border-slate-800 hover:border-indigo-500/60 bg-slate-900/60 hover:bg-slate-800/80"
-                      : "border-slate-200 hover:border-indigo-400 bg-slate-50 hover:bg-indigo-50/40"
+                      ? "border-[#242E2A] hover:border-[#5BA18C] bg-[#141A18] hover:bg-[#1B2320]"
+                      : "border-[#DFE6E2] hover:border-[#5BA18C] bg-[#F7F9F8] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   <img
@@ -217,7 +217,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                     referrerPolicy="no-referrer"
                   />
                   <span className={`text-xs font-medium ${
-                    isDark ? "text-slate-200 group-hover:text-indigo-300" : "text-slate-700 group-hover:text-indigo-900"
+                    isDark ? "text-[#ECF2EF] group-hover:text-[#7BBFA8]" : "text-[#5C6B63] group-hover:text-[#2F5D50]"
                   }`}>
                     {item.label}
                   </span>
@@ -230,8 +230,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
           {!selectedImage ? (
             <label className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all text-center group ${
               isDark
-                ? "border-slate-750 hover:border-indigo-500 hover:bg-indigo-950/20"
-                : "border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/20"
+                ? "border-[#242E2A] hover:border-[#5BA18C] hover:bg-[#182823]"
+                : "border-[#C4D1CA] hover:border-[#5BA18C] hover:bg-[#EFF4F1]"
             }`}>
               <input
                 type="file"
@@ -241,22 +241,22 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
               />
               <div className={`p-4 rounded-full transition-colors mb-3 ${
                 isDark
-                  ? "bg-slate-800 group-hover:bg-indigo-900/50 text-slate-300 group-hover:text-indigo-300"
-                  : "bg-slate-100 group-hover:bg-indigo-100 text-slate-500 group-hover:text-indigo-600"
+                  ? "bg-[#1B2320] group-hover:bg-[#182823] text-[#C5D3CC] group-hover:text-[#7BBFA8]"
+                  : "bg-[#EFF4F1] group-hover:bg-[#EFF4F1] text-[#5C6B63] group-hover:text-[#2F5D50]"
               }`}>
                 <Upload className="w-6 h-6" />
               </div>
-              <span className={`text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+              <span className={`text-sm font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                 Click to upload or drag & drop item photo
               </span>
-              <span className={`text-xs mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              <span className={`text-xs mt-1 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                 Supports JPG, PNG, WEBP up to 15MB
               </span>
             </label>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               {/* Image Preview */}
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-inner group">
+              <div className="relative rounded-2xl overflow-hidden border border-[#DFE6E2] bg-[#141A18] shadow-inner group">
                 <img
                   src={selectedImage}
                   alt="Item Preview"
@@ -274,12 +274,12 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                 </button>
 
                 {isAnalyzing && (
-                  <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-white p-4">
-                    <Loader2 className="w-8 h-8 text-indigo-400 mb-3" />
+                  <div className="absolute inset-0 bg-[#0D1110] flex flex-col items-center justify-center text-white p-4">
+                    <Loader2 className="w-8 h-8 text-[#7BBFA8] mb-3" />
                     <span className="text-sm font-semibold">
                       Inspecting with Google Gemini 3.8 Flash...
                     </span>
-                    <span className="text-xs text-slate-300 mt-1 text-center">
+                    <span className="text-xs text-[#C5D3CC] mt-1 text-center">
                       Auditing surface scratches, labels, and calculating fair campus resale price
                     </span>
                   </div>
@@ -291,14 +291,14 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                 {!analysisResult && !isAnalyzing && (
                   <div className={`p-4 rounded-xl border text-center space-y-3 ${
                     isDark
-                      ? "bg-slate-900/60 border-slate-800"
-                      : "bg-slate-50 border-slate-200"
+                      ? "bg-[#141A18] border-[#242E2A]"
+                      : "bg-[#F7F9F8] border-[#DFE6E2]"
                   }`}>
-                    <p className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                    <p className={`text-sm ${isDark ? "text-[#C5D3CC]" : "text-[#5C6B63]"}`}>
                       Photo ready for multimodal inspection with Google Gemini 3.8 Flash.
                     </p>
                     {!isOnline && (
-                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-center gap-2">
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[#DFC29B] text-xs flex items-center justify-center gap-2">
                         <WifiOff className="w-4 h-4 text-amber-500 shrink-0" />
                         <span>Gemini AI requires an active internet connection.</span>
                       </div>
@@ -308,8 +308,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                       disabled={!isOnline}
                       className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium shadow-sm transition-all select-none ${
                         !isOnline
-                          ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
-                          : "bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
+                          ? "bg-[#1B2320] text-[#5C6B63] border border-[#242E2A] cursor-not-allowed"
+                          : "bg-[#2F5D50] hover:bg-[#244A3F] text-white cursor-pointer"
                       }`}
                     >
                       {!isOnline ? (
@@ -341,49 +341,49 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                   <div className="space-y-4">
                     <div className={`p-4 rounded-xl border space-y-2 ${
                       isDark
-                        ? "bg-emerald-950/20 border-emerald-800/50"
-                        : "bg-emerald-50/70 border-emerald-200"
+                        ? "bg-[#182823] border-[#2A4A40]"
+                        : "bg-[#EFF4F1] border-[#C4D9D1]"
                     }`}>
                       <div className="flex items-center justify-between">
                         <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                          isDark ? "text-emerald-400" : "text-emerald-800"
+                          isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                         }`}>
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                          <CheckCircle2 className="w-4 h-4 text-[#2F5D50]" />
                           Inspection Complete
                         </span>
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-950 text-white text-xs font-black shadow-xs border border-slate-800">
-                          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span className="text-slate-200 font-bold">AI Score:</span>
-                          <span className="text-emerald-400 font-black">{analysisResult.inspectionScore}/100</span>
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#0D1110] text-white text-xs font-black shadow-xs border border-[#242E2A]">
+                          <ShieldCheck className="w-4 h-4 text-[#7BBFA8] shrink-0" />
+                          <span className="text-[#ECF2EF] font-bold">AI Score:</span>
+                          <span className="text-[#7BBFA8] font-black">{analysisResult.inspectionScore}/100</span>
                         </div>
                       </div>
 
-                      <h3 className={`text-base font-bold leading-tight ${isDark ? "text-white" : "text-slate-900"}`}>
+                      <h3 className={`text-base font-bold leading-tight ${isDark ? "text-white" : "text-[#18201C]"}`}>
                         {analysisResult.title}
                       </h3>
 
                       <div className="flex flex-wrap gap-2 pt-1">
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border ${
                           isDark
-                            ? "bg-slate-900 border-slate-750 text-slate-300"
-                            : "bg-white border-slate-200 text-slate-700"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#C5D3CC]"
+                            : "bg-white border-[#DFE6E2] text-[#5C6B63]"
                         }`}>
-                          <Tag className="w-3 h-3 text-indigo-500" />
+                          <Tag className="w-3 h-3 text-[#2F5D50]" />
                           Category: {analysisResult.category}
                         </span>
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
                           isDark
-                            ? "bg-amber-950/40 text-amber-300 border-amber-800/50"
-                            : "bg-amber-100 text-amber-900 border-amber-200"
+                            ? "bg-[#251F15] text-[#DFC29B] border-[#4A3B23]"
+                            : "bg-[#FDF6EC] text-[#9E6B43] border-[#EED8B8]"
                         }`}>
                           Condition: {analysisResult.condition}
                         </span>
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 border ${
                           isDark
-                            ? "bg-indigo-950/40 text-indigo-300 border-indigo-800/50"
-                            : "bg-indigo-100 text-indigo-900 border-indigo-200"
+                            ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                            : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                         }`}>
-                          <Zap className="w-3 h-3 text-indigo-500" />
+                          <Zap className="w-3 h-3 text-[#2F5D50]" />
                           Fair Resale: ₹{analysisResult.suggestedPriceMin} – ₹{analysisResult.suggestedPriceMax}
                         </span>
                       </div>
@@ -392,18 +392,18 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                     {/* Dedicated Category & Condition Auto-Suggestion Highlights */}
                     <div className={`p-3.5 rounded-xl border space-y-2.5 text-xs ${
                       isDark
-                        ? "bg-indigo-950/20 border-indigo-800/40 text-slate-200"
-                        : "bg-indigo-50/70 border-indigo-200 text-indigo-950"
+                        ? "bg-[#182823] border-[#2A4A40] text-[#ECF2EF]"
+                        : "bg-[#EFF4F1] border-[#C4D9D1] text-[#2F5D50]"
                     }`}>
                       <div className="flex items-center justify-between font-bold">
-                        <span className={`flex items-center gap-1.5 ${isDark ? "text-indigo-300" : "text-indigo-950"}`}>
-                          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                        <span className={`flex items-center gap-1.5 ${isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"}`}>
+                          <Sparkles className="w-3.5 h-3.5 text-[#2F5D50]" />
                           Form Auto-Fill Suggestions
                         </span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                           isDark
-                            ? "bg-indigo-900/60 text-indigo-300"
-                            : "bg-indigo-200/70 text-indigo-900"
+                            ? "bg-[#182823] text-[#7BBFA8]"
+                            : "bg-[#DFE9E4] text-[#2F5D50]"
                         }`}>
                           {analysisResult.categoryConfidence || 92}% Confidence
                         </span>
@@ -412,17 +412,17 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div className={`p-2.5 rounded-lg border ${
                           isDark
-                            ? "bg-slate-900/90 border-slate-800 text-slate-200"
-                            : "bg-white border-indigo-100 text-slate-900"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                            : "bg-white border-[#C4D9D1] text-[#18201C]"
                         }`}>
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                          <span className="text-[10px] font-bold uppercase text-[#8FA199] block">
                             Auto-Suggested Category
                           </span>
-                          <span className={`font-bold text-sm block ${isDark ? "text-indigo-300" : "text-indigo-900"}`}>
+                          <span className={`font-bold text-sm block ${isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"}`}>
                             {analysisResult.category}
                           </span>
                           {analysisResult.categoryReasoning && (
-                            <p className={`text-[11px] mt-0.5 leading-snug ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                            <p className={`text-[11px] mt-0.5 leading-snug ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                               {analysisResult.categoryReasoning}
                             </p>
                           )}
@@ -430,50 +430,50 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
 
                         <div className={`p-2.5 rounded-lg border ${
                           isDark
-                            ? "bg-slate-900/90 border-slate-800 text-slate-200"
-                            : "bg-white border-indigo-100 text-slate-900"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                            : "bg-white border-[#C4D9D1] text-[#18201C]"
                         }`}>
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                          <span className="text-[10px] font-bold uppercase text-[#8FA199] block">
                             Auto-Suggested Condition
                           </span>
-                          <span className={`font-bold text-sm block ${isDark ? "text-white" : "text-slate-900"}`}>
+                          <span className={`font-bold text-sm block ${isDark ? "text-white" : "text-[#18201C]"}`}>
                             {analysisResult.condition}
                           </span>
                           {analysisResult.conditionReasoning && (
-                            <p className={`text-[11px] mt-0.5 leading-snug ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                            <p className={`text-[11px] mt-0.5 leading-snug ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                               {analysisResult.conditionReasoning}
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <p className={`text-[11px] font-medium ${isDark ? "text-indigo-300" : "text-indigo-700"}`}>
+                      <p className={`text-[11px] font-medium ${isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"}`}>
                         ✨ These verified fields will be automatically selected when you apply this inspection to the Create Listing form.
                       </p>
                     </div>
 
                     <div className="space-y-2 text-xs">
                       <div>
-                        <span className={`font-bold block mb-0.5 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                        <span className={`font-bold block mb-0.5 ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                           Physical Inspection Summary:
                         </span>
                         <p className={`p-2.5 rounded-lg border leading-relaxed ${
                           isDark
-                            ? "bg-slate-900/60 border-slate-800 text-slate-300"
-                            : "bg-slate-50 border-slate-200 text-slate-700"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#C5D3CC]"
+                            : "bg-[#F7F9F8] border-[#DFE6E2] text-[#5C6B63]"
                         }`}>
                           {analysisResult.conditionDetails}
                         </p>
                       </div>
 
                       <div>
-                        <span className={`font-bold block mb-0.5 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                        <span className={`font-bold block mb-0.5 ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                           Key Features Identified:
                         </span>
                         <ul className={`list-disc list-inside space-y-1 p-2.5 rounded-lg border ${
                           isDark
-                            ? "bg-slate-900/60 border-slate-800 text-slate-300"
-                            : "bg-slate-50 border-slate-200 text-slate-700"
+                            ? "bg-[#141A18] border-[#242E2A] text-[#C5D3CC]"
+                            : "bg-[#F7F9F8] border-[#DFE6E2] text-[#5C6B63]"
                         }`}>
                           {analysisResult.keyFeatures.map((f, i) => (
                             <li key={i}>{f}</li>
@@ -483,13 +483,13 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
 
                       {analysisResult.recommendedHandoverTips && (
                         <div>
-                          <span className={`font-bold block mb-0.5 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                          <span className={`font-bold block mb-0.5 ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
                             Handover & Test Tip:
                           </span>
                           <p className={`p-2.5 rounded-lg border leading-relaxed ${
                             isDark
-                              ? "bg-indigo-950/30 border-indigo-800/40 text-indigo-300"
-                              : "bg-indigo-50/60 border-indigo-100 text-indigo-900"
+                              ? "bg-[#182823] border-[#2A4A40] text-[#7BBFA8]"
+                              : "bg-[#EFF4F1] border-[#C4D9D1] text-[#2F5D50]"
                           }`}>
                             💡 {analysisResult.recommendedHandoverTips}
                           </p>
@@ -500,7 +500,7 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                     <div className="pt-2 flex items-center gap-3">
                       <button
                         onClick={handleApply}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
+                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
                       >
                         Apply to Listing Form
                         <ArrowRight className="w-4 h-4" />
@@ -510,8 +510,8 @@ export const AIItemInspectorModal: React.FC<AIItemInspectorModalProps> = ({
                         title="Re-run analysis"
                         className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
                           isDark
-                            ? "border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white"
-                            : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                            ? "border-[#242E2A] text-[#8FA199] hover:bg-[#1B2320] hover:text-white"
+                            : "border-[#DFE6E2] text-[#5C6B63] hover:bg-[#EFF4F1]"
                         }`}
                       >
                         <RefreshCw className="w-4 h-4" />

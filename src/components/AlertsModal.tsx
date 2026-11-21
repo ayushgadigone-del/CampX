@@ -138,15 +138,15 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             id="alerts-modal-content"
             className={`relative w-full max-w-2xl rounded-3xl shadow-2xl border overflow-hidden my-6 ${
               isDark
-                ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/60"
-                : "bg-white border-slate-200 text-slate-900 shadow-slate-300/40"
+                ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] shadow-black/60"
+                : "bg-white border-[#DFE6E2] text-[#18201C] shadow-[#18201C]/10"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
         {/* Modal Header */}
-        <div className="relative px-6 py-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 text-white flex items-center justify-between">
+        <div className="relative px-6 py-5 bg-[#2F5D50] dark:bg-[#23473D] text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center">
               <Bell className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -154,11 +154,11 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                 <h2 className="text-lg font-black tracking-tight text-white">
                   'Notify Me' Listing Alerts
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F4EFE6] text-[#1E3B33] uppercase tracking-wider">
                   Real-time
                 </span>
               </div>
-              <p className="text-xs text-indigo-100">
+              <p className="text-xs text-[#D5E6DF]">
                 Get an instant on-screen toast notification whenever matching equipment is posted
               </p>
             </div>
@@ -175,17 +175,17 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
         {/* Tab Switcher */}
         <div className={`flex border-b px-6 pt-3 gap-2 ${
           isDark
-            ? "border-slate-800 bg-slate-900/60"
-            : "border-slate-200 bg-slate-50/70"
+            ? "border-[#242E2A] bg-[#141A18]"
+            : "border-[#DFE6E2] bg-[#F7F9F8]"
         }`}>
           <button
             onClick={() => setActiveTab("alerts")}
             className={`pb-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === "alerts"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-[#5BA18C] text-[#7BBFA8]"
                 : isDark
-                ? "border-transparent text-slate-400 hover:text-slate-200"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-transparent text-[#8FA199] hover:text-[#ECF2EF]"
+                : "border-transparent text-[#5C6B63] hover:text-[#18201C]"
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -195,10 +195,10 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             onClick={() => setActiveTab("history")}
             className={`pb-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === "history"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-[#5BA18C] text-[#7BBFA8]"
                 : isDark
-                ? "border-transparent text-slate-400 hover:text-slate-200"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-transparent text-[#8FA199] hover:text-[#ECF2EF]"
+                : "border-transparent text-[#5C6B63] hover:text-[#18201C]"
             }`}
           >
             <History className="w-3.5 h-3.5" />
@@ -206,8 +206,8 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             {alertHistory.length > 0 && (
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 isDark
-                  ? "bg-indigo-950/80 text-indigo-300 border border-indigo-800/40"
-                  : "bg-indigo-100 text-indigo-700"
+                  ? "bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                  : "bg-[#EFF4F1] text-[#2F5D50]"
               }`}>
                 {alertHistory.length}
               </span>
@@ -222,17 +222,17 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
               {/* Alert Creation Box */}
               <div className={`p-5 rounded-2xl border shadow-2xs space-y-4 ${
                 isDark
-                  ? "bg-slate-900/60 border-slate-800"
-                  : "bg-indigo-50/60 border-indigo-100/90"
+                  ? "bg-[#141A18] border-[#242E2A]"
+                  : "bg-[#EFF4F1] border-[#C4D9D1]"
               }`}>
                 <div className="flex items-center justify-between">
                   <div className={`flex items-center gap-1.5 text-xs font-extrabold ${
-                    isDark ? "text-indigo-300" : "text-indigo-950"
+                    isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"
                   }`}>
                     <Sparkles className="w-4 h-4 text-amber-500" />
                     <span>Create a New Custom Alert</span>
                   </div>
-                  <span className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <span className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Monitors live posts across campus
                   </span>
                 </div>
@@ -241,17 +241,17 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                     {/* Keyword Input */}
                     <div className="sm:col-span-6 relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                      <Search className="w-3.5 h-3.5 text-[#8FA199] absolute left-3 top-3" />
                       <input
                         id="alert-keyword-input"
                         type="text"
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
                         placeholder="Keyword: e.g. 'Casio Calculator', 'B.S. Grewal'..."
-                        className={`w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium ${
+                        className={`w-full pl-8.5 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#2F5D50] font-medium ${
                           isDark
-                            ? "bg-slate-950/80 border-slate-750 text-white placeholder:text-slate-500"
-                            : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                            ? "bg-[#0D1110] border-[#242E2A] text-white placeholder:text-[#5C6B63]"
+                            : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
                         }`}
                       />
                     </div>
@@ -262,14 +262,14 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                         id="alert-category-select"
                         value={category}
                         onChange={(e) => setCategory(e.target.value as any)}
-                        className={`w-full px-2.5 py-2 text-xs rounded-xl border font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                        className={`w-full px-2.5 py-2 text-xs rounded-xl border font-semibold focus:outline-none focus:ring-2 focus:ring-[#2F5D50] ${
                           isDark
-                            ? "bg-slate-950/80 border-slate-750 text-slate-200"
-                            : "bg-white border-slate-300 text-slate-700"
+                            ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF]"
+                            : "bg-white border-[#C4D1CA] text-[#5C6B63]"
                         }`}
                       >
                         {CATEGORY_OPTIONS.map((cat) => (
-                          <option key={cat} value={cat} className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                          <option key={cat} value={cat} className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
                             {cat === "All" ? "All Categories" : cat}
                           </option>
                         ))}
@@ -279,7 +279,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                     {/* Max Budget Threshold */}
                     <div className="sm:col-span-3">
                       <div className="relative">
-                        <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">
+                        <span className="absolute left-3 top-2 text-xs font-bold text-[#8FA199]">
                           ₹
                         </span>
                         <input
@@ -289,10 +289,10 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                           onChange={(e) => setMaxPrice(e.target.value)}
                           placeholder="Max Price Threshold"
                           min={0}
-                          className={`w-full pl-7 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium ${
+                          className={`w-full pl-7 pr-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#2F5D50] font-medium ${
                             isDark
-                              ? "bg-slate-950/80 border-slate-750 text-white placeholder:text-slate-500"
-                              : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                              ? "bg-[#0D1110] border-[#242E2A] text-white placeholder:text-[#5C6B63]"
+                              : "bg-white border-[#C4D1CA] text-[#18201C] placeholder:text-[#8FA199]"
                           }`}
                         />
                       </div>
@@ -302,7 +302,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                   {/* Budget Quick-Select Chips */}
                   <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}>
                       Budget Threshold:
                     </span>
@@ -318,10 +318,10 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                         onClick={() => setMaxPrice(b.val)}
                         className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
                           maxPrice === b.val
-                            ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                            ? "bg-[#2F5D50] text-white border-[#5BA18C] shadow-xs"
                             : isDark
-                            ? "bg-slate-950 text-slate-300 border-slate-750 hover:bg-emerald-950/30 hover:border-emerald-600/40"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
+                            ? "bg-[#0D1110] text-[#C5D3CC] border-[#242E2A] hover:bg-[#182823] hover:border-[#5BA18C]"
+                            : "bg-white text-[#5C6B63] border-[#DFE6E2] hover:bg-[#EFF4F1] hover:text-[#2F5D50] hover:border-[#C4D9D1]"
                         }`}
                       >
                         {b.label}
@@ -331,7 +331,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setMaxPrice("")}
-                        className="text-[10px] font-semibold text-slate-400 hover:text-rose-500 ml-1 cursor-pointer"
+                        className="text-[10px] font-semibold text-[#8FA199] hover:text-rose-500 ml-1 cursor-pointer"
                       >
                         Clear budget
                       </button>
@@ -341,7 +341,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                   {/* Preset Pills */}
                   <div className="space-y-1.5 pt-1">
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                      isDark ? "text-slate-400" : "text-slate-500"
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}>
                       Popular Student Presets (With Budgets):
                     </span>
@@ -353,8 +353,8 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                           onClick={() => handleApplyPreset(preset)}
                           className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border shadow-2xs transition-all cursor-pointer flex items-center gap-1 ${
                             isDark
-                              ? "bg-slate-950 hover:bg-indigo-600 text-slate-200 hover:text-white border-slate-750"
-                              : "bg-white hover:bg-indigo-600 hover:text-white text-slate-700 border-slate-200"
+                              ? "bg-[#0D1110] hover:bg-[#2F5D50] text-[#ECF2EF] hover:text-white border-[#242E2A]"
+                              : "bg-white hover:bg-[#2F5D50] hover:text-white text-[#5C6B63] border-[#DFE6E2]"
                           }`}
                         >
                           <Plus className="w-2.5 h-2.5" />
@@ -368,7 +368,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
 
                   {/* Submit Button */}
                   <div className="flex items-center justify-between pt-1">
-                    <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    <p className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                       {maxPrice
                         ? `🎯 Only notify when priced ≤ ₹${maxPrice}`
                         : "🔔 Notifies for all matching items (any budget)"}
@@ -377,7 +377,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                       id="submit-alert-btn"
                       type="submit"
                       disabled={!keyword.trim() && category === "All"}
-                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-750 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+                      className="px-4 py-2 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] disabled:bg-[#DFE6E2] dark:disabled:bg-[#242E2A] disabled:text-[#8FA199] text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
                     >
                       <Bell className="w-3.5 h-3.5" />
                       <span>Set Alert</span>
@@ -390,12 +390,12 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className={`text-xs font-extrabold flex items-center gap-1.5 ${
-                    isDark ? "text-slate-200" : "text-slate-800"
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}>
-                    <Tag className="w-3.5 h-3.5 text-indigo-500" />
+                    <Tag className="w-3.5 h-3.5 text-[#2F5D50]" />
                     <span>Your Active Subscriptions ({alerts.length})</span>
                   </h3>
-                  <span className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <span className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Triggers on-screen toast on new post
                   </span>
                 </div>
@@ -403,14 +403,14 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                 {alerts.length === 0 ? (
                   <div className={`p-8 text-center rounded-2xl border border-dashed space-y-2 ${
                     isDark
-                      ? "bg-slate-900/40 border-slate-800"
-                      : "bg-slate-50 border-slate-300"
+                      ? "bg-[#141A18] border-[#242E2A]"
+                      : "bg-[#F7F9F8] border-[#C4D1CA]"
                   }`}>
-                    <Bell className="w-8 h-8 text-slate-500 mx-auto" />
-                    <p className={`text-xs font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                    <Bell className="w-8 h-8 text-[#5C6B63] mx-auto" />
+                    <p className={`text-xs font-bold ${isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"}`}>
                       No active alerts set
                     </p>
-                    <p className={`text-[11px] max-w-sm mx-auto ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    <p className={`text-[11px] max-w-sm mx-auto ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                       Choose a preset above or type in what you need (e.g., 'Casio Calculator') so you never miss a deal!
                     </p>
                   </div>
@@ -423,15 +423,15 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                         className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           justAddedId === alert.id
                             ? isDark
-                              ? "bg-emerald-950/40 border-emerald-600/50 shadow-sm"
-                              : "bg-emerald-50/70 border-emerald-300 shadow-sm"
+                              ? "bg-[#182823] border-[#5BA18C] shadow-sm"
+                              : "bg-[#EFF4F1] border-[#C4D9D1] shadow-sm"
                             : alert.active
                             ? isDark
-                              ? "bg-slate-900/70 border-slate-800 hover:border-indigo-500/50 shadow-2xs"
-                              : "bg-white border-slate-200 hover:border-indigo-200 shadow-2xs"
+                              ? "bg-[#141A18] border-[#242E2A] hover:border-[#5BA18C] shadow-2xs"
+                              : "bg-white border-[#DFE6E2] hover:border-[#C4D9D1] shadow-2xs"
                             : isDark
-                            ? "bg-slate-900/30 border-slate-850 opacity-60"
-                            : "bg-slate-50/70 border-slate-200 opacity-60"
+                            ? "bg-[#141A18] border-[#242E2A] opacity-60"
+                            : "bg-[#F7F9F8] border-[#DFE6E2] opacity-60"
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -439,25 +439,25 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                             className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                               alert.active
                                 ? isDark
-                                  ? "bg-amber-500/20 text-amber-400"
-                                  : "bg-amber-100 text-amber-700"
+                                  ? "bg-amber-500/20 text-[#DFC29B]"
+                                  : "bg-[#FDF6EC] text-[#9E6B43]"
                                 : isDark
-                                ? "bg-slate-800 text-slate-500"
-                                : "bg-slate-200 text-slate-400"
+                                ? "bg-[#1B2320] text-[#5C6B63]"
+                                : "bg-[#DFE6E2] text-[#8FA199]"
                             }`}
                           >
                             <Bell className="w-4 h-4" />
                           </div>
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                              <span className={`text-sm font-bold ${isDark ? "text-white" : "text-[#18201C]"}`}>
                                 {alert.keyword || "All Items in Category"}
                               </span>
                               {alert.category && (
                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
                                   isDark
-                                    ? "bg-indigo-950/60 text-indigo-300 border-indigo-800/40"
-                                    : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                                    ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                                    : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                                 }`}>
                                   {alert.category === "All" ? "Any Category" : alert.category}
                                 </span>
@@ -465,25 +465,25 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                               {alert.maxPrice !== undefined && alert.maxPrice > 0 ? (
                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border flex items-center gap-1 ${
                                   isDark
-                                    ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/40"
-                                    : "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                    ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                                    : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                                 }`}>
                                   🎯 Budget: ≤ ₹{alert.maxPrice}
                                 </span>
                               ) : (
                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${
                                   isDark
-                                    ? "bg-slate-800 text-slate-400 border-slate-700"
-                                    : "bg-slate-100 text-slate-600 border border-slate-200"
+                                    ? "bg-[#1B2320] text-[#8FA199] border-[#242E2A]"
+                                    : "bg-[#EFF4F1] text-[#5C6B63] border border-[#DFE6E2]"
                                 }`}>
                                   Budget: Any
                                 </span>
                               )}
                             </div>
-                            <div className={`flex items-center gap-2 mt-1 text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                            <div className={`flex items-center gap-2 mt-1 text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                               <span>
                                 Status:{" "}
-                                <strong className={alert.active ? (isDark ? "text-emerald-400" : "text-emerald-600") : "text-slate-500"}>
+                                <strong className={alert.active ? (isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]") : "text-[#5C6B63]"}>
                                   {alert.active ? "Listening" : "Paused"}
                                 </strong>
                               </span>
@@ -504,8 +504,8 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                             title="Simulate posting a matching item to test the on-screen toast"
                             className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-colors shadow-2xs cursor-pointer ${
                               isDark
-                                ? "bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border-amber-800/50"
-                                : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200"
+                                ? "bg-[#251F15] hover:bg-[#251F15] text-[#DFC29B] border-[#4A3B23]"
+                                : "bg-[#FDF6EC] hover:bg-[#FDF6EC] text-[#9E6B43] border-[#EED8B8]"
                             }`}
                           >
                             <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -519,11 +519,11 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                             className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                               alert.active
                                 ? isDark
-                                  ? "bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-750"
-                                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                                  ? "bg-[#1B2320] text-[#ECF2EF] border-[#242E2A] hover:bg-[#222D29]"
+                                  : "bg-white text-[#5C6B63] border-[#C4D1CA] hover:bg-[#EFF4F1]"
                                 : isDark
-                                ? "bg-indigo-950/60 text-indigo-300 border-indigo-800/50"
-                                : "bg-indigo-50 text-indigo-700 border-indigo-200"
+                                ? "bg-[#182823] text-[#7BBFA8] border-[#2A4A40]"
+                                : "bg-[#EFF4F1] text-[#2F5D50] border-[#C4D9D1]"
                             }`}
                           >
                             {alert.active ? "Pause" : "Resume"}
@@ -533,7 +533,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteAlert(alert.id)}
-                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl text-[#8FA199] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                             title="Delete alert"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -550,10 +550,10 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className={`text-xs font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+                  <h3 className={`text-xs font-extrabold ${isDark ? "text-white" : "text-[#18201C]"}`}>
                     Recent Matched Items Triggered by Alerts
                   </h3>
-                  <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <p className={`text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     Items that satisfied your alert criteria when posted
                   </p>
                 </div>
@@ -570,12 +570,12 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
               {alertHistory.length === 0 ? (
                 <div className={`p-8 text-center rounded-2xl border border-dashed space-y-2 ${
                   isDark
-                    ? "bg-slate-900/40 border-slate-800"
-                    : "bg-slate-50 border-slate-300"
+                    ? "bg-[#141A18] border-[#242E2A]"
+                    : "bg-[#F7F9F8] border-[#C4D1CA]"
                 }`}>
-                  <History className="w-8 h-8 text-slate-500 mx-auto" />
-                  <p className={`text-xs font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>No alert triggers yet</p>
-                  <p className={`text-[11px] max-w-sm mx-auto ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <History className="w-8 h-8 text-[#5C6B63] mx-auto" />
+                  <p className={`text-xs font-bold ${isDark ? "text-[#ECF2EF]" : "text-[#5C6B63]"}`}>No alert triggers yet</p>
+                  <p className={`text-[11px] max-w-sm mx-auto ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
                     When someone lists an item matching your keywords or you click 'Test Alert', it will show up here!
                   </p>
                 </div>
@@ -586,31 +586,31 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                       key={item.id}
                       className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 shadow-2xs ${
                         isDark
-                          ? "bg-slate-900/70 border-slate-800 hover:border-indigo-500/50"
-                          : "bg-white border-slate-200 hover:border-indigo-200"
+                          ? "bg-[#141A18] border-[#242E2A] hover:border-[#5BA18C]"
+                          : "bg-white border-[#DFE6E2] hover:border-[#C4D9D1]"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <img
                           src={item.listing.imageUrl}
                           alt={item.listing.title}
-                          className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0"
+                          className="w-12 h-12 rounded-xl object-cover border border-[#242E2A] shrink-0"
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className={`text-xs font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                            <span className={`text-xs font-bold ${isDark ? "text-white" : "text-[#18201C]"}`}>
                               {item.listing.title}
                             </span>
                             <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                               isDark
-                                ? "bg-amber-950/60 text-amber-300 border border-amber-800/40"
-                                : "bg-amber-100 text-amber-800"
+                                ? "bg-[#251F15] text-[#DFC29B] border border-[#4A3B23]"
+                                : "bg-[#FDF6EC] text-[#9E6B43]"
                             }`}>
                               Matched: "{item.alertKeyword}"
                             </span>
                           </div>
-                          <div className={`flex items-center gap-2 mt-0.5 text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                            <span className="font-bold text-indigo-400">
+                          <div className={`flex items-center gap-2 mt-0.5 text-[11px] ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`}>
+                            <span className="font-bold text-[#7BBFA8]">
                               ₹{item.listing.price}
                             </span>
                             <span>•</span>
@@ -633,8 +633,8 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
                         }}
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer ${
                           isDark
-                            ? "bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-800/50"
-                            : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
+                            ? "bg-[#182823] hover:bg-[#182823] text-[#7BBFA8] border border-[#2A4A40]"
+                            : "bg-[#EFF4F1] hover:bg-[#EFF4F1] text-[#2F5D50]"
                         }`}
                       >
                         <span>View Item</span>
@@ -651,16 +651,16 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({
         {/* Modal Footer */}
         <div className={`px-6 py-4 border-t flex items-center justify-between ${
           isDark
-            ? "border-slate-800 bg-slate-900/90 text-slate-400"
-            : "border-slate-200 bg-slate-50 text-slate-500"
+            ? "border-[#242E2A] bg-[#141A18] text-[#8FA199]"
+            : "border-[#DFE6E2] bg-[#F7F9F8] text-[#5C6B63]"
         }`}>
           <div className="flex items-center gap-1.5 text-[11px]">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#2F5D50] shrink-0" />
             <span>Alerts automatically check all newly posted items in real-time</span>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold transition-colors cursor-pointer"
           >
             Done
           </button>

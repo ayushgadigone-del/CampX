@@ -154,26 +154,25 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
   return (
     <div
       id="price-trend-dashboard-widget"
-      className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden transition-all duration-200"
+      className="bg-white dark:bg-[#141A18] rounded-2xl border border-[#DFE6E2] dark:border-[#242E2A] overflow-hidden"
     >
       {/* Widget Header Banner */}
-      <div className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 border-b border-slate-200/80">
+      <div className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 bg-[#F3F5F2] dark:bg-[#111715] border-b border-[#DFE6E2] dark:border-[#242E2A]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#2F5D50] dark:bg-[#387262] text-white flex items-center justify-center shrink-0">
             <BarChart2 className="w-5 h-5" />
           </div>
-          <div>
+          <div className="text-left">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
-                7-Day Price Trend & Fair Value Index
+              <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF] tracking-tight">
+                7-Day Price Trend &amp; Fair Value Index
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EFF4F1] dark:bg-[#182823] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40]">
                 {selectedCategory}
               </span>
             </div>
-            <p className="text-xs text-slate-500">
-              Campus market valuation index • Helps you evaluate if an item is
-              fairly priced
+            <p className="text-xs text-[#5C6B63] dark:text-[#8FA199]">
+              Campus market valuation index · Helps you evaluate if an item is fairly priced
             </p>
           </div>
         </div>
@@ -182,21 +181,21 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <div className="flex items-center justify-end gap-1.5">
-              <span className="text-xs font-semibold text-slate-500">
+              <span className="text-xs font-medium text-[#5C6B63] dark:text-[#8FA199]">
                 Avg Price:
               </span>
-              <span className="text-base font-black text-slate-950">
+              <span className="text-base font-bold font-mono text-[#18201C] dark:text-[#ECF2EF]">
                 ₹{currentDayPrice}
               </span>
             </div>
-            <div className="flex items-center justify-end gap-1 text-[11px] font-bold">
+            <div className="flex items-center justify-end gap-1 text-[11px] font-semibold">
               {percentChange <= 0 ? (
-                <span className="text-emerald-600 flex items-center gap-0.5">
+                <span className="text-[#2F5D50] dark:text-[#7BBFA8] flex items-center gap-0.5">
                   <TrendingDown className="w-3 h-3" />
                   {Math.abs(percentChange)}% below 7d peak
                 </span>
               ) : (
-                <span className="text-amber-600 flex items-center gap-0.5">
+                <span className="text-[#9E6B43] dark:text-[#C89B6E] flex items-center gap-0.5">
                   <TrendingUp className="w-3 h-3" />
                   +{percentChange}% 7d shift
                 </span>
@@ -207,7 +206,7 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
           <button
             id="toggle-price-trend-widget-btn"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#1B2320] text-[#18201C] dark:text-[#ECF2EF] text-xs font-semibold flex items-center gap-1 cursor-pointer"
             title={isExpanded ? "Minimize price chart" : "Expand price chart"}
           >
             <span>{isExpanded ? "Hide Trend" : "View Trend"}</span>
@@ -224,39 +223,39 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
       {isExpanded && (
         <div className="p-4 sm:p-6 space-y-4">
           {/* Summary Pills Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-left">
+            <div className="p-3 rounded-xl bg-[#F7F9F8] dark:bg-[#1B2320] border border-[#DFE6E2] dark:border-[#242E2A]">
+              <span className="text-[10px] font-semibold text-[#5C6B63] dark:text-[#8FA199] uppercase tracking-wider block">
                 Average Listed Price
               </span>
-              <span className="text-base font-extrabold text-indigo-700">
+              <span className="text-base font-bold font-mono text-[#2F5D50] dark:text-[#7BBFA8]">
                 ₹{currentDayPrice}
               </span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <div className="p-3 rounded-xl bg-[#F7F9F8] dark:bg-[#1B2320] border border-[#DFE6E2] dark:border-[#242E2A]">
+              <span className="text-[10px] font-semibold text-[#5C6B63] dark:text-[#8FA199] uppercase tracking-wider block">
                 Fair Value Range
               </span>
-              <span className="text-base font-extrabold text-emerald-700">
+              <span className="text-base font-bold font-mono text-[#18201C] dark:text-[#ECF2EF]">
                 ₹{baseline.minFair} – ₹{baseline.maxFair}
               </span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <div className="p-3 rounded-xl bg-[#F7F9F8] dark:bg-[#1B2320] border border-[#DFE6E2] dark:border-[#242E2A]">
+              <span className="text-[10px] font-semibold text-[#5C6B63] dark:text-[#8FA199] uppercase tracking-wider block">
                 Active Listings
               </span>
-              <span className="text-base font-extrabold text-slate-800">
+              <span className="text-base font-bold font-mono text-[#18201C] dark:text-[#ECF2EF]">
                 {categoryListings.length} {categoryListings.length === 1 ? "item" : "items"}
               </span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <div className="p-3 rounded-xl bg-[#F7F9F8] dark:bg-[#1B2320] border border-[#DFE6E2] dark:border-[#242E2A]">
+              <span className="text-[10px] font-semibold text-[#5C6B63] dark:text-[#8FA199] uppercase tracking-wider block">
                 Campus Student Savings
               </span>
-              <span className="text-base font-extrabold text-blue-700">
+              <span className="text-base font-bold text-[#9E6B43] dark:text-[#C89B6E]">
                 ~50–65% off retail
               </span>
             </div>
@@ -271,22 +270,22 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
               >
                 <defs>
                   <linearGradient id="colorAvgPrice" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#2F5D50" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#2F5D50" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#CBD6D0" strokeOpacity={0.5} />
                 <XAxis
                   dataKey="day"
                   tickLine={false}
-                  axisLine={{ stroke: "#cbd5e1" }}
-                  tick={{ fontSize: 11, fill: "#64748b", fontWeight: 600 }}
+                  axisLine={{ stroke: "#CBD6D0" }}
+                  tick={{ fontSize: 11, fill: "#5C6B63", fontWeight: 600 }}
                 />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(val) => `₹${val}`}
-                  tick={{ fontSize: 11, fill: "#64748b", fontWeight: 600 }}
+                  tick={{ fontSize: 11, fill: "#5C6B63", fontWeight: 600 }}
                   domain={["dataMin - 50", "dataMax + 50"]}
                 />
                 <Tooltip
@@ -294,17 +293,17 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="p-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 text-xs space-y-1">
-                          <p className="font-extrabold text-indigo-300">
+                        <div className="p-3 bg-[#141A18] text-[#ECF2EF] rounded-xl shadow-xl border border-[#242E2A] text-xs space-y-1">
+                          <p className="font-semibold text-[#DFC29B]">
                             {data.day} ({data.date})
                           </p>
-                          <p className="text-base font-black text-white">
+                          <p className="text-base font-bold font-mono text-white">
                             Average Price: ₹{data.avgPrice}
                           </p>
-                          <p className="text-emerald-400 font-semibold">
+                          <p className="text-[#7BBFA8] font-medium">
                             Fair Range: ₹{data.fairMin} – ₹{data.fairMax}
                           </p>
-                          <p className="text-[10px] text-slate-400">
+                          <p className="text-[10px] text-[#8FA199]">
                             Based on verified student transactions
                           </p>
                         </div>
@@ -316,26 +315,26 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
                 <Area
                   type="monotone"
                   dataKey="avgPrice"
-                  stroke="#4f46e5"
-                  strokeWidth={3}
+                  stroke="#2F5D50"
+                  strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#colorAvgPrice)"
-                  dot={{ r: 4, fill: "#4f46e5", strokeWidth: 2, stroke: "#ffffff" }}
-                  activeDot={{ r: 6, fill: "#4338ca", stroke: "#ffffff", strokeWidth: 2 }}
+                  dot={{ r: 4, fill: "#2F5D50", strokeWidth: 2, stroke: "#ffffff" }}
+                  activeDot={{ r: 6, fill: "#387262", stroke: "#ffffff", strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           {/* Student Advisor Tip Box */}
-          <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-100 flex items-start gap-2.5 text-xs text-indigo-950">
-            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-[#EFF4F1] dark:bg-[#182823] border border-[#C4D9D1] dark:border-[#2A4A40] flex items-start gap-2.5 text-xs text-[#18201C] dark:text-[#ECF2EF] text-left">
+            <Sparkles className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0 mt-0.5" />
             <div className="flex-1">
-              <span className="font-bold">Student Fair-Price Advisor: </span>
-              <span className="text-indigo-900/90">{baseline.advice}</span>
+              <span className="font-semibold">Student Fair-Price Advisor: </span>
+              <span className="text-[#5C6B63] dark:text-[#8FA199]">{baseline.advice}</span>
             </div>
-            <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+            <div className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-[#2F5D50] dark:text-[#7BBFA8] bg-white dark:bg-[#141A18] px-2.5 py-0.5 rounded-md border border-[#DFE6E2] dark:border-[#242E2A]">
+              <ShieldCheck className="w-3.5 h-3.5" />
               <span>Campus Benchmark</span>
             </div>
           </div>

@@ -268,20 +268,20 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto">
       <div
         id={`listing-detail-${listing.id}`}
-        className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8"
+        className="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-[#141A18] shadow-2xl border border-[#DFE6E2] dark:border-[#242E2A] overflow-hidden my-8"
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#DFE6E2] dark:border-[#242E2A] bg-[#F7F9F8] dark:bg-[#111715]">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40]">
               {listing.category}
             </span>
             <span
               className={`px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs ${
                 listing.condition === "Like New"
-                  ? "bg-emerald-600 border border-emerald-500"
+                  ? "bg-[#2F5D50] border border-[#5BA18C]"
                   : listing.condition === "Good"
-                  ? "bg-blue-600 border border-blue-500"
+                  ? "bg-[#2F5D50] border border-[#5BA18C]"
                   : listing.condition === "Fair"
                   ? "bg-amber-600 border border-amber-500"
                   : "bg-rose-600 border border-rose-500"
@@ -293,8 +293,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               <span
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
                   listing.status === "completed"
-                    ? "bg-emerald-100 text-emerald-900 border-emerald-300"
-                    : "bg-amber-100 text-amber-900 border-amber-300"
+                    ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
+                    : "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border-[#EED8B8] dark:border-[#4A3B23]"
                 }`}
               >
                 {listing.status === "reserved"
@@ -311,15 +311,15 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               id={`detail-header-views-${listing.id}`}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 border select-none ${
                 (listing.views || 0) >= 100
-                  ? "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
-                  : "bg-slate-100 text-slate-700 border-slate-200"
+                  ? "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border-[#EED8B8] dark:border-[#4A3B23] shadow-2xs"
+                  : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] border-[#DFE6E2] dark:border-[#242E2A]"
               }`}
               title={`${listing.views || 0} students have viewed this item on campus`}
             >
               {(listing.views || 0) >= 100 ? (
-                <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
+                <Flame className="w-3.5 h-3.5 text-[#9E6B43] dark:text-[#DFC29B] fill-amber-600" />
               ) : (
-                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                <Eye className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
               )}
               <span>{(listing.views || 0).toLocaleString()} views</span>
             </span>
@@ -339,14 +339,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               <span
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${
                   listing.status === "inactive" || expiryInfo.isExpired
-                    ? "bg-slate-200 text-slate-700"
+                    ? "bg-[#DFE6E2] text-[#5C6B63] dark:text-[#8FA199]"
                     : expiryInfo.isUrgent
-                    ? "bg-amber-100 text-amber-900 border border-amber-300"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border border-[#EED8B8] dark:border-[#4A3B23]"
+                    : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199]"
                 }`}
                 title={`Valid until ${new Date(listing.expiryDate).toLocaleDateString()}`}
               >
-                <Clock className="w-3.5 h-3.5 text-slate-500" />
+                <Clock className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                 <span>{expiryInfo.label}</span>
               </span>
             )}
@@ -360,11 +360,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                 isReported
                   ? "bg-rose-50 text-rose-700 border-rose-200"
-                  : "bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50/60 border-slate-200"
+                  : "bg-white dark:bg-[#141A18] text-[#5C6B63] dark:text-[#8FA199] hover:text-rose-600 hover:bg-rose-50/60 border-[#DFE6E2] dark:border-[#242E2A]"
               }`}
               title="Report suspicious listing or inappropriate content"
             >
-              <Flag className={`w-4 h-4 ${isReported ? "text-rose-600 fill-rose-600" : "text-slate-400"}`} />
+              <Flag className={`w-4 h-4 ${isReported ? "text-rose-600 fill-rose-600" : "text-[#8FA199]"}`} />
               <span className="hidden sm:inline">{isReported ? "Reported" : "Report"}</span>
             </button>
 
@@ -374,19 +374,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               onClick={handleShare}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                 isShared
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                  : "bg-white text-slate-700 hover:text-indigo-600 hover:bg-slate-50 border-slate-200"
+                  ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
+                  : "bg-white dark:bg-[#141A18] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] hover:bg-[#F7F9F8] dark:hover:bg-[#1B2320] border-[#DFE6E2] dark:border-[#242E2A]"
               }`}
               title="Share listing with classmates"
             >
               {isShared ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-600" />
+                  <Check className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>Shared</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="w-4 h-4 text-slate-500" />
+                  <Share2 className="w-4 h-4 text-[#5C6B63] dark:text-[#8FA199]" />
                   <span>Share</span>
                 </>
               )}
@@ -399,13 +399,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-2xs cursor-pointer ${
                   isWishlisted
                     ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
-                    : "bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50 border-slate-200"
+                    : "bg-white dark:bg-[#141A18] text-[#5C6B63] dark:text-[#8FA199] hover:text-rose-600 hover:bg-rose-50 border-[#DFE6E2] dark:border-[#242E2A]"
                 }`}
                 title={isWishlisted ? "Remove from Wishlist" : "Save to Wishlist"}
               >
                 <Heart
                   className={`w-4 h-4 ${
-                    isWishlisted ? "fill-rose-500 text-rose-500" : "text-slate-400"
+                    isWishlisted ? "fill-rose-500 text-rose-500" : "text-[#8FA199]"
                   }`}
                 />
                 <span className="hidden sm:inline">
@@ -415,7 +415,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 cursor-pointer"
+              className="p-2 rounded-lg text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2] dark:hover:bg-[#242E2A] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -426,15 +426,15 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
           {/* Report Success Toast */}
           {reportSuccessToast && (
-            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between font-medium">
+            <div className="p-3.5 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] text-xs flex items-center justify-between font-medium">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                 <span>{reportSuccessToast}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setReportSuccessToast(null)}
-                className="text-emerald-700 hover:text-emerald-900 text-xs font-bold cursor-pointer"
+                className="text-[#2F5D50] dark:text-[#7BBFA8] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] text-xs font-bold cursor-pointer"
               >
                 Dismiss
               </button>
@@ -456,9 +456,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Inactive / Expired Notice Banner with Renewal Action */}
           {(listing.status === "inactive" || expiryInfo.isExpired) && (
-            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="p-3.5 rounded-xl bg-[#FDF6EC] dark:bg-[#251F15] border border-[#EED8B8] dark:border-[#4A3B23] text-[#9E6B43] dark:text-[#DFC29B] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-[#9E6B43] dark:text-[#DFC29B] shrink-0 mt-0.5" />
                 <div>
                   <strong className="block font-bold">Listing Inactive (Past 30-Day Validity)</strong>
                   <span>
@@ -481,8 +481,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           {/* Main Grid: Image + Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div
-              className={`relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 shadow-inner group transition-all duration-300 select-none ${
-                isImageZoomed ? "cursor-zoom-out ring-2 ring-indigo-500 shadow-xl" : "cursor-zoom-in"
+              className={`relative rounded-2xl overflow-hidden border border-[#DFE6E2] dark:border-[#242E2A] bg-[#0D1110] shadow-inner group transition-all duration-300 select-none ${
+                isImageZoomed ? "cursor-zoom-out ring-2 ring-[#2F5D50] shadow-xl" : "cursor-zoom-in"
               }`}
               onClick={() => setIsImageZoomed((prev) => !prev)}
               title={
@@ -503,15 +503,15 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               />
 
               {/* Zoom Status Hint Pill */}
-              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950/90 text-white text-xs font-bold border border-slate-700/80 shadow-md select-none pointer-events-none">
+              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#0D1110] text-white text-xs font-bold border border-[#242E2A] shadow-md select-none pointer-events-none">
                 {isImageZoomed ? (
                   <>
-                    <ZoomOut className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <ZoomOut className="w-3.5 h-3.5 text-[#DFC29B] shrink-0" />
                     <span>Click picture to zoom out</span>
                   </>
                 ) : (
                   <>
-                    <ZoomIn className="w-3.5 h-3.5 text-indigo-300 shrink-0" />
+                    <ZoomIn className="w-3.5 h-3.5 text-[#7BBFA8] shrink-0" />
                     <span>Click picture to zoom in</span>
                   </>
                 )}
@@ -535,7 +535,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   className="absolute bottom-3 right-3 z-10 px-2.5 py-1.5 rounded-xl bg-black/85 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-colors shadow-md cursor-pointer"
                   title="Open full interactive HD inspection lightbox"
                 >
-                  <Maximize2 className="w-3.5 h-3.5 text-indigo-300" />
+                  <Maximize2 className="w-3.5 h-3.5 text-[#7BBFA8]" />
                   <span>HD Inspector</span>
                 </button>
               )}
@@ -543,31 +543,31 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
             <div className="space-y-4">
               <div>
-                <h1 className="text-xl font-bold text-slate-900 leading-snug">
+                <h1 className="text-xl font-bold text-[#18201C] dark:text-[#ECF2EF] leading-snug">
                   {listing.title}
                 </h1>
                 <div className="flex flex-wrap items-baseline gap-2 mt-2">
                   {listing.listingType === "exchange" ? (
-                    <span className="text-lg font-bold text-purple-700">
+                    <span className="text-lg font-bold text-[#2F5D50] dark:text-[#7BBFA8]">
                       Exchange Only
                     </span>
                   ) : (
                     <>
-                      <span className="text-2xl font-extrabold text-slate-950">
+                      <span className="text-2xl font-extrabold text-[#18201C] dark:text-[#ECF2EF]">
                         ₹{listing.price}
                       </span>
                       {listing.originalPrice && listing.originalPrice > listing.price && (
-                        <span className="line-through text-sm font-semibold text-slate-500">
+                        <span className="line-through text-sm font-semibold text-[#5C6B63] dark:text-[#8FA199]">
                           MRP ₹{listing.originalPrice}
                         </span>
                       )}
                       {listing.originalPrice && listing.originalPrice > listing.price && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40]">
                           Save ₹{listing.originalPrice - listing.price} ({Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF)
                         </span>
                       )}
                       {listing.listingType === "both" && (
-                        <span className="text-xs font-semibold text-slate-500">
+                        <span className="text-xs font-semibold text-[#5C6B63] dark:text-[#8FA199]">
                           (or Open to Swap)
                         </span>
                       )}
@@ -583,12 +583,12 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       const el = document.getElementById("detail-reviews-section");
                       if (el) el.scrollIntoView({ behavior: "auto" });
                     }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100/90 text-amber-900 border border-amber-200/80 transition-colors text-xs font-bold shadow-2xs cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FDF6EC] dark:bg-[#251F15] hover:bg-[#FDF6EC] text-[#9E6B43] dark:text-[#DFC29B] border border-[#EED8B8] dark:border-[#4A3B23] transition-colors text-xs font-bold shadow-2xs cursor-pointer"
                     title="View verified student handover reviews"
                   >
                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 shrink-0" />
                     <span>{totalReviewsCount > 0 ? calculatedAverage.toFixed(1) : "New"}</span>
-                    <span className="text-[11px] font-medium text-amber-800/80">
+                    <span className="text-[11px] font-medium text-[#9E6B43]/80">
                       ({totalReviewsCount} {totalReviewsCount === 1 ? "review" : "reviews"})
                     </span>
                   </button>
@@ -597,19 +597,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     id={`detail-views-social-proof-${listing.id}`}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border select-none ${
                       (listing.views || 0) >= 100
-                        ? "bg-amber-50 text-amber-900 border-amber-300 shadow-2xs"
-                        : "bg-slate-100 text-slate-700 border-slate-200"
+                        ? "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border-[#EED8B8] dark:border-[#4A3B23] shadow-2xs"
+                        : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] border-[#DFE6E2] dark:border-[#242E2A]"
                     }`}
                     title={`${listing.views || 0} campus students viewed this listing`}
                   >
                     {(listing.views || 0) >= 100 ? (
                       <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
                     ) : (
-                      <Eye className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      <Eye className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                     )}
                     <span>{(listing.views || 0).toLocaleString()} views</span>
                     {(listing.views || 0) >= 100 && (
-                      <span className="text-[10px] font-black uppercase text-amber-700 tracking-wider">
+                      <span className="text-[10px] font-black uppercase text-[#9E6B43] dark:text-[#DFC29B] tracking-wider">
                         • Trending
                       </span>
                     )}
@@ -620,10 +620,10 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     id={`detail-stock-badge-${listing.id}`}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold border select-none ${
                       listing.availableStock === 0 || listing.status === "completed"
-                        ? "bg-slate-100 text-slate-700 border-slate-300"
+                        ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] border-[#C4D1CA] dark:border-[#34433D]"
                         : (listing.availableStock ?? 1) === 1
                         ? "bg-rose-100 text-rose-700 border-rose-300 shadow-rose-100 shadow-xs"
-                        : "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-emerald-100 shadow-xs"
+                        : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]  shadow-xs"
                     }`}
                     title="Real-time verified campus inventory"
                   >
@@ -646,7 +646,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                         if (el) el.scrollIntoView({ behavior: "auto" });
                       }, 50);
                     }}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 transition-colors"
+                    className="text-xs font-semibold text-[#2F5D50] dark:text-[#7BBFA8] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] hover:underline flex items-center gap-1 transition-colors"
                   >
                     <MessageSquarePlus className="w-3.5 h-3.5" />
                     <span>Leave Feedback</span>
@@ -663,9 +663,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               />
 
               {listing.exchangeFor && (
-                <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 space-y-1">
+                <div className="p-3 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-xs text-[#2F5D50] dark:text-[#7BBFA8] space-y-1">
                   <div className="font-bold flex items-center gap-1">
-                    <Repeat className="w-3.5 h-3.5 text-purple-600" />
+                    <Repeat className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                     Looking to Exchange For:
                   </div>
                   <p>{listing.exchangeFor}</p>
@@ -673,19 +673,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               )}
 
               {/* Seller info card */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="text-[11px] font-medium text-slate-500">
+              <div className="p-4 rounded-xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] space-y-2">
+                <div className="text-[11px] font-medium text-[#5C6B63] dark:text-[#8FA199]">
                   Listed by
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-white font-semibold flex items-center justify-center text-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#141A18] text-white font-semibold flex items-center justify-center text-sm">
                     {listing.sellerName.charAt(0)}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-slate-900">
+                    <div className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
                       {listing.sellerName}
                     </div>
-                    <span className="text-xs text-slate-500 block">
+                    <span className="text-xs text-[#5C6B63] dark:text-[#8FA199] block">
                       {listing.sellerEmail} · {listing.department || "Engineering"}
                       {listing.year ? ` · ${listing.year}` : ""}
                     </span>
@@ -697,9 +697,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               {listing.status === "completed" && (
                 <div
                   id="detail-completed-notice"
-                  className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5 shadow-xs"
+                  className="p-3.5 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-xs text-[#2F5D50] dark:text-[#7BBFA8] flex items-center gap-2.5 shadow-xs"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                   <div>
                     <strong className="font-bold">Deal Completed:</strong> This item has already been sold and handed over between students. You are viewing this record from campus transaction history.
                   </div>
@@ -710,9 +710,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               {!isOnline && (
                 <div
                   id="detail-offline-notice"
-                  className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2.5"
+                  className="p-3 rounded-xl bg-[#FDF6EC] dark:bg-[#251F15] border border-[#EED8B8] dark:border-[#4A3B23] text-xs text-[#9E6B43] dark:text-[#DFC29B] flex items-center gap-2.5"
                 >
-                  <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
+                  <WifiOff className="w-4 h-4 text-[#9E6B43] dark:text-[#DFC29B] shrink-0" />
                   <span>
                     <strong>Offline Mode:</strong> Live chat and negotiations are temporarily disabled while disconnected to protect your messages from being lost.
                   </span>
@@ -736,7 +736,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   }
                   className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm select-none ${
                     !isOnline
-                      ? "bg-[#EFF4F1] text-[#83928A] border border-[#DFE6E2] cursor-not-allowed"
+                      ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#83928A] border border-[#DFE6E2] dark:border-[#242E2A] cursor-not-allowed"
                       : "bg-[#2F5D50] hover:bg-[#244A3F] text-white cursor-pointer"
                   }`}
                 >
@@ -752,9 +752,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     onClose();
                     onOpenCalendar(listing);
                   }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DFE6E2] bg-white hover:bg-[#EFF4F1] text-[#18201C] font-semibold text-sm cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] text-[#18201C] dark:text-[#ECF2EF] font-semibold text-sm cursor-pointer"
                 >
-                  <CalendarIcon className="w-4 h-4 text-[#2F5D50]" />
+                  <CalendarIcon className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   Schedule Handover
                 </button>
               </div>
@@ -763,18 +763,18 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               {!isSeller && dynamicFaqs.length > 0 && (
                 <div
                   id="ask-seller-faq-section"
-                  className="mt-3 p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-100/90 space-y-2.5"
+                  className="mt-3 p-3.5 rounded-2xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1 rounded-lg bg-indigo-600 text-white">
+                      <div className="p-1 rounded-lg bg-[#2F5D50] text-white">
                         <HelpCircle className="w-3.5 h-3.5" />
                       </div>
-                      <h4 className="text-xs font-bold text-slate-900">
+                      <h4 className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF]">
                         Ask Seller ({listing.category} FAQs)
                       </h4>
                     </div>
-                    <span className="text-[10px] text-indigo-700 font-medium hidden sm:inline">
+                    <span className="text-[10px] text-[#2F5D50] dark:text-[#7BBFA8] font-medium hidden sm:inline">
                       Click to auto-populate chat
                     </span>
                   </div>
@@ -793,8 +793,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                         }}
                         className={`w-full group text-left px-3 py-2 rounded-xl border text-xs flex items-center justify-between gap-2 cursor-pointer ${
                           !isOnline
-                            ? "bg-white/60 border-slate-200 text-slate-400 cursor-not-allowed"
-                            : "bg-white hover:bg-indigo-50/80 border-indigo-100 hover:border-indigo-300 text-slate-700 hover:text-indigo-900 shadow-2xs hover:shadow-xs"
+                            ? "bg-white/60 border-[#DFE6E2] dark:border-[#242E2A] text-[#8FA199] cursor-not-allowed"
+                            : "bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] border-[#C4D9D1] dark:border-[#2A4A40] hover:border-[#C4D9D1] dark:hover:border-[#5BA18C] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#2F5D50] dark:hover:text-[#7BBFA8] shadow-2xs hover:shadow-xs"
                         }`}
                         title={
                           !isOnline
@@ -803,17 +803,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                         }
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          <span className="w-4 h-4 rounded-full bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] flex items-center justify-center text-[10px] font-bold shrink-0">
                             {idx + 1}
                           </span>
                           <span className="font-medium truncate">{faq.question}</span>
                           {faq.contextHint && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold shrink-0 hidden md:inline">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] font-semibold shrink-0 hidden md:inline">
                               {faq.contextHint}
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 text-indigo-600 opacity-80 group-hover:opacity-100 shrink-0 text-[11px] font-semibold">
+                        <div className="flex items-center gap-1 text-[#2F5D50] dark:text-[#7BBFA8] opacity-80 group-hover:opacity-100 shrink-0 text-[11px] font-semibold">
                           <span className="hidden sm:inline">Ask</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </div>
@@ -827,21 +827,21 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Semester-End Bundle Pack Checklist */}
           {listing.isBundle && listing.bundleItems && listing.bundleItems.length > 0 && (
-            <div className="p-4 rounded-xl bg-[#F7F9F8] border border-[#DFE6E2] space-y-2.5">
+            <div className="p-4 rounded-xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-bold text-[#18201C] flex items-center gap-1.5">
-                  <Package className="w-4 h-4 text-[#2F5D50]" />
+                <h3 className="text-sm font-bold text-[#18201C] dark:text-[#ECF2EF] flex items-center gap-1.5">
+                  <Package className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>Included in Semester Bundle Pack ({listing.bundleItems.length} items)</span>
                 </h3>
-                <span className="text-[11px] font-medium text-[#2F5D50]">Single Campus Handover</span>
+                <span className="text-[11px] font-medium text-[#2F5D50] dark:text-[#7BBFA8]">Single Campus Handover</span>
               </div>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {listing.bundleItems.map((bundleItem, idx) => (
                   <li
                     key={`${bundleItem}-${idx}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-[#DFE6E2] text-xs text-[#18201C] font-medium"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-[#141A18] border border-[#DFE6E2] dark:border-[#242E2A] text-xs text-[#18201C] dark:text-[#ECF2EF] font-medium"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#2F5D50] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                     <span>{bundleItem}</span>
                   </li>
                 ))}
@@ -851,11 +851,11 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Description */}
           <div className="space-y-2">
-            <h3 className="text-sm font-bold text-[#18201C] flex items-center gap-1.5">
-              <Tag className="w-4 h-4 text-[#5C6B63]" />
+            <h3 className="text-sm font-bold text-[#18201C] dark:text-[#ECF2EF] flex items-center gap-1.5">
+              <Tag className="w-4 h-4 text-[#5C6B63] dark:text-[#8FA199]" />
               Item Description
             </h3>
-            <p className="text-sm text-[#3B4A42] leading-relaxed bg-[#F7F9F8] p-4 rounded-xl border border-[#DFE6E2]">
+            <p className="text-sm text-[#3B4A42] leading-relaxed bg-[#F7F9F8] dark:bg-[#111715] p-4 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A]">
               {listing.description || "No additional description provided."}
             </p>
           </div>
@@ -863,15 +863,15 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           {/* Tags & Search Keywords */}
           {listing.tags && listing.tags.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5 text-indigo-600" />
+              <h3 className="text-xs font-bold text-[#5C6B63] dark:text-[#8FA199] flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                 <span>Search Keywords & Tags</span>
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {listing.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70"
+                    className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border border-[#C4D9D1] dark:border-[#2A4A40]"
                   >
                     #{tag}
                   </span>
@@ -882,17 +882,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* AI Inspection Details if available */}
           {listing.aiInspection && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-white border-2 border-indigo-200 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+            <div className="p-5 rounded-2xl bg-[#F3F5F2] dark:bg-[#111715] border-2 border-[#C4D9D1] dark:border-[#2A4A40] shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C4D9D1] dark:border-[#2A4A40] pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-xs shrink-0">
-                    <Sparkles className="w-5 h-5 text-amber-300" />
+                  <div className="p-2 rounded-xl bg-[#2F5D50] text-white shadow-xs shrink-0">
+                    <Sparkles className="w-5 h-5 text-[#DFC29B]" />
                   </div>
                   <div>
-                    <h4 className="text-base font-extrabold text-slate-950">
+                    <h4 className="text-base font-extrabold text-[#18201C] dark:text-[#ECF2EF]">
                       Gemini 3.8 Flash Inspection Report
                     </h4>
-                    <span className="text-xs text-indigo-900 font-bold">
+                    <span className="text-xs text-[#2F5D50] dark:text-[#7BBFA8] font-bold">
                       Automated physical condition analysis & fair price estimation
                     </span>
                   </div>
@@ -901,41 +901,41 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 {/* High-Visibility AI Inspection Score Header Badge */}
                 <div
                   id="detail-ai-inspection-score-header-badge"
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white shadow-md border border-slate-800 shrink-0 select-none"
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#0D1110] text-white shadow-md border border-[#242E2A] shrink-0 select-none"
                 >
-                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-xs font-extrabold text-slate-200">
+                  <ShieldCheck className="w-4 h-4 text-[#7BBFA8] shrink-0" />
+                  <span className="text-xs font-extrabold text-[#ECF2EF]">
                     AI Inspection Score:
                   </span>
-                  <span className="text-sm font-black text-emerald-400">
+                  <span className="text-sm font-black text-[#7BBFA8]">
                     {listing.aiInspection.inspectionScore}/100
                   </span>
                 </div>
               </div>
 
               {/* Dedicated Prominent AI Inspection Score & Verification Card */}
-              <div className="p-4 rounded-xl bg-white border-2 border-indigo-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-4 rounded-xl bg-white dark:bg-[#141A18] border-2 border-[#C4D9D1] dark:border-[#2A4A40] shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-950 text-white border-2 border-indigo-500/40 flex flex-col items-center justify-center shrink-0 shadow-md">
-                    <span className="text-2xl font-black text-emerald-400 leading-none">
+                  <div className="w-16 h-16 rounded-2xl bg-[#0D1110] text-white border-2 border-[#5BA18C] flex flex-col items-center justify-center shrink-0 shadow-md">
+                    <span className="text-2xl font-black text-[#7BBFA8] leading-none">
                       {listing.aiInspection.inspectionScore}
                     </span>
-                    <span className="text-[10px] font-extrabold text-slate-300 uppercase tracking-wider mt-0.5">
+                    <span className="text-[10px] font-extrabold text-[#C5D3CC] uppercase tracking-wider mt-0.5">
                       / 100
                     </span>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h5 className="text-sm font-black text-slate-950">
+                      <h5 className="text-sm font-black text-[#18201C] dark:text-[#ECF2EF]">
                         AI Inspection Score: {listing.aiInspection.inspectionScore}/100
                       </h5>
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${
                           listing.aiInspection.inspectionScore >= 90
-                            ? "bg-emerald-100 text-emerald-950 border-emerald-300"
+                            ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
                             : listing.aiInspection.inspectionScore >= 80
-                            ? "bg-indigo-100 text-indigo-950 border-indigo-300"
-                            : "bg-amber-100 text-amber-950 border-amber-300"
+                            ? "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] border-[#C4D9D1] dark:border-[#2A4A40]"
+                            : "bg-[#FDF6EC] dark:bg-[#251F15] text-amber-950 border-[#EED8B8] dark:border-[#4A3B23]"
                         }`}
                       >
                         {listing.aiInspection.inspectionScore >= 90
@@ -945,21 +945,21 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                           : "Grade B • Verified Working Condition"}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-800 font-bold leading-relaxed">
+                    <p className="text-xs text-[#18201C] dark:text-[#ECF2EF] font-bold leading-relaxed">
                       Physical integrity audit score based on high-resolution image analysis and campus condition standards.
                     </p>
                   </div>
                 </div>
 
                 {/* Visual Score Progress Bar */}
-                <div className="w-full sm:w-48 shrink-0 bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
-                  <div className="flex justify-between text-xs font-black text-slate-900">
+                <div className="w-full sm:w-48 shrink-0 bg-[#F7F9F8] dark:bg-[#111715] p-2.5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] space-y-1.5">
+                  <div className="flex justify-between text-xs font-black text-[#18201C] dark:text-[#ECF2EF]">
                     <span>Inspection Rating</span>
-                    <span className="text-indigo-950 font-black">{listing.aiInspection.inspectionScore}%</span>
+                    <span className="text-[#2F5D50] dark:text-[#7BBFA8] font-black">{listing.aiInspection.inspectionScore}%</span>
                   </div>
-                  <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-[#DFE6E2] rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-500"
+                      className="h-full rounded-full bg-[#2F5D50] dark:bg-[#387262]"
                       style={{ width: `${Math.min(100, Math.max(10, listing.aiInspection.inspectionScore))}%` }}
                     />
                   </div>
@@ -968,27 +968,27 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="font-extrabold text-slate-950 block mb-1 text-xs">
+                  <span className="font-extrabold text-[#18201C] dark:text-[#ECF2EF] block mb-1 text-xs">
                     Visual Condition Audit:
                   </span>
-                  <p className="bg-white p-3 rounded-xl border border-indigo-100 text-slate-900 font-semibold leading-relaxed shadow-2xs">
+                  <p className="bg-white dark:bg-[#141A18] p-3 rounded-xl border border-[#C4D9D1] dark:border-[#2A4A40] text-[#18201C] dark:text-[#ECF2EF] font-semibold leading-relaxed shadow-2xs">
                     {listing.aiInspection.conditionDetails}
                   </p>
                 </div>
 
                 <div>
-                  <span className="font-extrabold text-slate-950 block mb-1 text-xs">
+                  <span className="font-extrabold text-[#18201C] dark:text-[#ECF2EF] block mb-1 text-xs">
                     Student Economy Valuation:
                   </span>
-                  <div className="bg-white p-3 rounded-xl border border-indigo-100 space-y-1.5 shadow-2xs">
-                    <div className="flex items-center justify-between text-slate-950 font-bold">
+                  <div className="bg-white dark:bg-[#141A18] p-3 rounded-xl border border-[#C4D9D1] dark:border-[#2A4A40] space-y-1.5 shadow-2xs">
+                    <div className="flex items-center justify-between text-[#18201C] dark:text-[#ECF2EF] font-bold">
                       <span>Fair Campus Resale Range:</span>
-                      <span className="text-emerald-800 font-black text-sm">
+                      <span className="text-[#2F5D50] dark:text-[#7BBFA8] font-black text-sm">
                         ₹{listing.aiInspection.suggestedPriceMin} – ₹{listing.aiInspection.suggestedPriceMax}
                       </span>
                     </div>
                     {listing.aiInspection.authenticityCheck && (
-                      <p className="text-slate-800 font-semibold text-xs pt-1.5 border-t border-slate-100">
+                      <p className="text-[#18201C] dark:text-[#ECF2EF] font-semibold text-xs pt-1.5 border-t border-[#DFE6E2] dark:border-[#242E2A]">
                         {listing.aiInspection.authenticityCheck}
                       </p>
                     )}
@@ -998,14 +998,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
               {listing.aiInspection.keyFeatures && (
                 <div>
-                  <span className="font-bold text-slate-800 block mb-1 text-xs">
+                  <span className="font-bold text-[#18201C] dark:text-[#ECF2EF] block mb-1 text-xs">
                     Identified Product Specifications:
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {listing.aiInspection.keyFeatures.map((feat, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg text-xs bg-white text-slate-700 border border-slate-200 shadow-2xs"
+                        className="px-2.5 py-1 rounded-lg text-xs bg-white dark:bg-[#141A18] text-[#5C6B63] dark:text-[#8FA199] border border-[#DFE6E2] dark:border-[#242E2A] shadow-2xs"
                       >
                         ✓ {feat}
                       </span>
@@ -1015,8 +1015,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               )}
 
               {listing.aiInspection.recommendedHandoverTips && (
-                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
-                  <Zap className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-xl bg-[#FDF6EC] dark:bg-[#251F15] border border-[#EED8B8] dark:border-[#4A3B23] text-xs text-[#9E6B43] dark:text-[#DFC29B] flex items-start gap-2">
+                  <Zap className="w-4 h-4 text-[#9E6B43] dark:text-[#DFC29B] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold block">Handover Verification Advice:</span>
                     <span>{listing.aiInspection.recommendedHandoverTips}</span>
@@ -1028,10 +1028,10 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Active Handover details if scheduled */}
           {listing.handoverDetails && (
-            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs space-y-2">
+            <div className="p-4 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-blue-900 flex items-center gap-1.5">
-                  <CalendarIcon className="w-4 h-4 text-blue-600" />
+                <span className="font-bold text-[#2F5D50] dark:text-[#7BBFA8] flex items-center gap-1.5">
+                  <CalendarIcon className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   Scheduled Campus Handover
                 </span>
                 {listing.handoverDetails.calendarLink && (
@@ -1039,14 +1039,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     href={listing.handoverDetails.calendarLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-700 font-semibold hover:underline flex items-center gap-1"
+                    className="text-[#2F5D50] dark:text-[#7BBFA8] font-semibold hover:underline flex items-center gap-1"
                   >
                     Google Calendar Event
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 )}
               </div>
-              <div className="text-blue-800 space-y-0.5">
+              <div className="text-[#2F5D50] dark:text-[#7BBFA8] space-y-0.5">
                 <div>Date & Time: <strong>{listing.handoverDetails.scheduledDate} at {listing.handoverDetails.scheduledTime}</strong></div>
                 <div>Location: <strong>{listing.handoverDetails.location}</strong></div>
               </div>
@@ -1054,17 +1054,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           )}
 
           {/* Handover Reviews & Feedback Section */}
-          <div id="detail-reviews-section" className="pt-3 space-y-4 border-t border-slate-200">
+          <div id="detail-reviews-section" className="pt-3 space-y-4 border-t border-[#DFE6E2] dark:border-[#242E2A]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#18201C] dark:text-[#ECF2EF] flex items-center gap-2">
                   <Star className="w-5 h-5 fill-amber-400 text-amber-500 shrink-0" />
                   <span>Student Handover Feedback & Ratings</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199]">
                     {totalReviewsCount} {totalReviewsCount === 1 ? "Review" : "Reviews"}
                   </span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] mt-0.5">
                   Verified student feedback submitted after physical item inspection and campus handover
                 </p>
               </div>
@@ -1076,7 +1076,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   setShowReviewForm((prev) => !prev);
                   setReviewSuccessMessage(null);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
               >
                 <MessageSquarePlus className="w-4 h-4" />
                 <span>{showReviewForm ? "Close Form" : "Leave Handover Review"}</span>
@@ -1085,33 +1085,33 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
             {/* Success toast / message */}
             {reviewSuccessMessage && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="p-3.5 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-[#2F5D50] dark:text-[#7BBFA8] text-xs flex items-center gap-2 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8] shrink-0" />
                 <span>{reviewSuccessMessage}</span>
               </div>
             )}
 
             {/* Rating Summary Overview Card */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <div className="p-4 rounded-2xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               {/* Big Score */}
               <div className="flex items-center gap-3">
-                <div className="text-3xl font-extrabold text-slate-950">
+                <div className="text-3xl font-extrabold text-[#18201C] dark:text-[#ECF2EF]">
                   {totalReviewsCount > 0 ? calculatedAverage.toFixed(1) : "—"}
                 </div>
                 <div>
-                  <div className="flex items-center text-amber-400">
+                  <div className="flex items-center text-[#DFC29B]">
                     {[1, 2, 3, 4, 5].map((starIdx) => (
                       <Star
                         key={starIdx}
                         className={`w-4 h-4 ${
                           starIdx <= Math.round(calculatedAverage)
                             ? "fill-amber-400 text-amber-500"
-                            : "text-slate-300 fill-slate-200"
+                            : "text-[#C5D3CC] fill-[#DFE6E2] dark:fill-[#242E2A]"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-slate-500 block mt-0.5">
+                  <span className="text-xs text-[#5C6B63] dark:text-[#8FA199] block mt-0.5">
                     {totalReviewsCount > 0
                       ? `Based on ${totalReviewsCount} campus ${totalReviewsCount === 1 ? "handover" : "handovers"}`
                       : "No handover reviews yet"}
@@ -1120,32 +1120,32 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               </div>
 
               {/* Verified Trust Stats */}
-              <div className="text-xs space-y-1 border-t md:border-t-0 md:border-l border-slate-200 pt-2 md:pt-0 md:pl-4">
+              <div className="text-xs space-y-1 border-t md:border-t-0 md:border-l border-[#DFE6E2] dark:border-[#242E2A] pt-2 md:pt-0 md:pl-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Condition Matched:</span>
-                  <span className="font-bold text-emerald-700">
+                  <span className="text-[#5C6B63] dark:text-[#8FA199] font-medium">Condition Matched:</span>
+                  <span className="font-bold text-[#2F5D50] dark:text-[#7BBFA8]">
                     {totalReviewsCount > 0 ? `${conditionMatchedPercent}%` : "100% Verified"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Student Authenticity:</span>
-                  <span className="font-bold text-blue-700">Campus Verified</span>
+                  <span className="text-[#5C6B63] dark:text-[#8FA199] font-medium">Student Authenticity:</span>
+                  <span className="font-bold text-[#2F5D50] dark:text-[#7BBFA8]">Campus Verified</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Handover Spot:</span>
-                  <span className="font-medium text-slate-800 truncate max-w-[130px]">
+                  <span className="text-[#5C6B63] dark:text-[#8FA199] font-medium">Handover Spot:</span>
+                  <span className="font-medium text-[#18201C] dark:text-[#ECF2EF] truncate max-w-[130px]">
                     {listing.handoverDetails?.location || listing.locationPreference || "Campus Quad"}
                   </span>
                 </div>
               </div>
 
               {/* Prompt Callout */}
-              <div className="bg-white p-3 rounded-xl border border-slate-200/80 text-xs text-slate-600 space-y-1">
-                <div className="font-bold text-slate-900 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <div className="bg-white dark:bg-[#141A18] p-3 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] text-xs text-[#5C6B63] dark:text-[#8FA199] space-y-1">
+                <div className="font-bold text-[#18201C] dark:text-[#ECF2EF] flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>Campus Trust Guarantee</span>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-relaxed">
+                <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
                   Rating physical condition and punctuality keeps the student exchange safe and reliable.
                 </p>
               </div>
@@ -1156,21 +1156,21 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               <form
                 id="detail-review-form"
                 onSubmit={handleSubmitReview}
-                className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 shadow-xs space-y-4"
+                className="p-4 rounded-2xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] shadow-xs space-y-4"
               >
-                <div className="flex items-center justify-between border-b border-indigo-100 pb-2">
-                  <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                    <MessageSquarePlus className="w-4 h-4 text-indigo-600" />
+                <div className="flex items-center justify-between border-b border-[#C4D9D1] dark:border-[#2A4A40] pb-2">
+                  <h4 className="text-sm font-bold text-[#18201C] dark:text-[#ECF2EF] flex items-center gap-1.5">
+                    <MessageSquarePlus className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
                     <span>Leave Handover Feedback for {listing.sellerName}</span>
                   </h4>
-                  <span className="text-[11px] text-zinc-500 font-medium">
+                  <span className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] font-medium">
                     Student Feedback
                   </span>
                 </div>
 
                 {/* Interactive Star Selection */}
                 <div>
-                  <label className="text-xs font-bold text-slate-800 block mb-1">
+                  <label className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF] block mb-1">
                     Your Overall Experience & Item Rating:
                   </label>
                   <div className="flex items-center gap-3">
@@ -1191,14 +1191,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                               className={`w-6 h-6 ${
                                 activeStar
                                   ? "fill-amber-400 text-amber-500"
-                                  : "text-slate-300 fill-slate-100"
+                                  : "text-[#C5D3CC] fill-[#EFF4F1] dark:fill-[#1B2320]"
                               }`}
                             />
                           </button>
                         );
                       })}
                     </div>
-                    <span className="text-xs font-bold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md">
+                    <span className="text-xs font-bold text-[#9E6B43] dark:text-[#DFC29B] bg-[#FDF6EC] dark:bg-[#251F15] px-2 py-0.5 rounded-md">
                       {getRatingLabel(hoverRating || ratingInput)}
                     </span>
                   </div>
@@ -1207,7 +1207,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 {/* Reviewer Details Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-slate-700 block mb-1">
+                    <label className="font-semibold text-[#5C6B63] dark:text-[#8FA199] block mb-1">
                       Your Name / Display:
                     </label>
                     <input
@@ -1216,12 +1216,12 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       value={reviewerNameInput}
                       onChange={(e) => setReviewerNameInput(e.target.value)}
                       placeholder="e.g. Rahul Sharma"
-                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs"
+                      className="w-full px-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold text-slate-700 block mb-1">
+                    <label className="font-semibold text-[#5C6B63] dark:text-[#8FA199] block mb-1">
                       Department / Branch:
                     </label>
                     <input
@@ -1229,18 +1229,18 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       value={departmentInput}
                       onChange={(e) => setDepartmentInput(e.target.value)}
                       placeholder="e.g. Mechanical / CSE"
-                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs"
+                      className="w-full px-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold text-slate-700 block mb-1">
+                    <label className="font-semibold text-[#5C6B63] dark:text-[#8FA199] block mb-1">
                       Year of Study:
                     </label>
                     <select
                       value={yearInput}
                       onChange={(e) => setYearInput(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs"
+                      className="w-full px-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] text-xs"
                     >
                       <option value="1st Year">1st Year</option>
                       <option value="2nd Year">2nd Year</option>
@@ -1254,17 +1254,17 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 {/* Handover Spot & Condition Matched Toggle */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-slate-700 block mb-1">
+                    <label className="font-semibold text-[#5C6B63] dark:text-[#8FA199] block mb-1">
                       Campus Handover Location:
                     </label>
                     <div className="relative">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
+                      <MapPin className="w-3.5 h-3.5 text-[#8FA199] absolute left-2.5 top-2" />
                       <input
                         type="text"
                         value={handoverLocationInput}
                         onChange={(e) => setHandoverLocationInput(e.target.value)}
                         placeholder="e.g. Central Library Quad"
-                        className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs"
+                        className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] text-xs"
                       />
                     </div>
                   </div>
@@ -1275,9 +1275,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                         type="checkbox"
                         checked={conditionMatchedInput}
                         onChange={(e) => setConditionMatchedInput(e.target.checked)}
-                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                        className="w-4 h-4 rounded text-[#2F5D50] dark:text-[#7BBFA8] focus:ring-[#2F5D50]"
                       />
-                      <span className="text-xs font-semibold text-slate-800">
+                      <span className="text-xs font-semibold text-[#18201C] dark:text-[#ECF2EF]">
                         Item condition matched the listing description
                       </span>
                     </label>
@@ -1286,7 +1286,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
                 {/* Comment Textarea */}
                 <div>
-                  <label className="text-xs font-bold text-slate-800 block mb-1">
+                  <label className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF] block mb-1">
                     Your Review & Handover Notes:
                   </label>
                   <textarea
@@ -1295,7 +1295,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     value={commentInput}
                     onChange={(e) => setCommentInput(e.target.value)}
                     placeholder="Describe the handover experience: Was the item test-functional? Was the seller punctual at the campus spot?"
-                    className="w-full p-3 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"
+                    className="w-full p-3 rounded-xl border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] text-xs focus:outline-none focus:ring-2 focus:ring-[#2F5D50] leading-relaxed"
                   />
                 </div>
 
@@ -1304,14 +1304,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowReviewForm(false)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] text-[#5C6B63] dark:text-[#8FA199] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingReview || !commentInput.trim()}
-                    className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] disabled:opacity-50 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>{isSubmittingReview ? "Submitting..." : "Submit Review"}</span>
@@ -1326,21 +1326,21 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 reviewsList.map((rev) => (
                   <div
                     key={rev.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition-colors space-y-2.5"
+                    className="p-4 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] hover:border-[#C4D1CA] dark:hover:border-[#34433D] transition-colors space-y-2.5"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DFE6E2] dark:border-[#242E2A] pb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] font-bold text-xs flex items-center justify-center shrink-0">
                           {rev.reviewerName.charAt(0)}
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-slate-900">
+                            <span className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF]">
                               {rev.reviewerName}
                             </span>
                           </div>
                           {(rev.reviewerDepartment || rev.reviewerYear) && (
-                            <span className="text-[11px] text-slate-400 block">
+                            <span className="text-[11px] text-[#8FA199] block">
                               {[rev.reviewerDepartment, rev.reviewerYear].filter(Boolean).join(" • ")}
                             </span>
                           )}
@@ -1348,22 +1348,22 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center text-amber-400">
+                        <div className="flex items-center text-[#DFC29B]">
                           {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                               key={s}
                               className={`w-3.5 h-3.5 ${
                                 s <= rev.rating
                                   ? "fill-amber-400 text-amber-500"
-                                  : "text-slate-200 fill-slate-100"
+                                  : "text-[#ECF2EF] fill-[#EFF4F1] dark:fill-[#1B2320]"
                               }`}
                             />
                           ))}
                         </div>
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF]">
                           {rev.rating.toFixed(1)}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-[#8FA199]">
                           • {new Date(rev.createdAt).toLocaleDateString([], {
                               month: "short",
                               day: "numeric",
@@ -1375,44 +1375,44 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     {/* Metadata Badges: Location + Condition */}
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
                       {rev.handoverLocation && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] font-medium">
                           <MapPin className="w-3 h-3 text-red-500" />
                           <span>Handover at {rev.handoverLocation}</span>
                         </span>
                       )}
                       {rev.conditionMatched !== false ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] font-semibold border border-[#C4D9D1] dark:border-[#2A4A40]">
+                          <CheckCircle2 className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8]" />
                           <span>Condition as described</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold border border-amber-200/60">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] font-semibold border border-[#EED8B8] dark:border-[#4A3B23]">
                           <span>Condition discrepancy noted</span>
                         </span>
                       )}
                     </div>
 
                     {/* Comment text */}
-                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50/60 p-3 rounded-lg border border-slate-100">
+                    <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] leading-relaxed bg-[#F7F9F8] dark:bg-[#111715] p-3 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A]">
                       "{rev.comment}"
                     </p>
                   </div>
                 ))
               ) : (
-                <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center space-y-2 bg-slate-50/50">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-amber-50 text-amber-500 flex items-center justify-center">
+                <div className="p-6 rounded-xl border border-dashed border-[#C4D1CA] dark:border-[#34433D] text-center space-y-2 bg-[#F7F9F8] dark:bg-[#111715]">
+                  <div className="w-10 h-10 mx-auto rounded-full bg-[#FDF6EC] dark:bg-[#251F15] text-amber-500 flex items-center justify-center">
                     <Star className="w-5 h-5" />
                   </div>
-                  <h4 className="text-xs font-bold text-slate-800">
+                  <h4 className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF]">
                     No student reviews yet for this listing
                   </h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] max-w-sm mx-auto">
                     Have you met with {listing.sellerName} or completed a handover? Share your experience to help fellow students shop with confidence.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowReviewForm(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-2xs mt-1 cursor-pointer"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#2F5D50] text-white text-xs font-bold hover:bg-[#244A3F] transition-colors shadow-2xs mt-1 cursor-pointer"
                   >
                     <MessageSquarePlus className="w-3.5 h-3.5" />
                     <span>Be the First to Review</span>
@@ -1424,8 +1424,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Seller controls */}
           {isSeller && onUpdateStatus && (
-            <div className="p-4 rounded-xl bg-[#F7F9F8] border border-[#DFE6E2] space-y-2.5">
-              <span className="text-xs font-bold text-[#18201C] block">
+            <div className="p-4 rounded-xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] space-y-2.5">
+              <span className="text-xs font-bold text-[#18201C] dark:text-[#ECF2EF] block">
                 Manage Listing Status (Seller Controls):
               </span>
               <div className="flex flex-wrap gap-2">
@@ -1435,7 +1435,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "available"
                       ? "bg-[#2F5D50] text-white border-[#2F5D50]"
-                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
+                      : "bg-white dark:bg-[#141A18] text-[#18201C] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29]"
                   }`}
                 >
                   Mark Available
@@ -1446,7 +1446,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "reserved"
                       ? "bg-[#2F5D50] text-white border-[#2F5D50]"
-                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
+                      : "bg-white dark:bg-[#141A18] text-[#18201C] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29]"
                   }`}
                 >
                   Mark Reserved
@@ -1457,7 +1457,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "completed"
                       ? "bg-[#18201C] text-white border-[#18201C]"
-                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
+                      : "bg-white dark:bg-[#141A18] text-[#18201C] dark:text-[#ECF2EF] border-[#DFE6E2] dark:border-[#242E2A] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29]"
                   }`}
                 >
                   Mark Sold / Completed
@@ -1476,19 +1476,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
           >
             <div
               id="report-modal-dialog"
-              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4"
+              className="bg-white dark:bg-[#141A18] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#DFE6E2] dark:border-[#242E2A] space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-3 border-b border-[#DFE6E2] dark:border-[#242E2A]">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
                     <Flag className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-[#18201C] dark:text-[#ECF2EF]">
                       Report Listing
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199]">
                       Campus moderation & trust review
                     </p>
                   </div>
@@ -1496,7 +1496,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowReportModal(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-[#8FA199] hover:bg-[#EFF4F1] dark:hover:bg-[#222D29] hover:text-[#5C6B63] transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1504,14 +1504,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
               <form onSubmit={handleReportSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-[#5C6B63] dark:text-[#8FA199] mb-1.5">
                     Reason for Report *
                   </label>
                   <select
                     id="report-reason-select"
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] font-medium text-[#18201C] dark:text-[#ECF2EF] focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
                   >
                     <option value="Suspicious pricing or potential scam">
                       Suspicious pricing or potential scam
@@ -1535,7 +1535,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-[#5C6B63] dark:text-[#8FA199] mb-1.5">
                     Additional Details / Observations (Optional)
                   </label>
                   <textarea
@@ -1544,12 +1544,12 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     value={reportDetails}
                     onChange={(e) => setReportDetails(e.target.value)}
                     placeholder="Provide details to help student moderators verify this listing..."
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder:text-slate-400"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#C4D1CA] dark:border-[#34433D] focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder:text-[#8FA199]"
                   />
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1">
-                  <span className="font-semibold text-slate-800 block">
+                <div className="p-3 rounded-xl bg-[#F7F9F8] dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] text-[11px] text-[#5C6B63] dark:text-[#8FA199] space-y-1">
+                  <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF] block">
                     Campus Trust & Safety Policy:
                   </span>
                   <p>
@@ -1561,7 +1561,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowReportModal(false)}
-                    className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] hover:bg-[#F7F9F8] dark:hover:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
