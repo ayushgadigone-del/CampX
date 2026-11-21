@@ -330,7 +330,7 @@ export const CampusSecurityCenterModal: React.FC<CampusSecurityCenterModalProps>
                           <strong>Beware of external link shorteners:</strong> Keep all discussions inside the PVG's COET chat drawer. Do not open suspicious Bitly, TinyURL, or external APK download links.
                         </li>
                         <li>
-                          <strong>Verify student identity:</strong> Tap on the seller's Digital Passport to check their trust score, academic year, and verified email badge.
+                          <strong>Meet at public campus spots:</strong> Always complete exchanges at visible locations like the Central Library, Reading Hall, or Canteen Plaza during college hours.
                         </li>
                       </ul>
                     </div>

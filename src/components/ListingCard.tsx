@@ -1,39 +1,20 @@
 import React, { useState } from "react";
 import {
-  Sparkles,
   MapPin,
   MessageCircle,
   Calendar as CalendarIcon,
-  Tag,
-  Repeat,
-  BadgeCheck,
   Heart,
   Share2,
   Check,
-  ZoomIn,
-  Star,
-  Flag,
-  Clock,
-  WifiOff,
-  Eye,
-  Flame,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  ShieldCheck,
-  Award,
-  SlidersHorizontal,
+  Repeat,
   ArrowRight,
-  Maximize2,
-  CalendarCheck,
-  GraduationCap,
+  CheckCircle2,
+  Clock,
   Package,
 } from "lucide-react";
 import { Listing } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
 import { useTheme } from "../context/ThemeContext";
-import { SellerReputationBadge } from "./SellerReputationBadge";
-import { UserMilestoneBadge } from "./UserMilestoneBadge";
 
 interface ListingCardProps {
   listing: Listing;
@@ -45,18 +26,18 @@ interface ListingCardProps {
   onOpenCalendar: (listing: Listing) => void;
   onShowToast?: (message: string) => void;
   onOpenLightbox?: (listing: Listing) => void;
-  onOpenPassport?: (listing: Listing) => void;
   onOpenBarter?: (listing: Listing) => void;
   isOnline?: boolean;
   layoutMode?: "grid" | "detailed";
   isFullScreen?: boolean;
   onTagClick?: (tag: string) => void;
   index?: number;
+  isOwner?: boolean;
+  onUpdateStatus?: (listingId: string, newStatus: Listing["status"]) => void;
 }
 
 export const ListingCard: React.FC<ListingCardProps> = ({
   listing,
-  allListings,
   isWishlisted = false,
   onToggleWishlist,
   onOpenDetails,
@@ -64,67 +45,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   onOpenCalendar,
   onShowToast,
   onOpenLightbox,
-  onOpenPassport,
   onOpenBarter,
   isOnline = true,
   layoutMode = "grid",
-  isFullScreen = false,
-  onTagClick,
-  index,
+  isOwner = false,
+  onUpdateStatus,
 }) => {
   const { isDark } = useTheme();
   const [isShared, setIsShared] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const reviewCount = listing.reviews?.length ?? listing.totalReviews ?? 0;
-  const rating =
-    listing.averageRating ??
-    (listing.reviews && listing.reviews.length > 0
-      ? Math.round(
-          (listing.reviews.reduce((acc, r) => acc + r.rating, 0) /
-            listing.reviews.length) *
-            10
-        ) / 10
-      : 0);
-
-  const getConditionScore = (cond: string) => {
-    switch (cond) {
-      case "Like New":
-        return 96;
-      case "Good":
-        return 82;
-      case "Fair":
-        return 65;
-      default:
-        return 45;
-    }
-  };
-
-  const getConditionColor = (cond: string) => {
-    switch (cond) {
-      case "Like New":
-        return "bg-emerald-600 text-white border-emerald-500 shadow-xs";
-      case "Good":
-        return "bg-blue-600 text-white border-blue-500 shadow-xs";
-      case "Fair":
-        return "bg-amber-600 text-white border-amber-500 shadow-xs";
-      default:
-        return "bg-rose-600 text-white border-rose-500 shadow-xs";
-    }
-  };
-
-  const getConditionBarColor = (cond: string) => {
-    switch (cond) {
-      case "Like New":
-        return "bg-emerald-500";
-      case "Good":
-        return "bg-blue-500";
-      case "Fair":
-        return "bg-amber-500";
-      default:
-        return "bg-rose-500";
-    }
-  };
 
   const fallbackCopy = async (shareUrl: string, message: string) => {
     try {
@@ -143,9 +71,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       }
       setIsShared(true);
       setTimeout(() => setIsShared(false), 2500);
-      onShowToast?.("Listing link & message copied to clipboard!");
-    } catch (err) {
-      console.warn("Clipboard copy notice:", err);
+      onShowToast?.("Listing link copied to clipboard.");
+    } catch {
       onShowToast?.("Could not copy link.");
     }
   };
@@ -157,27 +84,26 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       listing.listingType === "exchange"
         ? "Available for Exchange"
         : listing.listingType === "both"
-        ? `₹${listing.price} (or Open to Swap)`
+        ? `₹${listing.price} (or Swap)`
         : `₹${listing.price}`;
 
     const locationText = listing.locationPreference
-      ? ` Handover spot: ${listing.locationPreference}.`
+      ? ` Handover: ${listing.locationPreference}.`
       : "";
 
-    const customMessage = `🎓 Check out this verified student listing on Campus Marketplace: "${listing.title}" for ${priceText} (Condition: ${listing.condition}) by ${listing.sellerName}.${locationText}`;
-
+    const customMessage = `Check out "${listing.title}" on Campus Resale for ${priceText} (${listing.condition}) by ${listing.sellerName}.${locationText}`;
     const shareUrl = `${window.location.origin}${window.location.pathname}?item=${listing.id}#listing-${listing.id}`;
 
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({
-          title: `${listing.title} | Campus Marketplace`,
+          title: `${listing.title} | Campus Resale`,
           text: customMessage,
           url: shareUrl,
         });
         setIsShared(true);
         setTimeout(() => setIsShared(false), 2500);
-        onShowToast?.("Shared listing successfully!");
+        onShowToast?.("Shared listing.");
       } catch (err: any) {
         if (err.name !== "AbortError") {
           await fallbackCopy(shareUrl, customMessage);
@@ -188,592 +114,367 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     }
   };
 
-  // Check if we should render detailed widescreen card layout
-  const isDetailedView = layoutMode === "detailed";
+  const handleChatClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (listing.status === "completed") {
+      onOpenDetails(listing);
+      return;
+    }
+    if (!isOnline) {
+      onShowToast?.("Chat is unavailable while offline.");
+      return;
+    }
+    onOpenChat(
+      listing,
+      `Hi ${listing.sellerName.split(" ")[0]}, is "${listing.title}" still available for handover on campus?`
+    );
+  };
+
+  const stockCount = listing.availableStock ?? 1;
+  const isSoldOut = stockCount === 0 || listing.status === "completed";
+  const hasDiscount =
+    listing.listingType !== "exchange" &&
+    Boolean(listing.originalPrice && listing.originalPrice > listing.price);
 
   /* ========================================================================= */
-  /* DETAILED WIDESCREEN / FULL-SCREEN CARD LAYOUT (EVERY DETAIL VISIBLE)      */
+  /* DETAILED / LIST VIEW CARD                                                 */
   /* ========================================================================= */
-  if (isDetailedView) {
+  if (layoutMode === "detailed") {
     return (
-      <div
+      <article
         id={`listing-card-${listing.id}`}
-        className="h-full w-full flex flex-col"
+        className={`flex flex-col md:flex-row rounded-xl border overflow-hidden h-full ${
+          isDark
+            ? "bg-[#141A18] border-[#242E2A] hover:border-[#34433D]"
+            : "bg-white border-[#DFE6E2] hover:border-[#C4D1CA]"
+        }`}
       >
+        {/* Left Image */}
         <div
-          className={`group relative flex flex-col md:flex-row rounded-3xl border transition-colors duration-200 overflow-hidden shadow-lg h-full ${
-            isDark
-              ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10"
-              : "bg-white border-slate-200/90 shadow-slate-200/70 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10"
+          className={`relative md:w-64 lg:w-72 shrink-0 aspect-[4/3] md:aspect-auto cursor-pointer overflow-hidden ${
+            isDark ? "bg-[#1B2320]" : "bg-[#EFF4F1]"
           }`}
+          onClick={() => (onOpenLightbox ? onOpenLightbox(listing) : onOpenDetails(listing))}
         >
-        {/* Top edge physical bevel shine */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
+          <img
+            src={listing.imageUrl}
+            alt={listing.title}
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
 
-        {/* Left Side: Visual Media & Condition Gauge Column */}
-        <div className="relative md:w-5/12 lg:w-4/12 flex-shrink-0 flex flex-col bg-slate-950/5 dark:bg-slate-950/30">
-          <div
-            className="relative h-64 md:h-full min-h-[240px] w-full cursor-pointer overflow-hidden group/image"
-            onClick={() => {
-              if (onOpenLightbox) {
-                onOpenLightbox(listing);
-              } else {
-                onOpenDetails(listing);
-              }
-            }}
-            title="Click to zoom and inspect item condition"
-          >
-            <img
-              src={listing.imageUrl}
-              alt={listing.title}
-              className="h-full w-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-
-            {/* Hover zoom affordance */}
-            <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none flex items-center justify-center">
-              <span className="px-3.5 py-2 rounded-full bg-slate-900/95 text-white text-xs font-bold flex items-center gap-2 shadow-xl border border-slate-700">
-                <ZoomIn className="w-4 h-4 text-indigo-400" />
-                <span>Zoom & Inspect</span>
-              </span>
-            </div>
-
-            {/* Badges on Media */}
-            <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[78%] z-10">
-              {/* Verified Student Badge */}
-              <span
-                id={`verified-student-badge-${listing.id}`}
-                className="relative inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-600/95 text-white border border-blue-400/40 shadow-xs select-none"
-                title="Verified Student Seller • Campus Authenticated"
-              >
-                <BadgeCheck className="w-3.5 h-3.5 text-blue-200 shrink-0" />
-                <span>Verified Student</span>
-              </span>
-
-              {/* Condition Badge */}
-              <span
-                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${getConditionColor(
-                  listing.condition
-                )}`}
-              >
-                {listing.condition}
-              </span>
-
-              {/* Available Stock Badge */}
-              <span
-                id={`stock-badge-${listing.id}`}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border shadow-xs flex items-center gap-1 ${
-                  listing.availableStock === 0 || listing.status === "completed"
-                    ? "bg-slate-700 text-slate-300 border-slate-600"
-                    : (listing.availableStock ?? 1) === 1
-                    ? "bg-rose-600 text-white border-rose-400/50 shadow-rose-900/30 shadow-xs"
-                    : "bg-emerald-600 text-white border-emerald-400/50 shadow-emerald-900/30 shadow-xs"
-                }`}
-              >
-                <Package className="w-3 h-3" />
-                <span>
-                  {listing.availableStock === 0 || listing.status === "completed"
-                    ? "Out of Stock"
-                    : `${listing.availableStock ?? 1} in stock`}
-                </span>
-              </span>
-
-              {/* Listing Type Tag */}
-              {listing.listingType === "exchange" ? (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-purple-600 text-white shadow-xs flex items-center gap-1">
-                  <Repeat className="w-3 h-3" />
-                  Exchange Only
-                </span>
-              ) : listing.listingType === "both" ? (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-indigo-600 text-white shadow-xs flex items-center gap-1">
-                  Sell or Swap
-                </span>
-              ) : null}
-
-              {listing.isReported && (
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1">
-                  <Flag className="w-3 h-3 fill-white" />
-                  Reported
-                </span>
-              )}
-            </div>
-
-            {/* Floating Top Right: Quick Share & Wishlist */}
-            <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+          {/* Top-right subtle icon actions */}
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+            <button
+              id={`listing-quick-share-${listing.id}`}
+              type="button"
+              aria-label="Share listing"
+              onClick={handleShare}
+              className={`w-8 h-8 rounded-full border flex items-center justify-center cursor-pointer ${
+                isShared
+                  ? "bg-zinc-900 text-white border-zinc-800"
+                  : "bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800"
+              }`}
+            >
+              {isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+            </button>
+            {onToggleWishlist && (
               <button
-                id={`listing-quick-share-${listing.id}`}
+                id={`wishlist-toggle-${listing.id}`}
                 type="button"
-                aria-label="Share listing"
-                title="Share this listing"
-                onClick={handleShare}
-                className={`p-2.5 rounded-full shadow-sm border transition-colors cursor-pointer ${
-                  isShared
-                    ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
-                    : "bg-slate-900/90 text-slate-200 hover:bg-slate-800 hover:text-white border-slate-700"
-                }`}
+                aria-label={isWishlisted ? "Remove from saved" : "Save item"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleWishlist(listing.id);
+                }}
+                className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
               >
-                {isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-              </button>
-
-              {onToggleWishlist && (
-                <button
-                  id={`wishlist-toggle-${listing.id}`}
-                  type="button"
-                  aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-                  title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleWishlist(listing.id);
-                  }}
-                  className={`p-2.5 rounded-full shadow-sm border transition-colors cursor-pointer ${
-                    isWishlisted
-                      ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
-                      : "bg-slate-900/90 text-slate-200 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
+                <Heart
+                  className={`w-3.5 h-3.5 ${
+                    isWishlisted ? "fill-rose-500 text-rose-500" : ""
                   }`}
-                >
-                  <Heart
-                    className={`w-4 h-4 ${
-                      isWishlisted ? "fill-rose-500 text-rose-500" : ""
-                    }`}
-                  />
-                </button>
-              )}
-            </div>
-
-            {/* Bottom on Image: AI Inspection & Views */}
-            <div className="absolute bottom-3 inset-x-3 z-10 flex items-center justify-between gap-2">
-              {listing.aiInspection ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-slate-950 text-white border border-slate-700/80 shadow-lg select-none">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="text-slate-100 font-bold">AI Score:</span>
-                  <span className="text-emerald-400 font-black">{listing.aiInspection.inspectionScore}%</span>
-                </span>
-              ) : (
-                <span />
-              )}
-
-              <span
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border shadow-xs select-none ${
-                  (listing.views || 0) >= 100
-                    ? "bg-slate-950/95 text-amber-300 border-amber-500/50"
-                    : "bg-slate-900/90 text-slate-200 border-slate-700/80"
-                }`}
-              >
-                {(listing.views || 0) >= 100 ? (
-                  <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                ) : (
-                  <Eye className="w-3.5 h-3.5 text-indigo-400" />
-                )}
-                <span>{(listing.views || 0).toLocaleString()} views</span>
-              </span>
-            </div>
-
-            {/* Status Overlay */}
-            {listing.status !== "available" && (
-              <div className="absolute inset-0 bg-slate-950/88 flex flex-col items-center justify-center p-4 text-center z-20">
-                {listing.status === "completed" ? (
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-2 shadow-xl">
-                      <CheckCircle2 className="w-7 h-7 text-emerald-400" />
-                    </div>
-                    <span className="px-3.5 py-1 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 font-extrabold text-xs uppercase tracking-wider shadow-md">
-                      Sold / Deal Completed
-                    </span>
-                    <span className="text-[11px] text-slate-300 mt-1.5 font-medium">
-                      Verified Campus Handover
-                    </span>
-                  </div>
-                ) : (
-                  <span
-                    className={`px-3.5 py-1.5 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-lg ${
-                      listing.status === "inactive"
-                        ? "bg-slate-800 border border-slate-700 text-slate-300"
-                        : "bg-amber-600/90 border border-amber-500/40"
-                    }`}
-                  >
-                    {listing.status === "reserved"
-                      ? "Reserved"
-                      : listing.status === "handover_scheduled"
-                      ? "Handover Scheduled"
-                      : "Inactive (Expired 30d)"}
-                  </span>
-                )}
-              </div>
+                />
+              </button>
             )}
           </div>
+
+          {listing.status !== "available" && (
+            <div className="absolute inset-0 bg-black/65 flex items-center justify-center p-3 z-10">
+              <span className="text-xs font-semibold text-white tracking-wide uppercase">
+                {listing.status === "completed"
+                  ? "Sold"
+                  : listing.status === "reserved"
+                  ? "Reserved"
+                  : listing.status === "handover_scheduled"
+                  ? "Meetup Scheduled"
+                  : "Inactive"}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Right Side: Rich Information, Specs & Actions Column */}
-        <div className="flex-1 p-5 md:p-6 flex flex-col justify-between space-y-4 relative z-10">
-          <div>
-            {/* Meta Row: Category, Handover Spot, Expiry */}
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs pb-2 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400">
-                  <Tag className="w-3.5 h-3.5" />
-                  {listing.category}
-                </span>
-
-                {listing.locationPreference && (
-                  <span
-                    className="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md"
-                    title={`Preferred handover spot: ${listing.locationPreference}`}
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                    <span className="font-semibold">{listing.locationPreference}</span>
+        {/* Right Info */}
+        <div className="flex-1 p-5 flex flex-col justify-between gap-4">
+          <div className="space-y-2.5">
+            {/* Unboxed Metadata Line */}
+            <div
+              className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${
+                isDark ? "text-zinc-400" : "text-zinc-500"
+              }`}
+            >
+              <span>{listing.category}</span>
+              <span aria-hidden="true">·</span>
+              <span>{listing.condition}</span>
+              {listing.locationPreference && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {listing.locationPreference}
                   </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {listing.expiryDate && (
-                  <span
-                    className={`flex items-center gap-1 text-[11px] font-medium ${
-                      listing.status === "inactive"
-                        ? "text-slate-400 line-through"
-                        : "text-slate-500 dark:text-slate-400"
-                    }`}
-                  >
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{formatExpiryInfo(listing).label}</span>
+                </>
+              )}
+              {listing.aiInspection && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="font-mono tabular-nums">
+                    AI {listing.aiInspection.inspectionScore}%
                   </span>
-                )}
-              </div>
+                </>
+              )}
+              {listing.expiryDate && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {formatExpiryInfo(listing).label}
+                  </span>
+                </>
+              )}
             </div>
 
-            {/* Title (Full unclipped in full screen) */}
+            {/* Title */}
             <h3
               onClick={() => onOpenDetails(listing)}
-              className={`text-lg sm:text-xl font-extrabold mt-3 cursor-pointer transition-colors leading-snug ${
-                isDark ? "text-white hover:text-indigo-300" : "text-slate-900 hover:text-indigo-600"
+              className={`text-base sm:text-lg font-semibold leading-snug cursor-pointer hover:underline underline-offset-4 ${
+                isDark ? "text-zinc-50" : "text-zinc-950"
               }`}
             >
               {listing.title}
             </h3>
 
-            {/* Description (Full text in detailed view) */}
-            <p className={`text-sm mt-2 leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+            {/* Description */}
+            <p
+              className={`text-xs sm:text-sm leading-relaxed line-clamp-3 ${
+                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+              }`}
+            >
               {listing.description}
             </p>
 
-            {/* Exchange Terms Box if Applicable */}
+            {/* Semester Bundle Items Preview */}
+            {listing.isBundle && listing.bundleItems && listing.bundleItems.length > 0 && (
+              <div
+                className={`p-2.5 rounded-lg border text-xs space-y-1 ${
+                  isDark
+                    ? "bg-[#0D1110] border-[#242E2A] text-[#C5D2CC]"
+                    : "bg-[#F7F9F8] border-[#DFE6E2] text-[#3B4A42]"
+                }`}
+              >
+                <div className="font-semibold text-[#2F5D50] dark:text-[#7BBFA8] flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 shrink-0" />
+                  <span>Semester Bundle · {listing.bundleItems.length} items included</span>
+                </div>
+                <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] truncate">
+                  {listing.bundleItems.join(" · ")}
+                </p>
+              </div>
+            )}
+
             {listing.exchangeFor && (
-              <div className="mt-3 p-3 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-start gap-2.5">
-                <Repeat className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
-                <div className="text-xs">
-                  <span className="font-extrabold text-purple-700 dark:text-purple-300">
-                    Open for Exchange Barter:{" "}
-                  </span>
-                  <span className="text-purple-900 dark:text-purple-200 font-medium">
-                    {listing.exchangeFor}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* AI Inspection Highlights Banner if Available */}
-            {listing.aiInspection && (
-              <div className="mt-3 p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border-2 border-indigo-200 dark:border-indigo-800/80 space-y-2">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span className="text-xs font-extrabold text-slate-950 dark:text-white">
-                      Gemini Inspection
-                    </span>
-                  </div>
-                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-950 text-white border border-slate-800 shadow-xs">
-                    <span className="text-[10px] font-bold text-slate-300">Score:</span>
-                    <span className="text-xs font-black text-emerald-400">
-                      {listing.aiInspection.inspectionScore}%
-                    </span>
-                  </div>
-                </div>
-
-                {listing.aiInspection.conditionDetails && (
-                  <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-normal">
-                    {listing.aiInspection.conditionDetails}
-                  </p>
-                )}
-
-                {listing.aiInspection.keyFeatures && listing.aiInspection.keyFeatures.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {listing.aiInspection.keyFeatures.slice(0, 4).map((feature, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 shadow-2xs"
-                      >
-                        <Check className="w-2.5 h-2.5 text-indigo-500" />
-                        <span>{feature}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Scheduled Handover Banner if Active */}
-            {listing.handoverDetails && (
-              <div className="mt-3 p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300">
-                <div className="flex items-center gap-2">
-                  <CalendarCheck className="w-4 h-4 text-emerald-500" />
-                  <span className="font-bold">Meetup Scheduled:</span>
-                  <span>
-                    {listing.handoverDetails.scheduledDate} at {listing.handoverDetails.scheduledTime} ({listing.handoverDetails.location})
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Tags Row */}
-            {listing.tags && listing.tags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 mt-3">
-                {listing.tags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTagClick?.(tag);
-                    }}
-                    className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                      isDark
-                        ? "bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500 hover:text-indigo-300"
-                        : "bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-700"
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                ))}
+              <div
+                className={`text-xs flex items-center gap-1.5 ${
+                  isDark ? "text-[#C5D2CC]" : "text-[#3B4A42]"
+                }`}
+              >
+                <Repeat className="w-3.5 h-3.5 text-[#5C6B63] shrink-0" />
+                <span className="truncate">Open to swap for: {listing.exchangeFor}</span>
               </div>
             )}
           </div>
 
-          {/* Bottom Card Footer: Seller Credentials, Price & Action Buttons */}
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
-            {/* Seller & Price Row */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              {/* Seller Profile Info */}
+          {/* Footer: Seller, Price, Actions */}
+          <div
+            className={`pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+              isDark ? "border-zinc-800/80" : "border-zinc-100"
+            }`}
+          >
+            {/* Plain Seller Info (No badges) */}
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                onClick={() => onOpenPassport?.(listing)}
-                className="flex items-center gap-3 cursor-pointer group/seller"
-                title="Click to inspect Verified Student Digital Passport"
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                  isDark ? "bg-zinc-800 text-zinc-200" : "bg-zinc-100 text-zinc-800"
+                }`}
               >
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-extrabold text-sm shadow-md shrink-0">
-                  {listing.sellerName.charAt(0)}
+                {listing.sellerName.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div
+                  className={`text-xs font-medium truncate ${
+                    isDark ? "text-zinc-200" : "text-zinc-900"
+                  }`}
+                >
+                  {listing.sellerName}
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-sm font-bold group-hover/seller:text-indigo-400 transition-colors ${isDark ? "text-white" : "text-slate-900"}`}>
-                      {listing.sellerName}
-                    </span>
-                    <span className="relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-500 dark:text-blue-300 border border-blue-500/30">
-                      <BadgeCheck className="w-3 h-3 text-blue-500" />
-                      <span>Passport</span>
-                    </span>
-                    <UserMilestoneBadge listing={listing} allListings={allListings} />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    <span>{listing.department || "Engineering"}</span>
-                    <span>•</span>
-                    <span>{listing.year || "Student"}</span>
-                    <span>•</span>
-                    <SellerReputationBadge
-                      listing={listing}
-                      allListings={allListings}
-                      variant="seller-row"
-                      onViewReviews={onOpenDetails}
-                    />
-                  </div>
+                <div
+                  className={`text-[11px] truncate ${
+                    isDark ? "text-zinc-500" : "text-zinc-500"
+                  }`}
+                >
+                  {[listing.department || "Engineering", listing.year]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </div>
               </div>
+            </div>
 
-              {/* Price Display with Comparison */}
-              <div className="sm:text-right">
+            <div className="flex items-center justify-between sm:justify-end gap-4">
+              {/* Price */}
+              <div className="text-left sm:text-right">
                 {listing.listingType === "exchange" ? (
-                  <div className="text-base font-extrabold text-purple-500">
-                    Open for Exchange
+                  <div
+                    className={`text-sm font-semibold ${
+                      isDark ? "text-zinc-100" : "text-zinc-950"
+                    }`}
+                  >
+                    Exchange
                   </div>
                 ) : (
-                  <div className="space-y-0.5">
-                    <div className="flex items-baseline sm:justify-end gap-1.5 flex-wrap">
-                      <span className="text-sm font-bold text-slate-500">₹</span>
-                      <span className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                        {listing.price}
+                  <div className="flex items-baseline gap-1.5 font-mono tabular-nums">
+                    <span
+                      className={`text-lg font-semibold ${
+                        isDark ? "text-zinc-50" : "text-zinc-950"
+                      }`}
+                    >
+                      ₹{listing.price}
+                    </span>
+                    {hasDiscount && (
+                      <span className="text-xs line-through text-zinc-400">
+                        ₹{listing.originalPrice}
                       </span>
-                      {listing.originalPrice && listing.originalPrice > listing.price && (
-                        <span className="line-through text-xs font-semibold text-slate-400 dark:text-slate-500">
-                          MRP ₹{listing.originalPrice}
-                        </span>
-                      )}
-                      {listing.listingType === "both" && (
-                        <span className="text-xs font-semibold text-indigo-500 ml-1">
-                          (or Swap)
-                        </span>
-                      )}
-                    </div>
-                    {listing.originalPrice && listing.originalPrice > listing.price && (
-                      <div className="flex items-center sm:justify-end gap-1.5 text-xs font-bold text-emerald-500">
-                        <span>Save ₹{listing.originalPrice - listing.price}</span>
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30">
-                          {Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF
-                        </span>
-                      </div>
+                    )}
+                    {listing.listingType === "both" && (
+                      <span className="text-[11px] font-sans text-zinc-500">· Swap</span>
                     )}
                   </div>
                 )}
-                {/* Available Stock Indicator */}
-                <div className="flex items-center sm:justify-end gap-1.5 text-xs font-semibold mt-1">
-                  <Package className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                  <span className={isDark ? "text-slate-300" : "text-slate-600"}>
-                    Stock:{" "}
-                    <strong
-                      className={
-                        listing.availableStock === 0 || listing.status === "completed"
-                          ? "text-slate-500 font-bold"
-                          : (listing.availableStock ?? 1) === 1
-                          ? "text-rose-600 dark:text-rose-400 font-bold"
-                          : "text-emerald-600 dark:text-emerald-400 font-bold"
-                      }
-                    >
-                      {listing.availableStock === 0 || listing.status === "completed"
-                        ? "0 Available (Sold Out)"
-                        : `${listing.availableStock ?? 1} Available`}
-                    </strong>
-                  </span>
+                <div className="text-[11px] text-zinc-500">
+                  {isSoldOut ? "Sold out" : `${stockCount} available`}
                 </div>
               </div>
-            </div>
 
-            {/* Full-width Responsive Action Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              <button
-                id={`listing-details-btn-${listing.id}`}
-                onClick={() => onOpenDetails(listing)}
-                className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 ${
-                  listing.status === "completed"
-                    ? isDark
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
-                      : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                    : isDark
-                    ? "border-slate-700 bg-slate-800 hover:bg-slate-700 text-white"
-                    : "border-slate-300 bg-white hover:bg-slate-50 text-slate-800"
-                }`}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
-                <span>{listing.status === "completed" ? "History" : "Full Specs"}</span>
-              </button>
-
-              <button
-                id={`listing-chat-btn-${listing.id}`}
-                onClick={() => {
-                  if (listing.status === "completed") {
-                    onOpenDetails(listing);
-                    return;
-                  }
-                  if (!isOnline) {
-                    onShowToast?.("⚠️ Chat is disabled while offline to prevent data loss.");
-                    return;
-                  }
-                  onOpenChat(
-                    listing,
-                    `Hi ${listing.sellerName.split(" ")[0]}! I saw your listing for "${listing.title}". Is it still available for handover on campus?`
-                  );
-                }}
-                disabled={!isOnline && listing.status !== "completed"}
-                title={`Ask ${listing.sellerName} questions or negotiate a deal`}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs ${
-                  listing.status === "completed"
-                    ? isDark
-                      ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
-                      : "bg-slate-100 text-emerald-700 border border-emerald-200 cursor-pointer"
-                    : !isOnline
-                    ? "bg-slate-800 text-slate-500 border border-slate-700"
-                    : isDark
-                    ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 cursor-pointer"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20 cursor-pointer"
-                }`}
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Ask Seller</span>
-              </button>
-
-              <button
-                id={`listing-meet-btn-${listing.id}`}
-                onClick={() => onOpenCalendar(listing)}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
-                  isDark
-                    ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40"
-                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
-                }`}
-                title="Schedule Handover on Google Calendar"
-              >
-                <CalendarIcon className="w-3.5 h-3.5" />
-                <span>Meetup</span>
-              </button>
-
-              <button
-                id={`listing-share-btn-${listing.id}`}
-                type="button"
-                onClick={handleShare}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
-                  isShared
-                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40"
-                    : isDark
-                    ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
-                }`}
-              >
-                {isShared ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Copied</span>
-                  </>
+              {/* Clean Actions */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {isOwner && onUpdateStatus ? (
+                  <div className="flex items-center gap-1">
+                    {(
+                      [
+                        { key: "available", label: "Available" },
+                        { key: "reserved", label: "Reserved" },
+                        { key: "completed", label: "Sold" },
+                      ] as const
+                    ).map((st) => {
+                      const active = listing.status === st.key;
+                      return (
+                        <button
+                          key={st.key}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUpdateStatus(listing.id, st.key);
+                          }}
+                          className={`h-8 px-2.5 rounded-lg border text-xs font-medium cursor-pointer ${
+                            active
+                              ? "bg-[#2F5D50] dark:bg-[#387262] text-white border-[#2F5D50] dark:border-[#387262]"
+                              : isDark
+                              ? "bg-[#0D1110] border-[#242E2A] text-[#8FA199] hover:text-[#ECF2EF]"
+                              : "bg-white border-[#DFE6E2] text-[#5C6B63] hover:text-[#18201C]"
+                          }`}
+                        >
+                          {st.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <>
-                    <Share2 className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Share</span>
+                    <button
+                      id={`listing-details-btn-${listing.id}`}
+                      type="button"
+                      onClick={() => onOpenDetails(listing)}
+                      className={`h-8 px-3 rounded-lg border text-xs font-medium cursor-pointer ${
+                        isDark
+                          ? "border-[#242E2A] text-[#ECF2EF] hover:bg-[#1B2320]"
+                          : "border-[#DFE6E2] text-[#18201C] hover:bg-[#EFF4F1]"
+                      }`}
+                    >
+                      Details
+                    </button>
+                    <button
+                      id={`listing-meet-btn-${listing.id}`}
+                      type="button"
+                      onClick={() => onOpenCalendar(listing)}
+                      title="Schedule campus handover"
+                      className={`h-8 w-8 rounded-lg border flex items-center justify-center cursor-pointer ${
+                        isDark
+                          ? "border-[#242E2A] text-[#8FA199] hover:bg-[#1B2320] hover:text-[#ECF2EF]"
+                          : "border-[#DFE6E2] text-[#5C6B63] hover:bg-[#EFF4F1] hover:text-[#18201C]"
+                      }`}
+                    >
+                      <CalendarIcon className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      id={`listing-chat-btn-${listing.id}`}
+                      type="button"
+                      onClick={handleChatClick}
+                      disabled={!isOnline && listing.status !== "completed"}
+                      className={`h-8 px-3 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                        isDark
+                          ? "bg-[#387262] hover:bg-[#448573] text-white"
+                          : "bg-[#2F5D50] hover:bg-[#244A3F] text-white"
+                      }`}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>Chat</span>
+                    </button>
                   </>
                 )}
-              </button>
+              </div>
             </div>
           </div>
         </div>
-        </div>
-      </div>
+      </article>
     );
   }
 
   /* ========================================================================= */
-  /* STANDARD DYNAMIC GRID CARD LAYOUT (WITH EXPANDABLE QUICK SPECS & REALISM) */
+  /* MINIMALIST GRID CARD (CLEAN PHOTO, ZERO BADGE CLUTTER)                    */
   /* ========================================================================= */
   return (
-    <div
+    <article
       id={`listing-card-${listing.id}`}
-      className="h-full w-full flex flex-col"
+      className={`flex flex-col rounded-xl border overflow-hidden h-full ${
+        isDark
+          ? "bg-[#141A18] border-[#242E2A] hover:border-[#34433D]"
+          : "bg-white border-[#DFE6E2] hover:border-[#C4D1CA]"
+      }`}
     >
+      {/* Clean 4:3 Product Photo (No badge spam) */}
       <div
-        className={`group relative flex flex-col rounded-2xl border transition-colors duration-200 overflow-hidden h-full ${
-          isDark
-            ? "bg-[#131D33] border-slate-700/80 shadow-2xl shadow-black/70 hover:border-indigo-400 ring-1 ring-white/10"
-            : "bg-white border-slate-200/90 shadow-md hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10"
+        className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden ${
+          isDark ? "bg-[#1B2320]" : "bg-[#EFF4F1]"
         }`}
-      >
-      {/* Subtle top edge bevel highlight */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 dark:via-indigo-400/30 to-transparent pointer-events-none z-10" />
-
-      {/* Image Container with Lightbox Trigger */}
-      <div
-        className={`relative h-42 sm:h-44 w-full cursor-pointer overflow-hidden group/image ${
-          isDark ? "bg-slate-900" : "bg-slate-100"
-        }`}
-        onClick={() => {
-          if (onOpenLightbox) {
-            onOpenLightbox(listing);
-          } else {
-            onOpenDetails(listing);
-          }
-        }}
-        title="Click to zoom and inspect item condition"
+        onClick={() => onOpenDetails(listing)}
       >
         <img
           src={listing.imageUrl}
@@ -782,131 +483,33 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           referrerPolicy="no-referrer"
         />
 
-        {/* Hover zoom affordance badge */}
-        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none flex items-center justify-center z-10">
-          <span className="px-3 py-1.5 rounded-full bg-slate-900/95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-slate-700">
-            <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Click to Zoom</span>
-          </span>
-        </div>
-
-        {/* Badges on Image */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[75%] z-10">
-          {/* Verified Student Badge */}
-          <span
-            id={`verified-student-badge-${listing.id}`}
-            className="relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600/95 hover:bg-blue-600 text-white border border-blue-400/40 shadow-xs overflow-hidden select-none"
-            title="Verified Student Seller • Campus Authenticated"
-          >
-            <BadgeCheck className="w-3 h-3 text-blue-200 shrink-0" />
-            <span>Verified Student</span>
-          </span>
-
-          {/* Seller Reputation Trust Score Badge */}
-          <SellerReputationBadge
-            listing={listing}
-            allListings={allListings}
-            variant="compact"
-            onViewReviews={onOpenDetails}
-          />
-
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getConditionColor(
-              listing.condition
-            )}`}
-          >
-            {listing.condition}
-          </span>
-
-          {/* Available Stock Badge */}
-          <span
-            id={`stock-badge-${listing.id}`}
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs flex items-center gap-1 ${
-              listing.availableStock === 0 || listing.status === "completed"
-                ? "bg-slate-700 text-slate-300 border-slate-600"
-                : (listing.availableStock ?? 1) === 1
-                ? "bg-rose-600 text-white border-rose-400/40 shadow-rose-900/30 shadow-xs"
-                : "bg-emerald-600 text-white border-emerald-400/40 shadow-emerald-900/30 shadow-xs"
-            }`}
-            title="Current available campus stock"
-          >
-            <Package className="w-3 h-3" />
-            <span>
-              {listing.availableStock === 0 || listing.status === "completed"
-                ? "0 Stock"
-                : `${listing.availableStock ?? 1} in stock`}
-            </span>
-          </span>
-
-          {listing.listingType === "exchange" ? (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-600 text-white shadow-xs flex items-center gap-1">
-              <Repeat className="w-3 h-3" />
-              Exchange
-            </span>
-          ) : listing.listingType === "both" ? (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-600 text-white shadow-xs flex items-center gap-1">
-              Sell / Swap
-            </span>
-          ) : null}
-
-          {listing.isReported && (
-            <span
-              id={`reported-badge-${listing.id}`}
-              className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-600 text-white shadow-xs flex items-center gap-1"
-              title="This listing has been reported for campus moderator review"
-            >
-              <Flag className="w-3 h-3 fill-white" />
-              <span>Reported</span>
-            </span>
-          )}
-
-          {listing.status === "inactive" && (
-            <span
-              id={`inactive-badge-${listing.id}`}
-              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/90 text-slate-200 border border-slate-700 shadow-xs flex items-center gap-1"
-              title="Listing has expired after 30 days and is marked inactive"
-            >
-              <Clock className="w-3 h-3 text-amber-400" />
-              <span>Inactive</span>
-            </span>
-          )}
-        </div>
-
-        {/* Floating Actions: Share & Wishlist */}
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+        {/* Minimal Floating Wishlist & Share */}
+        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           <button
             id={`listing-quick-share-${listing.id}`}
             type="button"
             aria-label="Share listing"
-            title="Share this listing"
+            title="Share listing"
             onClick={handleShare}
-            className={`p-2 rounded-full shadow-sm border transition-colors cursor-pointer ${
-              isShared
-                ? "bg-emerald-600 text-white shadow-md border-emerald-400/50"
-                : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-white border-slate-700"
-            }`}
+            className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
           >
-            {isShared ? <Check className="w-4 h-4 text-white" /> : <Share2 className="w-4 h-4" />}
+            {isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
           </button>
 
           {onToggleWishlist && (
             <button
               id={`wishlist-toggle-${listing.id}`}
               type="button"
-              aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-              title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+              aria-label={isWishlisted ? "Remove from saved" : "Save item"}
+              title={isWishlisted ? "Remove from saved" : "Save item"}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleWishlist(listing.id);
               }}
-              className={`p-2 rounded-full shadow-sm border transition-colors cursor-pointer ${
-                isWishlisted
-                  ? "bg-slate-900 text-rose-500 hover:bg-slate-800 border-rose-500/50 shadow-md"
-                  : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-rose-400 border-slate-700"
-              }`}
+              className="w-8 h-8 rounded-full border bg-white/95 dark:bg-zinc-950/90 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer"
             >
               <Heart
-                className={`w-4 h-4 ${
+                className={`w-3.5 h-3.5 ${
                   isWishlisted ? "fill-rose-500 text-rose-500" : ""
                 }`}
               />
@@ -914,540 +517,257 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           )}
         </div>
 
-        {/* Interactive Condition Pass Pill */}
-        <div className="absolute bottom-2.5 left-3 z-10">
-          {listing.aiInspection ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenDetails(listing);
-              }}
-              className="relative overflow-hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/95 text-indigo-200 border border-indigo-500/40 shadow-md cursor-pointer transition-colors hover:bg-slate-800"
-              title="Interactive Condition Pass • Inspected by Gemini AI"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="text-white font-black text-xs">Pass • {listing.aiInspection.inspectionScore}% AI Score</span>
-            </button>
-          ) : (
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border shadow-md ${getConditionColor(
-                listing.condition
-              )}`}
-            >
-              <Award className="w-3 h-3 shrink-0" />
-              <span>{getConditionScore(listing.condition)}% {listing.condition}</span>
-            </span>
-          )}
-        </div>
-
-        {/* Quick Zoom & View Count Pill */}
-        <div className="absolute bottom-2.5 right-3 z-10 flex items-center gap-1.5">
-          <span
-            id={`listing-thumb-views-${listing.id}`}
-            className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 border shadow-xs select-none ${
-              (listing.views || 0) >= 100
-                ? "bg-slate-950/95 text-amber-300 border-amber-500/50"
-                : "bg-slate-900/90 text-slate-200 border-slate-700/80"
-            }`}
-            title={`${listing.views || 0} students viewed this listing`}
-          >
-            {(listing.views || 0) >= 100 ? (
-              <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />
-            ) : (
-              <Eye className="w-3 h-3 text-indigo-400" />
-            )}
-            <span>{(listing.views || 0).toLocaleString()}</span>
-          </span>
-
-          <button
-            id={`listing-zoom-btn-${listing.id}`}
-            type="button"
-            aria-label={`Zoom and inspect condition of ${listing.title}`}
-            title="Zoom & inspect condition in lightbox"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onOpenLightbox) {
-                onOpenLightbox(listing);
-              } else {
-                onOpenDetails(listing);
-              }
-            }}
-            className="px-2 py-1 rounded-lg bg-slate-900/95 hover:bg-slate-800 text-white text-[10px] font-bold flex items-center gap-1 border border-slate-700 opacity-95 hover:opacity-100 transition-colors shadow-sm cursor-pointer"
-          >
-            <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Zoom</span>
-          </button>
-        </div>
-
-        {/* Status overlay if not available or completed */}
+        {/* Status Overlay only when unavailable */}
         {listing.status !== "available" && (
-          <div className="absolute inset-0 bg-slate-950/88 flex flex-col items-center justify-center p-3 text-center z-20">
+          <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center p-4 text-center z-20">
             {listing.status === "completed" ? (
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mb-1.5 shadow-lg">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                </div>
-                <span className="px-3 py-1 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 font-extrabold text-xs uppercase tracking-wider shadow-md">
-                  Sold / Completed
-                </span>
-                <span className="text-[10px] text-slate-300 mt-1 font-medium">
-                  Verified Campus Handover
-                </span>
+              <div className="flex items-center gap-1.5 text-white text-xs font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Sold</span>
               </div>
             ) : (
-              <span
-                className={`px-3 py-1 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-lg ${
-                  listing.status === "inactive"
-                    ? "bg-slate-800 border border-slate-700 text-slate-300"
-                    : "bg-amber-600/90 border border-amber-500/40"
-                }`}
-              >
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">
                 {listing.status === "reserved"
                   ? "Reserved"
                   : listing.status === "handover_scheduled"
                   ? "Handover Scheduled"
-                  : "Inactive (Expired 30d)"}
+                  : "Inactive"}
               </span>
             )}
           </div>
         )}
       </div>
 
-      {/* Card Content */}
-      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2 relative z-10">
-        <div>
-          {/* Category & Handover Location Row */}
-          <div className={`flex items-center justify-between text-xs mb-1.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-            <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
-              <Tag className="w-3 h-3" />
-              {listing.category}
-            </span>
-            <div className="flex items-center gap-2">
-              {listing.expiryDate && (
-                <span
-                  className={`flex items-center gap-1 text-[10px] font-medium ${
-                    listing.status === "inactive"
-                      ? isDark ? "text-slate-500 line-through" : "text-slate-400 line-through"
-                      : isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
-                  title={`Listing validity: ${new Date(listing.expiryDate).toLocaleDateString()}`}
-                >
-                  <Clock className="w-3 h-3 text-slate-400" />
-                  <span>{formatExpiryInfo(listing).label}</span>
+      {/* Airy Card Body */}
+      <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+        <div className="space-y-1.5">
+          {/* Quiet Unboxed Metadata */}
+          <div
+            className={`flex items-center gap-1.5 text-[11px] truncate ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          >
+            {listing.isBundle ? (
+              <span className="font-semibold text-[#2F5D50] dark:text-[#7BBFA8] shrink-0">
+                Bundle ({listing.bundleItems?.length || 2} items)
+              </span>
+            ) : (
+              <span className="truncate">{listing.category}</span>
+            )}
+            <span aria-hidden="true">·</span>
+            <span className="shrink-0">{listing.condition}</span>
+            {listing.aiInspection && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="font-mono tabular-nums shrink-0">
+                  AI {listing.aiInspection.inspectionScore}%
                 </span>
-              )}
-              {listing.locationPreference && (
-                <span
-                  className={`flex items-center gap-0.5 font-medium ${
-                    isFullScreen ? "max-w-none" : "truncate max-w-[130px]"
-                  } ${isDark ? "text-slate-300" : "text-slate-600"}`}
-                  title={`Preferred handover spot: ${listing.locationPreference}`}
-                >
-                  <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
-                  <span className={isFullScreen ? "break-words" : "truncate"}>{listing.locationPreference}</span>
-                </span>
-              )}
-            </div>
+              </>
+            )}
           </div>
 
-          {/* Title */}
+          {/* Product Title */}
           <h3
             onClick={() => onOpenDetails(listing)}
-            className={`text-sm font-bold transition-colors cursor-pointer leading-snug break-words ${
-              isFullScreen ? "line-clamp-none" : "line-clamp-2 hover:line-clamp-none"
-            } ${
-              isDark ? "text-white hover:text-indigo-300" : "text-slate-900 hover:text-indigo-600"
+            className={`text-[15px] font-semibold leading-snug line-clamp-2 cursor-pointer hover:underline underline-offset-4 ${
+              isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
             }`}
           >
             {listing.title}
           </h3>
 
-          {/* Description */}
-          <p className={`text-xs mt-1 leading-relaxed break-words ${
-            isFullScreen ? "line-clamp-none" : "line-clamp-3 hover:line-clamp-none"
-          } ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-            {listing.description}
-          </p>
-
-          {/* Exchange Terms Badge if present */}
-          {listing.exchangeFor && (
-            <div className="mt-2 p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-700 dark:text-purple-300 flex items-start gap-1.5">
-              <Repeat className="w-3 h-3 text-purple-500 shrink-0 mt-0.5" />
-              <span className="break-words">
-                <strong className="font-bold">Swap for:</strong> {listing.exchangeFor}
+          {/* Price Row */}
+          <div className="pt-1 flex items-baseline justify-between gap-2">
+            {listing.listingType === "exchange" ? (
+              <span
+                className={`text-sm font-semibold ${
+                  isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                }`}
+              >
+                Open to Exchange
               </span>
+            ) : (
+              <div className="flex items-baseline gap-1.5 font-mono tabular-nums">
+                <span
+                  className={`text-base font-semibold ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                  }`}
+                >
+                  ₹{listing.price}
+                </span>
+                {hasDiscount && (
+                  <span className="text-xs line-through text-[#83928A]">
+                    ₹{listing.originalPrice}
+                  </span>
+                )}
+                {listing.listingType === "both" && (
+                  <span className="text-[11px] font-sans text-[#5C6B63] dark:text-[#8FA199]">· Swap</span>
+                )}
+              </div>
+            )}
+
+            <span
+              className={`text-[11px] tabular-nums shrink-0 ${
+                isSoldOut
+                  ? "text-[#83928A]"
+                  : isDark
+                  ? "text-[#8FA199]"
+                  : "text-[#5C6B63]"
+              }`}
+            >
+              {isSoldOut ? "Sold out" : `${stockCount} left`}
+            </span>
+          </div>
+
+          {/* Location */}
+          {listing.locationPreference && (
+            <div
+              className={`flex items-center gap-1 text-[11px] truncate pt-0.5 ${
+                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+              }`}
+            >
+              <MapPin className="w-3 h-3 shrink-0" />
+              <span className="truncate">{listing.locationPreference}</span>
             </div>
           )}
+        </div>
 
-          {/* Tags Chips */}
-          {listing.tags && listing.tags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1 mt-2">
-              {(isFullScreen ? listing.tags : listing.tags.slice(0, 3)).map((tag) => (
+        {/* Footer: Plain Seller & Actions */}
+        <div
+          className={`pt-3 border-t space-y-2.5 ${
+            isDark ? "border-[#242E2A]" : "border-[#EFF4F1]"
+          }`}
+        >
+          {/* Seller row — plain name, zero student badges */}
+          <div className="flex items-center justify-between gap-2 text-[11px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 ${
+                  isDark ? "bg-[#1B2320] text-[#ECF2EF]" : "bg-[#EFF4F1] text-[#18201C]"
+                }`}
+              >
+                {listing.sellerName.charAt(0).toUpperCase()}
+              </div>
+              <span
+                className={`font-medium truncate ${
+                  isDark ? "text-[#C5D2CC]" : "text-[#3B4A42]"
+                }`}
+              >
+                {listing.sellerName}
+              </span>
+            </div>
+
+            {listing.year && (
+              <span className="text-[#83928A] shrink-0 truncate max-w-[90px]">
+                {listing.year}
+              </span>
+            )}
+          </div>
+
+          {/* Minimal Action Row (or One-Tap Seller Status Controls if Owner) */}
+          {isOwner && onUpdateStatus ? (
+            <div className="grid grid-cols-3 gap-1">
+              {(
+                [
+                  { key: "available", label: "Available" },
+                  { key: "reserved", label: "Reserved" },
+                  { key: "completed", label: "Sold" },
+                ] as const
+              ).map((st) => {
+                const active = listing.status === st.key;
+                return (
+                  <button
+                    key={st.key}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateStatus(listing.id, st.key);
+                    }}
+                    className={`h-8 rounded-lg border text-[11px] font-semibold cursor-pointer ${
+                      active
+                        ? "bg-[#2F5D50] dark:bg-[#387262] text-white border-[#2F5D50] dark:border-[#387262]"
+                        : isDark
+                        ? "bg-[#0D1110] border-[#242E2A] text-[#8FA199] hover:text-[#ECF2EF]"
+                        : "bg-white border-[#DFE6E2] text-[#5C6B63] hover:text-[#18201C]"
+                    }`}
+                  >
+                    {st.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <button
+                id={`listing-chat-btn-${listing.id}`}
+                type="button"
+                onClick={handleChatClick}
+                disabled={!isOnline && listing.status !== "completed"}
+                className={`flex-1 h-8 px-2.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                  isDark
+                    ? "bg-[#387262] hover:bg-[#448573] text-white"
+                    : "bg-[#2F5D50] hover:bg-[#244A3F] text-white"
+                }`}
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>{listing.status === "completed" ? "View" : "Chat"}</span>
+              </button>
+
+              {listing.listingType !== "sell" && onOpenBarter && listing.status === "available" && (
                 <button
-                  key={tag}
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onTagClick?.(tag);
+                    onOpenBarter(listing);
                   }}
-                  className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold transition-colors cursor-pointer ${
+                  title="Propose a barter swap"
+                  className={`h-8 px-2.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1 cursor-pointer ${
                     isDark
-                      ? "bg-slate-900/80 text-slate-300 border border-slate-700/60 hover:border-indigo-500/40 hover:text-indigo-300"
-                      : "bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-700"
+                      ? "border-[#242E2A] text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "border-[#DFE6E2] text-[#18201C] hover:bg-[#EFF4F1]"
                   }`}
                 >
-                  #{tag}
+                  <Repeat className="w-3.5 h-3.5" />
+                  <span>Swap</span>
                 </button>
-              ))}
-              {!isFullScreen && listing.tags.length > 3 && (
-                <span className={`text-[10px] font-medium ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                  +{listing.tags.length - 3}
-                </span>
               )}
-            </div>
-          )}
-
-          {/* Expandable Quick Specs & AI Report Accordion */}
-          <div className="mt-2.5">
-            <button
-              type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className={`w-full py-1 px-2 rounded-lg text-[11px] font-bold flex items-center justify-between border transition-colors cursor-pointer ${
-                isExpanded
-                  ? isDark
-                    ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
-                    : "bg-indigo-50 border-indigo-200 text-indigo-700"
-                  : isDark
-                  ? "bg-slate-900/50 border-slate-700/60 text-slate-400 hover:text-slate-200"
-                  : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <span className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-                <span>{isExpanded ? "Hide Full Details" : "Show All Details & Specs"}</span>
-              </span>
-              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </button>
-
-            {isExpanded && (
-                <div className="pt-2 space-y-2 text-xs">
-                  {/* Full Description */}
-                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
-                    <div className="font-bold text-[10px] uppercase text-slate-400 mb-1">Full Description</div>
-                    <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}>
-                      {listing.description}
-                    </p>
-                  </div>
-
-                  {/* Condition Meter */}
-                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
-                    <div className="flex items-center justify-between text-[11px] font-bold mb-1">
-                      <span>Condition Health: {listing.condition}</span>
-                      <span className="text-indigo-400">{getConditionScore(listing.condition)}%</span>
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${getConditionBarColor(listing.condition)}`}
-                        style={{ width: `${getConditionScore(listing.condition)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* AI Inspection Notes if present */}
-                  {listing.aiInspection && (
-                    <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-black text-slate-900 dark:text-white">
-                        <span className="flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                          AI Inspection Score
-                        </span>
-                        <span className="px-2 py-0.5 rounded-md bg-slate-950 text-emerald-400 font-black">
-                          {listing.aiInspection.inspectionScore}%
-                        </span>
-                      </div>
-                      {listing.aiInspection.conditionDetails && (
-                        <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-normal">
-                          {listing.aiInspection.conditionDetails}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Seller Details */}
-                  <div className={`p-2.5 rounded-xl border ${isDark ? "bg-slate-900/80 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-400 text-[10px] uppercase">Seller Credentials</span>
-                      <span className="text-[10px] text-emerald-500 font-bold">✓ Campus Verified</span>
-                    </div>
-                    <div className="mt-1 flex items-center justify-between text-xs">
-                      <span className="font-semibold">{listing.sellerName}</span>
-                      <span className="text-slate-400">{listing.department} ({listing.year || "Student"})</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-          </div>
-
-          {/* Star Rating & Review Summary */}
-          <div
-            id={`listing-rating-summary-${listing.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenDetails(listing);
-            }}
-            className={`mt-2 flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer group/rating ${
-              isDark
-                ? "bg-slate-900/60 hover:bg-slate-900/90 border-slate-700/60 hover:border-indigo-500/40"
-                : "bg-slate-50 hover:bg-slate-100/90 border-slate-200/80 hover:border-indigo-400"
-            }`}
-          >
-            <div className="flex items-center gap-1.5">
-              {reviewCount > 0 ? (
-                <>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                    <span className={`text-xs font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                      {rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <span className={`text-[11px] ${isDark ? "text-slate-400 group-hover/rating:text-indigo-300" : "text-slate-500 group-hover/rating:text-indigo-600"}`}>
-                    ({reviewCount} reviews)
-                  </span>
-                </>
-              ) : (
-                <div className="flex items-center gap-1 text-[11px] text-slate-500">
-                  <Star className="w-3.5 h-3.5 text-slate-400" />
-                  <span>No reviews yet</span>
-                </div>
-              )}
-            </div>
-
-            <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-              {reviewCount > 0 ? (
-                <>
-                  <span>Verified Deal</span>
-                  <span className="text-emerald-500 font-bold">✓</span>
-                </>
-              ) : (
-                <span>Campus Guarantee</span>
-              )}
-            </span>
-          </div>
-        </div>
-
-        {/* Card Footer: Price, Seller & Quick Actions */}
-        <div className={`pt-2.5 border-t space-y-2.5 ${isDark ? "border-slate-700/60" : "border-slate-200"}`}>
-          {/* Price & Seller Row */}
-          <div className="flex items-center justify-between">
-            <div>
-              {listing.listingType === "exchange" ? (
-                <div className="text-sm font-bold text-purple-500">
-                  Open for Exchange
-                </div>
-              ) : (
-                <div>
-                  <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>₹</span>
-                    <span className={`text-lg font-black ${isDark ? "text-white" : "text-slate-900"}`}>
-                      {listing.price}
-                    </span>
-                    {listing.originalPrice && listing.originalPrice > listing.price && (
-                      <span className="line-through text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                        ₹{listing.originalPrice}
-                      </span>
-                    )}
-                    {listing.listingType === "both" && (
-                      <span className={`text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>or Swap</span>
-                    )}
-                  </div>
-                  {listing.originalPrice && listing.originalPrice > listing.price && (
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500">
-                      <span>Save ₹{listing.originalPrice - listing.price}</span>
-                      <span className="px-1 py-0.2 rounded text-[9px] bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25">
-                        {Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}% OFF
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-              {/* Available Stock Indicator */}
-              <div className="flex items-center gap-1 text-[11px] font-bold mt-0.5">
-                <Package className="w-3 h-3 text-purple-400 shrink-0" />
-                <span className={isDark ? "text-slate-300" : "text-slate-600"}>
-                  Stock:{" "}
-                  <strong
-                    className={
-                      listing.availableStock === 0 || listing.status === "completed"
-                        ? "text-slate-500 font-bold"
-                        : (listing.availableStock ?? 1) === 1
-                        ? "text-rose-600 dark:text-rose-400 font-bold"
-                        : "text-emerald-600 dark:text-emerald-400 font-bold"
-                    }
-                  >
-                    {listing.availableStock === 0 || listing.status === "completed"
-                      ? "0 Left"
-                      : `${listing.availableStock ?? 1} Available`}
-                  </strong>
-                </span>
-              </div>
-            </div>
-
-            <div
-              onClick={() => onOpenPassport?.(listing)}
-              className="flex items-center gap-1.5 text-right cursor-pointer group/seller"
-              title="Click to view Verified Student Digital Passport"
-            >
-              <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 group-hover/seller:border-indigo-400 transition-colors">
-                {listing.sellerName.charAt(0)}
-              </div>
-              <div className="text-left">
-                <div className="flex items-center gap-1">
-                  <span className={`text-xs font-semibold group-hover/seller:text-indigo-400 transition-colors ${
-                    isFullScreen ? "break-words" : "truncate max-w-[90px]"
-                  } ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-                    {isFullScreen ? listing.sellerName : listing.sellerName.split(" ")[0]}
-                  </span>
-                  <UserMilestoneBadge listing={listing} allListings={allListings} />
-                </div>
-                <div className="flex items-center gap-1 -mt-0.5">
-                  <span className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    {isFullScreen ? (listing.department || "Student") : (listing.department?.split(" ")[0] || "Student")}
-                  </span>
-                  <SellerReputationBadge
-                    listing={listing}
-                    allListings={allListings}
-                    variant="seller-row"
-                    onViewReviews={onOpenDetails}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Action Buttons */}
-          <div className="space-y-1.5">
-            {/* Primary Action: Direct Ask Seller Button */}
-            <button
-              id={`listing-chat-btn-${listing.id}`}
-              onClick={() => {
-                if (listing.status === "completed") {
-                  onOpenDetails(listing);
-                  return;
-                }
-                if (!isOnline) {
-                  onShowToast?.("⚠️ Chat is disabled while offline to prevent data loss.");
-                  return;
-                }
-                onOpenChat(
-                  listing,
-                  `Hi ${listing.sellerName.split(" ")[0]}! I saw your listing for "${listing.title}". Is it still available for handover on campus?`
-                );
-              }}
-              disabled={!isOnline && listing.status !== "completed"}
-              title={
-                listing.status === "completed"
-                  ? "This item has already been sold on campus. Click to view history."
-                  : !isOnline
-                  ? "Chat is disabled while offline"
-                  : `Ask ${listing.sellerName} questions or negotiate a deal`
-              }
-              className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-colors flex items-center justify-center gap-1.5 shadow-2xs select-none ${
-                listing.status === "completed"
-                  ? isDark
-                    ? "bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-pointer"
-                    : "bg-slate-100 text-emerald-700 border border-emerald-200 cursor-pointer"
-                  : !isOnline
-                  ? isDark
-                    ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
-                    : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-                  : isDark
-                  ? "bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-indigo-600/30 cursor-pointer"
-                  : "bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-600/25 cursor-pointer"
-              }`}
-            >
-              {listing.status === "completed" ? (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                  <span>Item Sold • View History</span>
-                </>
-              ) : !isOnline ? (
-                <>
-                  <WifiOff className="w-3.5 h-3.5 shrink-0" />
-                  <span>Chat Offline</span>
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>Ask Seller</span>
-                </>
-              )}
-            </button>
-
-            {/* Secondary Actions: Details, Meet, Share */}
-            <div className="flex items-center gap-1.5">
-              <button
-                id={`listing-details-btn-${listing.id}`}
-                onClick={() => onOpenDetails(listing)}
-                className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs ${
-                  listing.status === "completed"
-                    ? isDark
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
-                      : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                    : isDark
-                    ? "border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-800"
-                }`}
-              >
-                {listing.status === "completed" ? "History" : "Details"}
-              </button>
 
               <button
                 id={`listing-meet-btn-${listing.id}`}
-                onClick={() => onOpenCalendar(listing)}
-                className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenCalendar(listing);
+                }}
+                aria-label="Schedule handover"
+                title="Schedule handover"
+                className={`h-8 w-8 rounded-lg border flex items-center justify-center cursor-pointer shrink-0 ${
                   isDark
-                    ? "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/40"
-                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                    ? "border-[#242E2A] text-[#8FA199] hover:bg-[#1B2320] hover:text-[#ECF2EF]"
+                    : "border-[#DFE6E2] text-[#5C6B63] hover:bg-[#EFF4F1] hover:text-[#18201C]"
                 }`}
-                title="Schedule Handover on Google Calendar"
               >
-                <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
-                <span>Meet</span>
+                <CalendarIcon className="w-3.5 h-3.5" />
               </button>
 
               <button
-                id={`listing-share-btn-${listing.id}`}
+                id={`listing-details-btn-${listing.id}`}
                 type="button"
-                onClick={handleShare}
-                className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                  isShared
-                    ? isDark
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : isDark
-                    ? "bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700"
-                    : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                onClick={() => onOpenDetails(listing)}
+                aria-label="View item details"
+                title="View details"
+                className={`h-8 w-8 rounded-lg border flex items-center justify-center cursor-pointer shrink-0 ${
+                  isDark
+                    ? "border-[#242E2A] text-[#8FA199] hover:bg-[#1B2320] hover:text-[#ECF2EF]"
+                    : "border-[#DFE6E2] text-[#5C6B63] hover:bg-[#EFF4F1] hover:text-[#18201C]"
                 }`}
-                title="Share listing via Web Share"
               >
-                {isShared ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span>Done</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>Share</span>
-                  </>
-                )}
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
-        </div>
+          )}
         </div>
       </div>
-    </div>
+    </article>
   );
 };

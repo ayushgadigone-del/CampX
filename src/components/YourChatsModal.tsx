@@ -389,15 +389,10 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
                         </h4>
 
                         {/* Seller marker */}
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          <User className="w-3 h-3 text-indigo-500" />
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                          <User className="w-3 h-3" />
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
                             {chat.sellerName || "Campus Seller"}
-                          </span>
-                          <span>•</span>
-                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-0.5">
-                            <ShieldCheck className="w-3 h-3" />
-                            Verified Student
                           </span>
                         </div>
 

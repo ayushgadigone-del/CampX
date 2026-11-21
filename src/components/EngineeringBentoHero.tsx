@@ -1,22 +1,6 @@
 import React from "react";
-import {
-  Terminal,
-  Cpu,
-  Sparkles,
-  ShieldCheck,
-  TrendingDown,
-  CalendarCheck,
-  PlusCircle,
-  Search,
-  GraduationCap,
-  Heart,
-  Sun,
-  Moon,
-  Zap,
-  Tag,
-} from "lucide-react";
+import { Plus, Sparkles, GraduationCap } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { HorizontalSlider } from "./HorizontalSlider";
 
 interface EngineeringBentoHeroProps {
   totalListingsCount: number;
@@ -40,657 +24,96 @@ interface EngineeringBentoHeroProps {
 export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
   totalListingsCount,
   totalActiveStock,
-  availableCount,
-  topperNotesCount = 0,
-  upcomingHandoversCount = 0,
-  isOnline = true,
   onOpenCreateListing,
   onOpenCreateModal,
   onOpenAIInspector,
   onOpenTopperNotes,
-  onOpenWishlist,
-  onOpenYourChats,
-  onOpenAlerts,
-  onFocusSearch,
-  onSelectCategory,
-  selectedCategory = "All",
 }) => {
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const handleCreate = onOpenCreateListing || onOpenCreateModal || (() => {});
+  const activeCount = totalActiveStock !== undefined ? totalActiveStock : totalListingsCount;
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 mb-6 sm:mb-8">
-      {/* Top Engineering Micro-Status Ribbon (Linear / Raycast Style) */}
+    <section
+      id="pvg-engineering-resale-section"
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-2"
+    >
       <div
-        className={`w-full mb-4 px-3.5 sm:px-4 py-2 rounded-xl text-xs flex flex-wrap items-center justify-between gap-3 border transition-colors ${
-          isDark
-            ? "bg-[#0F172A]/85 border-slate-800/90 text-slate-300 ring-1 ring-white/5"
-            : "bg-white/90 border-slate-200 text-slate-600 shadow-2xs"
+        className={`w-full flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b ${
+          isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
         }`}
       >
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 relative">
-            <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span className="font-mono text-[11px] font-semibold tracking-tight">
-            <strong className={isDark ? "text-slate-100" : "text-slate-900"}>
-              PVG&apos;s COET Terminal Node:
-            </strong>{" "}
-            Pune Campus Network Online
-          </span>
+        <div className="space-y-2 max-w-2xl text-left">
+          <div
+            className={`text-xs font-medium flex flex-wrap items-center gap-2 ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          >
+            <span>PVG&apos;s COET, Pune</span>
+            <span aria-hidden="true">·</span>
+            <span className="tabular-nums">{activeCount} items available</span>
+            <span aria-hidden="true">·</span>
+            <span>@pvgcoet.ac.in</span>
+          </div>
+
+          <h1
+            className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+              isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+            }`}
+          >
+            Student-to-student campus resale
+          </h1>
+
+          <p
+            className={`text-sm leading-relaxed ${
+              isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+            }`}
+          >
+            Buy, sell, or swap engineering textbooks, calculators, drafters, lab equipment, and cycles directly on campus with zero commission.
+          </p>
         </div>
 
-        {/* Keyboard Shortcut Cheatsheet Pills (Visible on Mobile & Desktop) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono overflow-x-auto no-scrollbar py-0.5 max-w-full">
-          <span className={`shrink-0 ${isDark ? "text-slate-400" : "text-slate-500"}`}>Shortcuts:</span>
-          {onFocusSearch && (
-            <button
-              onClick={onFocusSearch}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
-                isDark
-                  ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
-                  : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
-              }`}
-              title="Focus search input (Shortcut: /)"
-            >
-              <kbd className="font-bold">/</kbd> Search
-            </button>
-          )}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
+            type="button"
             onClick={handleCreate}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
+            className={`h-9 px-4 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:border-indigo-500 hover:text-white"
-                : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
+                ? "bg-[#387262] hover:bg-[#448573] text-white"
+                : "bg-[#2F5D50] hover:bg-[#244A3F] text-white"
             }`}
-            title="Create new listing (Shortcut: P)"
           >
-            <kbd className="font-bold text-indigo-400">P</kbd> Post
+            <Plus className="w-3.5 h-3.5" />
+            <span>Post Item</span>
           </button>
+
           <button
+            type="button"
+            onClick={onOpenAIInspector}
+            className={`h-9 px-3.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              isDark
+                ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
+            }`}
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`} />
+            <span>AI Inspector</span>
+          </button>
+
+          <button
+            type="button"
             onClick={onOpenTopperNotes}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
+            className={`h-9 px-3.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
-                : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
+                ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
             }`}
-            title="Open Topper Notes vault (Shortcut: N)"
           >
-            <kbd className="font-bold text-emerald-400">N</kbd> Notes
-          </button>
-          {onOpenWishlist && (
-            <button
-              onClick={onOpenWishlist}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
-                isDark
-                  ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
-                  : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
-              }`}
-              title="Open saved wishlist (Shortcut: W)"
-            >
-              <kbd className="font-bold text-rose-400">W</kbd> Wishlist
-            </button>
-          )}
-          {onOpenYourChats && (
-            <button
-              onClick={onOpenYourChats}
-              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer shrink-0 ${
-                isDark
-                  ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-indigo-500"
-                  : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
-              }`}
-              title="Open chats with sellers (Shortcut: C)"
-            >
-              <kbd className="font-bold text-sky-400">C</kbd> Chat
-            </button>
-          )}
-          <button
-            onClick={toggleTheme}
-            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono transition-colors cursor-pointer flex items-center gap-1 shrink-0 ${
-              isDark
-                ? "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-amber-400"
-                : "bg-slate-100 border-slate-300 text-slate-700 hover:border-indigo-400"
-            }`}
-            title="Toggle Dark / Light Mode (Shortcut: M)"
-          >
-            <kbd className="font-bold text-amber-400">M</kbd> {isDark ? "Light" : "Dark"}
+            <GraduationCap className={`w-3.5 h-3.5 ${isDark ? "text-[#8FA199]" : "text-[#5C6B63]"}`} />
+            <span>Topper Notes</span>
           </button>
         </div>
-
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-emerald-400 font-bold">
-            100% Student Verified
-          </span>
-        </div>
       </div>
-
-      {/* Main Structural Flow */}
-      <div className="space-y-4 sm:space-y-5">
-        {/* Side by Side Container: Section 1 & Section 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
-          {/* SECTION 1: PVG's COET Engineering Resale & Exchange */}
-          <div
-            id="pvg-engineering-resale-section"
-            className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
-              isDark
-                ? "bg-gradient-to-br from-[#0F172A] via-[#0F172A]/90 to-[#0A0E17] border-slate-800/90 shadow-xl ring-1 ring-white/5"
-                : "bg-gradient-to-br from-white via-slate-50 to-indigo-50/40 border-slate-200/90 shadow-md"
-            }`}
-          >
-            {/* Subtle background tech grid lines */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-            <div className="relative z-10 space-y-3.5">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`p-1.5 rounded-lg font-mono text-xs font-bold flex items-center gap-1.5 border ${
-                      isDark
-                        ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
-                        : "bg-indigo-50 border-indigo-200 text-indigo-700"
-                    }`}
-                  >
-                    <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>terminal://pvgcoet.market</span>
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider ${
-                      isDark
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    }`}
-                  >
-                    v2.6 Build
-                  </span>
-                </div>
-
-                {/* Theme quick toggle pill */}
-                <button
-                  onClick={toggleTheme}
-                  className={`p-2 rounded-xl border transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer ${
-                    isDark
-                      ? "bg-zinc-800/80 hover:bg-zinc-700 border-zinc-700 text-zinc-200"
-                      : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800 shadow-2xs"
-                  }`}
-                  title={`Switch to ${isDark ? "Light" : "Dark"} Mode (or press 'D')`}
-                >
-                  {isDark ? (
-                    <>
-                      <Sun className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="hidden sm:inline">Light</span>
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="w-3.5 h-3.5 text-indigo-600" />
-                      <span className="hidden sm:inline">Dark</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <div className="space-y-2 w-full">
-                <h1
-                  className={`text-xl sm:text-2xl md:text-2.5xl font-extrabold tracking-tight ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  PVG&apos;s COET Engineering Resale &amp; Exchange
-                </h1>
-                <p
-                  className={`w-full text-xs sm:text-sm leading-relaxed ${
-                    isDark ? "text-zinc-300" : "text-slate-700"
-                  }`}
-                >
-                  The official zero-commission Pune campus exchange for Casio fx-991 calculators, SPPU engineering textbooks, mini drafters, cycles, lab aprons, and free topper exam revision notes.
-                </p>
-              </div>
-
-              {/* Quick Department / Subject Filter Shortcuts (Slideable on mobile) */}
-              <div className="pt-2">
-                <HorizontalSlider
-                  id="bento-quick-tags-slider"
-                  showArrows={true}
-                  showProgress={false}
-                  showMobileHint={false}
-                  scrollStep={180}
-                  ariaLabel="Campus quick search tags slider"
-                  trackClassName="gap-2 py-1 items-center"
-                >
-                  <span
-                    className={`text-[11px] font-mono font-semibold flex items-center gap-1 shrink-0 ${
-                      isDark ? "text-zinc-400" : "text-slate-500"
-                    }`}
-                  >
-                    <Tag className="w-3 h-3 text-indigo-400" />
-                    <span>Quick Tags:</span>
-                  </span>
-                  {[
-                    { label: "Casio fx-991", cat: "Calculators" as const },
-                    { label: "SPPU Textbooks", cat: "Books" as const },
-                    { label: "Mini Drafters", cat: "Lab Equipment" as const },
-                    { label: "Campus Cycles", cat: "Cycles" as const },
-                  ].map((t) => {
-                    const isSelected = selectedCategory === t.cat;
-                    return (
-                      <button
-                        key={t.label}
-                        onClick={() => onSelectCategory(t.cat)}
-                        className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:shadow-[0_0_20px_rgba(168,85,247,0.55)] hover:border-purple-400 hover:ring-2 hover:ring-purple-400/40 ${
-                          isSelected
-                            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500 shadow-md shadow-purple-600/30 ring-2 ring-purple-400/40"
-                            : isDark
-                            ? "bg-zinc-800/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white"
-                            : "bg-white hover:bg-purple-50/60 border-slate-200 text-slate-700 hover:text-purple-700 shadow-2xs"
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    );
-                  })}
-                </HorizontalSlider>
-              </div>
-            </div>
-
-            {/* Bottom Action Row */}
-            <div className="relative z-10 pt-4 mt-4 border-t flex flex-wrap items-center gap-2.5 border-zinc-700/60">
-              <button
-                onClick={handleCreate}
-                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/25 transition-all cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Post Equipment</span>
-              </button>
-
-              <button
-                onClick={onOpenTopperNotes}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  isDark
-                    ? "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
-                    : "bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200"
-                }`}
-              >
-                <GraduationCap className="w-4 h-4 text-amber-400" />
-                <span>Topper Notes Vault</span>
-              </button>
-
-              {onOpenAlerts && (
-                <button
-                  onClick={onOpenAlerts}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1.5 cursor-pointer ${
-                    isDark
-                      ? "bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border-zinc-700"
-                      : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <span>Alerts</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* SECTION 2: AI Condition & Pricing Inspector (Side by Side with Section 1) */}
-          <div
-            id="ai-condition-pricing-inspector-section"
-            className={`w-full h-full rounded-2xl p-5 sm:p-6 border relative overflow-hidden flex flex-col justify-between ${
-              isDark
-                ? "bg-gradient-to-br from-[#0F172A] via-indigo-950/25 to-[#0A0E17] border-indigo-500/30 shadow-xl ring-1 ring-white/5"
-                : "bg-gradient-to-br from-indigo-50/80 via-white to-indigo-50/50 border-indigo-200/90 shadow-md"
-            }`}
-          >
-            <div className="space-y-3.5">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`p-1.5 rounded-lg border flex items-center gap-1.5 text-xs font-bold ${
-                      isDark
-                        ? "bg-indigo-500/20 text-indigo-300 border-indigo-400/30"
-                        : "bg-indigo-100 text-indigo-800 border-indigo-200"
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>Gemini 3.8 Flash</span>
-                  </span>
-                  <span
-                    className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                      isDark
-                        ? "bg-indigo-950/60 text-indigo-300 border border-indigo-800/60"
-                        : "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                    }`}
-                  >
-                    Computer Vision &amp; Pricing
-                  </span>
-                </div>
-                <span
-                  className={`font-mono text-[10px] font-bold px-2.5 py-1 rounded-md ${
-                    isDark
-                      ? "bg-zinc-800 text-emerald-400 border border-zinc-700"
-                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  }`}
-                >
-                  AI Lab Ready
-                </span>
-              </div>
-
-              <div>
-                <h2
-                  className={`text-xl sm:text-2xl font-extrabold tracking-tight ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  AI Condition &amp; Pricing Inspector
-                </h2>
-                <p
-                  className={`text-xs sm:text-sm mt-1 leading-relaxed ${
-                    isDark ? "text-zinc-300" : "text-slate-600"
-                  }`}
-                >
-                  Snap or upload a photo of your pre-owned engineering equipment. Gemini scans model serials, verifies authenticity, detects scratches, and calculates fair SPPU student pricing automatically.
-                </p>
-              </div>
-
-              {/* Feature Highlights Matrix (2x2 inside half-width card) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                <div
-                  className={`p-2.5 rounded-xl border text-xs ${
-                    isDark
-                      ? "bg-zinc-900/85 border-zinc-800"
-                      : "bg-white border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
-                      Defect Detection
-                    </span>
-                    <Zap className="w-3.5 h-3.5 text-indigo-400" />
-                  </div>
-                  <div
-                    className={`font-semibold text-xs ${
-                      isDark ? "text-zinc-200" : "text-slate-800"
-                    }`}
-                  >
-                    Scratches &amp; Key Wear
-                  </div>
-                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
-                    Grades Like New, Good, or Fair.
-                  </p>
-                </div>
-
-                <div
-                  className={`p-2.5 rounded-xl border text-xs ${
-                    isDark
-                      ? "bg-zinc-900/85 border-zinc-800"
-                      : "bg-white border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                      Fair Price Range
-                    </span>
-                    <span className="text-xs font-bold text-emerald-500">₹</span>
-                  </div>
-                  <div
-                    className={`font-semibold text-xs ${
-                      isDark ? "text-zinc-200" : "text-slate-800"
-                    }`}
-                  >
-                    SPPU Student Budget
-                  </div>
-                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
-                    Prevents campus price gouging.
-                  </p>
-                </div>
-
-                <div
-                  className={`p-2.5 rounded-xl border text-xs ${
-                    isDark
-                      ? "bg-zinc-900/85 border-zinc-800"
-                      : "bg-white border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[10px] text-blue-400 font-bold uppercase tracking-wider">
-                      Instant Auto-Draft
-                    </span>
-                    <Cpu className="w-3.5 h-3.5 text-blue-400" />
-                  </div>
-                  <div
-                    className={`font-semibold text-xs ${
-                      isDark ? "text-zinc-200" : "text-slate-800"
-                    }`}
-                  >
-                    1-Click Setup
-                  </div>
-                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
-                    Pre-fills specs and condition tier.
-                  </p>
-                </div>
-
-                <div
-                  className={`p-2.5 rounded-xl border text-xs ${
-                    isDark
-                      ? "bg-zinc-900/85 border-zinc-800"
-                      : "bg-white border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[10px] text-amber-400 font-bold uppercase tracking-wider">
-                      Authenticity
-                    </span>
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                  </div>
-                  <div
-                    className={`font-semibold text-xs ${
-                      isDark ? "text-zinc-200" : "text-slate-800"
-                    }`}
-                  >
-                    Serial Verification
-                  </div>
-                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
-                    Detects genuine student gear.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3.5 mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-indigo-500/20">
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="flex h-2 w-2 relative">
-                  <span className="inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                </span>
-                <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
-                  Live camera snap or image upload
-                </span>
-              </div>
-
-              <button
-                onClick={onOpenAIInspector}
-                className={`py-2 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-                  isDark
-                    ? "bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500/50 shadow-indigo-600/25"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 shadow-indigo-200"
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-indigo-200" />
-                <span>Launch AI Item Scanner</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* SECTION 3: Micro Stats Tiles (Slideable on mobile, 4-column on desktop) */}
-        <div className="pt-1 w-full">
-          <HorizontalSlider
-            id="bento-stats-slider"
-            showArrows={true}
-            showProgress={true}
-            showMobileHint={true}
-            scrollStep={260}
-            itemSnap={true}
-            ariaLabel="Campus Live Key Stats Slider"
-            trackClassName="gap-3 py-1"
-          >
-            {/* Stat 1: Verified Items Available */}
-            <div
-              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-                isDark
-                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
-                  : "bg-white border-slate-200 shadow-2xs"
-              }`}
-            >
-              <div className="space-y-0.5">
-                <span
-                  className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
-                >
-                  Active Campus Gear
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className={`text-xl font-black ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    {totalActiveStock !== undefined ? totalActiveStock : totalListingsCount}
-                  </span>
-                  <span className="text-[11px] text-emerald-500 font-bold">
-                    Verified In Stock
-                  </span>
-                </div>
-              </div>
-              <div
-                className={`p-2.5 rounded-xl shrink-0 ${
-                  isDark
-                    ? "bg-indigo-500/15 text-indigo-400"
-                    : "bg-indigo-50 text-indigo-600"
-                }`}
-              >
-                <Cpu className="w-5 h-5" />
-              </div>
-            </div>
-
-            {/* Stat 2: Student Savings */}
-            <div
-              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-                isDark
-                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
-                  : "bg-white border-slate-200 shadow-2xs"
-              }`}
-            >
-              <div className="space-y-0.5">
-                <span
-                  className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
-                >
-                  Avg Student Savings
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className={`text-xl font-black ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    50%
-                  </span>
-                  <span className="text-[11px] text-emerald-500 font-bold">
-                    vs Retail MRP
-                  </span>
-                </div>
-              </div>
-              <div
-                className={`p-2.5 rounded-xl shrink-0 ${
-                  isDark
-                    ? "bg-emerald-500/15 text-emerald-400"
-                    : "bg-emerald-50 text-emerald-600"
-                }`}
-              >
-                <TrendingDown className="w-5 h-5" />
-              </div>
-            </div>
-
-            {/* Stat 3: Safe Handover Hotspots */}
-            <div
-              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-                isDark
-                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
-                  : "bg-white border-slate-200 shadow-2xs"
-              }`}
-            >
-              <div className="space-y-0.5">
-                <span
-                  className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
-                >
-                  Handover Locations
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className={`text-xl font-black ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    4 Spots
-                  </span>
-                  <span className="text-[11px] text-blue-400 font-bold">
-                    Quad &amp; Library
-                  </span>
-                </div>
-              </div>
-              <div
-                className={`p-2.5 rounded-xl shrink-0 ${
-                  isDark
-                    ? "bg-blue-500/15 text-blue-400"
-                    : "bg-blue-50 text-blue-600"
-                }`}
-              >
-                <CalendarCheck className="w-5 h-5" />
-              </div>
-            </div>
-
-            {/* Stat 4: Authentication Security */}
-            <div
-              className={`w-[240px] sm:w-auto sm:flex-1 shrink-0 snap-start p-3.5 sm:p-4 rounded-xl border flex items-center justify-between ${
-                isDark
-                  ? "bg-[#0F172A]/90 border-slate-800/80 ring-1 ring-white/5"
-                  : "bg-white border-slate-200 shadow-2xs"
-              }`}
-            >
-              <div className="space-y-0.5">
-                <span
-                  className={`text-[11px] font-mono uppercase tracking-wider block ${
-                    isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
-                >
-                  Domain Restriction
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className={`text-sm sm:text-base font-black truncate max-w-[130px] ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    @pvgcoet.ac.in
-                  </span>
-                  <span className="text-[11px] text-emerald-500 font-bold">
-                    Enforced
-                  </span>
-                </div>
-              </div>
-              <div
-                className={`p-2.5 rounded-xl shrink-0 ${
-                  isDark
-                    ? "bg-amber-500/15 text-amber-400"
-                    : "bg-amber-50 text-amber-600"
-                }`}
-              >
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-            </div>
-          </HorizontalSlider>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 };

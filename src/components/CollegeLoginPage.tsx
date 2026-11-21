@@ -1,17 +1,12 @@
 import React, { useState, useRef } from "react";
 import {
-  GraduationCap,
-  ShieldCheck,
   AlertTriangle,
-  Building2,
-  Lock,
   ArrowRight,
   ArrowLeft,
   Mail,
   Camera,
   Loader2,
   CheckCircle2,
-  BookOpen,
 } from "lucide-react";
 import {
   ALLOWED_COLLEGE_DOMAIN,
@@ -97,7 +92,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
 
     if (!isValidCollegeEmail(emailToVerify)) {
       setValidationError(
-        `Invalid Email Domain: Only emails ending with @${ALLOWED_COLLEGE_DOMAIN} are authorized to access the campus marketplace.`
+        `Only emails ending with @${ALLOWED_COLLEGE_DOMAIN} are authorized to access the campus marketplace.`
       );
       return;
     }
@@ -160,19 +155,16 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   return (
     <div
       id="college-login-container"
-      className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden selection:bg-indigo-500 selection:text-white"
+      className="min-h-screen bg-[#F7F9F8] dark:bg-[#0D1110] text-[#18201C] dark:text-[#ECF2EF] flex flex-col justify-center items-center px-4 py-10 font-sans"
     >
-      {/* Background Decorative Ambient Highlights (GPU-safe subtle radial glow without blur-3xl flicker) */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.16),transparent)] pointer-events-none -z-10" />
-
-      <div className="w-full max-w-xl mx-auto flex flex-col items-center">
+      <div className="w-full max-w-lg mx-auto space-y-6">
         {onBackToLanding && (
-          <div className="w-full flex justify-start mb-4">
+          <div>
             <button
               id="back-to-overview-btn"
               type="button"
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-colors cursor-pointer select-none"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Overview</span>
@@ -180,78 +172,46 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
           </div>
         )}
 
-        {/* College Institutional Branding Header */}
-        <div className="text-center mb-6 space-y-2.5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold">
-            <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-            <span>PVG's COET, Pune</span>
-            <span className="text-indigo-400">•</span>
-            <span className="text-emerald-400 font-bold">Official Campus Portal</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-            Campus Resale & Exchange
+        {/* Header */}
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            PVG&apos;s COET · @{ALLOWED_COLLEGE_DOMAIN} only
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+            Sign in to Campus Resale
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-            Verified student-to-student marketplace for textbooks, calculators, lab gear, and topper revision notes.
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            {COLLEGE_RESTRICTION_MESSAGE}
           </p>
         </div>
 
-        {/* Mandatory Domain Restriction Notice Banner */}
-        <div
-          id="college-domain-restriction-banner"
-          className="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-amber-500/15 border border-amber-400/40 shadow-lg"
-        >
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 shrink-0 mt-0.5 border border-amber-500/30">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-black text-amber-200 tracking-wide uppercase">
-                  Institutional Access Restriction
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 text-[11px] font-mono font-bold border border-amber-400/30">
-                  @{ALLOWED_COLLEGE_DOMAIN} only
-                </span>
-              </div>
-              <p className="text-xs text-amber-100/90 leading-relaxed">
-                {COLLEGE_RESTRICTION_MESSAGE}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Feedback Box */}
+        {/* Error Feedback */}
         {activeError && (
           <div
             id="login-error-alert"
-            className="w-full mb-4 p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2.5"
+            className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2.5"
           >
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-bold text-rose-300">Authentication Warning</p>
+              <p className="font-semibold">Authentication notice</p>
               <p className="mt-0.5 leading-relaxed">{activeError}</p>
             </div>
           </div>
         )}
 
-        {/* Main Authentication Card */}
+        {/* Main Card */}
         <div
           id="college-login-card"
-          className="w-full bg-slate-800/95 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
+          className="w-full bg-white dark:bg-[#141A18] border border-[#DFE6E2] dark:border-[#242E2A] rounded-2xl p-6 sm:p-7 space-y-6"
         >
-          {/* Method 1: Google Institutional OAuth Sign-In */}
-          <div className="space-y-3">
-            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-              Option 1: Sign in with College Google Account
-            </label>
+          {/* Option 1: Google OAuth */}
+          <div className="space-y-2.5">
             <button
               id="login-with-google-btn"
               type="button"
               disabled={isLoading}
               onClick={handleGoogleClick}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm shadow-md cursor-pointer select-none disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-11 flex items-center justify-center gap-2.5 px-4 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#1B2320] hover:bg-[#EFF4F1] dark:hover:bg-[#242E2A] text-[#18201C] dark:text-[#ECF2EF] font-semibold text-xs sm:text-sm cursor-pointer disabled:opacity-60"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -271,29 +231,29 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>Sign in with @{ALLOWED_COLLEGE_DOMAIN}</span>
+              <span>Continue with @{ALLOWED_COLLEGE_DOMAIN}</span>
             </button>
-            <p className="text-[11px] text-slate-400 text-center">
-              Please choose your official <strong className="text-slate-200">@{ALLOWED_COLLEGE_DOMAIN}</strong> account in the Google prompt. First-time sign-ins will complete their student profile next.
+            <p className="text-[11px] text-zinc-500 text-center">
+              First-time Google sign-ins will complete their student profile next.
             </p>
           </div>
 
           <div className="relative flex items-center justify-center">
-            <div className="border-t border-slate-700 w-full" />
-            <span className="bg-slate-800/90 px-3 text-[11px] text-slate-400 uppercase font-semibold tracking-wider shrink-0">
-              OR ENTER ANY @PVGCOET.AC.IN EMAIL
+            <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
+            <span className="bg-white dark:bg-[#111113] px-3 text-[11px] text-zinc-400 shrink-0">
+              or enter your college email &amp; details
             </span>
-            <div className="border-t border-slate-700 w-full" />
+            <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
           </div>
 
-          {/* Method 2: Verified College ID Direct Login with Compulsory Student Details */}
+          {/* Option 2: Direct College Email + Compulsory Profile Details */}
           <form onSubmit={handleCustomCollegeLogin} className="space-y-4">
             <div>
               <label
                 htmlFor="college-email-input"
-                className="block text-xs font-semibold text-slate-300 mb-1.5"
+                className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
               >
-                College Email ID <span className="text-rose-400">*</span>
+                College Email <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -304,28 +264,24 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     setInputEmail(e.target.value);
                     if (validationError) setValidationError(null);
                   }}
-                  placeholder={`anyname@${ALLOWED_COLLEGE_DOMAIN}`}
-                  className="w-full min-h-[44px] pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs sm:text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                  placeholder={`name@${ALLOWED_COLLEGE_DOMAIN}`}
+                  className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs sm:text-sm focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-400 font-mono"
                   required
                 />
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 
-            {/* Compulsory Profile Picture Upload */}
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/80 flex items-center gap-3.5">
+            {/* Compulsory Profile Picture */}
+            <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Upload profile picture"
-                className={`w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0 cursor-pointer transition-colors ${
-                  photoURL
-                    ? "border-indigo-500 bg-slate-900"
-                    : "border-slate-600 bg-slate-900 hover:border-indigo-400 text-slate-400"
-                }`}
+                className="w-13 h-13 rounded-full border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer text-zinc-400"
               >
                 {isProcessingPhoto ? (
-                  <Loader2 className="w-5 h-5 text-indigo-400" />
+                  <Loader2 className="w-5 h-5 text-zinc-500" />
                 ) : photoURL ? (
                   <img
                     src={photoURL}
@@ -338,13 +294,13 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               </button>
 
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold text-slate-200">
-                  Profile Picture <span className="text-rose-400">*</span>
+                <div className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+                  Profile Picture <span className="text-rose-500">*</span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Compulsory photo (EXIF location stripped)
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Required · EXIF location data automatically removed
                 </p>
-                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                <div className="mt-2 flex items-center gap-2">
                   <input
                     ref={fileInputRef}
                     id="login-profile-photo-input"
@@ -357,13 +313,12 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isProcessingPhoto}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold text-slate-100 inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60"
+                    className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer disabled:opacity-60"
                   >
-                    <Camera className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>{photoURL ? "Change Photo" : "Upload Photo"}</span>
+                    {photoURL ? "Change Photo" : "Upload Photo"}
                   </button>
                   {photoURL && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Ready
                     </span>
@@ -372,14 +327,14 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               </div>
             </div>
 
-            {/* Compulsory Name & Surname */}
+            {/* Name & Surname */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label
                   htmlFor="college-first-name-input"
-                  className="block text-xs font-semibold text-slate-300 mb-1.5"
+                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
                 >
-                  Name (First Name) <span className="text-rose-400">*</span>
+                  First Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   id="college-first-name-input"
@@ -392,16 +347,16 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="e.g. Ayush"
-                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs sm:text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full h-11 px-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs sm:text-sm focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-400"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="college-surname-input"
-                  className="block text-xs font-semibold text-slate-300 mb-1.5"
+                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
                 >
-                  Surname <span className="text-rose-400">*</span>
+                  Surname <span className="text-rose-500">*</span>
                 </label>
                 <input
                   id="college-surname-input"
@@ -414,22 +369,19 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="e.g. Gadigone"
-                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs sm:text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full h-11 px-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs sm:text-sm focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-400"
                 />
               </div>
             </div>
 
-            {/* Compulsory Year of Study & Branch */}
+            {/* Year of Study & Branch */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label
                   htmlFor="college-year-select"
-                  className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5"
+                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
                 >
-                  <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>
-                    Year of Study <span className="text-rose-400">*</span>
-                  </span>
+                  Year of Study <span className="text-rose-500">*</span>
                 </label>
                 <select
                   id="college-year-select"
@@ -439,7 +391,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     setYear(e.target.value);
                     if (validationError) setValidationError(null);
                   }}
-                  className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-100 text-xs sm:text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full h-11 px-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-400"
                 >
                   <option value="">Select Year...</option>
                   {STUDY_YEARS.map((y) => (
@@ -453,12 +405,9 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               <div>
                 <label
                   htmlFor="college-branch-select"
-                  className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5"
+                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>
-                    Branch <span className="text-rose-400">*</span>
-                  </span>
+                  Branch <span className="text-rose-500">*</span>
                 </label>
                 <select
                   id="college-branch-select"
@@ -468,7 +417,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     setBranch(e.target.value);
                     if (validationError) setValidationError(null);
                   }}
-                  className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-100 text-xs sm:text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full h-11 px-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-400"
                 >
                   <option value="">Select Branch...</option>
                   {COLLEGE_BRANCHES.map((b) => (
@@ -484,25 +433,12 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               id="college-id-submit-btn"
               type="submit"
               disabled={isLoading || isProcessingPhoto}
-              className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md cursor-pointer disabled:opacity-60"
+              className="w-full h-11 flex items-center justify-center gap-2 px-4 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white font-semibold text-xs sm:text-sm cursor-pointer disabled:opacity-60"
             >
-              <span>Verify & Access Marketplace</span>
+              <span>Continue to Marketplace</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-        </div>
-
-        {/* Footer Security Badges */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-slate-500 text-xs">
-          <span className="flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            End-to-End Verified Campus Network
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1.5">
-            <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-            PVG's COET Project Based Learning
-          </span>
         </div>
       </div>
     </div>

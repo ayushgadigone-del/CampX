@@ -15,6 +15,7 @@ import {
   Clock,
   WifiOff,
   ShieldCheck,
+  Package,
 } from "lucide-react";
 import {
   ItemCategory,
@@ -80,6 +81,103 @@ const CAMPUS_SPOTS = [
   "Sports Ground Pavilion",
 ];
 
+interface BundleTemplate {
+  id: string;
+  label: string;
+  title: string;
+  category: ItemCategory;
+  condition: ItemCondition;
+  price: number;
+  originalPrice: number;
+  description: string;
+  imageUrl: string;
+  tags: string[];
+  items: string[];
+}
+
+const SEMESTER_BUNDLE_TEMPLATES: BundleTemplate[] = [
+  {
+    id: "fe-kit",
+    label: "Complete FE Kit",
+    title: "Complete FE Engineering Starter Kit (4-Item Bundle)",
+    category: "Lab Equipment",
+    condition: "Good",
+    price: 950,
+    originalPrice: 2600,
+    description:
+      "Complete First Year engineering pack ready for Sem 1 & 2 classes and labs. Save over 60% in a single campus handover.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
+    tags: ["Semester Bundle", "FE Kit", "Mini Drafter", "Calculator", "B.S. Grewal"],
+    items: [
+      "Omega Mini Drafter + Carry Tube",
+      "Casio FX-991ES Plus Scientific Calculator",
+      "Higher Engineering Mathematics (B.S. Grewal)",
+      "White Cotton Lab Coat / Apron",
+    ],
+  },
+  {
+    id: "se-comp-books",
+    label: "SE Comp Book Set",
+    title: "SE Computer Engineering Full Book Set (Sem 3 & 4)",
+    category: "Books",
+    condition: "Good",
+    price: 750,
+    originalPrice: 2400,
+    description:
+      "Complete Second Year Computer / IT core textbooks covering SPPU Sem 3 & 4 syllabus. Clean pages, firm bindings.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
+    tags: ["Semester Bundle", "SE Comp", "Book Set", "DSA", "Discrete Math"],
+    items: [
+      "Data Structures & Algorithms (Mark Allen Weiss)",
+      "Discrete Mathematics (Kenneth Rosen)",
+      "Digital Logic Design (Morris Mano)",
+      "Computer Organization & Architecture (Stallings)",
+    ],
+  },
+  {
+    id: "entc-lab-pack",
+    label: "E&TC Lab Kit",
+    title: "E&TC Practical & Breadboard Electronics Bundle",
+    category: "Lab Equipment",
+    condition: "Like New",
+    price: 520,
+    originalPrice: 1350,
+    description:
+      "Tested electronics lab bundle for BEE, Digital Circuits, and mini-projects. Ready to use immediately.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+    tags: ["Semester Bundle", "E&TC Lab", "Multimeter", "Breadboard", "Soldering"],
+    items: [
+      "Digital Multimeter with Continuity Probes",
+      "25W Soldering Iron + Stand & Solder Wire",
+      "Dual 830-Point Breadboards + Jumper Wire Box",
+      "Component Organizer (Resistors, LEDs, Logic ICs)",
+    ],
+  },
+  {
+    id: "mech-drafting",
+    label: "Mech Drafting Pack",
+    title: "Mechanical Workshop & Drawing Complete Bundle",
+    category: "Lab Equipment",
+    condition: "Good",
+    price: 680,
+    originalPrice: 1750,
+    description:
+      "All drawing and workshop measurement gear needed for Mechanical Engineering labs in one clean kit.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
+    tags: ["Semester Bundle", "Mechanical", "Vernier Caliper", "Mini Drafter"],
+    items: [
+      "Stainless Steel 150mm Vernier Caliper",
+      "0-25mm Micrometer Screw Gauge",
+      "Mini Drafter + Roller Scale & Sheet Clips",
+      "Blue Workshop Boiler Apron",
+    ],
+  },
+];
+
 export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   isOpen,
   onClose,
@@ -134,10 +232,43 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   const [customTagInput, setCustomTagInput] = useState<string>("");
   const [validityDays, setValidityDays] = useState<number>(30);
 
+  // Semester-End Bundle Pack state
+  const [isBundle, setIsBundle] = useState<boolean>(false);
+  const [bundleItems, setBundleItems] = useState<string[]>([]);
+  const [newBundleItemInput, setNewBundleItemInput] = useState<string>("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [analysisNotice, setAnalysisNotice] = useState<string | null>(null);
+
+  const applyBundleTemplate = (tpl: BundleTemplate) => {
+    setIsBundle(true);
+    setTitle(tpl.title);
+    setCategory(tpl.category);
+    setCondition(tpl.condition);
+    setListingType("sell");
+    setPrice(tpl.price);
+    setOriginalPrice(tpl.originalPrice);
+    setDescription(tpl.description);
+    setImageUrl(tpl.imageUrl);
+    setTags(tpl.tags);
+    setBundleItems(tpl.items);
+    setError(null);
+  };
+
+  const handleAddBundleItem = () => {
+    const clean = newBundleItemInput.trim();
+    if (clean && !bundleItems.includes(clean)) {
+      setBundleItems((prev) => [...prev, clean]);
+      setNewBundleItemInput("");
+      setIsBundle(true);
+    }
+  };
+
+  const handleRemoveBundleItem = (itemToRemove: string) => {
+    setBundleItems((prev) => prev.filter((item) => item !== itemToRemove));
+  };
 
   const analyzeImageAndSuggestFields = async (imageBase64OrUrl: string) => {
     if (!isOnline) {
@@ -353,6 +484,9 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
     const sanitizedDesc = sanitizeText(description.trim()).slice(0, 3000);
     const sanitizedExchange = exchangeFor ? sanitizeText(exchangeFor.trim()).slice(0, 150) : undefined;
     const sanitizedTags = tags.map((t) => sanitizeText(t.trim())).filter(Boolean).slice(0, 10);
+    const sanitizedBundleItems = isBundle
+      ? bundleItems.map((b) => sanitizeText(b.trim())).filter(Boolean).slice(0, 10)
+      : undefined;
 
     const newListingData: Omit<Listing, "id"> = {
       title: sanitizedTitle,
@@ -368,14 +502,20 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
       description: sanitizedDesc,
       imageUrl,
       sellerId: currentUser?.uid || "student-pvgcoet-id",
-      sellerName: currentUser?.displayName || "Verified Student",
+      sellerName: currentUser?.displayName || "Campus Student",
       sellerEmail: currentUser?.email || "student@pvgcoet.ac.in",
       sellerPhoto: currentUser?.photoURL || undefined,
       department: userBranch || "Engineering Student",
       year: userYear || "Student",
       status: "available",
+      availableStock: 1,
       locationPreference,
       tags: sanitizedTags.length > 0 ? sanitizedTags : undefined,
+      isBundle: isBundle && Boolean(sanitizedBundleItems && sanitizedBundleItems.length > 0),
+      bundleItems:
+        isBundle && sanitizedBundleItems && sanitizedBundleItems.length > 0
+          ? sanitizedBundleItems
+          : undefined,
       aiInspection: aiInspectionData || undefined,
       expiryDate: calculateNewExpiryDate(validityDays),
       sellerRating: 5.0,
@@ -411,45 +551,45 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
   return (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto"
         >
           <div
             id="create-listing-modal"
             className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden my-8 ${
               isDark
-                ? "bg-[#0B0F19] text-slate-100 border-slate-800 shadow-black/70"
-                : "bg-white text-slate-900 border-slate-200 shadow-slate-300/40"
+                ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A]"
+                : "bg-white text-[#18201C] border-[#DFE6E2]"
             }`}
           >
         {/* Header */}
         <div
           className={`flex items-center justify-between px-6 py-4 border-b ${
-            isDark ? "border-slate-800 bg-slate-900/80" : "border-slate-100 bg-slate-50/80"
+            isDark ? "border-[#242E2A] bg-[#0D1110]" : "border-[#DFE6E2] bg-[#F7F9F8]"
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-sm">
+            <div className="p-2 rounded-xl bg-[#2F5D50] dark:bg-[#387262] text-white">
               <Tag className="w-5 h-5" />
             </div>
             <div>
               <h2
                 className={`text-lg font-bold ${
-                  isDark ? "text-white" : "text-slate-900"
+                  isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                 }`}
               >
-                Post Pre-Owned Item
+                Post Pre-Owned Item or Bundle
               </h2>
               <p
                 className={`text-xs ${
-                  isDark ? "text-slate-400" : "text-slate-500"
+                  isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                 }`}
               >
-                List books, calculators, lab gear, cycles, or bags for campus exchange
+                List individual gear or a one-click Semester-End Bundle Pack for PVG&apos;s COET students
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F5D50] dark:text-[#7BBFA8] bg-[#EFF4F1] dark:bg-[#1B2320] px-2.5 py-1 rounded-md border border-[#DFE6E2] dark:border-[#242E2A]">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>EXIF Stripped</span>
             </span>
@@ -457,8 +597,8 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               onClick={onClose}
               className={`p-2 rounded-lg cursor-pointer ${
                 isDark
-                  ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+                  ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                  : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#EFF4F1]"
               }`}
             >
               <X className="w-5 h-5" />
@@ -468,30 +608,22 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
         {/* AI Scanner Banner */}
         <div
-          className={`mx-6 mt-6 p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-3 ${
+          className={`mx-6 mt-5 p-3.5 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-3 ${
             isDark
-              ? "bg-indigo-950/40 border-indigo-500/30 text-indigo-200"
-              : "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100 text-indigo-950"
+              ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF]"
+              : "bg-[#F7F9F8] border-[#DFE6E2] text-[#18201C]"
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-600 text-white shrink-0">
-              <Sparkles className="w-5 h-5" />
+            <div className="p-2 rounded-lg bg-[#2F5D50] dark:bg-[#387262] text-white shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <span
-                className={`text-xs font-bold block ${
-                  isDark ? "text-indigo-200" : "text-indigo-950"
-                }`}
-              >
-                Have a photo? Use Gemini 3.8 Flash
+              <span className="text-xs font-semibold block">
+                Have a photo? Auto-fill with AI Inspector
               </span>
-              <p
-                className={`text-xs ${
-                  isDark ? "text-indigo-300/90" : "text-indigo-700"
-                }`}
-              >
-                AI scans your item, detects scratches, assesses condition, and suggests fair campus pricing.
+              <p className="text-xs text-[#5C6B63] dark:text-[#8FA199]">
+                Grades cosmetic condition and suggests a realistic student price range.
               </p>
             </div>
           </div>
@@ -501,20 +633,124 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               onClose();
               onOpenAIInspector();
             }}
-            className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="shrink-0 h-8 px-3.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Scan Item with AI
+            Scan with AI
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Semester-End Bundle Pack One-Click Presets */}
+          <div
+            className={`p-3.5 rounded-xl border space-y-2.5 ${
+              isDark ? "bg-[#0D1110] border-[#242E2A]" : "bg-[#F7F9F8] border-[#DFE6E2]"
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
+                <span className="text-xs font-semibold">
+                  Semester-End Bundle Pack (One-Click Templates)
+                </span>
+              </div>
+              <label className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5C6B63] dark:text-[#8FA199] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isBundle}
+                  onChange={(e) => setIsBundle(e.target.checked)}
+                  className="rounded accent-[#2F5D50]"
+                />
+                <span>List as Bundle Pack</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {SEMESTER_BUNDLE_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => applyBundleTemplate(tpl)}
+                  className={`px-2.5 py-2 rounded-lg border text-left text-xs font-medium cursor-pointer ${
+                    isDark
+                      ? "bg-[#141A18] border-[#242E2A] hover:border-[#5BA18C] text-[#ECF2EF]"
+                      : "bg-white border-[#DFE6E2] hover:border-[#2F5D50] text-[#18201C]"
+                  }`}
+                >
+                  <div className="font-semibold truncate">{tpl.label}</div>
+                  <div className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] font-mono">
+                    {tpl.items.length} items · ₹{tpl.price}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {isBundle && (
+              <div className="pt-2 border-t border-[#DFE6E2] dark:border-[#242E2A] space-y-2">
+                <div className="text-[11px] font-semibold text-[#5C6B63] dark:text-[#8FA199]">
+                  Included items in this bundle ({bundleItems.length}):
+                </div>
+                {bundleItems.length > 0 && (
+                  <ul className="space-y-1.5">
+                    {bundleItems.map((bItem) => (
+                      <li
+                        key={bItem}
+                        className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs ${
+                          isDark
+                            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                            : "bg-white border-[#DFE6E2] text-[#18201C]"
+                        }`}
+                      >
+                        <span className="truncate">{bItem}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBundleItem(bItem)}
+                          className="text-[#5C6B63] hover:text-rose-500 cursor-pointer shrink-0"
+                          aria-label={`Remove ${bItem}`}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Add item to bundle (e.g., Roller Scale, Lab Manual)..."
+                    value={newBundleItemInput}
+                    onChange={(e) => setNewBundleItemInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddBundleItem();
+                      }
+                    }}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg border focus:outline-none ${
+                      isDark
+                        ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63] focus:border-[#5BA18C]"
+                        : "bg-white border-[#DFE6E2] text-[#18201C] placeholder:text-[#83928A] focus:border-[#2F5D50]"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddBundleItem}
+                    disabled={!newBundleItemInput.trim()}
+                    className="px-3 py-1.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] disabled:opacity-40 text-white text-xs font-semibold cursor-pointer shrink-0"
+                  >
+                    Add Item
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Title */}
           <div>
             <label
-              className={`block text-xs font-bold mb-1 ${
-                isDark ? "text-slate-200" : "text-slate-700"
+              className={`block text-xs font-semibold mb-1 ${
+                isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
               }`}
             >
               Item Title *
@@ -522,13 +758,13 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             <input
               type="text"
               required
-              placeholder="e.g., Casio FX-991ES Plus Calculator or B.S. Grewal Math Book"
+              placeholder="e.g., Casio FX-991ES Plus Calculator or Complete FE Starter Kit"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none ${
                 isDark
-                  ? "bg-slate-900/90 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                  : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                  ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63] focus:border-[#5BA18C]"
+                  : "bg-white border-[#DFE6E2] text-[#18201C] placeholder:text-[#83928A] focus:border-[#2F5D50]"
               }`}
             />
           </div>
@@ -1425,7 +1661,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           {/* Footer Submit */}
           <div
             className={`pt-3 border-t flex items-center gap-3 ${
-              isDark ? "border-slate-800" : "border-slate-100"
+              isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
             }`}
           >
             <button
@@ -1437,12 +1673,12 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                   ? "Publishing is disabled while disconnected to prevent data loss"
                   : "Publish item listing to campus marketplace"
               }
-              className={`flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm select-none ${
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm select-none ${
                 !isOnline
                   ? isDark
-                    ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none"
-                    : "bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer disabled:opacity-50"
+                    ? "bg-[#1B2320] text-[#5C6B63] border border-[#242E2A] cursor-not-allowed"
+                    : "bg-[#EFF4F1] text-[#83928A] border border-[#DFE6E2] cursor-not-allowed"
+                  : "bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white cursor-pointer disabled:opacity-50"
               }`}
             >
               {isSubmitting ? (
@@ -1458,17 +1694,17 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Publish Item Listing
+                  {isBundle ? "Publish Semester Bundle Pack" : "Publish Item Listing"}
                 </>
               )}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2.5 rounded-xl border text-sm font-medium cursor-pointer ${
+              className={`px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer ${
                 isDark
-                  ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                  : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                  ? "border-[#242E2A] text-[#ECF2EF] hover:bg-[#1B2320]"
+                  : "border-[#DFE6E2] text-[#18201C] hover:bg-[#EFF4F1]"
               }`}
             >
               Cancel

@@ -140,7 +140,7 @@ export async function exportHandoverReceiptDoc(
     `\nVERIFICATION GUARANTEE:`,
     `• AI Item Inspection Score: ${listing.aiInspection?.inspectionScore || 90}% Verified`,
     `• In-Person Physical Verification: Allowed before deal finalization`,
-    `• College Verified Student Protection Policy Applied`,
+    `• Campus Student Handover Policy Applied`,
     `--------------------------------------------------------------------------------\n`,
   ].filter(Boolean).join("\n");
 

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Tag,
   Repeat,
-  BadgeCheck,
   Zap,
   ExternalLink,
   Heart,
@@ -34,8 +33,6 @@ import {
 import { Listing, Review } from "../types";
 import { formatExpiryInfo } from "../utils/expiryUtils";
 import { getCategoryFAQs } from "../utils/faqQuestions";
-import { SellerReputationBadge } from "./SellerReputationBadge";
-import { UserMilestoneBadge } from "./UserMilestoneBadge";
 import { PriceTrendSparkline } from "./PriceTrendSparkline";
 
 interface ListingDetailModalProps {
@@ -55,7 +52,6 @@ interface ListingDetailModalProps {
   onReportListing?: (listingId: string, reason: string, details: string) => void;
   onRenewListing?: (listingId: string) => void;
   isOnline?: boolean;
-  onOpenPassport?: (listing: Listing) => void;
   onOpenBarter?: (listing: Listing) => void;
 }
 
@@ -76,7 +72,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   onReportListing,
   onRenewListing,
   isOnline = true,
-  onOpenPassport,
   onOpenBarter,
 }) => {
   const lastListingRef = React.useRef<Listing | null>(incomingListing);
@@ -105,7 +100,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   const [ratingInput, setRatingInput] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [reviewerNameInput, setReviewerNameInput] = useState<string>(
-    currentUser?.displayName || "Verified Student"
+    currentUser?.displayName || "Student"
   );
   const [departmentInput, setDepartmentInput] = useState<string>(
     currentUser?.email?.includes("mech")
@@ -126,7 +121,13 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   // Safe early return ONLY after all hooks have executed unconditionally
   if (!listing) return null;
 
-  const isSeller = currentUserId === listing.sellerId;
+  const isSeller =
+    Boolean(currentUserId && currentUserId === listing.sellerId) ||
+    Boolean(
+      currentUser?.email &&
+        listing.sellerEmail &&
+        currentUser.email.toLowerCase() === listing.sellerEmail.toLowerCase()
+    );
   const isReported = Boolean(listing.isReported || isReportSubmitted);
   const expiryInfo = formatExpiryInfo(listing);
 
@@ -672,54 +673,21 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               )}
 
               {/* Seller info card */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 group/seller">
-                <div className="flex items-center justify-between">
-                  <span
-                    id={`detail-verified-student-badge-${listing.id}`}
-                    className="relative inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/90 overflow-hidden select-none transition-colors group-hover/seller:bg-blue-100 group-hover/seller:border-blue-300"
-                    title="Verified University Student Seller • Enrolled Campus Student"
-                  >
-                    <BadgeCheck className="w-3 h-3 text-blue-600 shrink-0" />
-                    <span>Verified Student Seller</span>
-                  </span>
-                  {onOpenPassport && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenPassport(listing)}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer"
-                      title="Inspect Student Digital Passport credentials"
-                    >
-                      <Shield className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Student Passport</span>
-                    </button>
-                  )}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="text-[11px] font-medium text-slate-500">
+                  Listed by
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-white font-semibold flex items-center justify-center text-sm">
                     {listing.sellerName.charAt(0)}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900 flex-wrap">
-                      <span>{listing.sellerName}</span>
-                      <BadgeCheck className="w-4 h-4 text-blue-600" />
-                      <UserMilestoneBadge
-                        listing={listing}
-                        allListings={allListings}
-                      />
-                      <SellerReputationBadge
-                        listing={listing}
-                        allListings={allListings}
-                        variant="badge"
-                        onViewReviews={() => {
-                          const reviewsTabBtn = document.getElementById("tab-reviews-btn");
-                          if (reviewsTabBtn) {
-                            reviewsTabBtn.click();
-                          }
-                        }}
-                      />
+                    <div className="text-sm font-semibold text-slate-900">
+                      {listing.sellerName}
                     </div>
                     <span className="text-xs text-slate-500 block">
-                      {listing.sellerEmail} • {listing.department || "Engineering"}
+                      {listing.sellerEmail} · {listing.department || "Engineering"}
+                      {listing.year ? ` · ${listing.year}` : ""}
                     </span>
                   </div>
                 </div>
@@ -766,14 +734,14 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       ? "Chat is disabled while offline to prevent data loss"
                       : "Chat & negotiate with student seller"
                   }
-                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm select-none ${
+                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm select-none ${
                     !isOnline
-                      ? "bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer"
+                      ? "bg-[#EFF4F1] text-[#83928A] border border-[#DFE6E2] cursor-not-allowed"
+                      : "bg-[#2F5D50] hover:bg-[#244A3F] text-white cursor-pointer"
                   }`}
                 >
                   {!isOnline ? (
-                    <WifiOff className="w-4 h-4 shrink-0 text-slate-400" />
+                    <WifiOff className="w-4 h-4 shrink-0 text-[#83928A]" />
                   ) : (
                     <MessageCircle className="w-4 h-4 shrink-0" />
                   )}
@@ -784,9 +752,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     onClose();
                     onOpenCalendar(listing);
                   }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#DFE6E2] bg-white hover:bg-[#EFF4F1] text-[#18201C] font-semibold text-sm cursor-pointer"
                 >
-                  <CalendarIcon className="w-4 h-4" />
+                  <CalendarIcon className="w-4 h-4 text-[#2F5D50]" />
                   Schedule Handover
                 </button>
               </div>
@@ -857,13 +825,37 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             </div>
           </div>
 
+          {/* Semester-End Bundle Pack Checklist */}
+          {listing.isBundle && listing.bundleItems && listing.bundleItems.length > 0 && (
+            <div className="p-4 rounded-xl bg-[#F7F9F8] border border-[#DFE6E2] space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-bold text-[#18201C] flex items-center gap-1.5">
+                  <Package className="w-4 h-4 text-[#2F5D50]" />
+                  <span>Included in Semester Bundle Pack ({listing.bundleItems.length} items)</span>
+                </h3>
+                <span className="text-[11px] font-medium text-[#2F5D50]">Single Campus Handover</span>
+              </div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {listing.bundleItems.map((bundleItem, idx) => (
+                  <li
+                    key={`${bundleItem}-${idx}`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-[#DFE6E2] text-xs text-[#18201C] font-medium"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#2F5D50] shrink-0" />
+                    <span>{bundleItem}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Description */}
           <div className="space-y-2">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <Tag className="w-4 h-4 text-slate-500" />
+            <h3 className="text-sm font-bold text-[#18201C] flex items-center gap-1.5">
+              <Tag className="w-4 h-4 text-[#5C6B63]" />
               Item Description
             </h3>
-            <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <p className="text-sm text-[#3B4A42] leading-relaxed bg-[#F7F9F8] p-4 rounded-xl border border-[#DFE6E2]">
               {listing.description || "No additional description provided."}
             </p>
           </div>
@@ -1171,8 +1163,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                     <MessageSquarePlus className="w-4 h-4 text-indigo-600" />
                     <span>Leave Handover Feedback for {listing.sellerName}</span>
                   </h4>
-                  <span className="text-[11px] text-indigo-700 font-medium">
-                    Verified Student Form
+                  <span className="text-[11px] text-zinc-500 font-medium">
+                    Student Feedback
                   </span>
                 </div>
 
@@ -1346,10 +1338,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                             <span className="text-xs font-bold text-slate-900">
                               {rev.reviewerName}
                             </span>
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                              <BadgeCheck className="w-2.5 h-2.5 text-blue-600" />
-                              <span>Verified Student</span>
-                            </span>
                           </div>
                           {(rev.reviewerDepartment || rev.reviewerYear) && (
                             <span className="text-[11px] text-slate-400 block">
@@ -1436,37 +1424,40 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {/* Seller controls */}
           {isSeller && onUpdateStatus && (
-            <div className="p-4 rounded-xl bg-slate-100 border border-slate-200 space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">
+            <div className="p-4 rounded-xl bg-[#F7F9F8] border border-[#DFE6E2] space-y-2.5">
+              <span className="text-xs font-bold text-[#18201C] block">
                 Manage Listing Status (Seller Controls):
               </span>
               <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   onClick={() => onUpdateStatus(listing.id, "available")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "available"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-white text-slate-700 hover:bg-slate-200"
+                      ? "bg-[#2F5D50] text-white border-[#2F5D50]"
+                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Mark Available
                 </button>
                 <button
+                  type="button"
                   onClick={() => onUpdateStatus(listing.id, "reserved")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "reserved"
-                      ? "bg-amber-600 text-white"
-                      : "bg-white text-slate-700 hover:bg-slate-200"
+                      ? "bg-[#2F5D50] text-white border-[#2F5D50]"
+                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Mark Reserved
                 </button>
                 <button
+                  type="button"
                   onClick={() => onUpdateStatus(listing.id, "completed")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
                     listing.status === "completed"
-                      ? "bg-slate-900 text-white"
-                      : "bg-white text-slate-700 hover:bg-slate-200"
+                      ? "bg-[#18201C] text-white border-[#18201C]"
+                      : "bg-white text-[#18201C] border-[#DFE6E2] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Mark Sold / Completed

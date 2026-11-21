@@ -217,12 +217,11 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
               {otherPartyName.charAt(0)}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 leading-tight">
+              <h3 className="text-sm font-semibold text-slate-900 leading-tight">
                 {otherPartyName}
               </h3>
-              <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Verified Student on Campus
+              <span className="text-[11px] text-slate-500">
+                PVG&apos;s COET Student
               </span>
             </div>
           </div>

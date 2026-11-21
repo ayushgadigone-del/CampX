@@ -84,6 +84,7 @@ import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
 import { WishlistModal } from "./components/WishlistModal";
 import { YourChatsModal } from "./components/YourChatsModal";
 import { YourChatsSection } from "./components/YourChatsSection";
+import { CurrentlyNegotiatingSection } from "./components/CurrentlyNegotiatingSection";
 import { SectionNavigationTabs, SectionTabId } from "./components/SectionNavigationTabs";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { TopperVaultSection } from "./components/TopperVaultSection";
@@ -133,9 +134,7 @@ import {
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
 import { DedicatedSearchBar } from "./components/DedicatedSearchBar";
-import { CampusLiveTicker } from "./components/CampusLiveTicker";
 import { BarterComparisonDrawer } from "./components/BarterComparisonDrawer";
-import { StudentPassportModal } from "./components/StudentPassportModal";
 import { CampusSecurityCenterModal } from "./components/CampusSecurityCenterModal";
 import { RecentlyViewedSection } from "./components/RecentlyViewedSection";
 import { HorizontalSlider } from "./components/HorizontalSlider";
@@ -276,6 +275,8 @@ export default function App() {
   });
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
   const [wishlistOnlyFilter, setWishlistOnlyFilter] = useState(false);
+  const [bundleOnlyFilter, setBundleOnlyFilter] = useState(false);
+  const [myListingsOnlyFilter, setMyListingsOnlyFilter] = useState(false);
 
   // Success Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -433,11 +434,9 @@ export default function App() {
   const { isOnline, isSimulatedOffline, toggleSimulateOffline, reconnect } =
     useOnlineStatus();
 
-  // Visual Innovation States
+  // Barter Comparison State
   const [isBarterDrawerOpen, setIsBarterDrawerOpen] = useState(false);
   const [barterListing, setBarterListing] = useState<Listing | null>(null);
-  const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
-  const [passportListing, setPassportListing] = useState<Listing | null>(null);
 
   // Hydrate full student profile from localStorage / Firestore and enforce compulsory onboarding if incomplete
   const hydrateAndVerifyStudentProfile = useCallback(async (user: User) => {
@@ -778,13 +777,39 @@ export default function App() {
     }
   }, [listings]);
 
+  const isCurrentUserListing = useCallback(
+    (item: Listing) => {
+      if (!currentUser) return false;
+      if (currentUser.uid && item.sellerId === currentUser.uid) return true;
+      if (
+        currentUser.email &&
+        item.sellerEmail &&
+        currentUser.email.toLowerCase() === item.sellerEmail.toLowerCase()
+      ) {
+        return true;
+      }
+      return false;
+    },
+    [currentUser]
+  );
+
   // Filter & Sort Logic
   const filteredListings = useMemo(() => {
     return listings
       .filter((item) => {
         // Sold items filter: By default hide completed listings to keep marketplace clean,
-        // unless 'Include Sold Items' toggle is active for browsing transaction history.
-        if (!includeSoldItems && item.status === "completed") {
+        // unless 'Include Sold Items' or 'My listings' toggle is active.
+        if (!includeSoldItems && !myListingsOnlyFilter && item.status === "completed") {
+          return false;
+        }
+
+        // My listings filter (Seller management view)
+        if (myListingsOnlyFilter && !isCurrentUserListing(item)) {
+          return false;
+        }
+
+        // Semester-End Bundle Packs filter
+        if (bundleOnlyFilter && !item.isBundle) {
           return false;
         }
 
@@ -793,7 +818,7 @@ export default function App() {
           return false;
         }
 
-        // Search query
+        // Search query (also searches included bundle items)
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchTitle = item.title.toLowerCase().includes(q);
@@ -801,7 +826,10 @@ export default function App() {
           const matchCat = item.category.toLowerCase().includes(q);
           const matchSeller = item.sellerName.toLowerCase().includes(q);
           const matchTags = item.tags?.some((tag) => tag.toLowerCase().includes(q));
-          if (!matchTitle && !matchDesc && !matchCat && !matchSeller && !matchTags) return false;
+          const matchBundle = item.bundleItems?.some((b) => b.toLowerCase().includes(q));
+          if (!matchTitle && !matchDesc && !matchCat && !matchSeller && !matchTags && !matchBundle) {
+            return false;
+          }
         }
 
         // Category filter
@@ -847,9 +875,22 @@ export default function App() {
         // default newest
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [listings, includeSoldItems, searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, wishlistOnlyFilter, wishlistIds]);
+  }, [
+    listings,
+    includeSoldItems,
+    myListingsOnlyFilter,
+    bundleOnlyFilter,
+    isCurrentUserListing,
+    searchQuery,
+    selectedCategory,
+    selectedType,
+    selectedCondition,
+    sortBy,
+    wishlistOnlyFilter,
+    wishlistIds,
+  ]);
 
-  // Performance-optimized pagination slice for smooth 60fps rendering without lag
+  // Performance-optimized pagination slice for smooth rendering without lag
   const displayedListings = useMemo(() => {
     return filteredListings.slice(0, visibleListingsCount);
   }, [filteredListings, visibleListingsCount]);
@@ -857,6 +898,14 @@ export default function App() {
   const soldItemsCount = useMemo(() => {
     return listings.filter((item) => item.status === "completed").length;
   }, [listings]);
+
+  const bundlePacksCount = useMemo(() => {
+    return listings.filter((item) => item.isBundle && item.status !== "completed").length;
+  }, [listings]);
+
+  const myListingsCount = useMemo(() => {
+    return listings.filter((item) => isCurrentUserListing(item)).length;
+  }, [listings, isCurrentUserListing]);
 
   // Dynamic counts for each category
   const categoryCounts = useMemo(() => {
@@ -1289,8 +1338,8 @@ export default function App() {
       id: `item-sim-${Date.now()}`,
       title: kw.toLowerCase().includes("casio")
         ? "Casio FX-991ES Plus Scientific Calculator (Exam Approved)"
-        : `${kw} (Verified Student Listing)`,
-      description: `Authentic student equipment matching alert "${kw}". Fully verified condition, tested for semester examinations and campus labs.`,
+        : `${kw} (Campus Listing)`,
+      description: `Student equipment matching alert "${kw}". Tested for semester examinations and campus labs.`,
       category: categoryForSimulation,
       condition: "Like New",
       listingType: "sell",
@@ -1298,12 +1347,12 @@ export default function App() {
       imageUrl: sampleImages[categoryForSimulation] || sampleImages["Other"],
       sellerId: "student-seller-sim",
       sellerName: "Aryan Sharma (Mech 3rd Yr)",
-      sellerEmail: "aryan.sharma@college.edu.in",
+      sellerEmail: "aryan.sharma@pvgcoet.ac.in",
       department: "Mechanical Engineering",
       year: "3rd Year",
       status: "available",
       locationPreference: "Central Library Lawn",
-      tags: [kw.toLowerCase(), "verified student", "exam ready"],
+      tags: [kw.toLowerCase(), "campus", "exam ready"],
       createdAt: new Date().toISOString(),
     };
 
@@ -1323,16 +1372,32 @@ export default function App() {
   };
 
   const handleUpdateStatus = async (listingId: string, newStatus: Listing["status"]) => {
+    const updatedStock = newStatus === "completed" ? 0 : 1;
     setListings((prev) =>
-      prev.map((item) => (item.id === listingId ? { ...item, status: newStatus } : item))
+      prev.map((item) =>
+        item.id === listingId
+          ? { ...item, status: newStatus, availableStock: updatedStock }
+          : item
+      )
     );
+    if (selectedListing && selectedListing.id === listingId) {
+      setSelectedListing((prev) =>
+        prev ? { ...prev, status: newStatus, availableStock: updatedStock } : null
+      );
+    }
     try {
       const docRef = doc(db, "listings", listingId);
-      await updateDoc(docRef, { status: newStatus });
+      await updateDoc(docRef, { status: newStatus, availableStock: updatedStock });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `listings/${listingId}`);
     }
-    showToast(`Listing status updated to ${newStatus}.`);
+    const label =
+      newStatus === "completed"
+        ? "Sold"
+        : newStatus === "reserved"
+        ? "Reserved"
+        : "Available";
+    showToast(`Listing marked as ${label}.`);
   };
 
   const handleReportListing = async (
@@ -1583,31 +1648,17 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-hidden ${
+      className={`min-h-screen flex flex-col font-sans antialiased relative overflow-x-clip ${
         isDark
-          ? "bg-[#040711] text-slate-100 selection:bg-indigo-500 selection:text-white"
-          : "bg-[#F8FAFC] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900"
+          ? "bg-[#0D1110] text-[#ECF2EF] selection:bg-[#387262] selection:text-white"
+          : "bg-[#F7F9F8] text-[#18201C] selection:bg-[#2F5D50] selection:text-white"
       }`}
     >
-      {/* Refined ambient architectural lighting */}
-      {isDark ? (
-        <>
-          <div className="absolute top-0 inset-x-0 h-[480px] bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(99,102,241,0.14),transparent)] pointer-events-none -z-10" />
-          <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.06),transparent_70%)] pointer-events-none -z-10" />
-          <div className="absolute bottom-0 inset-x-0 h-[420px] bg-[radial-gradient(ellipse_70%_40%_at_50%_115%,rgba(99,102,241,0.08),transparent)] pointer-events-none -z-10" />
-        </>
-      ) : (
-        <>
-          <div className="absolute top-0 inset-x-0 h-[400px] bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(99,102,241,0.08),transparent)] pointer-events-none -z-10" />
-          <div className="absolute bottom-0 inset-x-0 h-[350px] bg-[radial-gradient(ellipse_70%_35%_at_50%_110%,rgba(244,114,182,0.05),transparent)] pointer-events-none -z-10" />
-        </>
-      )}
-
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50">
-          <div className="px-4 py-3 rounded-2xl bg-slate-800/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/80 flex items-center gap-2 max-w-md">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="px-4 py-2.5 rounded-lg bg-[#18201C] dark:bg-[#141A18] text-white text-xs font-medium shadow-lg border border-[#242E2A] flex items-center gap-2 max-w-md">
+            <CheckCircle2 className="w-4 h-4 text-[#5BA18C] shrink-0" />
             <span>{toastMessage}</span>
           </div>
         </div>
@@ -1683,14 +1734,6 @@ export default function App() {
         onEditProfileDetails={() => setProfileModalMode("edit")}
       />
 
-      {/* Live Campus Ticker & Hot-Drop Beacon */}
-      <CampusLiveTicker
-        onSelectItem={(query) => {
-          if (query) setSearchQuery(query);
-          setActiveSectionTab("marketplace");
-        }}
-      />
-
       {/* Offline Status Banner */}
       <OfflineBanner
         isOnline={isOnline}
@@ -1753,8 +1796,8 @@ export default function App() {
         />
       )}
 
-      {/* Main Container (Full Width Responsive with Bottom Nav Clearance) */}
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6 pb-28 md:pb-14">
+      {/* Main Container */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24 md:pb-14">
         {/* Section Navigation Tabs (Marketplace, Topper Vault, Beacon & Handovers, Chats, Saved & Alerts) */}
         <SectionNavigationTabs
           activeTab={activeSectionTab}
@@ -1798,109 +1841,102 @@ export default function App() {
 
         {/* Secondary Filter & Sorting Controls */}
         <div
-          className={`p-3 sm:p-4 rounded-2xl border shadow-md text-xs overflow-hidden ${
+          className={`flex flex-wrap items-center justify-between gap-3 py-3 border-y text-xs ${
             isDark
-              ? "bg-slate-800/95 border-slate-700/80 text-slate-200"
-              : "bg-white border-slate-200 text-slate-800 shadow-slate-200/60"
+              ? "border-[#242E2A] text-[#ECF2EF]"
+              : "border-[#DFE6E2] text-[#18201C]"
           }`}
         >
-          <HorizontalSlider
-            id="marketplace-filters-slider"
-            showArrows={true}
-            showProgress={true}
-            showMobileHint={true}
-            scrollStep={280}
-            ariaLabel="Marketplace Filters & Sorting Slider"
-            trackClassName="gap-4 py-1 items-center justify-between min-w-full"
-          >
-            <div className="flex items-center gap-3 shrink-0">
-              {/* Listing Type Filter */}
-              <div className="flex items-center gap-1.5">
-                <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Type:</span>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value as any)}
-                className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
-                  isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
-                }`}
-              >
-                <option value="all">All Types (Sell & Swap)</option>
-                <option value="sell">For Sale (₹ Cash)</option>
-                <option value="exchange">For Exchange Only</option>
-              </select>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Listing Type Filter */}
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value as any)}
+              aria-label="Filter by listing type"
+              className={`h-8 px-2.5 rounded-lg border text-xs font-medium focus:outline-none cursor-pointer ${
+                isDark
+                  ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF] focus:border-[#5BA18C]"
+                  : "border-[#DFE6E2] bg-white text-[#18201C] focus:border-[#2F5D50]"
+              }`}
+            >
+              <option value="all">All types</option>
+              <option value="sell">For sale</option>
+              <option value="exchange">For exchange</option>
+            </select>
 
             {/* Condition Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className={`font-bold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Condition:</span>
-              <select
-                value={selectedCondition}
-                onChange={(e) => setSelectedCondition(e.target.value as any)}
-                className={`px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
-                  isDark ? "border-slate-700 bg-slate-900/80 text-slate-200" : "border-slate-200 bg-slate-50 text-slate-800"
-                }`}
-              >
-                <option value="all">All Conditions</option>
-                <option value="Like New">Like New</option>
-                <option value="Good">Good</option>
-                <option value="Fair">Fair</option>
-              </select>
-            </div>
-
-            {/* Wishlist Quick Toggle */}
-            <button
-              id="filter-wishlist-toggle"
-              onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
-              aria-keyshortcuts="W"
-              title="Show only items saved to your Wishlist (Shortcut: W)"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
-                wishlistOnlyFilter
-                  ? "bg-rose-600 text-white shadow-xs border-rose-500"
-                  : "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-rose-500/30"
+            <select
+              value={selectedCondition}
+              onChange={(e) => setSelectedCondition(e.target.value as any)}
+              aria-label="Filter by item condition"
+              className={`h-8 px-2.5 rounded-lg border text-xs font-medium focus:outline-none cursor-pointer ${
+                isDark
+                  ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF] focus:border-[#5BA18C]"
+                  : "border-[#DFE6E2] bg-white text-[#18201C] focus:border-[#2F5D50]"
               }`}
             >
-              <Heart
-                className={`w-3.5 h-3.5 ${
-                  wishlistOnlyFilter
-                    ? "fill-white text-white"
-                    : "fill-rose-400 text-rose-400"
-                }`}
-              />
-              <span>Wishlist ({wishlistIds.length})</span>
-              <kbd
-                className={`inline-flex items-center justify-center min-w-[14px] h-[14px] sm:min-w-[16px] sm:h-[16px] px-1 text-[9px] sm:text-[10px] font-mono font-bold rounded border select-none ${
-                  wishlistOnlyFilter
-                    ? "bg-white/25 text-white border-white/30"
-                    : "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                }`}
-              >
-                W
-              </kbd>
+              <option value="all">All conditions</option>
+              <option value="Like New">Like New</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+            </select>
+
+            {/* Semester-End Bundle Packs Toggle */}
+            <button
+              id="filter-bundle-packs-toggle"
+              type="button"
+              onClick={() => setBundleOnlyFilter(!bundleOnlyFilter)}
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                bundleOnlyFilter
+                  ? isDark
+                    ? "bg-[#387262] text-white border-[#387262]"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
+                  : isDark
+                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span>Bundles ({bundlePacksCount})</span>
             </button>
 
-            {/* Your Chats Quick Access */}
-            <button
-              id="filter-your-chats-toggle"
-              onClick={() => setIsYourChatsModalOpen(true)}
-              aria-keyshortcuts="C"
-              title="View Your Chats with sellers (Shortcut: C)"
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
-                isDark
-                  ? "bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30"
-                  : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 shadow-2xs"
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Your Chats ({storedChats.length})</span>
-              <kbd
-                className={`inline-flex items-center justify-center min-w-[14px] h-[14px] sm:min-w-[16px] sm:h-[16px] px-1 text-[9px] sm:text-[10px] font-mono font-bold rounded border select-none ${
-                  isDark
-                    ? "bg-indigo-950/60 text-indigo-300 border-indigo-700/50"
-                    : "bg-indigo-100 text-indigo-700 border-indigo-200"
+            {/* My Listings (Seller Management) Toggle */}
+            {currentUser && (
+              <button
+                id="filter-my-listings-toggle"
+                type="button"
+                onClick={() => setMyListingsOnlyFilter(!myListingsOnlyFilter)}
+                className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                  myListingsOnlyFilter
+                    ? isDark
+                      ? "bg-[#387262] text-white border-[#387262]"
+                      : "bg-[#2F5D50] text-white border-[#2F5D50]"
+                    : isDark
+                    ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
+                    : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
                 }`}
               >
-                C
-              </kbd>
+                <span>My listings ({myListingsCount})</span>
+              </button>
+            )}
+
+            {/* Saved Quick Toggle */}
+            <button
+              id="filter-wishlist-toggle"
+              type="button"
+              onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                wishlistOnlyFilter
+                  ? isDark
+                    ? "bg-[#387262] text-white border-[#387262]"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
+                  : isDark
+                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${wishlistOnlyFilter ? "fill-current" : ""}`} />
+              <span>Saved ({wishlistIds.length})</span>
             </button>
 
             {/* Include Sold Items Toggle */}
@@ -1908,89 +1944,75 @@ export default function App() {
               id="filter-include-sold-toggle"
               type="button"
               onClick={() => setIncludeSoldItems(!includeSoldItems)}
-              title={
-                includeSoldItems
-                  ? "Currently showing all items including sold transactions. Click to hide sold items and keep marketplace clean."
-                  : "Include completed transactions to browse historical student sales, prices, and handovers."
-              }
-              className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 border cursor-pointer select-none ${
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                 includeSoldItems
                   ? isDark
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-xs"
-                    : "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-xs"
+                    ? "bg-[#387262] text-white border-[#387262]"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
                   : isDark
-                  ? "bg-slate-900/60 text-slate-400 hover:text-slate-200 border-slate-700/80 hover:border-slate-600"
-                  : "bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"
+                  ? "bg-[#141A18] text-[#8FA199] border-[#242E2A] hover:text-[#ECF2EF] hover:border-[#34433D]"
+                  : "bg-white text-[#5C6B63] border-[#DFE6E2] hover:text-[#18201C] hover:border-[#C4D1CA]"
               }`}
             >
-              <Archive className={`w-3.5 h-3.5 ${includeSoldItems ? "text-emerald-400" : "text-slate-400"}`} />
-              <span>Include Sold Items</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
-                  includeSoldItems
-                    ? isDark
-                      ? "bg-emerald-400/20 text-emerald-300"
-                      : "bg-emerald-200 text-emerald-900"
-                    : isDark
-                    ? "bg-slate-800 text-slate-400"
-                    : "bg-slate-200 text-slate-600"
-                }`}
-              >
-                {soldItemsCount}
-              </span>
+              <Archive className="w-3.5 h-3.5" />
+              <span>Sold ({soldItemsCount})</span>
             </button>
 
-            {/* Notify Me / Alerts Filter Shortcut */}
+            {/* Notify Me Shortcut */}
             <button
               id="filter-notify-me-btn"
+              type="button"
               onClick={() => {
                 setPrefilledAlertKeyword(searchQuery);
                 setPrefilledAlertCategory(selectedCategory);
                 setIsAlertsModalOpen(true);
               }}
-              title="Set an alert to notify you when items matching this criteria are posted"
-              className="px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 shadow-xs cursor-pointer"
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
             >
-              <Bell className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-              <span>
-                Notify Me
-                {searchQuery
-                  ? ` for "${searchQuery}"`
-                  : selectedCategory !== "All"
-                  ? ` for ${selectedCategory}`
-                  : ""}
-              </span>
+              <Bell className="w-3.5 h-3.5" />
+              <span>Alert me</span>
             </button>
 
-            {/* Clear filters shortcut */}
+            {/* Reset Filters */}
             {(selectedCategory !== "All" ||
               selectedType !== "all" ||
               selectedCondition !== "all" ||
               wishlistOnlyFilter ||
+              bundleOnlyFilter ||
+              myListingsOnlyFilter ||
               includeSoldItems ||
               searchQuery) && (
               <button
+                type="button"
                 onClick={() => {
                   setSelectedCategory("All");
                   setSelectedType("all");
                   setSelectedCondition("all");
                   setWishlistOnlyFilter(false);
+                  setBundleOnlyFilter(false);
+                  setMyListingsOnlyFilter(false);
                   setIncludeSoldItems(false);
                   setSearchQuery("");
                 }}
-                className="text-indigo-500 dark:text-indigo-400 hover:underline font-bold ml-1 cursor-pointer"
+                className={`h-8 px-2 text-xs font-medium underline underline-offset-4 cursor-pointer ${
+                  isDark ? "text-[#7BBFA8] hover:text-[#ECF2EF]" : "text-[#2F5D50] hover:text-[#244A3F]"
+                }`}
               >
-                Reset Filters
+                Reset
               </button>
             )}
           </div>
 
-          {/* View Mode Switcher & Full Screen Controls */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* View Mode Segmented Control */}
+          {/* View Mode & Sort */}
+          <div className="flex items-center gap-2">
+            {/* Layout Switcher */}
             <div
-              className={`p-1 rounded-xl border flex items-center gap-1 ${
-                isDark ? "bg-slate-900/90 border-slate-700" : "bg-slate-100 border-slate-200"
+              className={`p-0.5 rounded-lg border flex items-center ${
+                isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-[#EFF4F1] border-[#DFE6E2]"
               }`}
               role="group"
               aria-label="Listing card layout mode"
@@ -1999,15 +2021,15 @@ export default function App() {
                 type="button"
                 id="view-mode-grid-btn"
                 onClick={() => setLayoutMode("grid")}
-                title="Grid layout view with expandable details"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                title="Grid view"
+                className={`h-7 px-2.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                   layoutMode === "grid"
                     ? isDark
-                      ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                      ? "bg-[#1B2320] text-[#ECF2EF] border border-[#34433D]"
+                      : "bg-white text-[#18201C] shadow-2xs"
                     : isDark
-                    ? "text-slate-400 hover:text-white"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "text-[#8FA199] hover:text-[#ECF2EF]"
+                    : "text-[#5C6B63] hover:text-[#18201C]"
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -2018,308 +2040,103 @@ export default function App() {
                 type="button"
                 id="view-mode-detailed-btn"
                 onClick={() => setLayoutMode("detailed")}
-                title="Detailed full-specs layout view"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                title="Detailed view"
+                className={`h-7 px-2.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                   layoutMode === "detailed"
                     ? isDark
-                      ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                      ? "bg-[#1B2320] text-[#ECF2EF] border border-[#34433D]"
+                      : "bg-white text-[#18201C] shadow-2xs"
                     : isDark
-                    ? "text-slate-400 hover:text-white"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "text-[#8FA199] hover:text-[#ECF2EF]"
+                    : "text-[#5C6B63] hover:text-[#18201C]"
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Full Specs</span>
+                <span className="hidden sm:inline">Detailed</span>
               </button>
             </div>
-
-            {/* Full Screen Mode Toggle */}
-            <button
-              type="button"
-              id="fullscreen-toggle-btn"
-              onClick={toggleFullScreen}
-              aria-keyshortcuts="F"
-              title={
-                isFullScreenMode
-                  ? "Exit Fullscreen Theater View (Shortcut: F)"
-                  : "Enter Fullscreen Theater View - Every Detail Visible (Shortcut: F)"
-              }
-              className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs select-none ${
-                isFullScreenMode
-                  ? "bg-indigo-600 text-white border-indigo-500 shadow-md"
-                  : isDark
-                  ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
-                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
-              }`}
-            >
-              {isFullScreenMode ? (
-                <>
-                  <Minimize2 className="w-3.5 h-3.5 text-indigo-200" />
-                  <span className="hidden md:inline">Exit Fullscreen</span>
-                </>
-              ) : (
-                <>
-                  <Maximize2 className="w-3.5 h-3.5 text-indigo-500" />
-                  <span className="hidden md:inline">Fullscreen Mode</span>
-                </>
-              )}
-              <kbd
-                className={`hidden md:inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[10px] font-mono font-bold rounded border select-none ${
-                  isFullScreenMode
-                    ? "bg-white/25 text-white border-white/30"
-                    : isDark
-                    ? "bg-slate-700 text-slate-300 border-slate-600"
-                    : "bg-slate-100 text-slate-600 border-slate-300"
-                }`}
-              >
-                F
-              </kbd>
-            </button>
 
             {/* Sort By Dropdown */}
             <div
               id="marketplace-sort-container"
-              className={`flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-xl border transition-colors select-none ${
-                sortBy === "smart_sort"
-                  ? isDark
-                    ? "bg-purple-950/70 border-purple-500/50 shadow-xs ring-1 ring-purple-500/30"
-                    : "bg-purple-50/90 border-purple-300 shadow-xs ring-1 ring-purple-200"
-                  : sortBy !== "newest"
-                  ? isDark
-                    ? "bg-indigo-950/70 border-indigo-500/50 shadow-xs ring-1 ring-indigo-500/30"
-                    : "bg-indigo-50/90 border-indigo-300 shadow-xs ring-1 ring-indigo-200"
-                  : isDark
-                  ? "bg-slate-900/80 border-slate-700"
-                  : "bg-slate-50 border-slate-200"
+              className={`h-8 px-2.5 rounded-lg border flex items-center gap-1.5 ${
+                isDark
+                  ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                  : "bg-white border-[#DFE6E2] text-[#18201C]"
               }`}
             >
-              {/* Active sort state icon */}
-              <div className="relative flex items-center justify-center w-4 h-4 shrink-0">
-                <div className="flex items-center justify-center">
-                  {sortBy === "smart_sort" && (
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400 fill-purple-400/30" />
-                  )}
-                  {sortBy === "newest" && (
-                    <Clock className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
-                  )}
-                  {sortBy === "views_desc" && (
-                    <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/30" />
-                  )}
-                  {sortBy === "price_asc" && (
-                    <ArrowUpNarrowWide className="w-3.5 h-3.5 text-emerald-500" />
-                  )}
-                  {sortBy === "price_desc" && (
-                    <ArrowDownWideNarrow className="w-3.5 h-3.5 text-blue-500" />
-                  )}
-                  {sortBy === "ai_score" && (
-                    <Sparkles className="w-3.5 h-3.5 text-purple-500" />
-                  )}
-                </div>
-
-                {/* Steady indicator when a non-default sorting state is active */}
-                {sortBy !== "newest" && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className={`inline-flex rounded-full h-2 w-2 ${
-                      sortBy === "smart_sort" ? "bg-purple-500" : "bg-indigo-500"
-                    }`}></span>
-                  </span>
-                )}
-              </div>
-
-              <span
-                className={`text-xs font-bold hidden sm:inline ${
-                  sortBy === "smart_sort"
-                    ? isDark
-                      ? "text-purple-300"
-                      : "text-purple-700"
-                    : sortBy !== "newest"
-                    ? isDark
-                      ? "text-indigo-300"
-                      : "text-indigo-700"
-                    : isDark
-                    ? "text-slate-400"
-                    : "text-slate-500"
-                }`}
-              >
-                Sort:
-              </span>
-
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199] shrink-0" />
               <select
                 id="marketplace-sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 aria-label="Sort listings"
-                className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1 ${
-                  sortBy === "smart_sort"
-                    ? isDark
-                      ? "text-purple-200"
-                      : "text-purple-900"
-                    : sortBy !== "newest"
-                    ? isDark
-                      ? "text-indigo-200"
-                      : "text-indigo-900"
-                    : isDark
-                    ? "text-slate-200"
-                    : "text-slate-800"
-                }`}
+                className="bg-transparent text-xs font-medium focus:outline-none cursor-pointer pr-1"
               >
-                <option value="smart_sort" className={isDark ? "bg-slate-900 text-purple-300 font-bold" : "bg-white text-purple-700 font-bold"}>
-                  ✨ Smart Sort (Recency + AI + Trust)
+                <option value="smart_sort" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
+                  Recommended
                 </option>
-                <option value="newest" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
-                  Recently Listed
+                <option value="newest" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
+                  Newest first
                 </option>
-                <option value="views_desc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
-                  🔥 Most Popular (Views)
+                <option value="views_desc" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
+                  Most viewed
                 </option>
-                <option value="price_asc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                <option value="price_asc" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
                   Price: Low to High
                 </option>
-                <option value="price_desc" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                <option value="price_desc" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
                   Price: High to Low
                 </option>
-                <option value="ai_score" className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
-                  AI Inspection Score
+                <option value="ai_score" className={isDark ? "bg-[#141A18] text-[#ECF2EF]" : "bg-white text-[#18201C]"}>
+                  AI inspection score
                 </option>
               </select>
-
-              {/* Quick Reset Button when an active sort filter is selected */}
-              {sortBy !== "smart_sort" && (
-                <button
-                  type="button"
-                  onClick={() => setSortBy("smart_sort")}
-                  title="Switch to Smart Sort"
-                  className={`p-0.5 rounded-full cursor-pointer transition-colors ${
-                    isDark
-                      ? "hover:bg-purple-900/80 text-purple-300"
-                      : "hover:bg-purple-200 text-purple-700"
-                  }`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
             </div>
           </div>
-        </HorizontalSlider>
-      </div>
+        </div>
 
-        {/* Dedicated "Your Chats" Section */}
-        {storedChats.length > 0 && (
-          <YourChatsSection
-            chats={storedChats}
-            allListings={listings}
-            onOpenChat={handleOpenChat}
-            onOpenDetails={(item) => {
-              handleOpenDetails(item);
-            }}
-            onOpenCalendar={handleOpenCalendar}
-            onOpenFullModal={() => setIsYourChatsModalOpen(true)}
-          />
-        )}
+        {/* Currently Negotiating Section (items where buying talks have already started) */}
+        <CurrentlyNegotiatingSection
+          chats={storedChats}
+          allListings={listings}
+          onOpenChat={handleOpenChat}
+          onOpenDetails={handleOpenDetails}
+          onOpenCalendar={handleOpenCalendar}
+          onViewAllChats={() => {
+            setActiveSectionTab("chats");
+            window.scrollTo(0, 0);
+          }}
+          isOnline={isOnline}
+        />
 
         {/* Campus Marketplace Items Section */}
-        <section
-          id="campus-marketplace-items-section"
-          className={`p-6 sm:p-8 rounded-3xl border-2 transition-colors ${
-            isDark
-              ? "bg-slate-950/80 border-slate-800/90 shadow-2xl"
-              : "bg-white border-slate-200/90 shadow-sm"
-          }`}
-        >
-          {/* Full Screen Notice Banner */}
-          {isFullScreenMode && (
-            <div
-              className={`mb-6 p-3 px-4 rounded-2xl border flex items-center justify-between shadow-lg ${
-                isDark
-                  ? "bg-indigo-950/70 border-indigo-500/40 text-indigo-200"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-900"
-              }`}
-            >
-              <div className="flex items-center gap-2 text-xs font-semibold">
-                <Maximize2 className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>
-                  <strong>Theater Mode Active:</strong> Wide multi-column inspection view with AI scores, condition metrics, swap conditions, and seller credentials visible simultaneously.
-                </span>
-              </div>
+        <section id="campus-marketplace-items-section" className="space-y-5">
+          {/* Listings Header & Count */}
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div className="flex flex-wrap items-baseline gap-2.5">
+              <h2 className={`text-base font-semibold tracking-tight ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
+                {selectedCategory === "All" ? "All listings" : selectedCategory}
+              </h2>
+              <span className="text-xs font-mono tabular-nums text-[#5C6B63] dark:text-[#8FA199]">
+                {filteredListings.length} {filteredListings.length === 1 ? "item" : "items"}
+                {includeSoldItems ? " · including sold" : ""}
+              </span>
+            </div>
+
+            {storedChats.length > 0 && (
               <button
                 type="button"
-                onClick={toggleFullScreen}
-                className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-sm transition-colors flex items-center gap-1.5 shrink-0 ml-3"
+                onClick={() => setActiveSectionTab("chats")}
+                className="text-xs font-medium text-[#2F5D50] dark:text-[#7BBFA8] hover:text-[#244A3F] dark:hover:text-[#ECF2EF] flex items-center gap-1.5 cursor-pointer"
               >
-                <Minimize2 className="w-3.5 h-3.5" />
-                <span>Exit Fullscreen</span>
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>{storedChats.length} active {storedChats.length === 1 ? "chat" : "chats"}</span>
               </button>
-            </div>
-          )}
-
-          {/* Listings Header & Count */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                {selectedCategory === "All" ? "Campus Marketplace Items" : `${selectedCategory} Listings`}
-              </h2>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
-                  isDark
-                    ? "bg-slate-800 border-slate-700 text-indigo-300"
-                    : "bg-indigo-50 border-indigo-200 text-indigo-700"
-                }`}
-              >
-                {filteredListings.length}
-              </span>
-
-              {includeSoldItems && (
-                <span
-                  id="header-history-badge"
-                  className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1"
-                >
-                  <Archive className="w-3 h-3 text-emerald-400" />
-                  <span>Transaction History Included</span>
-                </span>
-              )}
-
-              {sortBy === "smart_sort" && (
-                <span
-                  id="header-smart-sort-badge"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
-                    isDark
-                      ? "bg-purple-950/60 text-purple-300 border-purple-500/40"
-                      : "bg-purple-50 text-purple-800 border-purple-200"
-                  }`}
-                  title="Smart Sort: Ranking by Recency, AI Inspection Score, and Seller Trust Rating"
-                >
-                  <Sparkles className="w-3 h-3 text-purple-400" />
-                  <span>Smart Ranked (AI + Trust + Recency)</span>
-                </span>
-              )}
-
-              {recentlyViewed.length > 0 && (
-                <span
-                  id="header-recently-viewed-badge"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
-                    isDark
-                      ? "bg-indigo-950/60 text-indigo-300 border-indigo-500/40"
-                      : "bg-indigo-50 text-indigo-800 border-indigo-200"
-                  }`}
-                  title={`${recentlyViewed.length} recently viewed items tracked`}
-                >
-                  <History className="w-3 h-3 text-indigo-400" />
-                  <span>{recentlyViewed.length} Recently Viewed</span>
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                {layoutMode === "detailed" || isFullScreenMode
-                  ? "Displaying comprehensive full-screen specs for all items"
-                  : "Click 'Quick Specs' or switch to 'Full Specs' to inspect every detail"}
-              </span>
-            </div>
+            )}
           </div>
 
-          {/* 'Recently Viewed' Section in the marketplace header */}
+          {/* Recently Viewed Strip (renders only when user has viewed items) */}
           <RecentlyViewedSection
             recentlyViewed={recentlyViewed}
             onOpenDetails={handleOpenDetails}
@@ -2339,8 +2156,8 @@ export default function App() {
               <div
                 className={
                   layoutMode === "detailed"
-                    ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
-                    : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-5 sm:gap-6"
+                    ? "grid grid-cols-1 lg:grid-cols-2 gap-5"
+                    : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
                 }
               >
                 {displayedListings.map((listing, index) => (
@@ -2363,10 +2180,6 @@ export default function App() {
                       onOpenChat={handleOpenChat}
                       onOpenCalendar={handleOpenCalendar}
                       onShowToast={showToast}
-                      onOpenPassport={(item) => {
-                        setPassportListing(item);
-                        setIsPassportModalOpen(true);
-                      }}
                       onOpenBarter={(item) => {
                         setBarterListing(item);
                         setIsBarterDrawerOpen(true);
@@ -2375,91 +2188,97 @@ export default function App() {
                       layoutMode={layoutMode}
                       isFullScreen={isFullScreenMode}
                       onTagClick={(tag) => setSearchQuery(tag)}
+                      isOwner={isCurrentUserListing(listing)}
+                      onUpdateStatus={handleUpdateStatus}
                     />
                   </div>
                 ))}
               </div>
 
-              {/* Load More Pagination Button (Smooth mobile scrolling without lag) */}
+              {/* Load More Pagination Button */}
               {filteredListings.length > visibleListingsCount && (
-                <div className="flex flex-col items-center justify-center pt-6 pb-2 gap-2">
+                <div className="flex items-center justify-center pt-6 pb-2">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic("light");
                       setVisibleListingsCount((prev) => prev + 12);
                     }}
-                    className={`px-6 py-2.5 rounded-xl font-extrabold text-xs transition-colors shadow-md cursor-pointer flex items-center gap-2 border ${
+                    className={`h-9 px-5 rounded-lg font-medium text-xs cursor-pointer flex items-center gap-2 border ${
                       isDark
-                        ? "bg-slate-800 hover:bg-slate-750 text-indigo-300 border-indigo-500/30"
-                        : "bg-white hover:bg-slate-50 text-indigo-700 border-indigo-200 shadow-2xs"
+                        ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D]"
+                        : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA]"
                     }`}
                   >
-                    <span>Load More Items</span>
-                    <span className="font-mono text-[11px] opacity-75">
-                      (Showing {displayedListings.length} of {filteredListings.length})
+                    <span>Load more</span>
+                    <span className="font-mono text-[11px] text-[#5C6B63] dark:text-[#8FA199]">
+                      {displayedListings.length}/{filteredListings.length}
                     </span>
                   </button>
                 </div>
               )}
             </>
           ) : (
-                <div
-                  key="empty-state"
-                  className={`text-center py-16 p-8 rounded-2xl border shadow-xs space-y-4 ${
-                    isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-slate-50 border-slate-200/90"
+            <div
+              key="empty-state"
+              className={`text-center py-16 px-6 rounded-xl border space-y-4 ${
+                isDark ? "bg-[#141A18] border-[#242E2A]" : "bg-white border-[#DFE6E2]"
+              }`}
+            >
+              <div
+                className={`w-11 h-11 mx-auto rounded-lg border flex items-center justify-center ${
+                  isDark ? "bg-[#1B2320] border-[#242E2A] text-[#8FA199]" : "bg-[#EFF4F1] border-[#DFE6E2] text-[#5C6B63]"
+                }`}
+              >
+                <Package className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className={`text-sm font-semibold ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
+                  No listings found
+                </h3>
+                <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] max-w-sm mx-auto mt-1">
+                  Try clearing your search or switching categories, or set an alert to be notified when a matching item is posted.
+                </p>
+              </div>
+              <div className="pt-1 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  id="empty-state-notify-btn"
+                  type="button"
+                  onClick={() => {
+                    setPrefilledAlertKeyword(searchQuery);
+                    setPrefilledAlertCategory(selectedCategory);
+                    setIsAlertsModalOpen(true);
+                  }}
+                  className="h-9 px-4 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  <span>
+                    Notify me {searchQuery ? `for "${searchQuery}"` : "when listed"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory("All");
+                    setSelectedType("all");
+                    setSelectedCondition("all");
+                    setWishlistOnlyFilter(false);
+                    setBundleOnlyFilter(false);
+                    setMyListingsOnlyFilter(false);
+                    setSearchQuery("");
+                  }}
+                  className={`h-9 px-4 rounded-lg text-xs font-medium border cursor-pointer ${
+                    isDark
+                      ? "bg-[#141A18] hover:bg-[#1B2320] text-[#ECF2EF] border-[#242E2A]"
+                      : "bg-white hover:bg-[#EFF4F1] text-[#18201C] border-[#DFE6E2]"
                   }`}
                 >
-                  <div
-                    className={`w-14 h-14 mx-auto rounded-full border flex items-center justify-center ${
-                      isDark ? "bg-slate-900 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-500"
-                    }`}
-                  >
-                    <Package className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
-                  </div>
-                  <div>
-                    <h3 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                      No items match your active filters
-                    </h3>
-                    <p className={`text-xs max-w-md mx-auto mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Try clearing your search or switching categories. You can also set a notification alert to get notified the second a student posts a matching item!
-                    </p>
-                  </div>
-                  <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
-                    <button
-                      id="empty-state-notify-btn"
-                      onClick={() => {
-                        setPrefilledAlertKeyword(searchQuery);
-                        setPrefilledAlertCategory(selectedCategory);
-                        setIsAlertsModalOpen(true);
-                      }}
-                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors shadow-lg flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Bell className="w-3.5 h-3.5 text-slate-950" />
-                      <span>
-                        Notify Me When Listed {searchQuery ? `("${searchQuery}")` : ""}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedCategory("All");
-                        setSelectedType("all");
-                        setSelectedCondition("all");
-                        setWishlistOnlyFilter(false);
-                        setSearchQuery("");
-                      }}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer ${
-                        isDark
-                          ? "bg-slate-700/90 hover:bg-slate-700 text-slate-200 border-slate-600"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
-                      }`}
-                    >
-                      Reset All Filters
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
+                  Reset filters
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
           </div>
         )}
 
@@ -2531,49 +2350,64 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer with Mentorship & PBL Credits (Full Width) */}
+      {/* Minimal Footer */}
       <footer
-        className={`mt-16 border-t py-10 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 text-xs transition-colors duration-200 ${
+        className={`mt-16 border-t py-8 px-4 sm:px-6 lg:px-8 text-xs ${
           isDark
-            ? "bg-[#090D16] border-slate-800/80 text-slate-400 shadow-2xl"
-            : "bg-slate-900 border-slate-800 text-slate-300 shadow-inner"
+            ? "bg-[#0D1110] border-[#242E2A] text-[#8FA199]"
+            : "bg-white border-[#DFE6E2] text-[#5C6B63]"
         }`}
       >
-        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="font-bold text-sm text-white">
-              PVG's COET Campus Resale & Exchange Platform
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-center md:text-left">
+            <div className={`font-semibold text-sm ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
+              Campus Resale
             </div>
-            <p className={isDark ? "text-slate-400" : "text-slate-300"}>
-              Official Student-to-Student Resale & Exchange • Pune Campus
+            <p className="mt-0.5 text-[#5C6B63] dark:text-[#8FA199]">
+              PVG's COET Student-to-Student Exchange · Pune
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <ThemeSelector variant="segmented" />
             <button
+              type="button"
               onClick={() => setIsAIInspectorOpen(true)}
-              className="px-3 py-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "border-[#DFE6E2] bg-white text-[#18201C] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              Gemini 3.8 Flash
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI Inspector</span>
             </button>
             <button
+              type="button"
               onClick={() => setIsSecurityCenterOpen(true)}
-              className="px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "border-[#DFE6E2] bg-white text-[#18201C] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Trust &amp; Security</span>
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Campus Safety</span>
             </button>
             <button
+              type="button"
               onClick={() => {
                 setShowLandingPage(true);
                 window.scrollTo(0, 0);
               }}
-              className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "border-[#242E2A] bg-[#141A18] text-[#ECF2EF] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "border-[#DFE6E2] bg-white text-[#18201C] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
             >
-              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-              <span>About App</span>
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>About</span>
             </button>
           </div>
         </div>
@@ -2600,10 +2434,6 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onOpenLightbox={(item) => {
           setLightboxListing(item);
-        }}
-        onOpenPassport={(item) => {
-          setPassportListing(item);
-          setIsPassportModalOpen(true);
         }}
         onOpenBarter={(item) => {
           setBarterListing(item);
@@ -2847,27 +2677,7 @@ export default function App() {
         }}
       />
 
-      {/* Verified Student Digital ID Passport Modal */}
-      <StudentPassportModal
-        isOpen={isPassportModalOpen}
-        onClose={() => {
-          setIsPassportModalOpen(false);
-          setPassportListing(null);
-        }}
-        sellerListing={passportListing}
-        allListings={listings}
-        onOpenChat={(item) => {
-          if (!isOnline) {
-            showToast("⚠️ Chat is disabled while offline to prevent data loss.");
-            return;
-          }
-          setChatListing(item);
-          setIsChatOpen(true);
-        }}
-        onShowToast={showToast}
-      />
-
-      {/* Campus Security & Trust Center Modal */}
+      {/* Campus Safety Center Modal */}
       <CampusSecurityCenterModal
         isOpen={isSecurityCenterOpen}
         onClose={() => setIsSecurityCenterOpen(false)}
@@ -2876,11 +2686,11 @@ export default function App() {
 
       {/* College Login Modal */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl border border-slate-700 bg-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+          <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl shadow-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18]">
             <button
               onClick={() => setIsLoginModalOpen(false)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-lg bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] hover:text-[#18201C] dark:hover:text-[#ECF2EF] flex items-center justify-center cursor-pointer"
               title="Close"
             >
               <X className="w-4 h-4" />
@@ -2961,9 +2771,9 @@ export default function App() {
           }}
           aria-label="Scroll to top"
           title="Back to Top"
-          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-11 h-11 rounded-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white shadow-xl border border-slate-700 flex items-center justify-center cursor-pointer"
+          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-30 w-10 h-10 rounded-full bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white shadow-md border border-[#244A3F] dark:border-[#448573] flex items-center justify-center cursor-pointer"
         >
-          <ArrowUpNarrowWide className="w-5 h-5 text-indigo-400" />
+          <ArrowUpNarrowWide className="w-4 h-4" />
         </button>
       )}
     </div>

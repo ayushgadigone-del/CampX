@@ -9,7 +9,6 @@ import {
   MessageCircle,
   MapPin,
   Sparkles,
-  BadgeCheck,
   Calendar as CalendarIcon,
   ShieldCheck,
   Info,
@@ -268,16 +267,7 @@ export const ListingImageLightboxModal: React.FC<ListingImageLightboxModalProps>
               <p className="text-[11px] text-slate-400 truncate flex items-center gap-2">
                 <span>{listing.category}</span>
                 <span>•</span>
-                <span className="flex items-center gap-1.5">
-                  <span>Offered by {listing.sellerName}</span>
-                  <span
-                    className="relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30 overflow-hidden select-none"
-                    title="Verified Student Seller"
-                  >
-                    <BadgeCheck className="w-2.5 h-2.5 text-blue-400 shrink-0" />
-                    <span>Verified</span>
-                  </span>
-                </span>
+                <span>Offered by {listing.sellerName}</span>
                 {listing.locationPreference && (
                   <>
                     <span>•</span>

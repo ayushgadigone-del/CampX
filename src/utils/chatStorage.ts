@@ -3,114 +3,155 @@ import { Conversation, ChatMessage, Listing } from "../types";
 const STORAGE_KEY = "campus_marketplace_user_chats";
 export const CHATS_UPDATED_EVENT = "campus_chats_updated";
 
-// Realistic initial chat threads so "Your Chats" demonstrates real student interactions right away
+// Initial active negotiation threads linked to real campus listings
 const INITIAL_DEMO_CHATS: Conversation[] = [
   {
-    id: "conv_list_calc_991_demo",
-    listingId: "list_calc_991",
-    listingTitle: "Casio FX-991CW ClassWiz Scientific Calculator",
-    listingPrice: 850,
-    listingImage: "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=600&auto=format&fit=crop&q=80",
-    listingCategory: "Electronics",
-    listingCondition: "Like New",
-    sellerId: "user_rahul_sharma",
-    sellerName: "Rahul Sharma",
-    sellerEmail: "rahul.sharma@pvgcoet.ac.in",
-    buyerId: "student_verified_curr",
+    id: "conv_seed-calc-1_demo",
+    listingId: "seed-calc-1",
+    listingTitle: "Casio FX-991ES Plus 2nd Edition Scientific Calculator",
+    listingPrice: 450,
+    listingImage:
+      "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80",
+    listingCategory: "Calculators",
+    listingCondition: "Good",
+    sellerId: "seed-user-ayush",
+    sellerName: "Ayush Gadigone",
+    sellerEmail: "ayush.gadigone@pvgcoet.ac.in",
+    buyerId: "student_current",
     buyerName: "You",
     buyerEmail: "student@pvgcoet.ac.in",
-    participants: ["user_rahul_sharma", "student_verified_curr"],
-    lastMessage: "Sounds great! Let's meet at Central Library Quad tomorrow at 1:15 PM.",
-    lastMessageTimestamp: Date.now() - 1000 * 60 * 25, // 25 mins ago
+    participants: ["seed-user-ayush", "student_current"],
+    lastMessage: "₹400 works for me! Let's meet at Central Library Quad tomorrow at 1:15 PM.",
+    lastMessageTimestamp: Date.now() - 1000 * 60 * 25,
     status: "handover_scheduled",
     unread: false,
     messages: [
       {
         id: "m1",
-        conversationId: "conv_list_calc_991_demo",
-        senderId: "student_verified_curr",
+        conversationId: "conv_seed-calc-1_demo",
+        senderId: "student_current",
         senderName: "You",
         senderEmail: "student@pvgcoet.ac.in",
-        text: "Hi Rahul! Is this Casio FX-991CW still available? Does it come with the sliding protective cover?",
+        text: "Hi! Is the Casio FX-991ES Plus still available? Does it include the hard slide cover?",
         type: "text",
         timestamp: Date.now() - 1000 * 60 * 60 * 2,
       },
       {
         id: "m2",
-        conversationId: "conv_list_calc_991_demo",
-        senderId: "user_rahul_sharma",
-        senderName: "Rahul Sharma",
-        senderEmail: "rahul.sharma@pvgcoet.ac.in",
-        text: "Yes, absolutely! The hard sliding cover and fresh solar battery are included. I barely used it for FE sem 2.",
+        conversationId: "conv_seed-calc-1_demo",
+        senderId: "seed-user-ayush",
+        senderName: "Ayush Gadigone",
+        senderEmail: "ayush.gadigone@pvgcoet.ac.in",
+        text: "Yes, still available! Hard cover is included and solar + keypad both work cleanly.",
         type: "text",
         timestamp: Date.now() - 1000 * 60 * 50,
       },
       {
         id: "m3",
-        conversationId: "conv_list_calc_991_demo",
-        senderId: "student_verified_curr",
+        conversationId: "conv_seed-calc-1_demo",
+        senderId: "student_current",
         senderName: "You",
         senderEmail: "student@pvgcoet.ac.in",
-        text: "Would you take ₹800 if I pick it up during lunch break?",
+        text: "Would you take ₹400 if I pick it up during lunch break?",
         type: "offer",
-        offerAmount: 800,
+        offerAmount: 400,
         timestamp: Date.now() - 1000 * 60 * 35,
       },
       {
         id: "m4",
-        conversationId: "conv_list_calc_991_demo",
-        senderId: "user_rahul_sharma",
-        senderName: "Rahul Sharma",
-        senderEmail: "rahul.sharma@pvgcoet.ac.in",
-        text: "Sounds great! Let's meet at Central Library Quad tomorrow at 1:15 PM.",
+        conversationId: "conv_seed-calc-1_demo",
+        senderId: "seed-user-ayush",
+        senderName: "Ayush Gadigone",
+        senderEmail: "ayush.gadigone@pvgcoet.ac.in",
+        text: "₹400 works for me! Let's meet at Central Library Quad tomorrow at 1:15 PM.",
         type: "text",
         timestamp: Date.now() - 1000 * 60 * 25,
       },
     ],
   },
   {
-    id: "conv_list_mech_book_demo",
-    listingId: "list_mech_book",
-    listingTitle: "Engineering Mechanics (SPPU Revised Syllabus)",
-    listingPrice: 320,
-    listingImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
+    id: "conv_seed-book-1_demo",
+    listingId: "seed-book-1",
+    listingTitle: "Higher Engineering Mathematics (44th Edition) – B.S. Grewal",
+    listingPrice: 260,
+    listingImage:
+      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
     listingCategory: "Books",
     listingCondition: "Good",
-    sellerId: "user_sneha_kulkarni",
-    sellerName: "Sneha Kulkarni",
-    sellerEmail: "sneha.kulkarni@pvgcoet.ac.in",
-    buyerId: "student_verified_curr",
+    sellerId: "seed-user-parshwa",
+    sellerName: "Parshwa Gandhi",
+    sellerEmail: "parshwa.gandhi@pvgcoet.ac.in",
+    buyerId: "student_current",
     buyerName: "You",
     buyerEmail: "student@pvgcoet.ac.in",
-    participants: ["user_sneha_kulkarni", "student_verified_curr"],
-    lastMessage: "I highlighted important formulas and solved previous question papers in pencil.",
-    lastMessageTimestamp: Date.now() - 1000 * 60 * 60 * 3, // 3 hours ago
-    status: "active",
+    participants: ["seed-user-parshwa", "student_current"],
+    lastMessage: "Can we settle at ₹220? I can collect it near the Canteen Porch after lectures.",
+    lastMessageTimestamp: Date.now() - 1000 * 60 * 60 * 2,
+    status: "deal_proposed",
     unread: true,
     messages: [
       {
         id: "mb1",
-        conversationId: "conv_list_mech_book_demo",
-        senderId: "student_verified_curr",
+        conversationId: "conv_seed-book-1_demo",
+        senderId: "student_current",
         senderName: "You",
         senderEmail: "student@pvgcoet.ac.in",
-        text: "Hey Sneha! Does this edition cover the latest SPPU in-sem question bank?",
+        text: "Hey Parshwa! Are all pages and differential equations chapters intact in this 44th edition?",
         type: "text",
-        timestamp: Date.now() - 1000 * 60 * 60 * 4,
+        timestamp: Date.now() - 1000 * 60 * 60 * 3,
       },
       {
         id: "mb2",
-        conversationId: "conv_list_mech_book_demo",
-        senderId: "user_sneha_kulkarni",
-        senderName: "Sneha Kulkarni",
-        senderEmail: "sneha.kulkarni@pvgcoet.ac.in",
-        text: "I highlighted important formulas and solved previous question papers in pencil.",
+        conversationId: "conv_seed-book-1_demo",
+        senderId: "seed-user-parshwa",
+        senderName: "Parshwa Gandhi",
+        senderEmail: "parshwa.gandhi@pvgcoet.ac.in",
+        text: "Yes, binding is firm and only light pencil notes in a few chapters.",
         type: "text",
-        timestamp: Date.now() - 1000 * 60 * 60 * 3,
+        timestamp: Date.now() - 1000 * 60 * 60 * 2.5,
+      },
+      {
+        id: "mb3",
+        conversationId: "conv_seed-book-1_demo",
+        senderId: "student_current",
+        senderName: "You",
+        senderEmail: "student@pvgcoet.ac.in",
+        text: "Can we settle at ₹220? I can collect it near the Canteen Porch after lectures.",
+        type: "offer",
+        offerAmount: 220,
+        timestamp: Date.now() - 1000 * 60 * 60 * 2,
       },
     ],
   },
 ];
+
+/**
+ * Extracts the latest monetary offer amount from a conversation's message history.
+ */
+export const getLatestOfferAmount = (conversation: Conversation): number | undefined => {
+  const msgs = conversation.messages || [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    const m = msgs[i];
+    if (typeof m.offerAmount === "number" && m.offerAmount > 0) {
+      return m.offerAmount;
+    }
+    const match = m.text?.match(/₹\s*(\d{2,6})/);
+    if (match && match[1]) {
+      const parsed = Number(match[1]);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+  }
+  const fallbackMatch = conversation.lastMessage?.match(/₹\s*(\d{2,6})/);
+  if (fallbackMatch && fallbackMatch[1]) {
+    const parsed = Number(fallbackMatch[1]);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Dispatches a window event so all React components listening can re-render
@@ -123,7 +164,7 @@ const notifyChatUpdates = () => {
 
 /**
  * Loads all stored chat conversations from localStorage.
- * Initializes with demo student chats on first load.
+ * Initializes with active student negotiation threads on first load.
  */
 export const getStoredChats = (): Conversation[] => {
   if (typeof window === "undefined") return INITIAL_DEMO_CHATS;
@@ -135,7 +176,7 @@ export const getStoredChats = (): Conversation[] => {
       return INITIAL_DEMO_CHATS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
     }
     return INITIAL_DEMO_CHATS;
@@ -169,7 +210,6 @@ export const saveStoredChat = (conversation: Conversation): void => {
       updated = [conversation, ...currentChats];
     }
 
-    // Sort newest first
     updated.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     notifyChatUpdates();
@@ -215,7 +255,8 @@ export const recordChatMessage = (
     buyerName: currentUser?.displayName || "You",
     buyerEmail: currentUser?.email || "student@pvgcoet.ac.in",
     participants: [listing.sellerId, currentUser?.uid || "current-user"],
-    lastMessage: message.text || (message.offerAmount ? `Offered ₹${message.offerAmount}` : "New message"),
+    lastMessage:
+      message.text || (message.offerAmount ? `Offered ₹${message.offerAmount}` : "New message"),
     lastMessageTimestamp: message.timestamp || Date.now(),
     status,
     messages: updatedMessages,
@@ -224,6 +265,27 @@ export const recordChatMessage = (
 
   saveStoredChat(updatedConv);
   return updatedConv;
+};
+
+/**
+ * Updates the negotiation status of an existing stored chat.
+ */
+export const updateChatStatus = (
+  conversationId: string,
+  status: Conversation["status"]
+): void => {
+  if (typeof window === "undefined") return;
+
+  try {
+    const currentChats = getStoredChats();
+    const updated = currentChats.map((c) =>
+      c.id === conversationId ? { ...c, status } : c
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    notifyChatUpdates();
+  } catch (err) {
+    console.warn("Could not update chat status:", err);
+  }
 };
 
 /**
@@ -249,7 +311,7 @@ export const clearAllStoredChats = (): void => {
   if (typeof window === "undefined") return;
 
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     notifyChatUpdates();
   } catch (err) {
     console.warn("Could not clear chats from localStorage:", err);

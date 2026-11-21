@@ -1,23 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  X,
-  Clock,
-  Sparkles,
-  Tag,
-  ArrowRight,
-  CornerDownLeft,
-  BookOpen,
-  Calculator,
-  FlaskConical,
-  Bike,
-  Briefcase,
-  Package,
-  Layers,
-  Boxes,
-} from "lucide-react";
+import { Search, X, Clock } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { HorizontalSlider } from "./HorizontalSlider";
 
 interface DedicatedSearchBarProps {
   searchQuery: string;
@@ -29,24 +12,15 @@ interface DedicatedSearchBarProps {
 }
 
 const STORAGE_KEY = "campus_marketplace_recent_searches";
-const POPULAR_CAMPUS_SEARCHES = [
-  { label: "Casio fx-991", category: "Calculators" },
-  { label: "SPPU Textbooks", category: "Books" },
-  { label: "Mini Drafter", category: "Lab Equipment" },
-  { label: "Campus Cycles", category: "Cycles" },
-  { label: "Engineering Maths M3", category: "Books" },
-  { label: "Workshop Apron", category: "Lab Equipment" },
-  { label: "Vernier Caliper", category: "Lab Equipment" },
-];
 
 const CATEGORY_ITEMS = [
-  { key: "All", label: "Total:", icon: Layers },
-  { key: "Cycles", label: "Cycles", icon: Bike },
-  { key: "Books", label: "Books", icon: BookOpen },
-  { key: "Calculators", label: "Calculators", icon: Calculator },
-  { key: "Lab Equipment", label: "Lab Equipment", icon: FlaskConical },
-  { key: "Bags", label: "Bags", icon: Briefcase },
-  { key: "Other", label: "Other", icon: Package },
+  { key: "All", label: "All" },
+  { key: "Books", label: "Books" },
+  { key: "Calculators", label: "Calculators" },
+  { key: "Lab Equipment", label: "Lab Equipment" },
+  { key: "Cycles", label: "Cycles" },
+  { key: "Bags", label: "Bags" },
+  { key: "Other", label: "Other" },
 ];
 
 export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
@@ -58,7 +32,6 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
   categoryStockCounts = {},
 }) => {
   const { isDark } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,22 +42,15 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.slice(0, 6);
+          return parsed.slice(0, 5);
         }
       }
-    } catch (e) {
-      console.warn("Could not load recent searches", e);
+    } catch {
+      // ignore storage errors
     }
-    return [
-      "Casio Calculator",
-      "B.S. Grewal",
-      "Mini Drafter",
-      "Campus Cycle",
-      "Vernier Caliper",
-    ];
+    return ["Casio fx-991", "SPPU Textbooks", "Mini Drafter", "Campus Cycle"];
   });
 
-  // Handle outside clicks to close dropdown
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -98,12 +64,15 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
   const addRecentSearch = (term: string) => {
     const clean = term.trim();
     if (!clean) return;
-    const updated = [clean, ...recentSearches.filter((item) => item.toLowerCase() !== clean.toLowerCase())].slice(0, 6);
+    const updated = [
+      clean,
+      ...recentSearches.filter((item) => item.toLowerCase() !== clean.toLowerCase()),
+    ].slice(0, 5);
     setRecentSearches(updated);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn("Could not save recent searches", e);
+    } catch {
+      // ignore
     }
   };
 
@@ -113,8 +82,8 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
     setRecentSearches(updated);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (err) {
-      console.warn("Could not remove recent search", err);
+    } catch {
+      // ignore
     }
   };
 
@@ -122,8 +91,8 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
     setRecentSearches([]);
     try {
       localStorage.removeItem(STORAGE_KEY);
-    } catch (err) {
-      console.warn("Could not clear recent searches", err);
+    } catch {
+      // ignore
     }
   };
 
@@ -136,373 +105,171 @@ export const DedicatedSearchBar: React.FC<DedicatedSearchBarProps> = ({
     }
   };
 
+  const totalStock = Object.values(categoryStockCounts).reduce((a, b) => a + b, 0);
+
   return (
     <section
       id="dedicated-search-bar-section"
-      aria-label="Dedicated Campus Marketplace Search"
-      className="w-full mb-2"
+      aria-label="Search Campus Marketplace"
+      className="w-full space-y-3"
     >
-      <div
-        className={`w-full rounded-2xl p-4 sm:p-5 border transition-colors duration-150 shadow-sm relative overflow-visible ${
-          isDark
-            ? isFocused
-              ? "bg-[#0F172A] border-indigo-500/80 ring-2 ring-indigo-500/20 shadow-lg shadow-indigo-950/40"
-              : "bg-[#0F172A]/85 hover:bg-[#0F172A] border-slate-800/90 ring-1 ring-white/5"
-            : isFocused
-            ? "bg-white border-indigo-400 ring-2 ring-indigo-500/15 shadow-md shadow-indigo-100"
-            : "bg-white hover:bg-slate-50/80 border-slate-200"
-        }`}
-      >
-        {/* Top Context Header: Label & Live Results Status */}
-        <div className="flex items-center justify-between gap-3 mb-2.5">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                isDark ? "text-indigo-400" : "text-indigo-600"
-              }`}
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>Campus Search Console</span>
-            </span>
-            {selectedCategory !== "All" && (
-              <span
-                className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${
-                  isDark
-                    ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/30"
-                    : "bg-indigo-50 text-indigo-700 border-indigo-200"
-                }`}
-              >
-                Category: {selectedCategory}
-              </span>
-            )}
-          </div>
+      {/* Clean Single-Row Search Bar */}
+      <div ref={containerRef} className="relative w-full">
+        <form onSubmit={handleSubmit} className="relative w-full flex items-center">
+          <Search
+            className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+              isDark ? "text-[#6D7E76]" : "text-[#83928A]"
+            }`}
+          />
 
-          <div className="flex items-center gap-2 text-xs">
-            {searchQuery ? (
-              <div className="flex items-center gap-1.5">
+          <input
+            ref={inputRef}
+            id="dedicated-search-bar-input"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              onSearchChange(e.target.value);
+              if (!isDropdownOpen) setIsDropdownOpen(true);
+            }}
+            onFocus={() => setIsDropdownOpen(true)}
+            placeholder="Search textbooks, calculators, drafters, cycles..."
+            className={`w-full h-11 pl-10 pr-24 rounded-xl text-sm outline-none border ${
+              isDark
+                ? "bg-[#141A18] text-[#ECF2EF] placeholder:text-[#6D7E76] border-[#242E2A] focus:border-[#5BA18C]"
+                : "bg-white text-[#18201C] placeholder:text-[#83928A] border-[#DFE6E2] focus:border-[#2F5D50]"
+            }`}
+          />
+
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            {searchQuery && (
+              <>
                 <span
-                  className={`font-semibold ${
-                    totalResultsCount > 0
-                      ? isDark
-                        ? "text-emerald-400"
-                        : "text-emerald-700"
-                      : isDark
-                      ? "text-amber-400"
-                      : "text-amber-700"
+                  className={`hidden sm:inline text-[11px] font-mono tabular-nums mr-1 ${
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
-                  {totalResultsCount} {totalResultsCount === 1 ? "match" : "matches"} found
+                  {totalResultsCount} {totalResultsCount === 1 ? "result" : "results"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onSearchChange("")}
-                  className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors underline cursor-pointer ml-1"
-                >
-                  Clear
-                </button>
-              </div>
-            ) : (
-              <span className={`hidden sm:inline text-[11px] font-mono ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                Quick focus: Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold border border-slate-700">/</kbd>
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Elongated Dedicated Search Input Bar */}
-        <div ref={containerRef} className="relative w-full">
-          <form onSubmit={handleSubmit} className="relative w-full flex items-center">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 flex items-center gap-1.5">
-              <Search
-                className={`w-5 h-5 transition-colors ${
-                  isFocused ? (isDark ? "text-indigo-400" : "text-indigo-600") : "text-slate-400"
-                }`}
-              />
-            </div>
-
-            <input
-              ref={inputRef}
-              id="dedicated-search-bar-input"
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                onSearchChange(e.target.value);
-                if (!isDropdownOpen) setIsDropdownOpen(true);
-              }}
-              onFocus={() => {
-                setIsFocused(true);
-                setIsDropdownOpen(true);
-              }}
-              onBlur={() => setIsFocused(false)}
-              placeholder="Search gear, Casio fx-991, SPPU books, cycles, drafters..."
-              className={`w-full pl-12 sm:pl-13 pr-28 sm:pr-32 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium outline-none transition-colors ${
-                isDark
-                  ? "bg-slate-950/80 text-white placeholder:text-slate-500 border border-slate-800 focus:border-indigo-500"
-                  : "bg-slate-50/90 text-slate-900 placeholder:text-slate-400 border border-slate-200 focus:border-indigo-500"
-              }`}
-            />
-
-            {/* Right Action Cluster in Search Bar */}
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-              {searchQuery && (
                 <button
                   type="button"
                   onClick={() => {
                     onSearchChange("");
                     inputRef.current?.focus();
                   }}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
-                  title="Clear search text"
-                  aria-label="Clear search text"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-
-              <button
-                type="submit"
-                id="dedicated-search-submit-btn"
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs ${
-                  searchQuery.trim()
-                    ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25"
-                    : isDark
-                    ? "bg-slate-800 text-slate-400 hover:text-slate-200"
-                    : "bg-slate-200 text-slate-600 hover:text-slate-900"
-                }`}
-                title="Search campus marketplace"
-              >
-                <span>Search</span>
-                <CornerDownLeft className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </form>
-
-          {/* Search Dropdown: Query Action + Recent History */}
-          {isDropdownOpen && (
-              <div
-                id="dedicated-search-dropdown"
-                className={`absolute left-0 right-0 top-full mt-2 rounded-2xl border shadow-2xl overflow-hidden z-50 ${
-                  isDark
-                    ? "bg-slate-900 border-slate-700 text-slate-100"
-                    : "bg-white border-slate-200 text-slate-900"
-                }`}
-              >
-                {searchQuery.trim() && (
-                  <div
-                    onClick={() => {
-                      addRecentSearch(searchQuery);
-                      setIsDropdownOpen(false);
-                    }}
-                    className={`p-3 px-4 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors border-b ${
-                      isDark
-                        ? "bg-indigo-950/70 hover:bg-indigo-900/80 text-indigo-200 border-indigo-800/50"
-                        : "bg-indigo-50/80 hover:bg-indigo-100 text-indigo-900 border-indigo-100"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <Search className="w-4 h-4 text-indigo-500 shrink-0" />
-                      <span>Search for &ldquo;{searchQuery}&rdquo;</span>
-                    </div>
-                    <span className="text-[11px] font-bold text-indigo-500 flex items-center gap-1">
-                      <span>Press Enter</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                )}
-
-                {/* Recent Searches Header */}
-                <div
-                  className={`px-4 py-2 flex items-center justify-between border-b text-xs ${
+                  className={`p-1.5 rounded-md cursor-pointer ${
                     isDark
-                      ? "bg-slate-950/70 border-slate-800 text-slate-400"
-                      : "bg-slate-50 border-slate-100 text-slate-500"
+                      ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#EFF4F1]"
                   }`}
+                  aria-label="Clear search"
                 >
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Recent Searches</span>
-                  </div>
-                  {recentSearches.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={clearAllRecent}
-                      className="text-[11px] font-semibold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
-                    >
-                      Clear History
-                    </button>
-                  )}
-                </div>
-
-                {recentSearches.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-slate-400">
-                    No recent searches yet. Search any engineering equipment above!
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-800/40 max-h-56 overflow-y-auto">
-                    {recentSearches.map((term) => (
-                      <div
-                        key={term}
-                        onClick={() => {
-                          onSearchChange(term);
-                          addRecentSearch(term);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`flex items-center justify-between px-4 py-2.5 text-xs cursor-pointer transition-colors ${
-                          isDark
-                            ? "hover:bg-slate-800/70 text-slate-200 hover:text-white"
-                            : "hover:bg-slate-50 text-slate-700 hover:text-indigo-600"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate font-medium">{term}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => removeRecentSearch(term, e)}
-                          title="Remove from history"
-                          aria-label={`Remove ${term} from search history`}
-                          className="p-1 text-slate-400 hover:text-rose-500 rounded-md transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-        </div>
-
-        {/* Category Available Stock Console Bar */}
-        <div className="pt-3.5 mt-2 border-t border-slate-700/50 dark:border-slate-800/80">
-          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <Boxes className="w-3.5 h-3.5 text-purple-400" />
-              <span
-                className={`text-[11px] font-bold uppercase tracking-wider ${
-                  isDark ? "text-purple-300" : "text-purple-700 font-extrabold"
-                }`}
-              >
-                Category Available Stock:
-              </span>
-            </div>
-            <span
-              className={`text-[11px] font-medium ${
-                isDark ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              Click any category to filter &bull; Real-time Pune campus inventory
-            </span>
-          </div>
-
-          <HorizontalSlider
-            id="search-console-stock-slider"
-            showArrows={true}
-            showProgress={true}
-            showMobileHint={true}
-            scrollStep={220}
-            itemSnap={true}
-            ariaLabel="Campus Categories Available Stock Slider"
-            trackClassName="gap-2 sm:gap-2.5 py-1"
-          >
-            {CATEGORY_ITEMS.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = selectedCategory === cat.key;
-              const stock =
-                cat.key === "All"
-                  ? Object.values(categoryStockCounts).reduce((a, b) => a + b, 0)
-                  : categoryStockCounts[cat.key] ?? 0;
-
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  id={`search-console-category-${cat.key.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => onSelectCategory && onSelectCategory(cat.key)}
-                  className={`group relative flex items-center justify-between gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 snap-start hover:border-purple-400 ${
-                    isSelected
-                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white border-purple-400 ring-2 ring-purple-400/60 shadow-lg shadow-purple-600/30"
-                      : isDark
-                      ? "bg-slate-800/85 hover:bg-slate-800 text-slate-200 hover:text-white border-slate-700/80"
-                      : "bg-slate-50/90 hover:bg-purple-50/80 text-slate-700 hover:text-purple-700 border-slate-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                    <Icon
-                      className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-                        isSelected
-                          ? "text-white"
-                          : "text-purple-400 group-hover:text-purple-300"
-                      }`}
-                    />
-                    <span className="font-bold whitespace-nowrap">{cat.label}</span>
-                  </div>
-
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-black shrink-0 whitespace-nowrap transition-colors ${
-                      stock === 0
-                        ? isSelected
-                          ? "bg-rose-600 text-white shadow-xs ring-1 ring-rose-300"
-                          : isDark
-                          ? "bg-rose-950/80 text-rose-300 border border-rose-800/80 group-hover:bg-rose-900"
-                          : "bg-rose-100 text-rose-700 border border-rose-300 group-hover:bg-rose-200"
-                        : isSelected
-                        ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-300"
-                        : isDark
-                        ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 group-hover:bg-emerald-900"
-                        : "bg-emerald-100 text-emerald-700 border border-emerald-300 group-hover:bg-emerald-200"
-                    }`}
-                  >
-                    {stock > 0 ? `${stock} in stock` : "0 in stock"}
-                  </span>
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              );
-            })}
-          </HorizontalSlider>
-        </div>
+              </>
+            )}
+          </div>
+        </form>
 
-        {/* Dedicated Popular Campus Search Shortcuts (Slideable on mobile) */}
-        <div className="pt-3 mt-2">
-          <HorizontalSlider
-            id="search-console-popular-slider"
-            showArrows={true}
-            showProgress={false}
-            showMobileHint={false}
-            scrollStep={180}
-            ariaLabel="Popular campus searches slider"
-            trackClassName="gap-1.5 sm:gap-2 py-1 items-center"
+        {/* Minimal Recent Searches Dropdown */}
+        {isDropdownOpen && recentSearches.length > 0 && (
+          <div
+            id="dedicated-search-dropdown"
+            className={`absolute left-0 right-0 top-full mt-1.5 rounded-xl border shadow-lg overflow-hidden z-40 ${
+              isDark
+                ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+                : "bg-white border-[#DFE6E2] text-[#18201C]"
+            }`}
           >
-            <span
-              className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0 ${
-                isDark ? "text-slate-400" : "text-slate-500"
+            <div
+              className={`px-3.5 py-2 flex items-center justify-between border-b text-[11px] ${
+                isDark
+                  ? "border-[#242E2A] text-[#8FA199]"
+                  : "border-[#DFE6E2] text-[#5C6B63]"
               }`}
             >
-              <Tag className="w-3 h-3 text-indigo-400" />
-              <span>Popular:</span>
-            </span>
-
-            {POPULAR_CAMPUS_SEARCHES.map((item) => (
+              <span>Recent searches</span>
               <button
-                key={item.label}
                 type="button"
-                onClick={() => {
-                  onSearchChange(item.label);
-                  addRecentSearch(item.label);
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 snap-start hover:border-purple-400 ${
-                  searchQuery.toLowerCase().includes(item.label.toLowerCase())
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-xs"
+                onClick={clearAllRecent}
+                className="hover:underline cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+            <div className={`divide-y ${isDark ? "divide-[#242E2A]" : "divide-[#EFF4F1]"}`}>
+              {recentSearches.map((term) => (
+                <div
+                  key={term}
+                  onClick={() => {
+                    onSearchChange(term);
+                    addRecentSearch(term);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`flex items-center justify-between px-3.5 py-2 text-xs cursor-pointer ${
+                    isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#F7F9F8]"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Clock className="w-3.5 h-3.5 text-[#83928A] shrink-0" />
+                    <span className="truncate">{term}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => removeRecentSearch(term, e)}
+                    aria-label={`Remove ${term}`}
+                    className="p-1 text-[#83928A] hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Cleanly Aligned Category Filter Bar */}
+      <div
+        role="group"
+        aria-label="Filter by category"
+        className="w-full flex items-center gap-2 overflow-x-auto no-scrollbar lg:grid lg:grid-cols-7"
+      >
+        {CATEGORY_ITEMS.map((cat) => {
+          const isSelected = selectedCategory === cat.key;
+          const stock =
+            cat.key === "All" ? totalStock : categoryStockCounts[cat.key] ?? 0;
+
+          return (
+            <button
+              key={cat.key}
+              type="button"
+              id={`search-console-category-${cat.key.toLowerCase().replace(/\s+/g, "-")}`}
+              onClick={() => onSelectCategory && onSelectCategory(cat.key)}
+              className={`h-9 px-3 rounded-lg text-xs font-medium inline-flex items-center justify-between gap-2 border whitespace-nowrap shrink-0 cursor-pointer ${
+                isSelected
+                  ? isDark
+                    ? "bg-[#387262] text-white border-[#387262] font-semibold"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50] font-semibold"
+                  : isDark
+                  ? "bg-[#141A18] text-[#8FA199] hover:text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D]"
+                  : "bg-white text-[#5C6B63] hover:text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA]"
+              }`}
+            >
+              <span className="truncate">{cat.label}</span>
+              <span
+                className={`text-[11px] font-mono tabular-nums shrink-0 ${
+                  isSelected
+                    ? "text-white/80"
                     : isDark
-                    ? "bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700/80"
-                    : "bg-slate-100/90 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border-slate-200"
+                    ? "text-[#6D7E76]"
+                    : "text-[#83928A]"
                 }`}
               >
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </HorizontalSlider>
-        </div>
+                {stock}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );

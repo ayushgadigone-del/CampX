@@ -1,29 +1,14 @@
 import React, { useState } from "react";
 import {
-  Building2,
-  ShieldCheck,
-  Sparkles,
   ArrowRight,
+  ChevronDown,
+  MapPin,
   BookOpen,
   Calculator,
   Compass,
   Bike,
   ShoppingBag,
   FileText,
-  Calendar,
-  MapPin,
-  Users,
-  Award,
-  CheckCircle2,
-  ChevronDown,
-  Lock,
-  ArrowDown,
-  HelpCircle,
-  Clock,
-  Scan,
-  Repeat,
-  HeartHandshake,
-  GraduationCap,
 } from "lucide-react";
 import { ALLOWED_COLLEGE_DOMAIN } from "../utils/collegeAuth";
 
@@ -50,482 +35,325 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const categories = [
     {
       icon: BookOpen,
-      name: "Engineering Textbooks & Notes",
-      desc: "SPPU reference books, course syllabus question banks, and handwritten topper revision notes for FE through BE.",
-      color: "from-blue-500/20 to-indigo-500/20 text-blue-400 border-blue-500/30",
+      name: "Textbooks & Notes",
+      desc: "SPPU reference books, syllabus question banks, and topper notes from FE to BE.",
     },
     {
       icon: Calculator,
       name: "Scientific Calculators",
-      desc: "Casio fx-991EX ClassWiz, fx-82MS, fx-991CW with verified dot-matrix screens and battery longevity.",
-      color: "from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30",
+      desc: "Casio fx-991EX, fx-82MS, and fx-991CW calculators ready for university exams.",
     },
     {
       icon: Compass,
-      name: "Mini Drafters & Lab Equipment",
-      desc: "Engineering drawing boards, clamps, Vernier calipers, screw gauges, breadboards, workshop aprons & Arduino boards.",
-      color: "from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30",
+      name: "Drafters & Lab Gear",
+      desc: "Mini drafters, drawing boards, Vernier calipers, breadboards, and workshop aprons.",
     },
     {
       icon: Bike,
-      name: "Campus Cycles & Commute",
-      desc: "Pre-owned student bicycles, sturdy U-locks, air pumps, and campus commuter gear.",
-      color: "from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/30",
+      name: "Campus Cycles",
+      desc: "Pre-owned bicycles, sturdy locks, pumps, and daily campus commute essentials.",
     },
     {
       icon: ShoppingBag,
-      name: "Bags & Hostel Utilities",
-      desc: "Durable laptop backpacks, study lamps, scientific stationary organizers, and hostel essentials.",
-      color: "from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30",
+      name: "Bags & Hostel Essentials",
+      desc: "Laptop backpacks, study lamps, desk organizers, and everyday hostel gear.",
     },
     {
       icon: FileText,
-      name: "Topper Notes Vault (100% Free)",
-      desc: "Curated PDF revision notes prepared by department semester toppers, free for all PVG's COET students.",
-      color: "from-rose-500/20 to-amber-500/20 text-rose-400 border-rose-500/30",
+      name: "Semester Bundles & Topper Notes",
+      desc: "One-handover FE/SE kit bundles plus peer-shared PDF revision guides free for every student.",
     },
   ];
 
   const steps = [
     {
       stepNumber: "01",
-      icon: Lock,
-      title: "Authenticate with College ID",
-      summary: "Strictly @pvgcoet.ac.in Verified",
-      desc: "Sign in with your official PVG's COET Google Workspace email. External accounts and unauthorized commercial sellers are blocked at the institutional perimeter.",
+      title: "Sign in with College ID",
+      desc: `Use your official @${ALLOWED_COLLEGE_DOMAIN} email and complete your student profile so every buyer and seller is a real peer on campus.`,
     },
     {
       stepNumber: "02",
-      icon: Scan,
-      title: "List or Browse with AI Inspection",
-      summary: "Instant Gemini AI Condition Analysis",
-      desc: "Selling an item? Snap a photo. Gemini AI inspects cosmetic wear, assigns a condition score ('Like New', 'Good', 'Fair'), and recommends fair student price bounds.",
+      title: "Post an item or bundle",
+      desc: "List single gear or a one-click Semester-End Bundle Pack, with optional AI condition grading and fair price suggestions.",
     },
     {
       stepNumber: "03",
-      icon: Repeat,
-      title: "Barter Flow or Direct Buy",
-      summary: "Side-by-Side Trade Value Parity",
-      desc: "Exchange last semester's drafter for this semester's calculator. Use the built-in Barter Drawer to calculate condition differentials and fair cash adjustments.",
+      title: "Negotiate or swap directly",
+      desc: "Chat in-app, track active deals in Currently Negotiating, or propose a semester-to-semester barter swap.",
     },
     {
       stepNumber: "04",
-      icon: MapPin,
-      title: "Meet at Campus Landmarks",
-      summary: "Zero Shipping Fees, Safe Handovers",
-      desc: "Schedule in-person exchanges at designated campus checkpoints like Central Library, Reading Hall, Canteen Plaza, or Workshop. Sync to Google Calendar with 1 click.",
+      title: "Handover on campus",
+      desc: "Meet at Central Library, Reading Hall, Canteen Plaza, or Workshop and mark the item sold with zero fees.",
     },
   ];
 
   const faqs = [
     {
-      q: "Who is eligible to use this platform?",
-      a: "This marketplace is exclusively restricted to students, faculty, and research scholars possessing an active official @pvgcoet.ac.in email address. Any outside commercial accounts or spam listings are strictly prevented by institutional authentication.",
+      q: "Who can use this platform?",
+      a: `Only students and faculty with an official @${ALLOWED_COLLEGE_DOMAIN} email address can access the marketplace.`,
     },
     {
-      q: "How do transactions and payments work?",
-      a: "Handovers happen in-person at safe campus checkpoints (such as the Central Library steps, Canteen Plaza, or Workshop entrance). Payment is made directly between students via UPI or cash upon physical verification of the item. There are zero platform cuts, commissions, or shipping fees.",
+      q: "How do payments and handovers work?",
+      a: "Students meet in person at public campus spots (Central Library, Canteen Plaza, Reading Hall, or Workshop) and pay directly via UPI or cash after inspecting the item. There are zero platform commissions.",
     },
     {
-      q: "Can I trade items without paying cash (Barter)?",
-      a: "Yes! The platform includes a dedicated Barter Flow engine. You can select an item you own from your inventory, compare condition ratings side-by-side with the seller's listing, and propose an item-for-item exchange with or without a small cash adjustment.",
+      q: "Can I swap items instead of paying cash?",
+      a: "Yes. Select any exchange-enabled listing to open the barter flow and propose an item-for-item swap with or without a cash difference.",
     },
     {
-      q: "How does the Gemini AI Condition Inspector work?",
-      a: "When you upload an item photo, our backend passes it securely to the Gemini model. The model identifies product make/model numbers, grades cosmetic wear into standardized tiers (Like New, Good, Fair, Wear & Tear), and provides realistic price recommendations tailored to student budgets.",
+      q: "How does the AI Photo Inspector work?",
+      a: "When you upload a photo, the inspector grades cosmetic wear (Like New, Good, Fair) and suggests a realistic student resale price range.",
     },
     {
-      q: "What is the Topper Notes Vault?",
-      a: "The Topper Notes Vault is a free peer-to-peer repository where high-scoring students share comprehensive handwritten notes, solved university question sets, and practical viva guides across all engineering branches.",
-    },
-    {
-      q: "Is this platform exclusively for PVG's COET students?",
-      a: "Yes, this application is restricted to verified institutional domain accounts (@pvgcoet.ac.in) to guarantee safe and authenticated on-campus peer-to-peer exchanges.",
+      q: "Are Topper Notes free?",
+      a: "Yes. All handwritten revision notes and question sets inside the Topper Notes Vault are completely free to browse and download.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0E17] text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white relative overflow-x-hidden font-sans">
-      {/* Background Decorative Ambient Radial Glow (GPU-safe without heavy blur-[140px]) */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(99,102,241,0.14),transparent)]" />
+    <div className="min-h-screen bg-[#F7F9F8] dark:bg-[#0D1110] text-[#18201C] dark:text-[#ECF2EF] flex flex-col font-sans">
+      {/* Minimal 3-Zone Header */}
+      <header className="sticky top-0 z-40 bg-white dark:bg-[#0D1110] border-b border-[#DFE6E2] dark:border-[#242E2A]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-8">
+          <span className="text-[15px] font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF] whitespace-nowrap shrink-0">
+            Campus Resale
+          </span>
 
-      {/* Top Floating Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-[#0A0E17]/95 border-b border-slate-800/80 px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-500/25 border border-indigo-400/30">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold text-white tracking-tight">
-                  PVG's COET
-                </span>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
-                  Campus Resale
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Official Student-to-Student Exchange
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
+          <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-[#5C6B63] dark:text-[#8FA199]">
             <button
+              type="button"
               onClick={() => scrollToSection("about")}
-              className="hover:text-white transition-colors cursor-pointer"
+              className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
-              What It Is
+              About
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("how-it-works")}
-              className="hover:text-white transition-colors cursor-pointer"
+              className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
-              How To Use
+              How it works
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("categories")}
-              className="hover:text-white transition-colors cursor-pointer"
+              className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
               Categories
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("faq")}
-              className="hover:text-white transition-colors cursor-pointer"
+              className="hover:text-[#18201C] dark:hover:text-[#ECF2EF] cursor-pointer whitespace-nowrap"
             >
               FAQ
             </button>
-          </div>
+          </nav>
 
           <button
             id="landing-header-signin-btn"
+            type="button"
             onClick={onProceedToSignIn}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-colors cursor-pointer select-none"
+            className="h-9 px-4 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
           >
-            <span>Sign In with College ID</span>
+            <span>Sign In</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
 
-      {/* Main Hero Section */}
       <main className="flex-1">
-        <section className="relative pt-12 pb-20 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-          {/* Institutional Badge */}
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/95 border border-slate-700/80 shadow-md text-slate-300 text-xs font-semibold mb-6"
-          >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Exclusively for verified <strong className="text-white">@{ALLOWED_COLLEGE_DOMAIN}</strong> students</span>
-            <span className="text-slate-500">•</span>
-            <span className="text-indigo-400 font-bold">Pune Campus</span>
-          </div>
-
-          {/* Hero Headline */}
-          <h1
-            className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl"
-          >
-            The Verified Campus Resale & Barter Network for{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-amber-300">
-              PVG's COET Students
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className="mt-6 text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl leading-relaxed"
-          >
-            Buy, barter, or pass down engineering textbooks, mini-drafters, scientific calculators, lab gear, and cycles. Handover directly between lectures at the Central Library, Canteen Plaza, or Workshop.
+        {/* Clean Minimal Hero */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 text-center space-y-6">
+          <p className="text-xs font-medium text-[#5C6B63] dark:text-[#8FA199]">
+            PVG&apos;s COET, Pune · Exclusively for @{ALLOWED_COLLEGE_DOMAIN}
           </p>
 
-          {/* Core CTAs */}
-          <div
-            className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto"
-          >
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF] leading-[1.12] max-w-3xl mx-auto">
+            Buy, sell, and exchange student gear on campus.
+          </h1>
+
+          <p className="text-sm sm:text-base text-[#5C6B63] dark:text-[#8FA199] max-w-xl mx-auto leading-relaxed">
+            A calm, zero-commission marketplace for PVG&apos;s COET students to pass down textbooks, scientific calculators, mini drafters, semester-end bundle kits, cycles, and free topper notes.
+          </p>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               id="landing-hero-cta-btn"
+              type="button"
               onClick={onProceedToSignIn}
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition-colors cursor-pointer"
+              className="w-full sm:w-auto h-11 px-6 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Access Campus Marketplace</span>
+              <span>Sign in with College ID</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection("how-it-works")}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 text-slate-200 font-semibold text-sm transition-colors cursor-pointer"
+              className="w-full sm:w-auto h-11 px-6 rounded-lg border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] hover:bg-[#EFF4F1] dark:hover:bg-[#1B2320] text-[#18201C] dark:text-[#ECF2EF] text-sm font-medium inline-flex items-center justify-center cursor-pointer"
             >
-              <span>See How It Works</span>
-              <ArrowDown className="w-4 h-4" />
+              How it works
             </button>
           </div>
+        </section>
 
-          {/* Value Proof Badges Strip */}
-          <div
-            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-4xl text-left"
-          >
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Zero Outsiders</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                Restricted to verified @pvgcoet.ac.in student emails only.
+        {/* About Strip */}
+        <section
+          id="about"
+          className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-1.5">
+              <h2 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                Campus-only access
+              </h2>
+              <p className="text-xs sm:text-sm text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
+                Restricted to @{ALLOWED_COLLEGE_DOMAIN} accounts so every buyer and seller is a fellow student on campus.
               </p>
             </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                <Sparkles className="w-4 h-4" />
-                <span>AI Photo Inspector</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                Gemini model auto-detects condition & realistic student prices.
+            <div className="space-y-1.5">
+              <h2 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                Semester kits &amp; fair pricing
+              </h2>
+              <p className="text-xs sm:text-sm text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
+                Pass down complete semester bundles in one handover or use the optional AI inspector to grade condition and price.
               </p>
             </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                <MapPin className="w-4 h-4" />
-                <span>Campus Handovers</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                Meet at Library or Canteen with zero shipping costs.
-              </p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <div className="flex items-center gap-2 text-rose-400 font-bold text-xs">
-                <Repeat className="w-4 h-4" />
-                <span>Barter Value Parity</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                Trade items semester-to-semester with fair balance calculations.
+            <div className="space-y-1.5">
+              <h2 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                Zero shipping, zero fees
+              </h2>
+              <p className="text-xs sm:text-sm text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
+                Meet directly between lectures at the Central Library, Reading Hall, Canteen Plaza, or Workshop.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Section: What the App is About */}
-        <section id="about" className="py-16 px-4 sm:px-8 border-t border-slate-800/80 bg-slate-900/40">
-          <div className="max-w-7xl mx-auto space-y-12">
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                Purpose & Philosophy
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Built specifically to solve engineering campus resale friction
+        {/* How It Works */}
+        <section
+          id="how-it-works"
+          className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+            <div className="max-w-xl space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+                How it works
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Every semester at PVG's COET, hundreds of students purchase expensive drawing drafters, calculators, and SPPU reference books brand new, only to leave them idling after exams. Meanwhile, juniors scramble to purchase the exact same items. Campus Resale connects seniors and juniors in a safe, transparent, and verified ecosystem.
+              <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
+                From signing in to handing over your gear in four simple steps.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/70 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Trust & Institutional Security</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  No strangers from generic classified portals. Every user is authenticated via Google Workspace with their college roll number or department email ID, ensuring full accountability.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/70 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Gemini AI Optical Inspection</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Eliminates condition disputes before meeting. The AI model checks photos for scratches, worn screen segments, or missing drafter knobs, recommending fair, realistic prices.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/70 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                  <HeartHandshake className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-white">Circularity & Campus Sustainability</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Reduces e-waste and paper waste across our college campus. Gives durable engineering equipment a lifespan across multiple student generations.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Section: How to Use It (Step-by-Step) */}
-        <section id="how-it-works" className="py-16 px-4 sm:px-8 border-t border-slate-800/80">
-          <div className="max-w-7xl mx-auto space-y-12">
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                Simple 4-Step Workflow
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                How you can use Campus Resale & Exchange
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Whether you are looking to save money on textbooks or sell equipment you no longer need, our platform guides you in minutes.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {steps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <div
-                    key={step.stepNumber}
-                    className="p-6 rounded-3xl bg-slate-800/50 border border-slate-700/70 relative group hover:border-indigo-500/50 transition-all duration-200"
-                  >
-                    <div className="text-3xl font-black text-slate-700 group-hover:text-indigo-400/40 transition-colors font-mono mb-4">
-                      {step.stepNumber}
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-3">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-base font-bold text-white mb-1">
-                      {step.title}
-                    </h3>
-                    <div className="text-[11px] font-semibold text-indigo-400 mb-2">
-                      {step.summary}
-                    </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      {step.desc}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="text-center pt-4">
-              <button
-                onClick={onProceedToSignIn}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-              >
-                <span>Ready to start? Sign In Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Section: Supported Categories */}
-        <section id="categories" className="py-16 px-4 sm:px-8 border-t border-slate-800/80 bg-slate-900/40">
-          <div className="max-w-7xl mx-auto space-y-12">
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                Marketplace Inventory
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Everything you need for your semester
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Organized strictly around the curriculum and practical laboratory requirements of engineering courses.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((cat) => {
-                const Icon = cat.icon;
-                return (
-                  <div
-                    key={cat.name}
-                    className="p-6 rounded-3xl bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800/90 transition-all duration-200 flex flex-col justify-between"
-                  >
-                    <div className="space-y-3">
-                      <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center border`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="text-base font-bold text-white">
-                        {cat.name}
-                      </h3>
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        {cat.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Section: Campus Handover Checkpoints */}
-        <section className="py-16 px-4 sm:px-8 border-t border-slate-800/80">
-          <div className="max-w-7xl mx-auto space-y-8">
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">
-                Safe Campus Locations
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Designated Handover Checkpoints
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Meet comfortably in well-lit, public spots on the PVG's COET campus. Zero delivery waits, immediate physical inspection.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {[
-                { name: "Central Library", desc: "Front Reception Counter" },
-                { name: "Reading Hall", desc: "Entrance Porch & Steps" },
-                { name: "Main Building", desc: "Ground Floor Foyer" },
-                { name: "Canteen Plaza", desc: "Outdoor Seating Area" },
-                { name: "Mech Workshop", desc: "Carpentry Section Gate" },
-                { name: "Basketball Court", desc: "Quad Benches" },
-              ].map((spot) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {steps.map((step) => (
                 <div
-                  key={spot.name}
-                  className="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-center space-y-1"
+                  key={step.stepNumber}
+                  className="p-5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] space-y-2.5"
                 >
-                  <MapPin className="w-4 h-4 text-indigo-400 mx-auto" />
-                  <div className="text-xs font-bold text-white">{spot.name}</div>
-                  <div className="text-[10px] text-slate-400">{spot.desc}</div>
+                  <div className="text-xs font-mono text-[#2F5D50] dark:text-[#7BBFA8]">{step.stepNumber}</div>
+                  <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
+                    {step.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Section: Frequently Asked Questions */}
-        <section id="faq" className="py-16 px-4 sm:px-8 border-t border-slate-800/80">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-3">
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                Common Inquiries
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Frequently Asked Questions
+        {/* Categories */}
+        <section
+          id="categories"
+          className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+            <div className="max-w-xl space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+                Built for engineering semesters
               </h2>
+              <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
+                Everything you need for classes, practicals, and campus life.
+              </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {categories.map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <div
+                    key={cat.name}
+                    className="p-5 rounded-xl border border-[#DFE6E2] dark:border-[#242E2A] bg-white dark:bg-[#141A18] space-y-2.5"
+                  >
+                    <Icon className="w-4 h-4 text-[#2F5D50] dark:text-[#7BBFA8]" />
+                    <h3 className="text-sm font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                      {cat.name}
+                    </h3>
+                    <p className="text-xs text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
+                      {cat.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Handover Checkpoints */}
+            <div className="pt-6 border-t border-[#DFE6E2] dark:border-[#242E2A]">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5C6B63] dark:text-[#8FA199]">
+                <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF] inline-flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
+                  Campus handover spots:
+                </span>
+                <span>Central Library</span>
+                <span aria-hidden="true">·</span>
+                <span>Reading Hall</span>
+                <span aria-hidden="true">·</span>
+                <span>Main Building Foyer</span>
+                <span aria-hidden="true">·</span>
+                <span>Canteen Plaza</span>
+                <span aria-hidden="true">·</span>
+                <span>Mech Workshop</span>
+                <span aria-hidden="true">·</span>
+                <span>Basketball Court</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section
+          id="faq"
+          className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-14 sm:py-16"
+        >
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+              Frequently asked questions
+            </h2>
+
+            <div className="divide-y divide-[#DFE6E2] dark:divide-[#242E2A] border-t border-b border-[#DFE6E2] dark:border-[#242E2A]">
               {faqs.map((faq, index) => {
                 const isOpen = openFaqIndex === index;
                 return (
-                  <div
-                    key={faq.q}
-                    className="rounded-2xl bg-slate-800/60 border border-slate-700/60 overflow-hidden transition-all"
-                  >
+                  <div key={faq.q}>
                     <button
+                      type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-200 hover:text-white cursor-pointer"
+                      className="w-full text-left py-4 flex items-center justify-between gap-4 text-sm font-medium text-[#18201C] dark:text-[#ECF2EF] cursor-pointer"
                     >
-                      <span className="flex items-center gap-2.5">
-                        <HelpCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-                        <span>{faq.q}</span>
-                      </span>
+                      <span>{faq.q}</span>
                       <ChevronDown
-                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                          isOpen ? "rotate-180 text-indigo-400" : ""
+                        className={`w-4 h-4 text-[#5C6B63] dark:text-[#8FA199] shrink-0 ${
+                          isOpen ? "rotate-180" : ""
                         }`}
                       />
                     </button>
                     {isOpen && (
-                      <div className="px-5 pb-4 text-xs text-slate-400 leading-relaxed border-t border-slate-700/40 pt-3">
+                      <p className="pb-4 text-xs sm:text-sm text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
                         {faq.a}
-                      </div>
+                      </p>
                     )}
                   </div>
                 );
@@ -534,20 +362,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </section>
 
-        {/* Bottom Banner Call To Action */}
-        <section className="py-16 px-4 sm:px-8 border-t border-slate-800/80 bg-gradient-to-b from-indigo-900/30 to-[#0A0E17]">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Ready to trade with your fellow PVG's COET students?
+        {/* Bottom CTA */}
+        <section className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-16">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-4">
+            <h2 className="text-2xl font-bold tracking-tight text-[#18201C] dark:text-[#ECF2EF]">
+              Ready to explore active campus listings?
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
-              Log in with your official college account now to explore active items, chat with sellers, and schedule handovers.
+            <p className="text-sm text-[#5C6B63] dark:text-[#8FA199]">
+              Sign in with your @{ALLOWED_COLLEGE_DOMAIN} account to browse, message sellers, and post items.
             </p>
             <div className="pt-2">
               <button
                 id="landing-bottom-signin-btn"
+                type="button"
                 onClick={onProceedToSignIn}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/40 cursor-pointer select-none"
+                className="h-11 px-6 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-sm font-semibold inline-flex items-center gap-2 cursor-pointer"
               >
                 <span>Sign In with @{ALLOWED_COLLEGE_DOMAIN}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -557,16 +386,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 px-4 sm:px-8 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Building2 className="w-4 h-4 text-indigo-400" />
-            <span>PVG's COET Campus Resale & Exchange</span>
-          </div>
-          <div>
-            Official Student-to-Student Resale & Exchange Network • Pune
-          </div>
+      <footer className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-6 px-4 sm:px-6 text-xs text-[#5C6B63] dark:text-[#8FA199]">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span className="font-medium text-[#18201C] dark:text-[#ECF2EF]">
+            PVG&apos;s COET Campus Resale &amp; Exchange
+          </span>
+          <span>Pune Campus · Student-to-Student Marketplace</span>
         </div>
       </footer>
     </div>

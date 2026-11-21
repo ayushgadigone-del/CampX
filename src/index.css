@@ -2,10 +2,29 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Plus Jakarta Sans", "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-pine: #2F5D50;
+  --color-pine-hover: #244A3F;
+  --color-pine-dark: #387262;
+  --color-pine-soft: #5BA18C;
+}
+
 /* Enforce a completely static, zero-flicker, zero-layout-shift interface */
 html {
   scroll-behavior: auto !important;
   scrollbar-gutter: stable;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
 }
 
 *,

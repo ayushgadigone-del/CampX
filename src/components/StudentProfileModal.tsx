@@ -156,32 +156,32 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         className={`relative w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden my-6 ${
           isDark
-            ? "bg-[#0B0F19] border-slate-800 text-slate-100 shadow-black/80"
-            : "bg-white border-slate-200 text-slate-900 shadow-slate-300/40"
+            ? "bg-[#141A18] border-[#242E2A] text-[#ECF2EF]"
+            : "bg-white border-[#DFE6E2] text-[#18201C]"
         }`}
       >
           {/* Header */}
           <div
             className={`flex items-center justify-between px-6 py-4 border-b ${
-              isDark ? "border-slate-800 bg-slate-900/70" : "border-slate-200 bg-slate-50"
+              isDark ? "border-[#242E2A] bg-[#0D1110]" : "border-[#DFE6E2] bg-[#F7F9F8]"
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#2F5D50] dark:bg-[#387262] text-white flex items-center justify-center shrink-0">
                 <UserCheck className="w-5 h-5" />
               </div>
               <div>
                 <h2
                   id="student-profile-modal-title"
                   className={`text-base sm:text-lg font-bold ${
-                    isDark ? "text-white" : "text-slate-900"
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
                   {isOnboarding ? "Complete Your Student Profile" : "Edit Details"}
                 </h2>
                 <p
                   className={`text-xs ${
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   {isOnboarding
@@ -196,10 +196,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Close edit details modal"
-                className={`min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
+                className={`min-w-[40px] min-h-[40px] rounded-lg flex items-center justify-center cursor-pointer ${
                   isDark
-                    ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/70"
+                    ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                    : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#EFF4F1]"
                 }`}
               >
                 <X className="w-5 h-5" />
@@ -213,14 +213,14 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <div
                 className={`px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
                   isDark
-                    ? "bg-slate-900/80 border-slate-800 text-slate-300"
-                    : "bg-slate-50 border-slate-200 text-slate-700"
+                    ? "bg-[#0D1110] border-[#242E2A] text-[#C5D2CC]"
+                    : "bg-[#F7F9F8] border-[#DFE6E2] text-[#3B4A42]"
                 }`}
               >
                 <span className="truncate font-mono">{email}</span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F5D50] dark:text-[#7BBFA8] shrink-0">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Verified ID
+                  College ID
                 </span>
               </div>
             )}
@@ -241,24 +241,24 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             <div
               className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center gap-4 ${
                 isDark
-                  ? "bg-slate-900/50 border-slate-800"
-                  : "bg-slate-50/80 border-slate-200"
+                  ? "bg-[#0D1110] border-[#242E2A]"
+                  : "bg-[#F7F9F8] border-[#DFE6E2]"
               }`}
             >
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Upload profile picture"
-                className={`relative w-20 h-20 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0 transition-colors cursor-pointer ${
+                className={`relative w-20 h-20 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0 cursor-pointer ${
                   photoURL
-                    ? "border-indigo-500 bg-slate-900"
+                    ? "border-[#2F5D50] dark:border-[#5BA18C] bg-[#141A18]"
                     : isDark
-                    ? "border-slate-700 bg-slate-900 hover:border-indigo-400 text-slate-400"
-                    : "border-slate-300 bg-white hover:border-indigo-500 text-slate-500"
+                    ? "border-[#34433D] bg-[#141A18] hover:border-[#5BA18C] text-[#8FA199]"
+                    : "border-[#C4D1CA] bg-white hover:border-[#2F5D50] text-[#5C6B63]"
                 }`}
               >
                 {isProcessingPhoto ? (
-                  <Loader2 className="w-6 h-6 text-indigo-500" />
+                  <Loader2 className="w-6 h-6 text-[#2F5D50] dark:text-[#7BBFA8]" />
                 ) : photoURL ? (
                   <img
                     src={photoURL}
@@ -277,7 +277,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 </div>
                 <p
                   className={`text-[11px] leading-relaxed ${
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                   }`}
                 >
                   Upload a clear student photo (JPG, PNG, or WebP). EXIF location metadata is automatically stripped.
@@ -295,13 +295,13 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isProcessingPhoto}
-                    className="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    className="min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
                   >
                     <Camera className="w-3.5 h-3.5" />
                     <span>{photoURL ? "Change Photo" : "Upload Photo"}</span>
                   </button>
                   {photoURL && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F5D50] dark:text-[#7BBFA8]">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Photo ready
                     </span>
@@ -315,8 +315,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <div>
                 <label
                   htmlFor="student-first-name-input"
-                  className={`block text-xs font-bold mb-1.5 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                  className={`block text-xs font-semibold mb-1.5 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
                   Name (First Name) <span className="text-rose-500">*</span>
@@ -329,10 +329,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Ayush"
-                  className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  className={`w-full min-h-[42px] px-3.5 py-2 rounded-lg border text-sm focus:outline-none ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                      : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                      ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63] focus:border-[#5BA18C]"
+                      : "bg-white border-[#DFE6E2] text-[#18201C] placeholder:text-[#83928A] focus:border-[#2F5D50]"
                   }`}
                 />
               </div>
@@ -340,8 +340,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <div>
                 <label
                   htmlFor="student-surname-input"
-                  className={`block text-xs font-bold mb-1.5 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                  className={`block text-xs font-semibold mb-1.5 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
                   Surname <span className="text-rose-500">*</span>
@@ -354,10 +354,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
                   placeholder="e.g. Gadigone"
-                  className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  className={`w-full min-h-[42px] px-3.5 py-2 rounded-lg border text-sm focus:outline-none ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                      : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                      ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF] placeholder:text-[#5C6B63] focus:border-[#5BA18C]"
+                      : "bg-white border-[#DFE6E2] text-[#18201C] placeholder:text-[#83928A] focus:border-[#2F5D50]"
                   }`}
                 />
               </div>
@@ -368,11 +368,11 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <div>
                 <label
                   htmlFor="student-year-select"
-                  className={`block text-xs font-bold mb-1.5 flex items-center gap-1.5 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                  className={`block text-xs font-semibold mb-1.5 flex items-center gap-1.5 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
-                  <GraduationCap className="w-3.5 h-3.5 text-indigo-500" />
+                  <GraduationCap className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>
                     Year of Study <span className="text-rose-500">*</span>
                   </span>
@@ -382,10 +382,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   required
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  className={`w-full min-h-[42px] px-3 py-2 rounded-lg border text-sm focus:outline-none ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100"
-                      : "bg-white border-slate-300 text-slate-900"
+                      ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF] focus:border-[#5BA18C]"
+                      : "bg-white border-[#DFE6E2] text-[#18201C] focus:border-[#2F5D50]"
                   }`}
                 >
                   <option value="">Select Year...</option>
@@ -400,11 +400,11 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <div>
                 <label
                   htmlFor="student-branch-select"
-                  className={`block text-xs font-bold mb-1.5 flex items-center gap-1.5 ${
-                    isDark ? "text-slate-200" : "text-slate-700"
+                  className={`block text-xs font-semibold mb-1.5 flex items-center gap-1.5 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+                  <BookOpen className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   <span>
                     Branch <span className="text-rose-500">*</span>
                   </span>
@@ -414,10 +414,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   required
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
-                  className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  className={`w-full min-h-[42px] px-3 py-2 rounded-lg border text-sm focus:outline-none ${
                     isDark
-                      ? "bg-slate-900 border-slate-700 text-slate-100"
-                      : "bg-white border-slate-300 text-slate-900"
+                      ? "bg-[#0D1110] border-[#242E2A] text-[#ECF2EF] focus:border-[#5BA18C]"
+                      : "bg-white border-[#DFE6E2] text-[#18201C] focus:border-[#2F5D50]"
                   }`}
                 >
                   <option value="">Select Branch...</option>
@@ -431,16 +431,16 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="pt-3 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 border-t border-[#DFE6E2] dark:border-[#242E2A]">
               {isOnboarding ? (
                 onSwitchAccount ? (
                   <button
                     type="button"
                     onClick={onSwitchAccount}
-                    className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`min-h-[42px] px-3 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
                       isDark
-                        ? "text-slate-400 hover:text-white hover:bg-slate-800"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                        ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#1B2320]"
+                        : "text-[#5C6B63] hover:text-[#18201C] hover:bg-[#EFF4F1]"
                     }`}
                   >
                     <LogOut className="w-3.5 h-3.5" />
@@ -453,10 +453,10 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className={`w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`w-full sm:w-auto min-h-[42px] px-4 py-2 rounded-lg border text-xs font-semibold cursor-pointer ${
                     isDark
-                      ? "border-slate-700 text-slate-300 hover:bg-slate-800"
-                      : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                      ? "border-[#242E2A] text-[#ECF2EF] hover:bg-[#1B2320]"
+                      : "border-[#DFE6E2] text-[#18201C] hover:bg-[#EFF4F1]"
                   }`}
                 >
                   Cancel
@@ -467,7 +467,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 id="save-student-profile-btn"
                 type="submit"
                 disabled={isSaving || isProcessingPhoto}
-                className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-colors inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto min-h-[42px] px-6 py-2 rounded-lg bg-[#2F5D50] hover:bg-[#244A3F] dark:bg-[#387262] dark:hover:bg-[#448573] text-white text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {isSaving ? (
                   <>

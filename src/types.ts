@@ -112,6 +112,8 @@ export interface Listing {
   completedHandovers?: number;
   views?: number;
   sellerMilestones?: UserMilestone[];
+  isBundle?: boolean;
+  bundleItems?: string[];
   createdAt: string;
 }
 
