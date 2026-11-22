@@ -73,7 +73,9 @@ export const CurrentlyNegotiatingSection: React.FC<
 }) => {
   const { isDark } = useTheme();
 
-  const activeNegotiations = chats.filter((c) => c.status !== "completed");
+  const activeNegotiations = chats.filter(
+    (c) => c.status !== "completed" && c.status !== "handover_scheduled"
+  );
 
   const resolveListing = (chat: Conversation): Listing => {
     const matched = allListings.find((l) => l.id === chat.listingId);
@@ -137,7 +139,7 @@ export const CurrentlyNegotiatingSection: React.FC<
                 : "text-[#5C6B63] hover:text-[#18201C]"
             }`}
           >
-            <span>All chats</span>
+            <span>All messages</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         )}
@@ -163,7 +165,7 @@ export const CurrentlyNegotiatingSection: React.FC<
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {activeNegotiations.slice(0, 6).map((chat) => {
+          {activeNegotiations.map((chat) => {
             const listing = resolveListing(chat);
             const offeredPrice = getLatestOfferAmount(chat);
             const stage = getNegotiationStage(chat.status, Boolean(offeredPrice));

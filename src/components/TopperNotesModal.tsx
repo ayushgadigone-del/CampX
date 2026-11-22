@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   BookOpen,
   GraduationCap,
   Sparkles,
-  Lock,
   Edit3,
   Search,
   CheckCircle2,
@@ -19,20 +18,22 @@ import {
   PlusCircle,
   Trash2,
   Save,
-  RotateCcw,
   BookMarked,
   Layers,
-  ChevronRight,
   Upload,
   FileUp,
-  FileCheck,
   ExternalLink,
   Paperclip,
   Eye,
-  FileDown,
+  HardDrive,
 } from "lucide-react";
 import { TopperNote } from "../types";
-import { isAppOwner } from "../utils/topperNotesStorage";
+import {
+  isAppOwner,
+  downloadTopperNoteLocally,
+  saveTopperNoteToGoogleDrive,
+  shareTopperNote,
+} from "../utils/topperNotesStorage";
 import { useTheme } from "../context/ThemeContext";
 import { exportTopperNoteToGoogleDoc } from "../lib/googleDocs";
 import { openGooglePicker } from "../lib/googlePicker";
@@ -46,6 +47,8 @@ interface TopperNotesModalProps {
   notes: TopperNote[];
   onSaveNotes: (updatedNotes: TopperNote[]) => void;
   onShowToast: (msg: string) => void;
+  initialNoteId?: string | null;
+  initialOpenUpload?: boolean;
 }
 
 export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
@@ -56,10 +59,12 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   notes,
   onSaveNotes,
   onShowToast,
+  initialNoteId = null,
+  initialOpenUpload = false,
 }) => {
   const { isDark } = useTheme();
   const [selectedNoteId, setSelectedNoteId] = useState<string>(
-    notes[0]?.id || ""
+    initialNoteId || notes[0]?.id || ""
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState<string>("All");
@@ -68,8 +73,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
     "read"
   );
   const [copiedLink, setCopiedLink] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<"catalog" | "reader">("reader");
+  const [isSavingToDrive, setIsSavingToDrive] = useState(false);
 
-  // App owner edit form state
+  // Curator edit form state
   const ownerMode = isAppOwner(currentUserEmail);
   const [isEditingCurrentNote, setIsEditingCurrentNote] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<TopperNote> | null>(
@@ -87,7 +94,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   const [docTitle, setDocTitle] = useState("");
   const [docSubject, setDocSubject] = useState("");
   const [docBranch, setDocBranch] = useState<TopperNote["branch"]>("Computer Science");
-  const [docSemester, setDocSemester] = useState<TopperNote["semester"]>("Sem 4");
+  const [docSemester, setDocSemester] = useState<TopperNote["semester"]>("Sem 1");
   const [docAuthor, setDocAuthor] = useState(currentUserName || "Campus Topper");
   const [docAuthorRank, setDocAuthorRank] = useState("Branch Rank Holder");
   const [docPages, setDocPages] = useState<number>(20);
@@ -96,6 +103,18 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showDocPreview, setShowDocPreview] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialNoteId) {
+        setSelectedNoteId(initialNoteId);
+        setMobilePanel("reader");
+      }
+      if (initialOpenUpload) {
+        setIsUploadDocModalOpen(true);
+      }
+    }
+  }, [isOpen, initialNoteId, initialOpenUpload]);
 
   const handleFileSelection = (file: File) => {
     const validExtensions = [
@@ -213,18 +232,26 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
     onShowToast("🎉 Document file uploaded to Topper Vault successfully!");
   };
 
-  const handleDownloadFile = (note: TopperNote) => {
-    if (!note.fileUrl) {
-      onShowToast("No file attachment found on this note.");
-      return;
+  const handleDownloadFile = async (note: TopperNote) => {
+    try {
+      const fileName = await downloadTopperNoteLocally(note);
+      onShowToast(`📥 Downloading "${fileName}" to your device...`);
+    } catch (err: any) {
+      onShowToast(err?.message || "Failed to download document locally.");
     }
-    const link = document.createElement("a");
-    link.href = note.fileUrl;
-    link.download = note.fileName || `${note.title.replace(/\s+/g, "_")}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    onShowToast(`📥 Downloading "${note.fileName || note.title}"...`);
+  };
+
+  const handleSaveToDrive = async (note: TopperNote) => {
+    setIsSavingToDrive(true);
+    try {
+      onShowToast(`Saving "${note.title}" to Google Drive...`);
+      const uploaded = await saveTopperNoteToGoogleDrive(note);
+      onShowToast(`☁️ Saved "${uploaded.name}" to your Google Drive!`);
+    } catch (err: any) {
+      onShowToast(err?.message || "Failed to save document to Google Drive.");
+    } finally {
+      setIsSavingToDrive(false);
+    }
   };
 
   const [isExportingDoc, setIsExportingDoc] = useState(false);
@@ -308,7 +335,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
   const handleStartEdit = (note: TopperNote) => {
     if (!ownerMode) {
-      onShowToast("🔒 Read-only access: Only the verified app owner can edit topper notes.");
+      onShowToast("🔒 Read-only access: Only verified vault curators can edit pre-uploaded notes.");
       return;
     }
     setEditFormData({ ...note });
@@ -336,7 +363,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
 
   const handleAddNewNote = () => {
     if (!ownerMode) {
-      onShowToast("🔒 Only the verified app owner can create new topper notes.");
+      onShowToast("🔒 Only verified vault curators can create new study guide drafts.");
       return;
     }
 
@@ -346,10 +373,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
       title: "New Subject Master Revision Notes",
       subject: "Core Engineering Subject",
       branch: "Computer Science",
-      semester: "Sem 4",
-      author: currentUserName ? `${currentUserName} (App Owner)` : "Ayush G. (App Owner)",
+      semester: "Sem 1",
+      author: "Campus Topper Contributor",
       authorRank: "University Rank Holder",
-      authorCollege: "Government College of Engineering",
+      authorCollege: "PVG's College of Engineering & Technology",
       description: "Concise exam-oriented summary notes compiled with key formula sheets and high-yield question breakdowns.",
       isFree: true,
       pagesCount: 24,
@@ -371,7 +398,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
     setSelectedNoteId(newNoteId);
     setEditFormData({ ...newNote });
     setIsEditingCurrentNote(true);
-    onShowToast("📝 Created new pre-uploaded note draft for App Owner editing.");
+    setMobilePanel("reader");
+    onShowToast("📝 Created new study guide draft in the vault.");
   };
 
   const handleDeleteNote = (noteId: string) => {
@@ -387,13 +415,22 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
     onShowToast("🗑️ Topper note removed.");
   };
 
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}${window.location.pathname}?notes=${activeNote?.id || "free"}`;
-    navigator.clipboard.writeText(url).then(() => {
+  const handleCopyLink = async () => {
+    if (!activeNote) return;
+    try {
+      const outcome = await shareTopperNote(activeNote);
       setCopiedLink(true);
-      onShowToast("📋 Shareable Topper Notes link copied to clipboard!");
+      onShowToast(
+        outcome === "shared"
+          ? `Shared "${activeNote.title}"`
+          : "📋 Shareable Topper Notes link copied to clipboard!"
+      );
       setTimeout(() => setCopiedLink(false), 2000);
-    });
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        onShowToast("Could not share link right now.");
+      }
+    }
   };
 
   const branches = [
@@ -436,20 +473,20 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
           >
         {/* Header */}
         <div
-          className={`px-5 py-4 border-b flex items-center justify-between shrink-0 ${
+          className={`px-4 sm:px-5 py-3.5 sm:py-4 border-b flex flex-wrap items-center justify-between gap-3 shrink-0 ${
             isDark
               ? "border-[#242E2A] bg-[#141A18]"
               : "border-[#DFE6E2] bg-[#F7F9F8]"
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] flex items-center justify-center text-white shadow-sm shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#2F5D50] dark:bg-[#387262] flex items-center justify-center text-white shadow-sm shrink-0">
               <GraduationCap className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2
-                  className={`text-base sm:text-lg font-black ${
+                  className={`text-sm sm:text-lg font-black truncate ${
                     isDark ? "text-white" : "text-[#18201C]"
                   }`}
                 >
@@ -462,48 +499,28 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       : "bg-[#EFF4F1] text-[#2F5D50]"
                   }`}
                 >
-                  <Sparkles className="w-3 h-3 text-[#2F5D50]" />
+                  <Sparkles className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8]" />
                   100% Free For Students
                 </span>
               </div>
               <p
-                className={`text-xs flex items-center gap-2 ${
+                className={`text-xs flex flex-wrap items-center gap-2 ${
                   isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                 }`}
               >
-                <span>Verified study materials & handwritten formula books</span>
-                <span className="hidden sm:inline">•</span>
-                <span
-                  className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                    isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
-                  }`}
-                >
-                  <Lock className="w-3 h-3 text-[#8FA199]" />
-                  Read-only for students
-                  {ownerMode ? (
-                    <span
-                      className={`px-1.5 py-0.2 rounded font-bold text-[10px] ml-1 ${
-                        isDark
-                          ? "bg-[#251F15] text-[#DFC29B]"
-                          : "bg-[#FDF6EC] text-[#9E6B43]"
-                      }`}
-                    >
-                      App Owner Verified
-                    </span>
-                  ) : null}
-                </span>
+                <span>Verified study materials &amp; handwritten formula books (Sem 1 – Sem 8)</span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               id="header-upload-doc-btn"
               onClick={() => setIsUploadDocModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2F5D50] dark:bg-[#387262] hover:bg-[#244A3F] dark:hover:bg-[#448573] text-white text-xs font-bold shadow-xs cursor-pointer"
               title="Upload document file to Topper Vault"
             >
-              <Upload className="w-3.5 h-3.5" />
+              <Upload className="w-3.5 h-3.5 text-white" />
               <span>Upload Document</span>
             </button>
             {ownerMode && (
@@ -512,14 +529,14 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                 onClick={handleAddNewNote}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-bold shadow-xs cursor-pointer"
               >
-                <PlusCircle className="w-3.5 h-3.5" />
-                Add Pre-Uploaded Note
+                <PlusCircle className="w-3.5 h-3.5 text-white" />
+                Add Study Guide
               </button>
             )}
             <button
               id="close-topper-notes-modal-btn"
               onClick={onClose}
-              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+              className={`p-2 rounded-xl cursor-pointer ${
                 isDark
                   ? "text-[#8FA199] hover:text-[#ECF2EF] hover:bg-[#19211E]"
                   : "text-[#8FA199] hover:text-[#5C6B63] hover:bg-[#DFE6E2]"
@@ -531,11 +548,47 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
           </div>
         </div>
 
-        {/* Modal Main Body: 2-column layout */}
+        {/* Mobile Panel Switcher (Catalog vs Reader on < md) */}
+        <div
+          className={`flex md:hidden items-center gap-2 px-4 py-2 border-b shrink-0 ${
+            isDark ? "border-[#242E2A] bg-[#0D1110]" : "border-[#DFE6E2] bg-[#F7F9F8]"
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => setMobilePanel("catalog")}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer ${
+              mobilePanel === "catalog"
+                ? "bg-[#2F5D50] text-white"
+                : isDark
+                ? "bg-[#141A18] text-[#8FA199] border border-[#242E2A]"
+                : "bg-white text-[#5C6B63] border border-[#DFE6E2]"
+            }`}
+          >
+            All Notes ({filteredNotes.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobilePanel("reader")}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer ${
+              mobilePanel === "reader"
+                ? "bg-[#2F5D50] text-white"
+                : isDark
+                ? "bg-[#141A18] text-[#8FA199] border border-[#242E2A]"
+                : "bg-white text-[#5C6B63] border border-[#DFE6E2]"
+            }`}
+          >
+            Active Reader
+          </button>
+        </div>
+
+        {/* Modal Main Body: 2-column layout on md+, tab-switched on mobile */}
         <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
           {/* Left Column: Notes Catalog & Filter */}
           <div
-            className={`w-full md:w-80 lg:w-96 border-r flex flex-col shrink-0 ${
+            className={`${
+              mobilePanel === "catalog" ? "flex" : "hidden md:flex"
+            } w-full md:w-80 lg:w-96 flex-1 md:flex-none md:border-r flex-col min-h-0 shrink-0 ${
               isDark
                 ? "border-[#242E2A] bg-[#0D1110]"
                 : "border-[#DFE6E2] bg-[#F7F9F8]"
@@ -650,6 +703,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                       onClick={() => {
                         setSelectedNoteId(note.id);
                         setIsEditingCurrentNote(false);
+                        setMobilePanel("reader");
                       }}
                       className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                         isSelected
@@ -695,7 +749,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                           <Paperclip className="w-3 h-3 shrink-0" />
                           <span className="truncate">{note.fileName}</span>
                           {note.fileSize && (
-                            <span className="text-[9px] px-1 py-0.2 rounded bg-[#2F5D50] dark:bg-[#387262] shrink-0">
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#2F5D50] dark:bg-[#387262] text-white shrink-0">
                               {note.fileSize}
                             </span>
                           )}
@@ -733,9 +787,11 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Note Reader & Owner Editor */}
+          {/* Right Column: Note Reader & Editor */}
           <div
-            className={`flex-1 flex flex-col min-h-0 ${
+            className={`${
+              mobilePanel === "reader" ? "flex" : "hidden md:flex"
+            } flex-1 flex-col min-h-0 ${
               isDark ? "bg-[#141A18]" : "bg-white"
             }`}
           >
@@ -782,47 +838,56 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       id="copy-topper-note-share-btn"
                       onClick={handleCopyLink}
-                      className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors ${
+                      className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                         isDark
                           ? "border-[#242E2A] bg-[#1B2320] hover:bg-[#242E2A] text-[#ECF2EF]"
-                          : "border-[#DFE6E2] bg-white hover:bg-[#F7F9F8] text-[#5C6B63]"
+                          : "border-[#DFE6E2] bg-white hover:bg-[#F7F9F8] text-[#18201C]"
                       }`}
-                      title="Copy link to this free study guide"
+                      title="Share link to this free study guide"
                     >
                       {copiedLink ? (
-                        <Check className="w-3.5 h-3.5 text-[#2F5D50]" />
+                        <Check className="w-3.5 h-3.5 text-[#2F5D50] dark:text-[#7BBFA8]" />
                       ) : (
-                        <Share2 className="w-3.5 h-3.5 text-[#8FA199]" />
+                        <Share2 className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
                       )}
-                      <span>{copiedLink ? "Link Copied" : "Share"}</span>
+                      <span>{copiedLink ? "Shared" : "Share"}</span>
+                    </button>
+
+                    <button
+                      id="download-note-doc-btn"
+                      onClick={() => handleDownloadFile(activeNote)}
+                      className="px-2.5 py-1.5 rounded-xl border border-[#2F5D50] bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      title="Download this study document locally to your device"
+                    >
+                      <Download className="w-3.5 h-3.5 text-white" />
+                      <span>Download Local</span>
+                    </button>
+
+                    <button
+                      id="save-google-drive-btn"
+                      onClick={() => handleSaveToDrive(activeNote)}
+                      disabled={isSavingToDrive}
+                      className="px-2.5 py-1.5 rounded-xl border border-[#2F5D50] bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-60"
+                      title="Save this study document directly to your Google Drive"
+                    >
+                      <HardDrive className="w-3.5 h-3.5 text-white" />
+                      <span>{isSavingToDrive ? "Saving..." : "Save to Drive"}</span>
                     </button>
 
                     <button
                       id="export-google-docs-btn"
                       onClick={() => handleExportGoogleDoc(activeNote)}
                       disabled={isExportingDoc}
-                      className="px-2.5 py-1.5 rounded-xl border border-[#5BA18C] bg-[#2F5D50] hover:bg-[#244A3F] text-[#2F5D50] dark:text-[#7BBFA8] text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                      className="px-2.5 py-1.5 rounded-xl border border-[#2F5D50] bg-[#2F5D50] hover:bg-[#244A3F] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-60"
                       title="Open and edit this study guide in Google Docs"
                     >
-                      <FileText className="w-3.5 h-3.5 text-[#2F5D50]" />
+                      <FileText className="w-3.5 h-3.5 text-white" />
                       <span>{isExportingDoc ? "Opening..." : "Google Docs"}</span>
                     </button>
-
-                    {activeNote.fileUrl && (
-                      <button
-                        id="download-note-doc-btn"
-                        onClick={() => handleDownloadFile(activeNote)}
-                        className="px-2.5 py-1.5 rounded-xl border border-[#5BA18C] bg-[#2F5D50] hover:bg-[#244A3F] text-[#2F5D50] dark:text-[#7BBFA8] text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
-                        title="Download attached study document"
-                      >
-                        <Download className="w-3.5 h-3.5 text-[#2F5D50]" />
-                        <span>Download File</span>
-                      </button>
-                    )}
 
                     {ownerMode ? (
                       <button
@@ -1101,7 +1166,7 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                               isDark ? "text-[#DFC29B]" : "text-amber-950"
                             }`}
                           >
-                            App Owner Editor (Restricted Access)
+                            Edit Study Guide
                           </h3>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1513,10 +1578,10 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
         >
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-[#2F5D50]"></span>
-            <span>Free Student Read Access Active</span>
+            <span>Free Student Read, Share &amp; Download Access Active</span>
             <span className="hidden sm:inline">•</span>
             <span className="hidden sm:inline">
-              Only app owner ({currentUserEmail === "ayushgadigone@gmail.com" ? "you" : "ayushgadigone@gmail.com"}) can modify or upload notes
+              Sem 1 – Sem 8 Campus Topper Vault
             </span>
           </div>
           <button
@@ -1646,8 +1711,8 @@ export const TopperNotesModal: React.FC<TopperNotesModalProps> = ({
                         </div>
                       ) : (
                         <div className="space-y-2.5">
-                          <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] text-[#2F5D50] flex items-center justify-center mx-auto">
-                            <Upload className="w-5 h-5" />
+                          <div className="w-10 h-10 rounded-2xl bg-[#2F5D50] text-white flex items-center justify-center mx-auto">
+                            <Upload className="w-5 h-5 text-white" />
                           </div>
                           <div>
                             <p className="font-bold">Drag and drop your study document here</p>

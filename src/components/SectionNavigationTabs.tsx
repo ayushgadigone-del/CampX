@@ -17,7 +17,10 @@ export type SectionTabId =
   | "beacon_handovers"
   | "chats"
   | "saved"
-  | "my_listings";
+  | "my_listings"
+  | "my_profile"
+  | "post_item"
+  | "settings";
 
 export interface SectionTabItem {
   id: SectionTabId;
@@ -83,8 +86,8 @@ export const SectionNavigationTabs: React.FC<SectionNavigationTabsProps> = ({
     },
     {
       id: "chats",
-      label: "Chats",
-      shortLabel: "Chats",
+      label: "Messages",
+      shortLabel: "Messages",
       icon: MessageSquare,
       count: chatsCount > 0 ? chatsCount : undefined,
       shortcut: "4",

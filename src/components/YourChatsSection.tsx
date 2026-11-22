@@ -69,7 +69,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
   return (
     <section
       id="your-chats-section"
-      aria-label="Your Chats Section"
+      aria-label="Messages Section"
       className="w-full space-y-5"
     >
       {/* Header */}
@@ -81,7 +81,7 @@ export const YourChatsSection: React.FC<YourChatsSectionProps> = ({
                 isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
               }`}
             >
-              Your chats
+              Messages
             </h2>
             <span
               className={`text-xs font-mono tabular-nums ${

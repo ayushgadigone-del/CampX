@@ -121,7 +121,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[10px]">Chats</span>
+          <span className="text-[10px]">Messages</span>
         </button>
 
         <button

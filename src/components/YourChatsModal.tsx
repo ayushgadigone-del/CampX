@@ -147,7 +147,7 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black tracking-tight">Your Chats</h2>
+                <h2 className="text-lg font-black tracking-tight">Messages</h2>
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#2F5D50] text-white shadow-2xs">
                   {chats.length} {chats.length === 1 ? "thread" : "threads"}
                 </span>
@@ -247,7 +247,7 @@ export const YourChatsModal: React.FC<YourChatsModalProps> = ({
           {/* Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
             {[
-              { id: "all", label: "All Chats" },
+              { id: "all", label: "All Messages" },
               { id: "active", label: "💬 Active" },
               { id: "deal_proposed", label: "🤝 Offers" },
               { id: "handover_scheduled", label: "📅 Scheduled" },

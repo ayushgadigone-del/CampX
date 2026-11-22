@@ -41,6 +41,11 @@ export interface StudentProfileDetails {
   year: string;
   branch: string;
   photoURL: string;
+  rollNumber?: string;
+  admissionYear?: string;
+  lastYearCgpa?: string;
+  bio?: string;
+  interests?: string;
   profileCompleted: boolean;
   updatedAt?: string;
 }
@@ -157,6 +162,11 @@ export function loadLocalStudentProfile(
           year: parsed.year,
           branch: parsed.branch,
           photoURL: parsed.photoURL,
+          rollNumber: parsed.rollNumber || "",
+          admissionYear: parsed.admissionYear || "",
+          lastYearCgpa: parsed.lastYearCgpa || "",
+          bio: parsed.bio || "",
+          interests: parsed.interests || "",
           profileCompleted: true,
           updatedAt: parsed.updatedAt,
         };
@@ -200,6 +210,11 @@ export function saveLocalStudentProfile(profile: StudentProfileDetails): void {
         year: profile.year,
         branch: profile.branch,
         photoURL: profile.photoURL,
+        rollNumber: profile.rollNumber || "",
+        admissionYear: profile.admissionYear || "",
+        lastYearCgpa: profile.lastYearCgpa || "",
+        bio: profile.bio || "",
+        interests: profile.interests || "",
         profileCompleted: profile.profileCompleted,
         updatedAt: profile.updatedAt || new Date().toISOString(),
       })
@@ -227,6 +242,11 @@ export async function fetchFirestoreStudentProfile(
           year: data.year,
           branch: data.branch,
           photoURL: data.photoURL,
+          rollNumber: data.rollNumber || "",
+          admissionYear: data.admissionYear || "",
+          lastYearCgpa: data.lastYearCgpa || "",
+          bio: data.bio || "",
+          interests: data.interests || "",
           profileCompleted: Boolean(data.profileCompleted),
           updatedAt: data.updatedAt,
         };
@@ -248,6 +268,11 @@ export async function persistStudentProfile(
   const cleanSurname = sanitizeText(input.surname).slice(0, 60);
   const cleanYear = sanitizeText(input.year).slice(0, 50);
   const cleanBranch = sanitizeText(input.branch).slice(0, 100);
+  const cleanRollNumber = sanitizeText(input.rollNumber || "").slice(0, 40);
+  const cleanAdmissionYear = sanitizeText(input.admissionYear || "").slice(0, 10);
+  const cleanCgpa = sanitizeText(input.lastYearCgpa || "").slice(0, 10);
+  const cleanBio = sanitizeText(input.bio || "").slice(0, 300);
+  const cleanInterests = sanitizeText(input.interests || "").slice(0, 200);
   const cleanEmail = input.email.trim().toLowerCase();
   const displayName = `${cleanFirstName} ${cleanSurname}`.trim();
   const updatedAt = new Date().toISOString();
@@ -261,6 +286,11 @@ export async function persistStudentProfile(
     year: cleanYear,
     branch: cleanBranch,
     photoURL: input.photoURL,
+    rollNumber: cleanRollNumber,
+    admissionYear: cleanAdmissionYear,
+    lastYearCgpa: cleanCgpa,
+    bio: cleanBio,
+    interests: cleanInterests,
     profileCompleted: true,
     updatedAt,
   };
@@ -295,6 +325,11 @@ export async function persistStudentProfile(
           department: cleanBranch,
           branch: cleanBranch,
           year: cleanYear,
+          rollNumber: cleanRollNumber,
+          admissionYear: cleanAdmissionYear,
+          lastYearCgpa: cleanCgpa,
+          bio: cleanBio,
+          interests: cleanInterests,
           photoURL: savedProfile.photoURL,
           profileCompleted: true,
           updatedAt,

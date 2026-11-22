@@ -84,6 +84,10 @@ export const purgeExpiredListings = (
 ): { activeListings: Listing[]; purgedCount: number; purgedIds: string[] } => {
   const purgedIds: string[] = [];
   const activeListings = listings.filter((listing) => {
+    // Always preserve sold/completed listings so the Sold view accurately shows sold items
+    if (listing.status === "completed") {
+      return true;
+    }
     // A listing is deleted if it has expired past its validity date or is marked inactive due to expiry
     if (isListingExpired(listing) || listing.status === "inactive") {
       purgedIds.push(listing.id);

@@ -41,6 +41,9 @@ export interface HandoverDetails {
   calendarEventId?: string;
   calendarLink?: string;
   notes?: string;
+  buyerName?: string;
+  buyerDepartment?: string;
+  completedAt?: string;
 }
 
 export interface Review {

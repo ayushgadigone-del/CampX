@@ -293,21 +293,21 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
           </div>
 
           {/* Right Column: Static Campus Community Emblem + Value Cards */}
-          <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
-            <div className="relative flex items-center justify-center py-6 px-6 sm:px-12">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center lg:justify-end">
+            <div className="relative flex items-center justify-center py-4 sm:py-6 px-4 sm:px-12">
               {/* Outer Soft Sage Circle */}
               <div
-                className={`w-60 h-60 sm:w-72 sm:h-72 rounded-full flex items-center justify-center ${
+                className={`w-52 h-52 sm:w-72 sm:h-72 rounded-full flex items-center justify-center ${
                   isDark ? "bg-[#192621]" : "bg-[#DDE6E0]"
                 }`}
               >
                 {/* Inner Solid Deep Pine Circle */}
                 <div
-                  className={`w-40 h-40 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center text-center shadow-sm ${
+                  className={`w-36 h-36 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center text-center shadow-sm ${
                     isDark ? "bg-[#244A3F]" : "bg-[#2F5D50]"
                   }`}
                 >
-                  <span className="text-white text-sm sm:text-[15px] font-bold tracking-[0.14em] uppercase leading-relaxed">
+                  <span className="text-white text-xs sm:text-[15px] font-bold tracking-[0.14em] uppercase leading-relaxed">
                     CAMPUS
                     <br />
                     COMMUNITY
@@ -315,9 +315,9 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                 </div>
               </div>
 
-              {/* Top-Left Static Card: Pass it on. */}
+              {/* Top-Left Static Card (Tablet & Desktop Floating) */}
               <div
-                className={`absolute top-2 left-0 sm:-left-2 rounded-xl border px-3.5 py-3 shadow-sm flex items-center gap-3 w-52 sm:w-56 ${
+                className={`hidden sm:flex absolute top-2 -left-2 rounded-xl border px-3.5 py-3 shadow-sm items-center gap-3 w-56 ${
                   isDark
                     ? "bg-[#141A18] border-[#242E2A]"
                     : "bg-white border-[#DFE6E2]"
@@ -354,9 +354,9 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                 </div>
               </div>
 
-              {/* Bottom-Right Static Card: Buy smarter. */}
+              {/* Bottom-Right Static Card (Tablet & Desktop Floating) */}
               <div
-                className={`absolute bottom-2 right-0 sm:-right-2 rounded-xl border px-3.5 py-3 shadow-sm flex items-center gap-3 w-48 sm:w-52 ${
+                className={`hidden sm:flex absolute bottom-2 -right-2 rounded-xl border px-3.5 py-3 shadow-sm items-center gap-3 w-52 ${
                   isDark
                     ? "bg-[#141A18] border-[#242E2A]"
                     : "bg-white border-[#DFE6E2]"
@@ -379,6 +379,76 @@ export const EngineeringBentoHero: React.FC<EngineeringBentoHeroProps> = ({
                   </p>
                   <p
                     className={`text-[11px] leading-snug mt-0.5 ${
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                    }`}
+                  >
+                    Spend less, do more
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile-only Clean Side-by-Side Value Cards (zero overflow on 360px phones) */}
+            <div className="grid grid-cols-2 gap-2.5 w-full mt-3 sm:hidden">
+              <div
+                className={`rounded-xl border px-3 py-2.5 flex items-center gap-2.5 ${
+                  isDark
+                    ? "bg-[#141A18] border-[#242E2A]"
+                    : "bg-white border-[#DFE6E2]"
+                }`}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 28 28"
+                  fill="none"
+                  aria-hidden="true"
+                  className="shrink-0"
+                >
+                  <rect x="3" y="5" width="7" height="16" rx="1.5" fill="#4CAF50" />
+                  <rect x="9.5" y="7" width="7" height="15" rx="1.5" fill="#E53935" />
+                  <rect x="16" y="9" width="7" height="14" rx="1.5" fill="#3B82F6" />
+                </svg>
+                <div className="min-w-0 text-left">
+                  <p
+                    className={`text-xs font-bold leading-tight ${
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                    }`}
+                  >
+                    Pass it on.
+                  </p>
+                  <p
+                    className={`text-[10px] leading-snug mt-0.5 ${
+                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                    }`}
+                  >
+                    Give books a new life
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`rounded-xl border px-3 py-2.5 flex items-center gap-2.5 ${
+                  isDark
+                    ? "bg-[#141A18] border-[#242E2A]"
+                    : "bg-white border-[#DFE6E2]"
+                }`}
+              >
+                <Recycle
+                  className={`w-4 h-4 shrink-0 ${
+                    isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                  }`}
+                />
+                <div className="min-w-0 text-left">
+                  <p
+                    className={`text-xs font-bold leading-tight ${
+                      isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                    }`}
+                  >
+                    Buy smarter.
+                  </p>
+                  <p
+                    className={`text-[10px] leading-snug mt-0.5 ${
                       isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
                     }`}
                   >

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  MapPin,
   MessageCircle,
   Calendar as CalendarIcon,
   Heart,
@@ -9,11 +8,9 @@ import {
   Repeat,
   ArrowRight,
   CheckCircle2,
-  Clock,
   Package,
 } from "lucide-react";
 import { Listing } from "../types";
-import { formatExpiryInfo } from "../utils/expiryUtils";
 import { useTheme } from "../context/ThemeContext";
 
 interface ListingCardProps {
@@ -87,11 +84,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         ? `₹${listing.price} (or Swap)`
         : `₹${listing.price}`;
 
-    const locationText = listing.locationPreference
-      ? ` Handover: ${listing.locationPreference}.`
-      : "";
-
-    const customMessage = `Check out "${listing.title}" on Campus Resale for ${priceText} (${listing.condition}) by ${listing.sellerName}.${locationText}`;
+    const customMessage = `Check out "${listing.title}" on Campus Resale for ${priceText} (${listing.condition}) by ${listing.sellerName}.`;
     const shareUrl = `${window.location.origin}${window.location.pathname}?item=${listing.id}#listing-${listing.id}`;
 
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
@@ -198,16 +191,16 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             )}
           </div>
 
-          {listing.status !== "available" && (
+          {(listing.status === "completed" ||
+            listing.status === "reserved" ||
+            listing.status === "handover_scheduled") && (
             <div className="absolute inset-0 bg-black/65 flex items-center justify-center p-3 z-10">
               <span className="text-xs font-semibold text-white tracking-wide uppercase">
                 {listing.status === "completed"
                   ? "Sold"
                   : listing.status === "reserved"
                   ? "Reserved"
-                  : listing.status === "handover_scheduled"
-                  ? "Meetup Scheduled"
-                  : "Inactive"}
+                  : "Meetup Scheduled"}
               </span>
             </div>
           )}
@@ -225,29 +218,11 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               <span>{listing.category}</span>
               <span aria-hidden="true">·</span>
               <span>{listing.condition}</span>
-              {listing.locationPreference && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {listing.locationPreference}
-                  </span>
-                </>
-              )}
               {listing.aiInspection && (
                 <>
                   <span aria-hidden="true">·</span>
                   <span className="font-mono tabular-nums">
                     AI {listing.aiInspection.inspectionScore}%
-                  </span>
-                </>
-              )}
-              {listing.expiryDate && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatExpiryInfo(listing).label}
                   </span>
                 </>
               )}
@@ -517,8 +492,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           )}
         </div>
 
-        {/* Status Overlay only when unavailable */}
-        {listing.status !== "available" && (
+        {/* Status Overlay only when sold, reserved, or scheduled */}
+        {(listing.status === "completed" ||
+          listing.status === "reserved" ||
+          listing.status === "handover_scheduled") && (
           <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center p-4 text-center z-20">
             {listing.status === "completed" ? (
               <div className="flex items-center gap-1.5 text-white text-xs font-semibold">
@@ -529,9 +506,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
                 {listing.status === "reserved"
                   ? "Reserved"
-                  : listing.status === "handover_scheduled"
-                  ? "Handover Scheduled"
-                  : "Inactive"}
+                  : "Meetup Scheduled"}
               </span>
             )}
           </div>
@@ -618,18 +593,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               {isSoldOut ? "Sold out" : `${stockCount} left`}
             </span>
           </div>
-
-          {/* Location */}
-          {listing.locationPreference && (
-            <div
-              className={`flex items-center gap-1 text-[11px] truncate pt-0.5 ${
-                isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
-              }`}
-            >
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="truncate">{listing.locationPreference}</span>
-            </div>
-          )}
         </div>
 
         {/* Footer: Plain Seller & Actions */}

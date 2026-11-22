@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   X,
   Sparkles,
-  MapPin,
   Calendar as CalendarIcon,
   MessageCircle,
   ShieldCheck,
@@ -22,7 +21,6 @@ import {
   Star,
   MessageSquarePlus,
   Flag,
-  Clock,
   AlertTriangle,
   WifiOff,
   HelpCircle,
@@ -31,9 +29,7 @@ import {
   Flame,
 } from "lucide-react";
 import { Listing, Review } from "../types";
-import { formatExpiryInfo } from "../utils/expiryUtils";
 import { getCategoryFAQs } from "../utils/faqQuestions";
-import { PriceTrendSparkline } from "./PriceTrendSparkline";
 
 interface ListingDetailModalProps {
   listing: Listing | null;
@@ -110,9 +106,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
       : "Computer Science"
   );
   const [yearInput, setYearInput] = useState<string>("2nd Year");
-  const [handoverLocationInput, setHandoverLocationInput] = useState<string>(
-    listing?.handoverDetails?.location || listing?.locationPreference || "Central Library Quad"
-  );
   const [conditionMatchedInput, setConditionMatchedInput] = useState<boolean>(true);
   const [commentInput, setCommentInput] = useState<string>("");
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
@@ -129,7 +122,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
         currentUser.email.toLowerCase() === listing.sellerEmail.toLowerCase()
     );
   const isReported = Boolean(listing.isReported || isReportSubmitted);
-  const expiryInfo = formatExpiryInfo(listing);
 
   const reviewsList = listing.reviews || [];
   const totalReviewsCount = reviewsList.length || listing.totalReviews || 0;
@@ -182,7 +174,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
       reviewerYear: yearInput.trim() || undefined,
       rating: ratingInput,
       comment: commentInput.trim(),
-      handoverLocation: handoverLocationInput.trim() || undefined,
       conditionMatched: conditionMatchedInput,
     };
 
@@ -204,11 +195,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
         ? `₹${listing.price} (or Swap)`
         : `₹${listing.price}`;
 
-    const locationText = listing.locationPreference
-      ? ` Handover spot: ${listing.locationPreference}.`
-      : "";
-
-    const customMessage = `🎓 Check out this verified student listing on Campus Marketplace: "${listing.title}" for ${priceText} (Condition: ${listing.condition}) by ${listing.sellerName}.${locationText}`;
+    const customMessage = `🎓 Check out this verified student listing on Campus Marketplace: "${listing.title}" for ${priceText} (Condition: ${listing.condition}) by ${listing.sellerName}.`;
     const shareUrl = `${window.location.origin}${window.location.pathname}?item=${listing.id}#listing-${listing.id}`;
 
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
@@ -289,7 +276,9 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             >
               {listing.condition}
             </span>
-            {listing.status !== "available" && (
+            {(listing.status === "reserved" ||
+              listing.status === "handover_scheduled" ||
+              listing.status === "completed") && (
               <span
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
                   listing.status === "completed"
@@ -301,8 +290,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   ? "Reserved"
                   : listing.status === "handover_scheduled"
                   ? "Handover Scheduled"
-                  : listing.status === "inactive"
-                  ? "Inactive (Expired)"
                   : "Sold / Handover Done"}
               </span>
             )}
@@ -332,22 +319,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
               >
                 <Flag className="w-3.5 h-3.5 fill-rose-600 text-rose-600" />
                 <span>Reported for Review</span>
-              </span>
-            )}
-            {/* Expiry Badge */}
-            {listing.expiryDate && (
-              <span
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${
-                  listing.status === "inactive" || expiryInfo.isExpired
-                    ? "bg-[#DFE6E2] text-[#5C6B63] dark:text-[#8FA199]"
-                    : expiryInfo.isUrgent
-                    ? "bg-[#FDF6EC] dark:bg-[#251F15] text-[#9E6B43] dark:text-[#DFC29B] border border-[#EED8B8] dark:border-[#4A3B23]"
-                    : "bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199]"
-                }`}
-                title={`Valid until ${new Date(listing.expiryDate).toLocaleDateString()}`}
-              >
-                <Clock className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                <span>{expiryInfo.label}</span>
               </span>
             )}
           </div>
@@ -454,30 +425,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             </div>
           )}
 
-          {/* Inactive / Expired Notice Banner with Renewal Action */}
-          {(listing.status === "inactive" || expiryInfo.isExpired) && (
-            <div className="p-3.5 rounded-xl bg-[#FDF6EC] dark:bg-[#251F15] border border-[#EED8B8] dark:border-[#4A3B23] text-[#9E6B43] dark:text-[#DFC29B] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-[#9E6B43] dark:text-[#DFC29B] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="block font-bold">Listing Inactive (Past 30-Day Validity)</strong>
-                  <span>
-                    This listing was marked inactive after 30 days to keep the campus marketplace clean and fresh.
-                  </span>
-                </div>
-              </div>
-              {onRenewListing && (
-                <button
-                  type="button"
-                  id={`renew-listing-btn-${listing.id}`}
-                  onClick={() => onRenewListing(listing.id)}
-                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0 cursor-pointer"
-                >
-                  Renew for 30 Days
-                </button>
-              )}
-            </div>
-          )}
           {/* Main Grid: Image + Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div
@@ -517,13 +464,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                 )}
               </div>
 
-              <div
-                className="absolute bottom-3 left-3 bg-black/85 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 z-10 border border-white/10 shadow-md"
-                title={`Preferred handover spot: ${listing.locationPreference || "Campus Handover"}`}
-              >
-                <MapPin className="w-3.5 h-3.5 text-red-400" />
-                <span>{listing.locationPreference || "Campus Handover"}</span>
-              </div>
               {onOpenLightbox && (
                 <button
                   type="button"
@@ -653,14 +593,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   </button>
                 </div>
               </div>
-
-              {/* Price Trend Sparkline: Historical Average Selling Price for this specific category over last 6 months */}
-              <PriceTrendSparkline
-                category={listing.category}
-                currentPrice={listing.price}
-                listingType={listing.listingType}
-                allListings={allListings}
-              />
 
               {listing.exchangeFor && (
                 <div className="p-3 rounded-xl bg-[#EFF4F1] dark:bg-[#1B2320] border border-[#C4D9D1] dark:border-[#2A4A40] text-xs text-[#2F5D50] dark:text-[#7BBFA8] space-y-1">
@@ -1131,12 +1063,6 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   <span className="text-[#5C6B63] dark:text-[#8FA199] font-medium">Student Authenticity:</span>
                   <span className="font-bold text-[#2F5D50] dark:text-[#7BBFA8]">Campus Verified</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#5C6B63] dark:text-[#8FA199] font-medium">Handover Spot:</span>
-                  <span className="font-medium text-[#18201C] dark:text-[#ECF2EF] truncate max-w-[130px]">
-                    {listing.handoverDetails?.location || listing.locationPreference || "Campus Quad"}
-                  </span>
-                </div>
               </div>
 
               {/* Prompt Callout */}
@@ -1251,37 +1177,19 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   </div>
                 </div>
 
-                {/* Handover Spot & Condition Matched Toggle */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <label className="font-semibold text-[#5C6B63] dark:text-[#8FA199] block mb-1">
-                      Campus Handover Location:
-                    </label>
-                    <div className="relative">
-                      <MapPin className="w-3.5 h-3.5 text-[#8FA199] absolute left-2.5 top-2" />
-                      <input
-                        type="text"
-                        value={handoverLocationInput}
-                        onChange={(e) => setHandoverLocationInput(e.target.value)}
-                        placeholder="e.g. Central Library Quad"
-                        className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[#C4D1CA] dark:border-[#34433D] bg-white dark:bg-[#141A18] focus:outline-none focus:ring-2 focus:ring-[#2F5D50] text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center pt-5">
-                    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={conditionMatchedInput}
-                        onChange={(e) => setConditionMatchedInput(e.target.checked)}
-                        className="w-4 h-4 rounded text-[#2F5D50] dark:text-[#7BBFA8] focus:ring-[#2F5D50]"
-                      />
-                      <span className="text-xs font-semibold text-[#18201C] dark:text-[#ECF2EF]">
-                        Item condition matched the listing description
-                      </span>
-                    </label>
-                  </div>
+                {/* Condition Matched Toggle */}
+                <div className="text-xs">
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={conditionMatchedInput}
+                      onChange={(e) => setConditionMatchedInput(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#2F5D50] dark:text-[#7BBFA8] focus:ring-[#2F5D50]"
+                    />
+                    <span className="text-xs font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                      Item condition matched the listing description
+                    </span>
+                  </label>
                 </div>
 
                 {/* Comment Textarea */}
@@ -1372,14 +1280,8 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Metadata Badges: Location + Condition */}
+                    {/* Metadata Badge: Condition */}
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                      {rev.handoverLocation && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF4F1] dark:bg-[#1B2320] text-[#5C6B63] dark:text-[#8FA199] font-medium">
-                          <MapPin className="w-3 h-3 text-red-500" />
-                          <span>Handover at {rev.handoverLocation}</span>
-                        </span>
-                      )}
                       {rev.conditionMatched !== false ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF4F1] dark:bg-[#1B2320] text-[#2F5D50] dark:text-[#7BBFA8] font-semibold border border-[#C4D9D1] dark:border-[#2A4A40]">
                           <CheckCircle2 className="w-3 h-3 text-[#2F5D50] dark:text-[#7BBFA8]" />

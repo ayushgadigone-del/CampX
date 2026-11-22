@@ -33,6 +33,7 @@ import {
   ArrowDownWideNarrow,
   MessageSquare,
   History,
+  Handshake,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import {
@@ -77,7 +78,9 @@ import { ListingGridSkeleton } from "./components/ListingCardSkeleton";
 import { ListingDetailModal } from "./components/ListingDetailModal";
 import { ListingImageLightboxModal } from "./components/ListingImageLightboxModal";
 import { AIItemInspectorModal } from "./components/AIItemInspectorModal";
-import { CreateListingModal } from "./components/CreateListingModal";
+import { PostItemSection } from "./components/PostItemSection";
+import { MyProfileSection } from "./components/MyProfileSection";
+import { SettingsSection } from "./components/SettingsSection";
 import { CalendarHandoverModal } from "./components/CalendarHandoverModal";
 import { ChatDrawer } from "./components/ChatDrawer";
 import { UpcomingHandoversModal } from "./components/UpcomingHandoversModal";
@@ -133,6 +136,7 @@ import {
 } from "./utils/expiryUtils";
 import { useTheme } from "./context/ThemeContext";
 import { EngineeringBentoHero } from "./components/EngineeringBentoHero";
+import { CampusLiveTicker } from "./components/CampusLiveTicker";
 import { MarketplaceCategoryGrid } from "./components/MarketplaceCategoryGrid";
 import { SellerPromoBanner } from "./components/SellerPromoBanner";
 import { MyListingsSection } from "./components/MyListingsSection";
@@ -210,13 +214,15 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory | "All">("All");
   const [selectedType, setSelectedType] = useState<ListingType | "all">("all");
   const [selectedCondition, setSelectedCondition] = useState<ItemCondition | "all">("all");
-  const [includeSoldItems, setIncludeSoldItems] = useState<boolean>(false);
+  const [soldOnlyFilter, setSoldOnlyFilter] = useState<boolean>(false);
+  const [negotiatingOnlyFilter, setNegotiatingOnlyFilter] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<"smart_sort" | "newest" | "views_desc" | "price_asc" | "price_desc" | "ai_score">("smart_sort");
   const [layoutMode, setLayoutMode] = useState<"grid" | "detailed">("grid");
   const [isFullScreenMode, setIsFullScreenMode] = useState<boolean>(false);
 
-  // Section Navigation Tab State (Marketplace, Topper Vault, Beacon & Handovers, Chats, Saved)
+  // Section Navigation Tab State (Marketplace, Topper Vault, Beacon & Handovers, Messages, Saved, Settings)
   const [activeSectionTab, setActiveSectionTab] = useState<SectionTabId>("marketplace");
+  const [profileStartInEditMode, setProfileStartInEditMode] = useState<boolean>(false);
 
   // Performance Optimization: Mobile-optimized pagination to eliminate scroll lag
   const [visibleListingsCount, setVisibleListingsCount] = useState<number>(12);
@@ -234,7 +240,7 @@ export default function App() {
   // Reset pagination when search / filter changes
   useEffect(() => {
     setVisibleListingsCount(12);
-  }, [searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, includeSoldItems]);
+  }, [searchQuery, selectedCategory, selectedType, selectedCondition, sortBy, soldOnlyFilter, negotiatingOnlyFilter]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -277,7 +283,6 @@ export default function App() {
   });
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
   const [wishlistOnlyFilter, setWishlistOnlyFilter] = useState(false);
-  const [bundleOnlyFilter, setBundleOnlyFilter] = useState(false);
   const [myListingsOnlyFilter, setMyListingsOnlyFilter] = useState(false);
 
   // Success Notification Toast
@@ -382,7 +387,6 @@ export default function App() {
   }, [listings]);
 
   const [isAIInspectorOpen, setIsAIInspectorOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [prefilledInspection, setPrefilledInspection] = useState<AIInspectionResult | null>(null);
   const [prefilledImage, setPrefilledImage] = useState<string | null>(null);
 
@@ -416,9 +420,12 @@ export default function App() {
 
   const [isHandoversModalOpen, setIsHandoversModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [authSessionToken, setAuthSessionToken] = useState<string | null>(null);
   const [showLandingPage, setShowLandingPage] = useState(false);
   const [authGateView, setAuthGateView] = useState<"landing" | "login">("landing");
   const [isTopperNotesModalOpen, setIsTopperNotesModalOpen] = useState(false);
+  const [topperNotesInitialId, setTopperNotesInitialId] = useState<string | null>(null);
+  const [topperNotesInitialUpload, setTopperNotesInitialUpload] = useState(false);
   const [isGoogleDriveModalOpen, setIsGoogleDriveModalOpen] = useState(false);
   const [topperNotes, setTopperNotes] = useState<TopperNote[]>(() => getStoredTopperNotes());
 
@@ -572,9 +579,11 @@ export default function App() {
             }
 
             const fetched: Listing[] = [];
+            const fetchedIds = new Set<string>();
             querySnapshot.forEach((docSnap) => {
               const data = docSnap.data() as any;
               const seedMatch = INITIAL_SEED_LISTINGS.find((s) => s.id === docSnap.id);
+              fetchedIds.add(docSnap.id);
               fetched.push({
                 id: docSnap.id,
                 ...data,
@@ -582,10 +591,25 @@ export default function App() {
                 reviews: data.reviews && data.reviews.length > 0 ? data.reviews : seedMatch?.reviews || [],
                 averageRating: data.averageRating ?? seedMatch?.averageRating,
                 totalReviews: data.totalReviews ?? (data.reviews ? data.reviews.length : seedMatch?.totalReviews || 0),
+                handoverDetails: data.handoverDetails ?? seedMatch?.handoverDetails,
               });
             });
 
-            const sourceList = fetched.length > 0 ? fetched : INITIAL_SEED_LISTINGS;
+            // Exclude legacy pre-seeded sold items so Sold starts cleanly at 0 unless real sales occur
+            const cleanedFetched = fetched.filter(
+              (item) => !(item.id.startsWith("seed-sold-") && item.status === "completed")
+            );
+            const cleanedFetchedIds = new Set(cleanedFetched.map((item) => item.id));
+
+            // Merge available campus catalog seed items not already in Firestore so the marketplace is richly populated
+            const missingSeedListings = INITIAL_SEED_LISTINGS.filter(
+              (s) => !cleanedFetchedIds.has(s.id) && s.status !== "completed"
+            );
+
+            const sourceList =
+              cleanedFetched.length > 0
+                ? [...cleanedFetched, ...missingSeedListings]
+                : INITIAL_SEED_LISTINGS;
             const { activeListings, purgedIds } = purgeExpiredListings(sourceList);
             setListings((prev) =>
               prev.length === activeListings.length &&
@@ -795,23 +819,196 @@ export default function App() {
     [currentUser]
   );
 
+  const isNegotiatingListing = useCallback(
+    (item: Listing) => {
+      if (item.status === "completed" || item.status === "handover_scheduled") return false;
+      return storedChats.some(
+        (chat) =>
+          chat.status !== "completed" &&
+          chat.status !== "handover_scheduled" &&
+          (chat.listingId === item.id ||
+            (Boolean(chat.listingTitle) &&
+              chat.listingTitle.trim().toLowerCase() === item.title.trim().toLowerCase()))
+      );
+    },
+    [storedChats]
+  );
+
+  // Mutually exclusive quick filter toggle (only ONE of My listings, Saved, Currently negotiating, Sold can be active at a time)
+  const toggleQuickViewFilter = useCallback(
+    (mode: "my_listings" | "saved" | "negotiating" | "sold") => {
+      setMyListingsOnlyFilter((prev) => (mode === "my_listings" ? !prev : false));
+      setWishlistOnlyFilter((prev) => (mode === "saved" ? !prev : false));
+      setNegotiatingOnlyFilter((prev) => (mode === "negotiating" ? !prev : false));
+      setSoldOnlyFilter((prev) => (mode === "sold" ? !prev : false));
+    },
+    []
+  );
+
+  // Unified list of ONLY actively negotiating items (excludes completed items and agreed/scheduled handovers)
+  const negotiatingListingsPool = useMemo(() => {
+    const result: Listing[] = [];
+    const seenIds = new Set<string>();
+    const seenTitles = new Set<string>();
+
+    // 1. Include active negotiation threads (in discussion / offer sent) from storedChats
+    storedChats
+      .filter((chat) => chat.status !== "completed" && chat.status !== "handover_scheduled")
+      .forEach((chat) => {
+        const matched = listings.find(
+          (item) =>
+            item.status !== "completed" &&
+            item.status !== "handover_scheduled" &&
+            (item.id === chat.listingId ||
+              (Boolean(chat.listingTitle) &&
+                item.title.trim().toLowerCase() === chat.listingTitle.trim().toLowerCase()))
+        );
+
+        const resolved: Listing = matched || {
+          id: chat.listingId || chat.id,
+          title: chat.listingTitle || "Campus Item",
+          price: typeof chat.listingPrice === "number" ? chat.listingPrice : 0,
+          imageUrl: chat.listingImage || "",
+          category: (chat.listingCategory as Listing["category"]) || "Other",
+          condition: (chat.listingCondition as Listing["condition"]) || "Good",
+          sellerId: chat.sellerId || "campus-seller",
+          sellerName: chat.sellerName || "Campus Seller",
+          sellerEmail: chat.sellerEmail,
+          status: "available",
+          listingType: chat.listingPrice === 0 ? "exchange" : "sell",
+          description: chat.lastMessage || "Currently negotiating with seller on campus.",
+          views: 1,
+          createdAt: new Date(chat.lastMessageTimestamp || Date.now()).toISOString(),
+        };
+
+        const titleKey = resolved.title.trim().toLowerCase();
+        if (!seenIds.has(resolved.id) && !seenTitles.has(titleKey)) {
+          seenIds.add(resolved.id);
+          seenTitles.add(titleKey);
+          result.push(resolved);
+        }
+      });
+
+    // 2. Also include any marketplace listings linked to an active negotiation
+    listings.forEach((item) => {
+      if (item.status === "completed" || item.status === "handover_scheduled") return;
+      const titleKey = item.title.trim().toLowerCase();
+      if (
+        isNegotiatingListing(item) &&
+        !seenIds.has(item.id) &&
+        !seenTitles.has(titleKey)
+      ) {
+        seenIds.add(item.id);
+        seenTitles.add(titleKey);
+        result.push(item);
+      }
+    });
+
+    return result;
+  }, [listings, storedChats, isNegotiatingListing]);
+
+  // Unified list of ALL scheduled & completed handovers (merges chatted items with status === "handover_scheduled" + scheduled listings)
+  const handoverListingsPool = useMemo(() => {
+    const result: Listing[] = [];
+    const seenIds = new Set<string>();
+    const seenTitles = new Set<string>();
+
+    // 1. Include every chat thread that has an agreed/scheduled handover
+    storedChats
+      .filter((chat) => chat.status === "handover_scheduled")
+      .forEach((chat) => {
+        const matched = listings.find(
+          (item) =>
+            item.id === chat.listingId ||
+            (Boolean(chat.listingTitle) &&
+              item.title.trim().toLowerCase() === chat.listingTitle.trim().toLowerCase())
+        );
+
+        const defaultDate = new Date(
+          (chat.lastMessageTimestamp || Date.now()) + 24 * 60 * 60 * 1000
+        )
+          .toISOString()
+          .split("T")[0];
+
+        const timeMatch = chat.lastMessage?.match(/\b(\d{1,2}:\d{2}\s*(?:AM|PM)?)\b/i);
+        const locationMatch = chat.lastMessage?.match(/at\s+([^.!?\n]+?)(?:\s+tomorrow|\s+today|\s+at\s+\d|$)/i);
+
+        const derivedHandoverDetails = matched?.handoverDetails || {
+          scheduledDate: defaultDate,
+          scheduledTime: timeMatch?.[1] || "1:15 PM",
+          location: locationMatch?.[1]?.trim() || matched?.locationPreference || "Central Library Quad",
+          buyerName: chat.buyerName || currentUser?.displayName || "You",
+          buyerEmail: chat.buyerEmail || currentUser?.email || undefined,
+          notes: chat.lastMessage || "Campus handover scheduled via chat.",
+        };
+
+        const resolved: Listing = matched
+          ? {
+              ...matched,
+              status: "handover_scheduled",
+              handoverDetails: derivedHandoverDetails,
+            }
+          : {
+              id: chat.listingId || chat.id,
+              title: chat.listingTitle || "Campus Item",
+              price: typeof chat.listingPrice === "number" ? chat.listingPrice : 0,
+              imageUrl: chat.listingImage || "",
+              category: (chat.listingCategory as Listing["category"]) || "Other",
+              condition: (chat.listingCondition as Listing["condition"]) || "Good",
+              sellerId: chat.sellerId || "campus-seller",
+              sellerName: chat.sellerName || "Campus Seller",
+              sellerEmail: chat.sellerEmail,
+              status: "handover_scheduled",
+              listingType: chat.listingPrice === 0 ? "exchange" : "sell",
+              description: chat.lastMessage || "Campus meetup scheduled via chat.",
+              views: 1,
+              createdAt: new Date(chat.lastMessageTimestamp || Date.now()).toISOString(),
+              handoverDetails: derivedHandoverDetails,
+            };
+
+        const titleKey = resolved.title.trim().toLowerCase();
+        if (!seenIds.has(resolved.id) && !seenTitles.has(titleKey)) {
+          seenIds.add(resolved.id);
+          seenTitles.add(titleKey);
+          result.push(resolved);
+        }
+      });
+
+    // 2. Include all listings with scheduled/completed handovers
+    listings.forEach((item) => {
+      if (
+        item.status !== "handover_scheduled" &&
+        item.status !== "completed" &&
+        !item.handoverDetails
+      ) {
+        return;
+      }
+      const titleKey = item.title.trim().toLowerCase();
+      if (!seenIds.has(item.id) && !seenTitles.has(titleKey)) {
+        seenIds.add(item.id);
+        seenTitles.add(titleKey);
+        result.push(item);
+      }
+    });
+
+    return result;
+  }, [listings, storedChats, currentUser]);
+
   // Filter & Sort Logic
   const filteredListings = useMemo(() => {
-    return listings
+    const basePool = negotiatingOnlyFilter ? negotiatingListingsPool : listings;
+    return basePool
       .filter((item) => {
-        // Sold items filter: By default hide completed listings to keep marketplace clean,
-        // unless 'Include Sold Items' or 'My listings' toggle is active.
-        if (!includeSoldItems && !myListingsOnlyFilter && item.status === "completed") {
+        // Sold items filter: When 'Sold' button is active, show ONLY sold items.
+        // Otherwise hide completed items by default (unless viewing 'My listings').
+        if (soldOnlyFilter) {
+          if (item.status !== "completed") return false;
+        } else if (!myListingsOnlyFilter && item.status === "completed") {
           return false;
         }
 
         // My listings filter (Seller management view)
         if (myListingsOnlyFilter && !isCurrentUserListing(item)) {
-          return false;
-        }
-
-        // Semester-End Bundle Packs filter
-        if (bundleOnlyFilter && !item.isBundle) {
           return false;
         }
 
@@ -879,9 +1076,10 @@ export default function App() {
       });
   }, [
     listings,
-    includeSoldItems,
+    negotiatingListingsPool,
+    soldOnlyFilter,
+    negotiatingOnlyFilter,
     myListingsOnlyFilter,
-    bundleOnlyFilter,
     isCurrentUserListing,
     searchQuery,
     selectedCategory,
@@ -901,9 +1099,7 @@ export default function App() {
     return listings.filter((item) => item.status === "completed").length;
   }, [listings]);
 
-  const bundlePacksCount = useMemo(() => {
-    return listings.filter((item) => item.isBundle && item.status !== "completed").length;
-  }, [listings]);
+  const negotiatingItemsCount = negotiatingListingsPool.length;
 
   const myListings = useMemo(() => {
     return listings.filter((item) => isCurrentUserListing(item));
@@ -913,8 +1109,8 @@ export default function App() {
 
   // Dynamic counts for each category
   const categoryCounts = useMemo(() => {
-    const visibleListings = includeSoldItems
-      ? listings
+    const visibleListings = soldOnlyFilter
+      ? listings.filter((item) => item.status === "completed")
       : listings.filter((item) => item.status !== "completed");
 
     const counts: Record<string, number> = { All: visibleListings.length };
@@ -922,7 +1118,7 @@ export default function App() {
       counts[item.category] = (counts[item.category] || 0) + 1;
     });
     return counts;
-  }, [listings, includeSoldItems]);
+  }, [listings, soldOnlyFilter]);
 
   // Dynamic available stock inventory for each category
   const categoryStockCounts = useMemo(() => {
@@ -987,7 +1183,8 @@ export default function App() {
   const handleDemoCollegeLogin = async (
     customEmail: string = "ayush.gadigone@pvgcoet.ac.in",
     displayName?: string,
-    profileData?: LoginProfilePayload
+    profileData?: LoginProfilePayload,
+    sessionToken?: string
   ): Promise<boolean> => {
     setAuthErrorMessage(null);
     const cleanEmail = customEmail.trim().toLowerCase();
@@ -996,6 +1193,9 @@ export default function App() {
         `Invalid Email Domain: Only accounts ending with @${ALLOWED_COLLEGE_DOMAIN} can sign in.`
       );
       return false;
+    }
+    if (sessionToken) {
+      setAuthSessionToken(sessionToken);
     }
 
     try {
@@ -1055,6 +1255,7 @@ export default function App() {
 
   const handleLogout = async () => {
     await logout();
+    setAuthSessionToken(null);
     setCurrentUser(null);
     setStudentProfile(null);
     setProfileModalMode(null);
@@ -1139,12 +1340,21 @@ export default function App() {
   ) => {
     if (!calendarTargetListing) return;
 
+    const isSellerScheduling = isCurrentUserListing(calendarTargetListing);
     const handoverDetails = {
       scheduledDate: date,
       scheduledTime: time,
       location,
       calendarEventId: event.id,
       calendarLink: event.htmlLink,
+      buyerName: isSellerScheduling
+        ? calendarOtherParty.name || "Campus Student"
+        : studentProfile?.displayName ||
+          currentUser?.displayName ||
+          "Campus Student",
+      buyerDepartment: isSellerScheduling
+        ? undefined
+        : studentProfile?.branch || undefined,
     };
 
     // Update in local state
@@ -1226,8 +1436,9 @@ export default function App() {
   const handleApplyAIToListing = (inspection: AIInspectionResult, imageSrc: string) => {
     setPrefilledInspection(inspection);
     setPrefilledImage(imageSrc);
-    setIsCreateModalOpen(true);
-    showToast("✨ Applied Gemini 3.8 Flash analysis to listing form!");
+    setActiveSectionTab("post_item");
+    window.scrollTo(0, 0);
+    showToast("✨ Applied AI analysis to your item form!");
   };
 
   // Alerts Matching & Management Logic
@@ -1482,7 +1693,7 @@ export default function App() {
     showToast("🎉 Listing renewed! Active for another 30 days.");
   };
 
-  const upcomingHandoversCount = listings.filter((l) => l.handoverDetails).length;
+  const upcomingHandoversCount = handoverListingsPool.length;
   const availableListingsCount = listings.filter((l) => l.status === "available").length;
   const totalActiveStock = useMemo(() => {
     return listings.reduce((sum, item) => {
@@ -1558,7 +1769,8 @@ export default function App() {
         if (isOnline) {
           setPrefilledInspection(null);
           setPrefilledImage(null);
-          setIsCreateModalOpen(true);
+          setActiveSectionTab("post_item");
+          window.scrollTo(0, 0);
         } else {
           showToast("⚠️ Offline: Creating listings is disabled.");
         }
@@ -1616,8 +1828,8 @@ export default function App() {
           onGoogleSignIn={async () => {
             await handleLogin();
           }}
-          onDemoCollegeSignIn={async (email, name, profileData) => {
-            await handleDemoCollegeLogin(email, name, profileData);
+          onDemoCollegeSignIn={async (email, name, profileData, sessionToken) => {
+            await handleDemoCollegeLogin(email, name, profileData, sessionToken);
           }}
           authErrorMessage={authErrorMessage}
           onClearError={() => setAuthErrorMessage(null)}
@@ -1668,8 +1880,21 @@ export default function App() {
         </div>
       )}
 
+      {/* Topmost Announcement Header */}
+      <div
+        id="top-announcement-bar"
+        className={`w-full py-2.5 px-4 text-center text-xs sm:text-[13px] font-medium tracking-wide ${
+          isDark
+            ? "bg-[#162C24] text-[#ECF2EF] border-b border-[#242E2A]"
+            : "bg-[#224134] text-white"
+        }`}
+      >
+        A smarter way to buy, sell &amp; exchange on campus.
+      </div>
+
       {/* Navigation Header */}
       <Navbar
+        activeTab={activeSectionTab}
         currentUser={currentUser}
         onLogin={() => setIsLoginModalOpen(true)}
         onDemoLogin={() => handleDemoCollegeLogin()}
@@ -1697,7 +1922,8 @@ export default function App() {
           }
           setPrefilledInspection(null);
           setPrefilledImage(null);
-          setIsCreateModalOpen(true);
+          setActiveSectionTab("post_item");
+          window.scrollTo(0, 0);
         }}
         onOpenAIInspector={() => {
           if (!isOnline) {
@@ -1745,7 +1971,17 @@ export default function App() {
         onToggleSimulateOffline={toggleSimulateOffline}
         onShowToast={showToast}
         studentProfile={studentProfile}
-        onEditProfileDetails={() => setProfileModalMode("edit")}
+        onEditProfileDetails={() => {
+          triggerHaptic("medium");
+          setProfileStartInEditMode(false);
+          setActiveSectionTab("my_profile");
+          window.scrollTo(0, 0);
+        }}
+        onOpenSettings={() => {
+          triggerHaptic("medium");
+          setActiveSectionTab("settings");
+          window.scrollTo(0, 0);
+        }}
       />
 
       {/* Offline Status Banner */}
@@ -1781,7 +2017,8 @@ export default function App() {
             }
             setPrefilledInspection(null);
             setPrefilledImage(null);
-            setIsCreateModalOpen(true);
+            setActiveSectionTab("post_item");
+            window.scrollTo(0, 0);
           }}
           onOpenAIInspector={() => {
             if (!isOnline) {
@@ -1821,37 +2058,59 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24 md:pb-14">
-        {/* Section Navigation Tabs (Marketplace, Topper Vault, Beacon & Handovers, Chats, Saved & Alerts) */}
-        <SectionNavigationTabs
-          activeTab={activeSectionTab}
-          onTabChange={(tab) => {
-            setActiveSectionTab(tab);
-            window.scrollTo(0, 0);
-          }}
-          listingsCount={filteredListings.length}
-          topperNotesCount={topperNotes.length}
-          chatsCount={storedChats.length}
-          wishlistCount={wishlistIds.length}
-          alertsCount={alerts.filter((a) => a.active).length}
-          upcomingHandoversCount={upcomingHandoversCount}
-          onOpenCreateModal={() => {
-            if (!currentUser) {
-              setIsLoginModalOpen(true);
-              return;
-            }
-            if (!isOnline) {
-              showToast("⚠️ Offline: Creating listings is disabled.");
-              return;
-            }
-            setPrefilledInspection(null);
-            setPrefilledImage(null);
-            setIsCreateModalOpen(true);
-          }}
-        />
+        {/* Section Navigation Tabs (hidden on dedicated My Profile, Post Item, and Settings full pages) */}
+        {activeSectionTab !== "my_profile" &&
+          activeSectionTab !== "post_item" &&
+          activeSectionTab !== "settings" && (
+          <SectionNavigationTabs
+            activeTab={activeSectionTab}
+            onTabChange={(tab) => {
+              setActiveSectionTab(tab);
+              window.scrollTo(0, 0);
+            }}
+            listingsCount={filteredListings.length}
+            topperNotesCount={topperNotes.length}
+            chatsCount={storedChats.length}
+            wishlistCount={wishlistIds.length}
+            alertsCount={alerts.filter((a) => a.active).length}
+            upcomingHandoversCount={upcomingHandoversCount}
+            onOpenCreateModal={() => {
+              if (!currentUser) {
+                setIsLoginModalOpen(true);
+                return;
+              }
+              if (!isOnline) {
+                showToast("⚠️ Offline: Creating listings is disabled.");
+                return;
+              }
+              setPrefilledInspection(null);
+              setPrefilledImage(null);
+              setActiveSectionTab("post_item");
+              window.scrollTo(0, 0);
+            }}
+          />
+        )}
 
         {/* TAB 1: MARKETPLACE FEED */}
         {activeSectionTab === "marketplace" && (
-          <div id="tab-panel-marketplace" role="tabpanel" className="space-y-10">
+          <div id="tab-panel-marketplace" role="tabpanel" className="space-y-8 sm:space-y-10">
+            {/* Live Campus Beacon Ticker Bar (moved from Handovers to Marketplace) */}
+            <div
+              className={`rounded-2xl overflow-hidden border ${
+                isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
+              }`}
+            >
+              <CampusLiveTicker
+                onSelectItem={(query) => {
+                  setSearchQuery(query);
+                  const el = document.getElementById("campus-marketplace-items-section");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "auto" });
+                  }
+                }}
+              />
+            </div>
+
             {/* Find Your Category 3x2 Grid */}
             <MarketplaceCategoryGrid
               selectedCategory={selectedCategory}
@@ -1900,14 +2159,30 @@ export default function App() {
                         isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
                       }`}
                     >
-                      {selectedCategory === "All"
+                      {soldOnlyFilter
+                        ? "Sold items."
+                        : negotiatingOnlyFilter
+                        ? "Currently negotiating."
+                        : myListingsOnlyFilter
+                        ? "My listings."
+                        : wishlistOnlyFilter
+                        ? "Saved items."
+                        : selectedCategory === "All"
                         ? "Fresh on campus."
                         : `${selectedCategory}.`}
                     </h2>
                     <span className="text-xs font-mono tabular-nums text-[#5C6B63] dark:text-[#8FA199]">
                       {filteredListings.length}{" "}
                       {filteredListings.length === 1 ? "item" : "items"}
-                      {includeSoldItems ? " · including sold" : ""}
+                      {soldOnlyFilter
+                        ? " · sold"
+                        : negotiatingOnlyFilter
+                        ? " · in negotiation"
+                        : myListingsOnlyFilter
+                        ? " · posted by you"
+                        : wishlistOnlyFilter
+                        ? " · saved"
+                        : ""}
                     </span>
                     {searchQuery.trim() && (
                       <span className="text-xs text-[#2F5D50] dark:text-[#7BBFA8] font-medium">
@@ -1934,7 +2209,7 @@ export default function App() {
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span>
                         {storedChats.length} active{" "}
-                        {storedChats.length === 1 ? "chat" : "chats"}
+                        {storedChats.length === 1 ? "message" : "messages"}
                       </span>
                     </button>
                   )}
@@ -1983,31 +2258,13 @@ export default function App() {
               <option value="Fair">Fair</option>
             </select>
 
-            {/* Semester-End Bundle Packs Toggle */}
-            <button
-              id="filter-bundle-packs-toggle"
-              type="button"
-              onClick={() => setBundleOnlyFilter(!bundleOnlyFilter)}
-              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
-                bundleOnlyFilter
-                  ? isDark
-                    ? "bg-[#387262] text-white border-[#387262]"
-                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
-                  : isDark
-                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
-                  : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
-              }`}
-            >
-              <Package className="w-3.5 h-3.5" />
-              <span>Bundles ({bundlePacksCount})</span>
-            </button>
-
-            {/* My Listings (Seller Management) Toggle */}
+            {/* My Listings (Seller Management) Toggle — mutually exclusive */}
             {currentUser && (
               <button
                 id="filter-my-listings-toggle"
                 type="button"
-                onClick={() => setMyListingsOnlyFilter(!myListingsOnlyFilter)}
+                aria-pressed={myListingsOnlyFilter}
+                onClick={() => toggleQuickViewFilter("my_listings")}
                 className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                   myListingsOnlyFilter
                     ? isDark
@@ -2022,11 +2279,12 @@ export default function App() {
               </button>
             )}
 
-            {/* Saved Quick Toggle */}
+            {/* Saved Quick Toggle — mutually exclusive */}
             <button
               id="filter-wishlist-toggle"
               type="button"
-              onClick={() => setWishlistOnlyFilter(!wishlistOnlyFilter)}
+              aria-pressed={wishlistOnlyFilter}
+              onClick={() => toggleQuickViewFilter("saved")}
               className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
                 wishlistOnlyFilter
                   ? isDark
@@ -2041,13 +2299,34 @@ export default function App() {
               <span>Saved ({wishlistIds.length})</span>
             </button>
 
-            {/* Include Sold Items Toggle */}
+            {/* Currently Negotiating Toggle — mutually exclusive */}
+            <button
+              id="filter-currently-negotiating-toggle"
+              type="button"
+              aria-pressed={negotiatingOnlyFilter}
+              onClick={() => toggleQuickViewFilter("negotiating")}
+              className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                negotiatingOnlyFilter
+                  ? isDark
+                    ? "bg-[#387262] text-white border-[#387262]"
+                    : "bg-[#2F5D50] text-white border-[#2F5D50]"
+                  : isDark
+                  ? "bg-[#141A18] text-[#ECF2EF] border-[#242E2A] hover:border-[#34433D] hover:bg-[#1B2320]"
+                  : "bg-white text-[#18201C] border-[#DFE6E2] hover:border-[#C4D1CA] hover:bg-[#EFF4F1]"
+              }`}
+            >
+              <Handshake className="w-3.5 h-3.5" />
+              <span>Currently negotiating ({negotiatingItemsCount})</span>
+            </button>
+
+            {/* Sold Items Only Toggle — mutually exclusive */}
             <button
               id="filter-include-sold-toggle"
               type="button"
-              onClick={() => setIncludeSoldItems(!includeSoldItems)}
+              aria-pressed={soldOnlyFilter}
+              onClick={() => toggleQuickViewFilter("sold")}
               className={`h-8 px-3 rounded-lg border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
-                includeSoldItems
+                soldOnlyFilter
                   ? isDark
                     ? "bg-[#387262] text-white border-[#387262]"
                     : "bg-[#2F5D50] text-white border-[#2F5D50]"
@@ -2084,9 +2363,9 @@ export default function App() {
               selectedType !== "all" ||
               selectedCondition !== "all" ||
               wishlistOnlyFilter ||
-              bundleOnlyFilter ||
               myListingsOnlyFilter ||
-              includeSoldItems ||
+              soldOnlyFilter ||
+              negotiatingOnlyFilter ||
               searchQuery) && (
               <button
                 type="button"
@@ -2095,9 +2374,9 @@ export default function App() {
                   setSelectedType("all");
                   setSelectedCondition("all");
                   setWishlistOnlyFilter(false);
-                  setBundleOnlyFilter(false);
                   setMyListingsOnlyFilter(false);
-                  setIncludeSoldItems(false);
+                  setSoldOnlyFilter(false);
+                  setNegotiatingOnlyFilter(false);
                   setSearchQuery("");
                 }}
                 className={`h-8 px-2 text-xs font-medium underline underline-offset-4 cursor-pointer ${
@@ -2325,8 +2604,9 @@ export default function App() {
                     setSelectedType("all");
                     setSelectedCondition("all");
                     setWishlistOnlyFilter(false);
-                    setBundleOnlyFilter(false);
                     setMyListingsOnlyFilter(false);
+                    setSoldOnlyFilter(false);
+                    setNegotiatingOnlyFilter(false);
                     setSearchQuery("");
                   }}
                   className={`h-9 px-4 rounded-lg text-xs font-medium border cursor-pointer ${
@@ -2357,7 +2637,8 @@ export default function App() {
                 }
                 setPrefilledInspection(null);
                 setPrefilledImage(null);
-                setIsCreateModalOpen(true);
+                setActiveSectionTab("post_item");
+                window.scrollTo(0, 0);
               }}
             />
           </div>
@@ -2368,7 +2649,11 @@ export default function App() {
           <div id="tab-panel-topper_vault" role="tabpanel">
             <TopperVaultSection
               notes={topperNotes}
-              onOpenNotesModal={() => setIsTopperNotesModalOpen(true)}
+              onOpenNotesModal={(noteId, openUpload) => {
+                setTopperNotesInitialId(noteId || null);
+                setTopperNotesInitialUpload(Boolean(openUpload));
+                setIsTopperNotesModalOpen(true);
+              }}
               onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
               onShowToast={showToast}
               isOnline={isOnline}
@@ -2380,7 +2665,7 @@ export default function App() {
         {activeSectionTab === "beacon_handovers" && (
           <div id="tab-panel-beacon_handovers" role="tabpanel">
             <BeaconHandoversSection
-              listings={listings}
+              listings={handoverListingsPool}
               onOpenDetails={handleOpenDetails}
               onOpenCalendar={handleOpenCalendar}
               onSelectItem={(query) => {
@@ -2447,7 +2732,8 @@ export default function App() {
                 }
                 setPrefilledInspection(null);
                 setPrefilledImage(null);
-                setIsCreateModalOpen(true);
+                setActiveSectionTab("post_item");
+                window.scrollTo(0, 0);
               }}
               onOpenDetails={handleOpenDetails}
               onOpenLightbox={(item) => setLightboxListing(item)}
@@ -2467,6 +2753,88 @@ export default function App() {
             />
           </div>
         )}
+
+        {/* TAB 7: MY PROFILE (STUDENT ACCOUNT — accessed via profile photo menu) */}
+        {activeSectionTab === "my_profile" && currentUser && (
+          <div id="tab-panel-my_profile" role="tabpanel">
+            <MyProfileSection
+              uid={currentUser.uid}
+              email={currentUser.email || ""}
+              fallbackDisplayName={currentUser.displayName}
+              fallbackPhotoURL={currentUser.photoURL}
+              studentProfile={studentProfile}
+              onProfileSaved={handleStudentProfileSaved}
+              initialEditMode={profileStartInEditMode}
+              onBackToHome={() => {
+                setProfileStartInEditMode(false);
+                setActiveSectionTab("marketplace");
+                window.scrollTo(0, 0);
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 8: POST ITEM FULL PAGE ("SELL ON CAMPUS — Give your item a new home.") */}
+        {activeSectionTab === "post_item" && (
+          <div id="tab-panel-post_item" role="tabpanel">
+            <PostItemSection
+              currentUser={currentUser}
+              initialInspection={prefilledInspection}
+              initialImage={prefilledImage}
+              onListingCreated={(createdItem) => {
+                handleListingCreated(createdItem);
+                setPrefilledInspection(null);
+                setPrefilledImage(null);
+                setActiveSectionTab("marketplace");
+                window.scrollTo(0, 0);
+              }}
+              onCancel={() => {
+                setPrefilledInspection(null);
+                setPrefilledImage(null);
+                setActiveSectionTab("marketplace");
+                window.scrollTo(0, 0);
+              }}
+              isOnline={isOnline}
+              userBranch={studentProfile?.branch}
+              userYear={studentProfile?.year}
+            />
+          </div>
+        )}
+
+        {/* TAB 9: SETTINGS ("YOUR ACCOUNT — Settings") */}
+        {activeSectionTab === "settings" && currentUser && (
+          <div id="tab-panel-settings" role="tabpanel">
+            <SettingsSection
+              uid={currentUser.uid}
+              email={currentUser.email || ""}
+              fallbackDisplayName={currentUser.displayName}
+              fallbackPhotoURL={currentUser.photoURL}
+              studentProfile={studentProfile}
+              onOpenMyProfile={(startInEditMode = false) => {
+                triggerHaptic("medium");
+                setProfileStartInEditMode(startInEditMode);
+                setActiveSectionTab("my_profile");
+                window.scrollTo(0, 0);
+              }}
+              onOpenMessages={() => {
+                triggerHaptic("medium");
+                setActiveSectionTab("chats");
+                window.scrollTo(0, 0);
+              }}
+              onOpenMyListings={() => {
+                triggerHaptic("medium");
+                setActiveSectionTab("my_listings");
+                window.scrollTo(0, 0);
+              }}
+              onLogout={handleLogout}
+              onBackToHome={() => {
+                setActiveSectionTab("marketplace");
+                window.scrollTo(0, 0);
+              }}
+              onShowToast={showToast}
+            />
+          </div>
+        )}
       </main>
 
       {/* Minimal Footer */}
@@ -2482,6 +2850,9 @@ export default function App() {
             <div className={`font-semibold text-sm ${isDark ? "text-[#ECF2EF]" : "text-[#18201C]"}`}>
               Campus Resale
             </div>
+            <p className={`mt-1 text-xs font-medium ${isDark ? "text-[#7BBFA8]" : "text-[#2F5D50]"}`}>
+              Better finds. Better value. Better campus communities.
+            </p>
             <p className="mt-0.5 text-[#5C6B63] dark:text-[#8FA199]">
               PVG's COET Student-to-Student Exchange · Pune
             </p>
@@ -2598,11 +2969,11 @@ export default function App() {
         }}
         onDeleteChat={(conversationId) => {
           deleteStoredChat(conversationId);
-          showToast("Chat thread removed from Your Chats");
+          showToast("Thread removed from Messages");
         }}
         onClearAllChats={() => {
           clearAllStoredChats();
-          showToast("All chats cleared from Your Chats");
+          showToast("All conversations cleared from Messages");
         }}
         isOnline={isOnline}
       />
@@ -2612,23 +2983,6 @@ export default function App() {
         onClose={() => setIsAIInspectorOpen(false)}
         onApplyToListing={handleApplyAIToListing}
         isOnline={isOnline}
-      />
-
-      <CreateListingModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          setPrefilledInspection(null);
-          setPrefilledImage(null);
-        }}
-        onOpenAIInspector={() => setIsAIInspectorOpen(true)}
-        currentUser={currentUser}
-        initialInspection={prefilledInspection}
-        initialImage={prefilledImage}
-        onListingCreated={handleListingCreated}
-        isOnline={isOnline}
-        userBranch={studentProfile?.branch}
-        userYear={studentProfile?.year}
       />
 
       {calendarTargetListing && (
@@ -2668,7 +3022,7 @@ export default function App() {
       <UpcomingHandoversModal
         isOpen={isHandoversModalOpen}
         onClose={() => setIsHandoversModalOpen(false)}
-        listings={listings}
+        listings={handoverListingsPool}
         onSelectListingForCalendar={handleOpenCalendar}
         onOpenDetails={(item) => {
           handleOpenDetails(item);
@@ -2703,7 +3057,10 @@ export default function App() {
       {/* Topper Notes Free Vault Modal */}
       <TopperNotesModal
         isOpen={isTopperNotesModalOpen}
-        onClose={() => setIsTopperNotesModalOpen(false)}
+        onClose={() => {
+          setIsTopperNotesModalOpen(false);
+          setTopperNotesInitialUpload(false);
+        }}
         currentUserEmail={currentUser?.email}
         currentUserName={currentUser?.displayName}
         notes={topperNotes}
@@ -2712,6 +3069,8 @@ export default function App() {
           saveStoredTopperNotes(updated);
         }}
         onShowToast={showToast}
+        initialNoteId={topperNotesInitialId}
+        initialOpenUpload={topperNotesInitialUpload}
       />
 
       {/* Google Drive, Picker & Docs Modal */}
@@ -2815,14 +3174,15 @@ export default function App() {
               <X className="w-4 h-4" />
             </button>
             <CollegeLoginPage
+              isModal
               onGoogleSignIn={async () => {
                 const ok = await handleLogin();
                 if (ok) {
                   setIsLoginModalOpen(false);
                 }
               }}
-              onDemoCollegeSignIn={async (email, name, profileData) => {
-                const ok = await handleDemoCollegeLogin(email, name, profileData);
+              onDemoCollegeSignIn={async (email, name, profileData, sessionToken) => {
+                const ok = await handleDemoCollegeLogin(email, name, profileData, sessionToken);
                 if (ok) {
                   setIsLoginModalOpen(false);
                 }
@@ -2873,7 +3233,8 @@ export default function App() {
           }
           setPrefilledInspection(null);
           setPrefilledImage(null);
-          setIsCreateModalOpen(true);
+          setActiveSectionTab("post_item");
+          window.scrollTo(0, 0);
         }}
         wishlistCount={wishlistIds.length}
         chatsCount={storedChats.length}

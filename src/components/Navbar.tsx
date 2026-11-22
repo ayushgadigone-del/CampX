@@ -6,16 +6,11 @@ import {
   Sun,
   Moon,
   WifiOff,
-  UserCog,
-  HardDrive,
-  Bell,
-  ShieldCheck,
-  Sparkles,
-  Calendar as CalendarIcon,
+  User as UserIcon,
   MessageSquare,
   Heart,
-  GraduationCap,
   Package,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { User } from "firebase/auth";
 import { useTheme } from "../context/ThemeContext";
@@ -51,6 +46,8 @@ interface NavbarProps {
   onShowToast?: (msg: string) => void;
   studentProfile?: StudentProfileDetails | null;
   onEditProfileDetails?: () => void;
+  onOpenSettings?: () => void;
+  activeTab?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -77,6 +74,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   isOnline = true,
   studentProfile,
   onEditProfileDetails,
+  onOpenSettings,
+  activeTab = "marketplace",
 }) => {
   const { isDark, toggleTheme } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -103,6 +102,49 @@ export const Navbar: React.FC<NavbarProps> = ({
   const avatarInitial =
     (studentProfile?.firstName || currentUser?.displayName || "S").charAt(0).toUpperCase();
 
+  const navItems = [
+    {
+      id: "navbar-topper-notes-btn",
+      label: "Notes",
+      keyShortcut: "N",
+      active: activeTab === "topper_vault",
+      onClick: onOpenTopperNotes,
+      count: 0,
+    },
+    {
+      id: "navbar-ai-inspector-btn",
+      label: "AI Inspector",
+      keyShortcut: "I",
+      active: false,
+      onClick: onOpenAIInspector,
+      count: 0,
+    },
+    {
+      id: "navbar-handovers-btn",
+      label: "Handovers",
+      keyShortcut: "H",
+      active: activeTab === "beacon_handovers",
+      onClick: onOpenHandovers,
+      count: upcomingHandoversCount,
+    },
+    {
+      id: "navbar-your-chats-button",
+      label: "Messages",
+      keyShortcut: "C",
+      active: activeTab === "chats",
+      onClick: onOpenYourChats,
+      count: chatsCount,
+    },
+    {
+      id: "navbar-wishlist-button",
+      label: "Saved",
+      keyShortcut: "W",
+      active: activeTab === "saved",
+      onClick: onOpenWishlist,
+      count: wishlistCount,
+    },
+  ];
+
   return (
     <header
       className={`sticky top-0 z-40 w-full border-b ${
@@ -111,102 +153,81 @@ export const Navbar: React.FC<NavbarProps> = ({
           : "bg-white border-[#DFE6E2]"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-6 h-14">
-          {/* Zone 1: Clean single-line wordmark */}
-          <div className="flex items-center shrink-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 lg:gap-6 h-14 sm:h-16">
+          {/* Zone 1: Clean Brand Mark & Wordmark */}
+          <div className="flex items-center shrink-0 min-w-0">
             <button
               type="button"
               onClick={onGoHome}
-              className={`text-[15px] sm:text-base font-bold tracking-tight whitespace-nowrap cursor-pointer ${
-                isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
-              }`}
+              className="inline-flex items-center gap-2 sm:gap-2.5 cursor-pointer group min-w-0"
               title="PVG's COET Campus Resale & Exchange"
             >
-              Campus Resale
+              <span
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center shrink-0 ${
+                  isDark
+                    ? "bg-[#346858] text-white"
+                    : "bg-[#274C3F] text-white"
+                }`}
+              >
+                C
+              </span>
+              <span
+                className={`text-sm sm:text-base font-bold tracking-tight whitespace-nowrap ${
+                  isDark ? "text-[#ECF2EF]" : "text-[#18201C]"
+                }`}
+              >
+                Campus Resale
+              </span>
             </button>
           </div>
 
-          {/* Zone 2: Minimal single-line text links (Desktop) */}
+          {/* Zone 2: Evenly Spaced Navigation Links (Desktop / Fullscreen) */}
           <nav
             aria-label="Campus Navigation"
-            className="hidden lg:flex items-center gap-6 text-[13px] font-medium"
+            className="hidden lg:flex items-center justify-center gap-1.5 xl:gap-2.5 text-[13px] font-medium"
           >
-            <button
-              id="navbar-topper-notes-btn"
-              type="button"
-              onClick={onOpenTopperNotes}
-              aria-keyshortcuts="N"
-              className={`whitespace-nowrap shrink-0 cursor-pointer hover:underline underline-offset-4 ${
-                isDark
-                  ? "text-[#8FA199] hover:text-[#ECF2EF]"
-                  : "text-[#5C6B63] hover:text-[#18201C]"
-              }`}
-            >
-              Notes
-            </button>
-
-            <button
-              id="navbar-ai-inspector-btn"
-              type="button"
-              onClick={onOpenAIInspector}
-              aria-keyshortcuts="I"
-              className={`whitespace-nowrap shrink-0 cursor-pointer hover:underline underline-offset-4 ${
-                isDark
-                  ? "text-[#8FA199] hover:text-[#ECF2EF]"
-                  : "text-[#5C6B63] hover:text-[#18201C]"
-              }`}
-            >
-              AI Inspector
-            </button>
-
-            <button
-              id="navbar-handovers-btn"
-              type="button"
-              onClick={onOpenHandovers}
-              aria-keyshortcuts="H"
-              className={`whitespace-nowrap shrink-0 cursor-pointer hover:underline underline-offset-4 tabular-nums ${
-                isDark
-                  ? "text-[#8FA199] hover:text-[#ECF2EF]"
-                  : "text-[#5C6B63] hover:text-[#18201C]"
-              }`}
-            >
-              Handovers{upcomingHandoversCount > 0 ? ` (${upcomingHandoversCount})` : ""}
-            </button>
-
-            <button
-              id="navbar-your-chats-button"
-              type="button"
-              onClick={onOpenYourChats}
-              aria-keyshortcuts="C"
-              className={`whitespace-nowrap shrink-0 cursor-pointer hover:underline underline-offset-4 tabular-nums ${
-                isDark
-                  ? "text-[#8FA199] hover:text-[#ECF2EF]"
-                  : "text-[#5C6B63] hover:text-[#18201C]"
-              }`}
-            >
-              Chats{chatsCount > 0 ? ` (${chatsCount})` : ""}
-            </button>
-
-            <button
-              id="navbar-wishlist-button"
-              type="button"
-              onClick={onOpenWishlist}
-              aria-keyshortcuts="W"
-              className={`whitespace-nowrap shrink-0 cursor-pointer hover:underline underline-offset-4 tabular-nums ${
-                isDark
-                  ? "text-[#8FA199] hover:text-[#ECF2EF]"
-                  : "text-[#5C6B63] hover:text-[#18201C]"
-              }`}
-            >
-              Saved{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
-            </button>
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                id={item.id}
+                type="button"
+                onClick={item.onClick}
+                aria-keyshortcuts={item.keyShortcut}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0 cursor-pointer ${
+                  item.active
+                    ? isDark
+                      ? "bg-[#182823] text-[#7BBFA8] font-semibold"
+                      : "bg-[#EFF4F1] text-[#224134] font-semibold"
+                    : isDark
+                    ? "text-[#9EB0A8] hover:text-[#ECF2EF] hover:bg-[#161E1B]"
+                    : "text-[#53625A] hover:text-[#18201C] hover:bg-[#F3F6F4]"
+                }`}
+              >
+                <span>{item.label}</span>
+                {item.count > 0 && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[11px] font-mono font-semibold leading-none tabular-nums ${
+                      item.active
+                        ? isDark
+                          ? "bg-[#223B33] text-[#7BBFA8]"
+                          : "bg-[#DCE8E2] text-[#224134]"
+                        : isDark
+                        ? "bg-[#1B2320] text-[#9EB0A8]"
+                        : "bg-[#EEF2F0] text-[#53625A]"
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                )}
+              </button>
+            ))}
           </nav>
 
-          {/* Zone 3: Minimal Utility & Primary Action */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Zone 3: Balanced Utility & Primary Action Cluster */}
+          <div className="flex items-center gap-2 sm:gap-3.5 lg:gap-5 shrink-0">
             {!isOnline && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-rose-500 mr-1">
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-500">
                 <WifiOff className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Offline</span>
               </span>
@@ -220,10 +241,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               aria-label={`Switch to ${isDark ? "Light" : "Dark"} mode`}
               title={`Switch to ${isDark ? "Light" : "Dark"} mode`}
-              className={`h-9 w-9 rounded-lg border flex items-center justify-center cursor-pointer shrink-0 ${
+              className={`h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg border flex items-center justify-center cursor-pointer shrink-0 ${
                 isDark
-                  ? "bg-[#141A18] border-[#242E2A] text-[#8FA199] hover:bg-[#1B2320] hover:text-[#ECF2EF]"
-                  : "bg-white border-[#DFE6E2] text-[#5C6B63] hover:bg-[#EFF4F1] hover:text-[#18201C]"
+                  ? "bg-[#141A18] border-[#242E2A] text-[#9EB0A8] hover:bg-[#1B2320] hover:text-[#ECF2EF]"
+                  : "bg-white border-[#DFE6E2] text-[#53625A] hover:bg-[#F3F6F4] hover:text-[#18201C]"
               }`}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -239,17 +260,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               disabled={!isOnline}
               aria-keyshortcuts="P"
-              className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 ${
+              className={`h-8 sm:h-9 lg:h-10 inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 lg:px-5 rounded-lg text-xs sm:text-[13px] font-semibold whitespace-nowrap shrink-0 ${
                 !isOnline
                   ? "bg-[#DFE6E2] dark:bg-[#242E2A] text-[#8FA199] cursor-not-allowed"
                   : isDark
                   ? "bg-[#387262] hover:bg-[#448573] text-white cursor-pointer"
-                  : "bg-[#2F5D50] hover:bg-[#244A3F] text-white cursor-pointer"
+                  : "bg-[#274C3F] hover:bg-[#1E3B31] text-white cursor-pointer"
               }`}
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>Post Item</span>
             </button>
+
+            <div
+              className={`hidden sm:block h-5 lg:h-6 w-px mx-0.5 lg:mx-1 ${
+                isDark ? "bg-[#242E2A]" : "bg-[#DFE6E2]"
+              }`}
+              aria-hidden="true"
+            />
 
             {currentUser ? (
               <div className="relative shrink-0 flex items-center" ref={profileMenuRef}>
@@ -259,16 +287,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   aria-label="User Account Menu"
                   aria-expanded={showProfileMenu}
-                  title="Profile & Edit Details"
-                  className={`flex items-center gap-1 p-0.5 rounded-full cursor-pointer ${
-                    isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
+                  title="My Profile & Account"
+                  className={`h-8 sm:h-9 lg:h-10 flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 pl-0.5 pr-1.5 sm:pl-1.5 sm:pr-3 rounded-full border cursor-pointer ${
+                    isDark
+                      ? "border-[#242E2A] bg-[#141A18] hover:bg-[#1B2320] hover:border-[#34433D]"
+                      : "border-[#DFE6E2] bg-white hover:bg-[#F3F6F4] hover:border-[#C4D1CA]"
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full border overflow-hidden flex items-center justify-center shrink-0 ${
+                    className={`w-7 h-7 lg:w-8 lg:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${
                       isDark
-                        ? "border-[#242E2A] bg-[#1B2320] text-[#ECF2EF]"
-                        : "border-[#DFE6E2] bg-[#2F5D50] text-white"
+                        ? "bg-[#1B2320] text-[#ECF2EF]"
+                        : "bg-[#274C3F] text-white"
                     }`}
                   >
                     {studentProfile?.photoURL || currentUser.photoURL ? (
@@ -283,8 +313,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     )}
                   </div>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 hidden sm:block ${
-                      isDark ? "text-[#8FA199]" : "text-[#5C6B63]"
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      isDark ? "text-[#9EB0A8]" : "text-[#53625A]"
                     }`}
                   />
                 </button>
@@ -365,7 +395,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       {onEditProfileDetails && (
                         <button
-                          id="navbar-edit-details-btn"
+                          id="navbar-my-profile-btn"
                           type="button"
                           onClick={() => {
                             setShowProfileMenu(false);
@@ -377,24 +407,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                               : "text-[#18201C] hover:bg-[#EFF4F1] border-[#DFE6E2]"
                           }`}
                         >
-                          <UserCog className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Edit Details</span>
+                          <UserIcon className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
+                          <span>My Profile</span>
                         </button>
                       )}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenAIInspector();
-                        }}
-                        className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
-                        }`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                        <span>AI Photo Inspector</span>
-                      </button>
 
                       <button
                         type="button"
@@ -408,7 +424,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       >
                         <span className="flex items-center gap-2">
                           <MessageSquare className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Your Chats</span>
+                          <span>Messages</span>
                         </span>
                         {chatsCount > 0 && (
                           <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
@@ -418,6 +434,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
+                        id="navbar-saved-alerts-button"
                         type="button"
                         onClick={() => {
                           setShowProfileMenu(false);
@@ -429,103 +446,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                       >
                         <span className="flex items-center gap-2">
                           <Heart className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Saved Wishlist</span>
+                          <span>Saved &amp; Alerts</span>
                         </span>
-                        {wishlistCount > 0 && (
+                        {wishlistCount + alertsCount > 0 && (
                           <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
-                            {wishlistCount}
+                            {wishlistCount + alertsCount}
                           </span>
                         )}
                       </button>
 
-                      <button
-                        id="navbar-alerts-button"
-                        type="button"
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenAlerts();
-                        }}
-                        className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <Bell className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Item Alerts</span>
-                        </span>
-                        {alertsCount > 0 && (
-                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
-                            {alertsCount}
-                          </span>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenHandovers();
-                        }}
-                        className={`w-full text-left px-3.5 py-2 flex items-center justify-between cursor-pointer ${
-                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <CalendarIcon className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Handovers</span>
-                        </span>
-                        {upcomingHandoversCount > 0 && (
-                          <span className="text-[11px] font-mono text-[#5C6B63] dark:text-[#8FA199] tabular-nums">
-                            {upcomingHandoversCount}
-                          </span>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowProfileMenu(false);
-                          onOpenTopperNotes();
-                        }}
-                        className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                          isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
-                        }`}
-                      >
-                        <GraduationCap className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                        <span>Topper Notes</span>
-                      </button>
-
-                      {onOpenGoogleDrive && (
+                      {onOpenSettings && (
                         <button
-                          id="navbar-drive-docs-btn"
+                          id="navbar-settings-btn"
                           type="button"
                           onClick={() => {
                             setShowProfileMenu(false);
-                            onOpenGoogleDrive();
+                            onOpenSettings();
                           }}
-                          className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
+                          className={`w-full text-left px-3.5 py-2 flex items-center gap-2 font-medium cursor-pointer ${
                             isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
                           }`}
                         >
-                          <HardDrive className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Drive &amp; Docs</span>
-                        </button>
-                      )}
-
-                      {onOpenSecurity && (
-                        <button
-                          id="navbar-security-shield-btn"
-                          type="button"
-                          onClick={() => {
-                            setShowProfileMenu(false);
-                            onOpenSecurity();
-                          }}
-                          className={`w-full text-left px-3.5 py-2 flex items-center gap-2 cursor-pointer ${
-                            isDark ? "hover:bg-[#1B2320]" : "hover:bg-[#EFF4F1]"
-                          }`}
-                        >
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
-                          <span>Campus Safety</span>
+                          <SettingsIcon className="w-3.5 h-3.5 text-[#5C6B63] dark:text-[#8FA199]" />
+                          <span>Settings</span>
                         </button>
                       )}
                     </div>
@@ -584,6 +527,48 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
         </div>
+
+        {/* Mobile & Tablet Completely Visible Navigation Row */}
+        <nav
+          aria-label="Mobile Campus Navigation"
+          className={`flex lg:hidden flex-wrap items-center justify-center sm:justify-start gap-x-1.5 gap-y-1.5 py-2 border-t text-xs font-medium ${
+            isDark ? "border-[#242E2A]" : "border-[#DFE6E2]"
+          }`}
+        >
+          {navItems.map((item) => (
+            <button
+              key={`mobile-${item.id}`}
+              type="button"
+              onClick={item.onClick}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 cursor-pointer ${
+                item.active
+                  ? isDark
+                    ? "bg-[#182823] text-[#7BBFA8] font-semibold"
+                    : "bg-[#EFF4F1] text-[#224134] font-semibold"
+                  : isDark
+                  ? "text-[#9EB0A8] hover:text-[#ECF2EF] hover:bg-[#161E1B]"
+                  : "text-[#53625A] hover:text-[#18201C] hover:bg-[#F3F6F4]"
+              }`}
+            >
+              <span>{item.label}</span>
+              {item.count > 0 && (
+                <span
+                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono font-semibold leading-none tabular-nums ${
+                    item.active
+                      ? isDark
+                        ? "bg-[#223B33] text-[#7BBFA8]"
+                        : "bg-[#DCE8E2] text-[#224134]"
+                      : isDark
+                      ? "bg-[#1B2320] text-[#9EB0A8]"
+                      : "bg-[#EEF2F0] text-[#53625A]"
+                  }`}
+                >
+                  {item.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
       </div>
     </header>
   );

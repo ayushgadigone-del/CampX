@@ -2,6 +2,9 @@ import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
+import os from "os";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
@@ -116,10 +119,16 @@ setInterval(() => {
 // Security: Secret Redactor utility to ensure no API keys or endpoint tokens ever leak in error responses or logs
 function scrubSecrets(rawText: string): string {
   if (!rawText || typeof rawText !== "string") return "";
-  const apiKey = process.env.GEMINI_API_KEY;
   let scrubbed = rawText;
-  if (apiKey && apiKey.length > 5) {
-    scrubbed = scrubbed.split(apiKey).join("[REDACTED_API_KEY]");
+  const secretsToRedact = [
+    process.env.GEMINI_API_KEY,
+    process.env.SMTP_PASS,
+    process.env.SESSION_SECRET,
+  ];
+  for (const secret of secretsToRedact) {
+    if (secret && secret.length > 5) {
+      scrubbed = scrubbed.split(secret).join("[REDACTED_SECRET]");
+    }
   }
   return scrubbed
     .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]")
@@ -149,6 +158,531 @@ app.get(["/health", "/api/health", "/_health"], (_req: Request, res: Response) =
     service: "campus-resale-backend",
     timestamp: new Date().toISOString(),
   });
+});
+
+// ============================================================================
+// Campus Student Account Auth (Email + Password + Email OTP Verification)
+// ============================================================================
+
+const ALLOWED_COLLEGE_DOMAIN = "pvgcoet.ac.in";
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const OTP_RESEND_COOLDOWN_MS = 30 * 1000; // 30 seconds
+const MAX_OTP_ATTEMPTS = 5;
+
+// Ephemeral HMAC key if SESSION_SECRET is not provided in environment
+const SESSION_SIGNING_SECRET =
+  process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
+
+interface StoredStudentAccount {
+  uid: string;
+  email: string;
+  firstName: string;
+  surname: string;
+  displayName: string;
+  year: string;
+  branch: string;
+  photoURL: string;
+  passwordSalt: string;
+  passwordHash: string;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+interface PendingOtpRegistration {
+  email: string;
+  firstName: string;
+  surname: string;
+  displayName: string;
+  year: string;
+  branch: string;
+  photoURL: string;
+  passwordSalt: string;
+  passwordHash: string;
+  otpHash: string;
+  expiresAt: number;
+  lastSentAt: number;
+  attempts: number;
+}
+
+const ACCOUNTS_STORE_PATH = path.join(os.tmpdir(), "campus-resale-student-accounts.json");
+const studentAccountsMap = new Map<string, StoredStudentAccount>();
+const pendingOtpMap = new Map<string, PendingOtpRegistration>();
+
+function loadPersistedAccounts(): void {
+  try {
+    if (!fs.existsSync(ACCOUNTS_STORE_PATH)) return;
+    const raw = fs.readFileSync(ACCOUNTS_STORE_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      for (const acc of parsed) {
+        if (acc && typeof acc.email === "string" && typeof acc.passwordHash === "string" && typeof acc.passwordSalt === "string") {
+          studentAccountsMap.set(acc.email.toLowerCase(), acc as StoredStudentAccount);
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn("Could not hydrate student accounts store:", scrubSecrets(err?.message || ""));
+  }
+}
+
+function savePersistedAccounts(): void {
+  try {
+    const serialized = JSON.stringify(Array.from(studentAccountsMap.values()));
+    fs.writeFileSync(ACCOUNTS_STORE_PATH, serialized, { encoding: "utf8", mode: 0o600 });
+  } catch (err: any) {
+    console.warn("Could not persist student accounts store:", scrubSecrets(err?.message || ""));
+  }
+}
+
+loadPersistedAccounts();
+
+// Periodically clear expired pending OTP registrations
+setInterval(() => {
+  const now = Date.now();
+  for (const [email, pending] of pendingOtpMap.entries()) {
+    if (now > pending.expiresAt) {
+      pendingOtpMap.delete(email);
+    }
+  }
+}, 2 * 60 * 1000);
+
+function isAuthorizedCollegeEmail(email: string): boolean {
+  const trimmed = email.trim().toLowerCase();
+  const basicFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return basicFormat.test(trimmed) && trimmed.endsWith(`@${ALLOWED_COLLEGE_DOMAIN}`);
+}
+
+function hashPassword(password: string): { salt: string; hash: string } {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return { salt, hash };
+}
+
+function verifyPassword(password: string, salt: string, expectedHashHex: string): boolean {
+  try {
+    const derived = crypto.scryptSync(password, salt, 64);
+    const expected = Buffer.from(expectedHashHex, "hex");
+    if (derived.length !== expected.length) return false;
+    return crypto.timingSafeEqual(derived, expected);
+  } catch {
+    return false;
+  }
+}
+
+function hashOtpCode(email: string, otp: string): string {
+  return crypto
+    .createHmac("sha256", SESSION_SIGNING_SECRET)
+    .update(`${email.toLowerCase()}:${otp}`)
+    .digest("hex");
+}
+
+function verifyOtpCode(email: string, candidateOtp: string, expectedHashHex: string): boolean {
+  try {
+    const candidateHash = Buffer.from(hashOtpCode(email, candidateOtp), "hex");
+    const expectedHash = Buffer.from(expectedHashHex, "hex");
+    if (candidateHash.length !== expectedHash.length) return false;
+    return crypto.timingSafeEqual(candidateHash, expectedHash);
+  } catch {
+    return false;
+  }
+}
+
+function createSignedSessionToken(uid: string, email: string): string {
+  const payload = Buffer.from(
+    JSON.stringify({
+      uid,
+      email,
+      iat: Date.now(),
+      exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    })
+  ).toString("base64url");
+  const signature = crypto
+    .createHmac("sha256", SESSION_SIGNING_SECRET)
+    .update(payload)
+    .digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function sanitizePlainText(value: unknown, maxLen: number): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/[<>]/g, "").trim().slice(0, maxLen);
+}
+
+function isValidAvatarPhoto(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 2 * 1024 * 1024) return false;
+  return /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(trimmed) || /^https:\/\//i.test(trimmed);
+}
+
+interface OtpDeliveryResult {
+  delivered: boolean;
+  method: "smtp" | "preview";
+}
+
+async function sendOtpEmail(
+  toEmail: string,
+  otpCode: string,
+  fullName: string
+): Promise<OtpDeliveryResult> {
+  const subject = `${otpCode} is your Campus Resale verification code`;
+  const textBody = [
+    `Hi ${fullName},`,
+    "",
+    `Your one-time password (OTP) to verify your PVG COET Campus Resale account is: ${otpCode}`,
+    "",
+    "This code expires in 10 minutes. If you did not request this account, you can safely ignore this email.",
+    "",
+    "— Campus Resale · PVG's COET",
+  ].join("\n");
+
+  const safeName = fullName.replace(/[&<>"']/g, "");
+  const htmlBody = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #F7F9F8; color: #18201C;">
+      <div style="background: #ffffff; border: 1px solid #DFE6E2; border-radius: 16px; padding: 28px;">
+        <div style="font-weight: 700; font-size: 16px; color: #224134; margin-bottom: 16px;">Campus Resale</div>
+        <h2 style="margin: 0 0 8px; font-size: 20px; color: #18201C;">Verify your college email</h2>
+        <p style="margin: 0 0 20px; font-size: 14px; color: #5C6B63; line-height: 1.5;">
+          Hi ${safeName}, enter the 6-digit one-time password below to complete your Campus Resale account creation.
+        </p>
+        <div style="background: #EFF4F1; border: 1px solid #C4D9D1; border-radius: 12px; padding: 16px; text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 0.25em; color: #224134;">
+          ${otpCode}
+        </div>
+        <p style="margin: 18px 0 0; font-size: 12px; color: #5C6B63;">
+          This verification code expires in 10 minutes. Do not share it with anyone.
+        </p>
+      </div>
+    </div>
+  `;
+
+  // Option 1: SMTP via Nodemailer (supports Gmail App Passwords with or without spaces)
+  const smtpUser = process.env.SMTP_USER?.trim();
+  const rawSmtpPass = process.env.SMTP_PASS?.trim();
+  const inferredHost =
+    process.env.SMTP_HOST?.trim() ||
+    (smtpUser?.toLowerCase().endsWith("@gmail.com") ? "smtp.gmail.com" : "");
+  const smtpPass =
+    rawSmtpPass && inferredHost.toLowerCase().includes("gmail.com")
+      ? rawSmtpPass.replace(/\s+/g, "")
+      : rawSmtpPass;
+
+  if (inferredHost && smtpUser && smtpPass) {
+    const smtpPort = Number(process.env.SMTP_PORT || 587);
+    const transporter = nodemailer.createTransport({
+      host: inferredHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+    const fromAddress = process.env.SMTP_FROM?.trim() || `Campus Resale <${smtpUser}>`;
+    await transporter.sendMail({
+      from: fromAddress,
+      to: toEmail,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    return { delivered: true, method: "smtp" };
+  }
+
+  // Fallback when SMTP secrets are not configured yet
+  return { delivered: false, method: "preview" };
+}
+
+// 1. Request OTP for new account creation
+app.post("/api/auth/request-otp", apiRateLimiter, async (req: Request, res: Response) => {
+  try {
+    const { fullName, email, password, year, branch, photoURL } = req.body || {};
+
+    const cleanFullName = sanitizePlainText(fullName, 120);
+    const nameParts = cleanFullName.split(/\s+/).filter(Boolean);
+    if (nameParts.length < 2) {
+      res.status(400).json({ error: "Please enter your full name (first name and surname)." });
+      return;
+    }
+    const firstName = nameParts[0].slice(0, 60);
+    const surname = nameParts.slice(1).join(" ").slice(0, 60);
+
+    const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    if (!isAuthorizedCollegeEmail(cleanEmail)) {
+      res.status(400).json({
+        error: `Please enter a valid college email ending with @${ALLOWED_COLLEGE_DOMAIN}.`,
+      });
+      return;
+    }
+
+    if (studentAccountsMap.has(cleanEmail)) {
+      res.status(409).json({
+        error: "An account with this college email already exists. Please sign in instead.",
+      });
+      return;
+    }
+
+    if (typeof password !== "string" || password.length < 8 || password.length > 128) {
+      res.status(400).json({ error: "Password must be at least 8 characters long." });
+      return;
+    }
+
+    const cleanYear = sanitizePlainText(year, 60);
+    if (!cleanYear) {
+      res.status(400).json({ error: "Year of study is required." });
+      return;
+    }
+
+    const cleanBranch = sanitizePlainText(branch, 100);
+    if (!cleanBranch) {
+      res.status(400).json({ error: "Branch is required." });
+      return;
+    }
+
+    if (!isValidAvatarPhoto(photoURL)) {
+      res.status(400).json({ error: "A valid profile photo (JPG, PNG, or WEBP) is required." });
+      return;
+    }
+
+    const { salt: passwordSalt, hash: passwordHash } = hashPassword(password);
+    const otpCode = String(crypto.randomInt(100000, 1000000));
+    const otpHash = hashOtpCode(cleanEmail, otpCode);
+    const now = Date.now();
+
+    pendingOtpMap.set(cleanEmail, {
+      email: cleanEmail,
+      firstName,
+      surname,
+      displayName: `${firstName} ${surname}`.trim(),
+      year: cleanYear,
+      branch: cleanBranch,
+      photoURL: photoURL.trim(),
+      passwordSalt,
+      passwordHash,
+      otpHash,
+      expiresAt: now + OTP_TTL_MS,
+      lastSentAt: now,
+      attempts: 0,
+    });
+
+    const delivery = await sendOtpEmail(cleanEmail, otpCode, `${firstName} ${surname}`.trim());
+
+    if (delivery.delivered) {
+      res.status(200).json({
+        success: true,
+        deliveryMethod: "email",
+        email: cleanEmail,
+        expiresInSeconds: Math.floor(OTP_TTL_MS / 1000),
+        message: `A 6-digit verification code has been sent to ${cleanEmail}.`,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      deliveryMethod: "preview",
+      email: cleanEmail,
+      expiresInSeconds: Math.floor(OTP_TTL_MS / 1000),
+      previewOtp: otpCode,
+      message:
+        "Email delivery (SMTP/Resend) is not yet configured in environment secrets. Use the verification code shown below to verify your account.",
+    });
+  } catch (err: any) {
+    console.error("OTP request error:", scrubSecrets(err?.message || ""));
+    res.status(500).json({
+      error: "Could not send verification OTP right now. Please try again.",
+    });
+  }
+});
+
+// 2. Resend OTP for pending registration
+app.post("/api/auth/resend-otp", apiRateLimiter, async (req: Request, res: Response) => {
+  try {
+    const cleanEmail = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const pending = pendingOtpMap.get(cleanEmail);
+    if (!pending) {
+      res.status(404).json({
+        error: "Your verification session expired. Please fill in your account details again.",
+      });
+      return;
+    }
+
+    const now = Date.now();
+    const elapsed = now - pending.lastSentAt;
+    if (elapsed < OTP_RESEND_COOLDOWN_MS) {
+      const waitSeconds = Math.ceil((OTP_RESEND_COOLDOWN_MS - elapsed) / 1000);
+      res.status(429).json({
+        error: `Please wait ${waitSeconds} seconds before requesting another OTP.`,
+      });
+      return;
+    }
+
+    const otpCode = String(crypto.randomInt(100000, 1000000));
+    pending.otpHash = hashOtpCode(cleanEmail, otpCode);
+    pending.expiresAt = now + OTP_TTL_MS;
+    pending.lastSentAt = now;
+    pending.attempts = 0;
+
+    const delivery = await sendOtpEmail(cleanEmail, otpCode, pending.displayName);
+
+    if (delivery.delivered) {
+      res.status(200).json({
+        success: true,
+        deliveryMethod: "email",
+        email: cleanEmail,
+        message: `A new 6-digit verification code has been sent to ${cleanEmail}.`,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      deliveryMethod: "preview",
+      email: cleanEmail,
+      previewOtp: otpCode,
+      message: "A fresh preview verification code has been generated.",
+    });
+  } catch (err: any) {
+    console.error("OTP resend error:", scrubSecrets(err?.message || ""));
+    res.status(500).json({ error: "Could not resend OTP right now. Please try again." });
+  }
+});
+
+// 3. Verify OTP and finalize student account creation
+app.post("/api/auth/verify-otp", apiRateLimiter, (req: Request, res: Response) => {
+  try {
+    const cleanEmail = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const cleanOtp = typeof req.body?.otp === "string" ? req.body.otp.replace(/\D/g, "").trim() : "";
+
+    if (!cleanEmail || cleanOtp.length !== 6) {
+      res.status(400).json({ error: "Please enter the 6-digit one-time password." });
+      return;
+    }
+
+    const pending = pendingOtpMap.get(cleanEmail);
+    if (!pending) {
+      res.status(404).json({
+        error: "Verification code expired or not found. Please request a new code.",
+      });
+      return;
+    }
+
+    if (Date.now() > pending.expiresAt) {
+      pendingOtpMap.delete(cleanEmail);
+      res.status(410).json({
+        error: "Your one-time password has expired. Please create your account again.",
+      });
+      return;
+    }
+
+    if (pending.attempts >= MAX_OTP_ATTEMPTS) {
+      pendingOtpMap.delete(cleanEmail);
+      res.status(429).json({
+        error: "Too many incorrect attempts. Please request a new verification code.",
+      });
+      return;
+    }
+
+    if (!verifyOtpCode(cleanEmail, cleanOtp, pending.otpHash)) {
+      pending.attempts += 1;
+      const remaining = Math.max(0, MAX_OTP_ATTEMPTS - pending.attempts);
+      res.status(400).json({
+        error:
+          remaining > 0
+            ? `Incorrect verification code. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`
+            : "Too many incorrect attempts. Please request a new verification code.",
+      });
+      return;
+    }
+
+    const uid = `student-${crypto
+      .createHash("sha256")
+      .update(cleanEmail)
+      .digest("hex")
+      .slice(0, 16)}`;
+
+    const newAccount: StoredStudentAccount = {
+      uid,
+      email: cleanEmail,
+      firstName: pending.firstName,
+      surname: pending.surname,
+      displayName: pending.displayName,
+      year: pending.year,
+      branch: pending.branch,
+      photoURL: pending.photoURL,
+      passwordSalt: pending.passwordSalt,
+      passwordHash: pending.passwordHash,
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    studentAccountsMap.set(cleanEmail, newAccount);
+    savePersistedAccounts();
+    pendingOtpMap.delete(cleanEmail);
+
+    res.status(200).json({
+      success: true,
+      email: cleanEmail,
+      message: "Account verified and created! You can now sign in using your college email and password.",
+    });
+  } catch (err: any) {
+    console.error("OTP verification error:", scrubSecrets(err?.message || ""));
+    res.status(500).json({ error: "Could not verify your code. Please try again." });
+  }
+});
+
+// 4. Sign in with verified college email & password
+app.post("/api/auth/signin", apiRateLimiter, (req: Request, res: Response) => {
+  try {
+    const cleanEmail = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+
+    if (!isAuthorizedCollegeEmail(cleanEmail)) {
+      res.status(400).json({
+        error: `Please sign in using your verified @${ALLOWED_COLLEGE_DOMAIN} college email.`,
+      });
+      return;
+    }
+
+    if (!password) {
+      res.status(400).json({ error: "Please enter your password." });
+      return;
+    }
+
+    const account = studentAccountsMap.get(cleanEmail);
+    if (!account || !account.emailVerified) {
+      res.status(401).json({
+        error: "Invalid PVG college email or password. If you don't have an account yet, click Create account.",
+      });
+      return;
+    }
+
+    const isPasswordValid = verifyPassword(password, account.passwordSalt, account.passwordHash);
+    if (!isPasswordValid) {
+      res.status(401).json({
+        error: "Invalid PVG college email or password.",
+      });
+      return;
+    }
+
+    const token = createSignedSessionToken(account.uid, account.email);
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        uid: account.uid,
+        email: account.email,
+        firstName: account.firstName,
+        surname: account.surname,
+        displayName: account.displayName,
+        year: account.year,
+        branch: account.branch,
+        photoURL: account.photoURL,
+      },
+    });
+  } catch (err: any) {
+    console.error("Sign-in error:", scrubSecrets(err?.message || ""));
+    res.status(500).json({ error: "Sign in failed. Please try again." });
+  }
 });
 
 // Image Analysis using Gemini model with rigorous validation & key isolation

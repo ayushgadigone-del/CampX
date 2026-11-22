@@ -85,6 +85,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#F7F9F8] dark:bg-[#0D1110] text-[#18201C] dark:text-[#ECF2EF] flex flex-col font-sans">
+      {/* Topmost Announcement Header */}
+      <div
+        id="landing-top-announcement-bar"
+        className="w-full py-2.5 px-4 text-center text-xs sm:text-[13px] font-medium tracking-wide bg-[#224134] dark:bg-[#162C24] text-white dark:text-[#ECF2EF] dark:border-b dark:border-[#242E2A]"
+      >
+        A smarter way to buy, sell &amp; exchange on campus.
+      </div>
+
       {/* Minimal 3-Zone Header */}
       <header className="sticky top-0 z-40 bg-white dark:bg-[#0D1110] border-b border-[#DFE6E2] dark:border-[#242E2A]">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-8">
@@ -417,10 +425,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </main>
 
       <footer className="border-t border-[#DFE6E2] dark:border-[#242E2A] py-6 px-4 sm:px-6 lg:px-8 text-xs text-[#5C6B63] dark:text-[#8FA199]">
-        <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span className="font-medium text-[#18201C] dark:text-[#ECF2EF]">
-            PVG&apos;s COET Campus Resale &amp; Exchange
-          </span>
+        <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+          <div>
+            <span className="font-medium text-[#18201C] dark:text-[#ECF2EF]">
+              PVG&apos;s COET Campus Resale &amp; Exchange
+            </span>
+            <p className="mt-0.5 font-medium text-[#2F5D50] dark:text-[#7BBFA8]">
+              Better finds. Better value. Better campus communities.
+            </p>
+          </div>
           <span>Pune Campus · Student-to-Student Marketplace</span>
         </div>
       </footer>
