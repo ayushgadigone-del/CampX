@@ -46,26 +46,26 @@ googleProvider.setCustomParameters({
   prompt: "select_account",
 });
 
-// Primary Firestore Database ID for this applet
-const FIRESTORE_DB_ID =
-  (firebaseConfig as Record<string, any>).firestoreDatabaseId ||
-  "ai-studio-campusresaleexch-f68635d5-915d-4859-b9cf-6705adcd3715";
+// Use configured named Firestore database ID if present; otherwise connect to "(default)"
+const configuredDatabaseId =
+  typeof (firebaseConfig as Record<string, any>).firestoreDatabaseId === "string" &&
+  (firebaseConfig as Record<string, any>).firestoreDatabaseId.trim().length > 0
+    ? (firebaseConfig as Record<string, any>).firestoreDatabaseId.trim()
+    : undefined;
 
 let firestoreInstance;
 try {
-  firestoreInstance = initializeFirestore(
-    app,
-    {
-      experimentalForceLongPolling: true,
-    },
-    FIRESTORE_DB_ID
-  );
+  firestoreInstance = configuredDatabaseId
+    ? initializeFirestore(
+        app,
+        { experimentalAutoDetectLongPolling: true },
+        configuredDatabaseId
+      )
+    : initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
 } catch {
-  try {
-    firestoreInstance = getFirestore(app, FIRESTORE_DB_ID);
-  } catch {
-    firestoreInstance = getFirestore(app);
-  }
+  firestoreInstance = configuredDatabaseId
+    ? getFirestore(app, configuredDatabaseId)
+    : getFirestore(app);
 }
 export const db = firestoreInstance;
 
