@@ -20,6 +20,10 @@ import {
   COLLEGE_BRANCHES,
   processProfileAvatarFile,
 } from "../utils/studentProfile";
+import {
+  registerFirebaseCollegeAccount,
+  signInFirebaseCollegeAccount,
+} from "../lib/firebase";
 
 export interface LoginProfilePayload {
   firstName: string;
@@ -152,6 +156,32 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
 
     setIsLoading(true);
     try {
+      // 1. Authenticate against persistent Firebase Auth + Firestore profile first
+      const firebaseSignIn = await signInFirebaseCollegeAccount(cleanEmail, signInPassword);
+      if (firebaseSignIn.status === "signed_in") {
+        const fbProfile = firebaseSignIn.profile;
+        await onDemoCollegeSignIn(
+          cleanEmail,
+          fbProfile?.displayName || firebaseSignIn.user.displayName || undefined,
+          fbProfile
+            ? {
+                firstName: fbProfile.firstName,
+                surname: fbProfile.surname,
+                year: fbProfile.year,
+                branch: fbProfile.branch,
+                photoURL: fbProfile.photoURL,
+              }
+            : undefined
+        );
+        return;
+      }
+
+      if (firebaseSignIn.status === "too_many_requests") {
+        setValidationError(firebaseSignIn.message);
+        return;
+      }
+
+      // 2. Graceful fallback to Express auth store (for accounts created prior to enabling Firebase Email/Password)
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -302,18 +332,41 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
         return;
       }
 
-      // Account verified and created -> switch to Sign In screen with email pre-filled
+      // Persist verified student account to Firebase Auth + Firestore /users/{uid}
       const verifiedEmail = data.email || pendingEmail;
+      const verifiedUser = data.user as Partial<AuthenticatedAccountPayload> | undefined;
+      const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+      const resolvedFirstName = verifiedUser?.firstName || nameParts[0] || "";
+      const resolvedSurname = verifiedUser?.surname || nameParts.slice(1).join(" ") || "";
+
+      const fbRegistration = await registerFirebaseCollegeAccount({
+        email: verifiedEmail,
+        password: createPassword,
+        firstName: resolvedFirstName,
+        surname: resolvedSurname,
+        year: verifiedUser?.year || year,
+        branch: verifiedUser?.branch || branch,
+        photoURL: verifiedUser?.photoURL || photoURL,
+      });
+
+      // Account verified and created -> switch to Sign In screen with email pre-filled
       setSignInEmail(verifiedEmail);
       setSignInPassword("");
       setCreatePassword("");
       setConfirmPassword("");
       setOtpInput("");
       setPreviewOtpCode(null);
-      setSuccessNotice(
-        data.message ||
-          "Account verified and created! Sign in below with your PVG college email and password."
-      );
+
+      if (fbRegistration.status === "already_exists") {
+        setSuccessNotice(
+          "An account with this PVG college email already exists. Sign in below with your password."
+        );
+      } else {
+        setSuccessNotice(
+          data.message ||
+            "Account verified and created! Sign in below with your PVG college email and password."
+        );
+      }
       setViewMode("signin");
     } catch (err: any) {
       setValidationError(err?.message || "Could not verify OTP. Please try again.");
@@ -888,7 +941,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                       {previewOtpCode}
                     </div>
                     <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
-                      Add SMTP or Resend credentials in environment secrets to send real emails directly to student inboxes.
+                      Add Google SMTP credentials in environment secrets to send real verification emails directly to student inboxes.
                     </p>
                   </div>
                 )}

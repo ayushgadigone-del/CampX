@@ -3,6 +3,8 @@ import {
   getAuth,
   signInWithPopup,
   signInAnonymously,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   updateProfile,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -13,6 +15,8 @@ import {
   getFirestore,
   initializeFirestore,
   doc,
+  getDoc,
+  setDoc,
   getDocFromServer,
 } from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
@@ -451,7 +455,15 @@ export const collegeEmailSignIn = async (
   } catch {}
 
   try {
-    const cred = await signInAnonymously(auth);
+    // Preserve an existing real (non-anonymous) Firebase Auth session matching this college email
+    const existingAuthUser = auth.currentUser;
+    const activeUser =
+      existingAuthUser &&
+      !existingAuthUser.isAnonymous &&
+      existingAuthUser.email?.toLowerCase() === cleanEmail
+        ? existingAuthUser
+        : (await signInAnonymously(auth)).user;
+
     try {
       const authProfileUpdate: { displayName?: string; photoURL?: string } = {
         displayName: resolvedName,
@@ -459,8 +471,10 @@ export const collegeEmailSignIn = async (
       if (avatarUrl.length < 1800) {
         authProfileUpdate.photoURL = avatarUrl;
       }
-      await updateProfile(cred.user, authProfileUpdate);
+      await updateProfile(activeUser, authProfileUpdate);
     } catch {}
+
+    const cred = { user: activeUser };
 
     Object.defineProperty(cred.user, "email", {
       value: cleanEmail,
@@ -519,6 +533,220 @@ export const collegeEmailSignIn = async (
 
 // Backward-compatible alias for demoStudentSignIn
 export const demoStudentSignIn = collegeEmailSignIn;
+
+export interface FirebaseCollegeProfileRecord {
+  uid: string;
+  email: string;
+  firstName: string;
+  surname: string;
+  displayName: string;
+  year: string;
+  branch: string;
+  photoURL: string;
+}
+
+export type FirebaseCollegeRegisterResult =
+  | { status: "created"; uid: string }
+  | { status: "already_exists" }
+  | { status: "provider_disabled" }
+  | { status: "error"; message: string };
+
+/**
+ * Registers a verified PVG student account in Firebase Auth (Email/Password)
+ * and persists their full compulsory profile to Firestore `/users/{uid}` so it
+ * survives Cloud Run container restarts. Signs out cleanly afterwards so the
+ * student completes a normal Sign In flow.
+ */
+export const registerFirebaseCollegeAccount = async (params: {
+  email: string;
+  password: string;
+  firstName: string;
+  surname: string;
+  year: string;
+  branch: string;
+  photoURL: string;
+}): Promise<FirebaseCollegeRegisterResult> => {
+  const cleanEmail = params.email.trim().toLowerCase();
+  if (!isValidCollegeEmail(cleanEmail)) {
+    return {
+      status: "error",
+      message: `Only emails ending with @${ALLOWED_COLLEGE_DOMAIN} are allowed.`,
+    };
+  }
+
+  const displayName = `${params.firstName.trim()} ${params.surname.trim()}`.trim();
+  const updatedAt = new Date().toISOString();
+
+  isSigningIn = true;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, cleanEmail, params.password);
+    try {
+      const authUpdate: { displayName?: string; photoURL?: string } = { displayName };
+      if (params.photoURL && params.photoURL.length < 1800) {
+        authUpdate.photoURL = params.photoURL;
+      }
+      await updateProfile(cred.user, authUpdate);
+    } catch (profileErr) {
+      console.warn("Firebase Auth displayName update notice:", profileErr);
+    }
+
+    try {
+      await setDoc(
+        doc(db, "users", cred.user.uid),
+        {
+          uid: cred.user.uid,
+          email: cleanEmail,
+          firstName: params.firstName.trim().slice(0, 60),
+          surname: params.surname.trim().slice(0, 60),
+          displayName: displayName.slice(0, 120),
+          department: params.branch.trim().slice(0, 100),
+          branch: params.branch.trim().slice(0, 100),
+          year: params.year.trim().slice(0, 50),
+          photoURL: params.photoURL,
+          emailVerified: true,
+          profileCompleted: true,
+          updatedAt,
+        },
+        { merge: true }
+      );
+    } catch (firestoreErr) {
+      handleFirestoreError(firestoreErr, OperationType.WRITE, `users/${cred.user.uid}`);
+    }
+
+    // Sign out cleanly so the student returns to the Sign In screen as designed
+    try {
+      await signOut(auth);
+    } catch {}
+
+    return { status: "created", uid: cred.user.uid };
+  } catch (err: any) {
+    const code = err?.code || "";
+    if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
+      console.info(
+        "Firebase Email/Password provider is not enabled yet in Firebase Console; using server session fallback."
+      );
+      return { status: "provider_disabled" };
+    }
+    if (code === "auth/email-already-in-use") {
+      return { status: "already_exists" };
+    }
+    return {
+      status: "error",
+      message: err?.message || "Could not persist student account to Firebase.",
+    };
+  } finally {
+    isSigningIn = false;
+  }
+};
+
+export type FirebaseCollegeSignInResult =
+  | {
+      status: "signed_in";
+      user: User;
+      profile: FirebaseCollegeProfileRecord | null;
+    }
+  | { status: "provider_disabled" }
+  | { status: "not_found_or_invalid" }
+  | { status: "too_many_requests"; message: string };
+
+/**
+ * Signs in a student against Firebase Auth (Email/Password) and hydrates their
+ * persistent profile document from Firestore `/users/{uid}`.
+ */
+export const signInFirebaseCollegeAccount = async (
+  email: string,
+  password: string
+): Promise<FirebaseCollegeSignInResult> => {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!isValidCollegeEmail(cleanEmail)) {
+    return { status: "not_found_or_invalid" };
+  }
+
+  isSigningIn = true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+    let profile: FirebaseCollegeProfileRecord | null = null;
+
+    try {
+      const snap = await getDoc(doc(db, "users", cred.user.uid));
+      if (snap.exists()) {
+        const data = snap.data() as Record<string, any>;
+        if (data.firstName && data.surname && data.year && data.branch && data.photoURL) {
+          profile = {
+            uid: cred.user.uid,
+            email: cleanEmail,
+            firstName: String(data.firstName),
+            surname: String(data.surname),
+            displayName:
+              String(data.displayName || `${data.firstName} ${data.surname}`).trim(),
+            year: String(data.year),
+            branch: String(data.branch),
+            photoURL: String(data.photoURL),
+          };
+        }
+      }
+    } catch (firestoreErr) {
+      handleFirestoreError(firestoreErr, OperationType.GET, `users/${cred.user.uid}`);
+    }
+
+    const resolvedName =
+      profile?.displayName ||
+      cred.user.displayName ||
+      cleanEmail
+        .split("@")[0]
+        .split(".")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+
+    const resolvedPhoto =
+      profile?.photoURL ||
+      cred.user.photoURL ||
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80";
+
+    try {
+      localStorage.removeItem(EXPLICIT_LOGOUT_STORAGE_KEY);
+      localStorage.setItem(
+        COLLEGE_USER_STORAGE_KEY,
+        JSON.stringify({
+          uid: cred.user.uid,
+          email: cleanEmail,
+          displayName: resolvedName,
+          photoURL: resolvedPhoto,
+          explicitSignIn: true,
+          ...(profile
+            ? {
+                firstName: profile.firstName,
+                surname: profile.surname,
+                year: profile.year,
+                branch: profile.branch,
+                profileCompleted: true,
+              }
+            : {}),
+        })
+      );
+    } catch {}
+
+    return {
+      status: "signed_in",
+      user: cred.user,
+      profile,
+    };
+  } catch (err: any) {
+    const code = err?.code || "";
+    if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
+      return { status: "provider_disabled" };
+    }
+    if (code === "auth/too-many-requests") {
+      return {
+        status: "too_many_requests",
+        message: "Too many failed sign-in attempts. Please wait a minute and try again.",
+      };
+    }
+    return { status: "not_found_or_invalid" };
+  } finally {
+    isSigningIn = false;
+  }
+};
 
 export const getAccessToken = async (): Promise<string | null> => {
   return cachedAccessToken;

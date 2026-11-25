@@ -5,22 +5,24 @@
       "description": "A pre-owned item listed by a college student for sale or exchange",
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
-        "description": { "type": "string" },
+        "title": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 2000 },
         "category": { "type": "string", "enum": ["Books", "Calculators", "Lab Equipment", "Cycles", "Bags", "Other"] },
         "condition": { "type": "string", "enum": ["Like New", "Good", "Fair", "Wear & Tear"] },
         "listingType": { "type": "string", "enum": ["sell", "exchange", "both"] },
         "price": { "type": "number", "description": "Resale price offered by the student seller" },
         "originalPrice": { "type": "number", "description": "Actual store / retail MRP purchase price for student savings comparison" },
-        "exchangeFor": { "type": "string" },
+        "exchangeFor": { "type": "string", "maxLength": 300 },
         "imageUrl": { "type": "string" },
-        "sellerId": { "type": "string" },
-        "sellerName": { "type": "string" },
-        "sellerEmail": { "type": "string" },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "sellerEmail": { "type": "string", "maxLength": 160 },
         "sellerPhoto": { "type": "string" },
         "status": { "type": "string", "enum": ["available", "reserved", "handover_scheduled", "completed"] },
         "views": { "type": "number", "description": "Total count of student views/impressions received for social proof" },
-        "createdAt": { "type": "string" }
+        "availableStock": { "type": "number" },
+        "expiryDate": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["title", "category", "condition", "listingType", "sellerId", "status"]
     },
@@ -29,34 +31,58 @@
       "description": "Direct student-to-student negotiation thread linked to an item listing",
       "type": "object",
       "properties": {
-        "listingId": { "type": "string" },
-        "listingTitle": { "type": "string" },
-        "sellerId": { "type": "string" },
-        "buyerId": { "type": "string" },
+        "listingId": { "type": "string", "maxLength": 128 },
+        "listingTitle": { "type": "string", "maxLength": 150 },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "buyerId": { "type": "string", "maxLength": 128 },
         "participants": { "type": "array" },
-        "lastMessage": { "type": "string" },
+        "participantIds": { "type": "array" },
+        "lastMessage": { "type": "string", "maxLength": 1000 },
         "lastMessageTimestamp": { "type": "number" }
       },
       "required": ["listingId", "sellerId", "buyerId", "participants"]
     },
     "UserProfile": {
       "title": "UserProfile",
-      "description": "Verified student account profile",
+      "description": "Verified student account profile persisted across Cloud Run restarts",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
+        "uid": { "type": "string", "maxLength": 128 },
         "firstName": { "type": "string", "minLength": 1, "maxLength": 60 },
         "surname": { "type": "string", "minLength": 1, "maxLength": 60 },
         "displayName": { "type": "string", "maxLength": 120 },
-        "email": { "type": "string" },
+        "email": { "type": "string", "maxLength": 160 },
         "department": { "type": "string", "maxLength": 100 },
         "branch": { "type": "string", "maxLength": 100 },
         "year": { "type": "string", "maxLength": 50 },
+        "rollNumber": { "type": "string", "maxLength": 40 },
+        "admissionYear": { "type": "string", "maxLength": 10 },
+        "lastYearCgpa": { "type": "string", "maxLength": 10 },
+        "bio": { "type": "string", "maxLength": 300 },
+        "interests": { "type": "string", "maxLength": 200 },
         "photoURL": { "type": "string" },
+        "emailVerified": { "type": "boolean" },
         "profileCompleted": { "type": "boolean" },
-        "updatedAt": { "type": "string" }
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
-      "required": ["uid", "email"]
+      "required": ["uid", "email", "firstName", "surname", "year", "branch", "photoURL", "profileCompleted"]
+    },
+    "TopperNote": {
+      "title": "TopperNote",
+      "description": "Campus Topper Vault study guide or uploaded semester note document",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 2, "maxLength": 200 },
+        "subject": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "branch": { "type": "string", "maxLength": 100 },
+        "semester": { "type": "string", "maxLength": 30 },
+        "author": { "type": "string", "maxLength": 120 },
+        "uploadedByEmail": { "type": "string", "maxLength": 160 },
+        "uploaderId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 1500 },
+        "lastUpdated": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["title", "subject", "semester"]
     }
   },
   "firestore": {
@@ -70,7 +96,11 @@
     },
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "Verified student profile records"
+      "description": "Private verified student profile records (owner-only read/write)"
+    },
+    "/topper_notes/{noteId}": {
+      "schema": "TopperNote",
+      "description": "Campus Topper Vault semester notes and study guides"
     }
   }
 }

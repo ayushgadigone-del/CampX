@@ -1,7 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Authentication Helpers
+    // =========================================================
+    // Core Auth & Validation Helpers
+    // =========================================================
     function isSignedIn() {
       return request.auth != null;
     }
@@ -10,86 +12,188 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // 1. Campus Listings Collection
-    match /listings/{listingId} {
-      allow read: if true;
-
-      // Only signed-in students can create listings, binding their UID & email
-      allow create: if isSignedIn()
-        && request.resource.data.title is string
-        && request.resource.data.title.size() >= 3
-        && request.resource.data.title.size() <= 150
-        && request.resource.data.category is string
-        && request.resource.data.price is number
-        && request.resource.data.price >= 0
-        && request.resource.data.price <= 500000
-        && request.resource.data.sellerId == request.auth.uid;
-
-      // Listing owners can edit their listings; or specific permitted field updates
-      allow update: if (isSignedIn() && resource.data.sellerId == request.auth.uid)
-        // Public/peer view count increment
-        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
-        // Student reporting suspicious listing for moderation
-        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isReported', 'reportReason', 'reportDetails'])
-        // Handover feedback and rating submission
-        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews', 'averageRating', 'totalReviews'])
-        // Scheduling handover meeting
-        || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'handoverDetails']));
-
-      // Only the listing owner can delete their listing
-      allow delete: if isSignedIn() && (resource.data.sellerId == request.auth.uid);
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && !id.matches('.*[/\\\\].*');
     }
 
-    // 2. Student Conversations & Negotiations (Strict Participant Privacy)
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isOptionalString(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.uid == userId
+        && isValidString(data.email, 5, 160)
+        && isOptionalString(data, 'firstName', 60)
+        && isOptionalString(data, 'surname', 60)
+        && isOptionalString(data, 'displayName', 120)
+        && isOptionalString(data, 'department', 100)
+        && isOptionalString(data, 'branch', 100)
+        && isOptionalString(data, 'year', 50)
+        && isOptionalString(data, 'rollNumber', 40)
+        && isOptionalString(data, 'admissionYear', 10)
+        && isOptionalString(data, 'lastYearCgpa', 10)
+        && isOptionalString(data, 'bio', 300)
+        && isOptionalString(data, 'interests', 200)
+        && isOptionalString(data, 'updatedAt', 64)
+        && (!('emailVerified' in data) || data.emailVerified is bool)
+        && (!('profileCompleted' in data) || data.profileCompleted is bool);
+    }
+
+    function isValidListingCreate(data) {
+      return isValidString(data.title, 3, 150)
+        && isValidString(data.category, 2, 60)
+        && data.price is number
+        && data.price >= 0
+        && data.price <= 500000
+        && data.sellerId == request.auth.uid
+        && (!('status' in data) || data.status in ['available', 'reserved', 'handover_scheduled', 'completed'])
+        && isOptionalString(data, 'description', 2000)
+        && isOptionalString(data, 'exchangeFor', 300)
+        && isOptionalString(data, 'sellerName', 120)
+        && isOptionalString(data, 'sellerEmail', 160);
+    }
+
+    function isConversationParticipant(data) {
+      return isSignedIn() && (
+        request.auth.uid == data.buyerId
+        || request.auth.uid == data.sellerId
+        || ('participantIds' in data && data.participantIds is list && request.auth.uid in data.participantIds)
+      );
+    }
+
+    function isTopperNoteUploader(data) {
+      return isSignedIn() && (
+        ('uploaderId' in data && data.uploaderId == request.auth.uid)
+        || ('uploadedByEmail' in data && request.auth.token.email != null && data.uploadedByEmail == request.auth.token.email)
+      );
+    }
+
+    // =========================================================
+    // 1. Campus Listings Collection
+    // =========================================================
+    match /listings/{listingId} {
+      allow read: if isValidId(listingId);
+
+      // Only signed-in students can create listings bound to their UID
+      allow create: if isSignedIn()
+        && isValidId(listingId)
+        && isValidListingCreate(request.resource.data);
+
+      // Listing owner can edit (preserving sellerId); signed-in peers have scoped field updates
+      allow update: if isSignedIn() && isValidId(listingId) && (
+        // Owner editing their own listing without reassigning ownership
+        (resource.data.sellerId == request.auth.uid
+          && request.resource.data.sellerId == resource.data.sellerId)
+        // Peer view count increment
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+          && request.resource.data.views is number
+          && request.resource.data.views >= 0)
+        // Student reporting a suspicious listing for moderation
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isReported', 'reportReason', 'reportDetails'])
+          && request.resource.data.isReported == true
+          && isOptionalString(request.resource.data, 'reportReason', 120)
+          && isOptionalString(request.resource.data, 'reportDetails', 1000))
+        // Handover feedback & rating submission
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews', 'averageRating', 'totalReviews'])
+          && request.resource.data.reviews is list
+          && request.resource.data.reviews.size() <= 200
+          && request.resource.data.averageRating is number
+          && request.resource.data.totalReviews is number)
+        // Scheduling a verified campus handover meeting
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'handoverDetails'])
+          && request.resource.data.status == 'handover_scheduled')
+      );
+
+      // Only the listing owner can delete their listing
+      allow delete: if isSignedIn()
+        && isValidId(listingId)
+        && resource.data.sellerId == request.auth.uid;
+    }
+
+    // =========================================================
+    // 2. Student Conversations & Negotiations (Strict Privacy)
+    // =========================================================
     match /conversations/{conversationId} {
-      // Students can only read or modify conversations where they are the buyer or seller
-      allow read: if isSignedIn() && (
-        resource == null 
-        || request.auth.uid == resource.data.buyerId 
-        || request.auth.uid == resource.data.sellerId
-        || (resource.data.keys().hasAny(['participantIds']) && request.auth.uid in resource.data.participantIds)
+      allow read: if isSignedIn() && isValidId(conversationId) && (
+        resource == null || isConversationParticipant(resource.data)
       );
 
-      allow create: if isSignedIn() && (
-        request.auth.uid == request.resource.data.buyerId 
-        || request.auth.uid == request.resource.data.sellerId
-      );
+      allow create: if isSignedIn()
+        && isValidId(conversationId)
+        && (request.auth.uid == request.resource.data.buyerId
+          || request.auth.uid == request.resource.data.sellerId)
+        && isOptionalString(request.resource.data, 'listingTitle', 150)
+        && isOptionalString(request.resource.data, 'lastMessage', 1000);
 
-      allow update: if isSignedIn() && (
-        request.auth.uid == resource.data.buyerId 
-        || request.auth.uid == resource.data.sellerId
-      );
+      allow update: if isSignedIn()
+        && isValidId(conversationId)
+        && isConversationParticipant(resource.data)
+        && request.resource.data.buyerId == resource.data.buyerId
+        && request.resource.data.sellerId == resource.data.sellerId
+        && isOptionalString(request.resource.data, 'lastMessage', 1000);
 
-      allow delete: if isSignedIn() && (
-        request.auth.uid == resource.data.buyerId 
-        || request.auth.uid == resource.data.sellerId
-      );
+      allow delete: if isSignedIn()
+        && isValidId(conversationId)
+        && isConversationParticipant(resource.data);
 
       match /messages/{messageId} {
-        allow read, write: if isSignedIn() && (
-          request.auth.uid == get(/databases/$(database)/documents/conversations/$(conversationId)).data.buyerId
-          || request.auth.uid == get(/databases/$(database)/documents/conversations/$(conversationId)).data.sellerId
-        );
+        allow read: if isSignedIn()
+          && isValidId(conversationId)
+          && isValidId(messageId)
+          && isConversationParticipant(get(/databases/$(database)/documents/conversations/$(conversationId)).data);
+
+        allow create: if isSignedIn()
+          && isValidId(conversationId)
+          && isValidId(messageId)
+          && isConversationParticipant(get(/databases/$(database)/documents/conversations/$(conversationId)).data)
+          && (!('senderId' in request.resource.data) || request.resource.data.senderId == request.auth.uid)
+          && isOptionalString(request.resource.data, 'text', 2000);
+
+        allow update, delete: if isSignedIn()
+          && isValidId(conversationId)
+          && isValidId(messageId)
+          && isConversationParticipant(get(/databases/$(database)/documents/conversations/$(conversationId)).data)
+          && ('senderId' in resource.data && resource.data.senderId == request.auth.uid);
       }
     }
 
-    // 3. User Profiles Collection
+    // =========================================================
+    // 3. Verified Student Profiles (Strict Owner-Only PII Access)
+    // =========================================================
     match /users/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
+      allow read: if isOwner(userId) && isValidId(userId);
+      allow create, update: if isOwner(userId)
+        && isValidId(userId)
+        && isValidUserProfile(request.resource.data, userId);
+      allow delete: if isOwner(userId) && isValidId(userId);
     }
 
-    // 4. Topper Notes Archive
+    // =========================================================
+    // 4. Campus Topper Notes Archive
+    // =========================================================
     match /topper_notes/{noteId} {
-      allow read: if true;
-      allow create: if isSignedIn() 
-        && request.resource.data.title is string
-        && request.resource.data.subject is string;
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn() && (
-        resource.data.uploadedByEmail == request.auth.token.email
-        || request.auth.token.email == 'ayushgadigone@gmail.com'
-      );
+      allow read: if isValidId(noteId);
+
+      allow create: if isSignedIn()
+        && isValidId(noteId)
+        && isValidString(request.resource.data.title, 2, 200)
+        && isValidString(request.resource.data.subject, 2, 120)
+        && isOptionalString(request.resource.data, 'semester', 30)
+        && isOptionalString(request.resource.data, 'branch', 100)
+        && isOptionalString(request.resource.data, 'description', 1500);
+
+      allow update, delete: if isValidId(noteId) && isTopperNoteUploader(resource.data);
+    }
+
+    // =========================================================
+    // 5. Default Deny-All Fallback
+    // =========================================================
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

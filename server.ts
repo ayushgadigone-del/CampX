@@ -15,7 +15,7 @@ const isProduction =
   process.env.NODE_ENV === "production" ||
   process.argv.some((arg) => arg.includes("server.js") || arg.includes("server.cjs") || arg.includes("dist"));
 
-// Support both CLI flags (--port 3000, --host 0.0.0.0) and environment variables
+// Support CLI flags (--port 3000, --host 0.0.0.0) and Cloud Run PORT env var
 let port = 3000;
 const portArgIndex = process.argv.findIndex((arg) => arg === "--port" || arg === "-p");
 if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
@@ -23,8 +23,13 @@ if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
   if (!isNaN(parsed) && parsed > 0) {
     port = parsed;
   }
-} else if (process.env.PORT && process.env.PORT !== "8080") {
-  port = parseInt(process.env.PORT, 10);
+} else if (process.env.PORT) {
+  const parsedEnvPort = parseInt(process.env.PORT, 10);
+  // In production (Google Cloud Run), always honor process.env.PORT (including 8080).
+  // In local dev preview, keep port 3000 unless a non-8080 port is explicitly provided.
+  if (!isNaN(parsedEnvPort) && parsedEnvPort > 0 && (isProduction || parsedEnvPort !== 8080)) {
+    port = parsedEnvPort;
+  }
 }
 const PORT = port;
 
@@ -37,6 +42,8 @@ const HOST = host;
 
 // Security: Disable X-Powered-By header to prevent server technology fingerprinting
 app.disable("x-powered-by");
+// Trust Google Cloud Run's HTTPS load balancer proxy headers for accurate client IP & rate limiting
+app.set("trust proxy", 1);
 
 // Process-level error resilience to keep dev server robust
 process.on("unhandledRejection", (reason, promise) => {
@@ -484,7 +491,7 @@ app.post("/api/auth/request-otp", apiRateLimiter, async (req: Request, res: Resp
       expiresInSeconds: Math.floor(OTP_TTL_MS / 1000),
       previewOtp: otpCode,
       message:
-        "Email delivery (SMTP/Resend) is not yet configured in environment secrets. Use the verification code shown below to verify your account.",
+        "Google SMTP email delivery is not yet configured in environment secrets. Use the verification code shown below to verify your account.",
     });
   } catch (err: any) {
     console.error("OTP request error:", scrubSecrets(err?.message || ""));
@@ -622,6 +629,16 @@ app.post("/api/auth/verify-otp", apiRateLimiter, (req: Request, res: Response) =
     res.status(200).json({
       success: true,
       email: cleanEmail,
+      user: {
+        uid: newAccount.uid,
+        email: newAccount.email,
+        firstName: newAccount.firstName,
+        surname: newAccount.surname,
+        displayName: newAccount.displayName,
+        year: newAccount.year,
+        branch: newAccount.branch,
+        photoURL: newAccount.photoURL,
+      },
       message: "Account verified and created! You can now sign in using your college email and password.",
     });
   } catch (err: any) {
