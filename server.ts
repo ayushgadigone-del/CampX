@@ -13,6 +13,7 @@ dotenv.config();
 const app = express();
 const isProduction =
   process.env.NODE_ENV === "production" ||
+  process.env.RENDER === "true" ||
   process.argv.some((arg) => arg.includes("server.js") || arg.includes("server.cjs") || arg.includes("dist"));
 
 // Support CLI flags (--port 3000, --host 0.0.0.0) and Cloud Run PORT env var
