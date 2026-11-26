@@ -5,6 +5,9 @@ import {
   signInAnonymously,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  reload,
   updateProfile,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -230,6 +233,21 @@ export const initAuth = (
 
       // If this is a leftover anonymous Firebase session without an explicit college sign-in, treat as signed out
       if (user.isAnonymous && !hasExplicitLocalSession) {
+        try {
+          await signOut(auth);
+        } catch {}
+        cachedAccessToken = null;
+        if (onAuthFailure) {
+          onAuthFailure();
+        }
+        return;
+      }
+
+      // Block unverified Email/Password accounts from automatically entering the marketplace
+      const isPasswordAccount =
+        !user.isAnonymous &&
+        user.providerData?.some((provider) => provider.providerId === "password");
+      if (isPasswordAccount && !user.emailVerified) {
         try {
           await signOut(auth);
         } catch {}
@@ -546,16 +564,43 @@ export interface FirebaseCollegeProfileRecord {
 }
 
 export type FirebaseCollegeRegisterResult =
-  | { status: "created"; uid: string }
+  | { status: "verification_sent"; uid: string; email: string }
   | { status: "already_exists" }
-  | { status: "provider_disabled" }
+  | { status: "provider_disabled"; message: string }
+  | { status: "too_many_requests"; message: string }
   | { status: "error"; message: string };
 
 /**
- * Registers a verified PVG student account in Firebase Auth (Email/Password)
- * and persists their full compulsory profile to Firestore `/users/{uid}` so it
- * survives Cloud Run container restarts. Signs out cleanly afterwards so the
- * student completes a normal Sign In flow.
+ * Helper: Sends Firebase's built-in HTTPS verification link.
+ * Falls back cleanly without continueUrl if the current host isn't allowlisted in Authorized Domains yet.
+ */
+async function dispatchFirebaseVerificationEmail(user: User): Promise<void> {
+  const actionCodeSettings =
+    typeof window !== "undefined" && window.location.origin.startsWith("http")
+      ? { url: window.location.origin, handleCodeInApp: false }
+      : undefined;
+
+  if (actionCodeSettings) {
+    try {
+      await sendEmailVerification(user, actionCodeSettings);
+      return;
+    } catch (verifyErr: any) {
+      if (
+        verifyErr?.code !== "auth/unauthorized-continue-uri" &&
+        verifyErr?.code !== "auth/invalid-continue-uri"
+      ) {
+        throw verifyErr;
+      }
+    }
+  }
+  await sendEmailVerification(user);
+}
+
+/**
+ * Registers a PVG student account in Firebase Auth (Email/Password), saves their
+ * compulsory profile to Firestore `/users/{uid}`, sends Firebase's built-in HTTPS
+ * verification link to their college inbox (works on Render free tier with zero SMTP),
+ * and signs out cleanly until they click the link.
  */
 export const registerFirebaseCollegeAccount = async (params: {
   email: string;
@@ -603,7 +648,7 @@ export const registerFirebaseCollegeAccount = async (params: {
           branch: params.branch.trim().slice(0, 100),
           year: params.year.trim().slice(0, 50),
           photoURL: params.photoURL,
-          emailVerified: true,
+          emailVerified: false,
           profileCompleted: true,
           updatedAt,
         },
@@ -613,26 +658,49 @@ export const registerFirebaseCollegeAccount = async (params: {
       handleFirestoreError(firestoreErr, OperationType.WRITE, `users/${cred.user.uid}`);
     }
 
-    // Sign out cleanly so the student returns to the Sign In screen as designed
+    // Send Firebase built-in HTTPS email verification link (never blocked by Render)
+    await dispatchFirebaseVerificationEmail(cred.user);
+
+    // Sign out cleanly so unverified students cannot bypass the verification gate
     try {
       await signOut(auth);
     } catch {}
 
-    return { status: "created", uid: cred.user.uid };
+    return { status: "verification_sent", uid: cred.user.uid, email: cleanEmail };
   } catch (err: any) {
     const code = err?.code || "";
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+    } catch {}
+
     if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
-      console.info(
-        "Firebase Email/Password provider is not enabled yet in Firebase Console; using server session fallback."
-      );
-      return { status: "provider_disabled" };
+      return {
+        status: "provider_disabled",
+        message:
+          "Email/Password sign-in is not enabled yet in Firebase Console. Enable Email/Password under Authentication → Sign-in method to register accounts.",
+      };
     }
     if (code === "auth/email-already-in-use") {
       return { status: "already_exists" };
     }
+    if (code === "auth/weak-password") {
+      return {
+        status: "error",
+        message: "Password is too weak. Please choose a stronger password (at least 8 characters).",
+      };
+    }
+    if (code === "auth/too-many-requests") {
+      return {
+        status: "too_many_requests",
+        message:
+          "Too many verification requests right now. Please wait a couple of minutes and try again.",
+      };
+    }
     return {
       status: "error",
-      message: err?.message || "Could not persist student account to Firebase.",
+      message: err?.message || "Could not create your account right now. Please try again.",
     };
   } finally {
     isSigningIn = false;
@@ -645,13 +713,14 @@ export type FirebaseCollegeSignInResult =
       user: User;
       profile: FirebaseCollegeProfileRecord | null;
     }
-  | { status: "provider_disabled" }
+  | { status: "email_not_verified"; email: string }
+  | { status: "provider_disabled"; message: string }
   | { status: "not_found_or_invalid" }
   | { status: "too_many_requests"; message: string };
 
 /**
- * Signs in a student against Firebase Auth (Email/Password) and hydrates their
- * persistent profile document from Firestore `/users/{uid}`.
+ * Signs in a student against Firebase Auth (Email/Password), enforces
+ * `emailVerified === true`, and hydrates their persistent profile from Firestore `/users/{uid}`.
  */
 export const signInFirebaseCollegeAccount = async (
   email: string,
@@ -665,12 +734,31 @@ export const signInFirebaseCollegeAccount = async (
   isSigningIn = true;
   try {
     const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+    try {
+      await reload(cred.user);
+    } catch {}
+
+    if (!cred.user.emailVerified) {
+      try {
+        await signOut(auth);
+      } catch {}
+      return { status: "email_not_verified", email: cleanEmail };
+    }
+
     let profile: FirebaseCollegeProfileRecord | null = null;
 
     try {
-      const snap = await getDoc(doc(db, "users", cred.user.uid));
+      const userDocRef = doc(db, "users", cred.user.uid);
+      const snap = await getDoc(userDocRef);
       if (snap.exists()) {
         const data = snap.data() as Record<string, any>;
+        if (!data.emailVerified) {
+          setDoc(
+            userDocRef,
+            { emailVerified: true, updatedAt: new Date().toISOString() },
+            { merge: true }
+          ).catch(() => {});
+        }
         if (data.firstName && data.surname && data.year && data.branch && data.photoURL) {
           profile = {
             uid: cred.user.uid,
@@ -734,7 +822,11 @@ export const signInFirebaseCollegeAccount = async (
   } catch (err: any) {
     const code = err?.code || "";
     if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
-      return { status: "provider_disabled" };
+      return {
+        status: "provider_disabled",
+        message:
+          "Email/Password sign-in is not enabled yet in Firebase Console. Enable Email/Password under Authentication → Sign-in method.",
+      };
     }
     if (code === "auth/too-many-requests") {
       return {
@@ -745,6 +837,108 @@ export const signInFirebaseCollegeAccount = async (
     return { status: "not_found_or_invalid" };
   } finally {
     isSigningIn = false;
+  }
+};
+
+export type FirebaseResendVerificationResult =
+  | { status: "sent" }
+  | { status: "already_verified" }
+  | { status: "too_many_requests"; message: string }
+  | { status: "error"; message: string };
+
+/**
+ * Re-sends Firebase's built-in HTTPS verification link for an unverified student account.
+ */
+export const resendFirebaseVerificationEmail = async (
+  email: string,
+  password: string
+): Promise<FirebaseResendVerificationResult> => {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!isValidCollegeEmail(cleanEmail) || !password) {
+    return {
+      status: "error",
+      message: "Enter your PVG college email and password to resend the verification link.",
+    };
+  }
+
+  isSigningIn = true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+    try {
+      await reload(cred.user);
+    } catch {}
+
+    if (cred.user.emailVerified) {
+      await signOut(auth);
+      return { status: "already_verified" };
+    }
+
+    await dispatchFirebaseVerificationEmail(cred.user);
+    await signOut(auth);
+    return { status: "sent" };
+  } catch (err: any) {
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+    } catch {}
+
+    const code = err?.code || "";
+    if (code === "auth/too-many-requests") {
+      return {
+        status: "too_many_requests",
+        message:
+          "A verification email was just sent. Please wait a minute and check your inbox (and Spam folder).",
+      };
+    }
+    return {
+      status: "error",
+      message: "Could not resend the verification email right now. Please check your password and try again.",
+    };
+  } finally {
+    isSigningIn = false;
+  }
+};
+
+export type FirebasePasswordResetResult =
+  | { status: "sent" }
+  | { status: "error"; message: string };
+
+/**
+ * Sends a Firebase built-in HTTPS password reset link to a verified PVG college email.
+ */
+export const sendFirebasePasswordReset = async (
+  email: string
+): Promise<FirebasePasswordResetResult> => {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!isValidCollegeEmail(cleanEmail)) {
+    return {
+      status: "error",
+      message: `Please enter your @${ALLOWED_COLLEGE_DOMAIN} email address first.`,
+    };
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, cleanEmail);
+    return { status: "sent" };
+  } catch (err: any) {
+    const code = err?.code || "";
+    if (code === "auth/too-many-requests") {
+      return {
+        status: "error",
+        message: "Too many password reset requests. Please wait a few minutes and try again.",
+      };
+    }
+    if (code === "auth/operation-not-allowed") {
+      return {
+        status: "error",
+        message: "Enable Email/Password sign-in in Firebase Console to use password reset.",
+      };
+    }
+    return {
+      status: "error",
+      message: "Could not send a password reset email right now. Please try again.",
+    };
   }
 };
 

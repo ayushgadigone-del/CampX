@@ -23,6 +23,8 @@ import {
 import {
   registerFirebaseCollegeAccount,
   signInFirebaseCollegeAccount,
+  resendFirebaseVerificationEmail,
+  sendFirebasePasswordReset,
 } from "../lib/firebase";
 
 export interface LoginProfilePayload {
@@ -58,7 +60,7 @@ interface CollegeLoginPageProps {
   isModal?: boolean;
 }
 
-type AuthViewMode = "signin" | "signup" | "verify_otp";
+type AuthViewMode = "signin" | "signup" | "verify_email";
 
 export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   onDemoCollegeSignIn,
@@ -75,6 +77,8 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [unverifiedSignInEmail, setUnverifiedSignInEmail] = useState<string | null>(null);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   // Create Account state
   const [fullName, setFullName] = useState("");
@@ -88,11 +92,9 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
 
-  // OTP Verification state
+  // Email Verification Link state
   const [pendingEmail, setPendingEmail] = useState("");
-  const [otpInput, setOtpInput] = useState("");
-  const [otpDeliveryMethod, setOtpDeliveryMethod] = useState<"email" | "preview">("email");
-  const [previewOtpCode, setPreviewOtpCode] = useState<string | null>(null);
+  const [pendingPassword, setPendingPassword] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Feedback & loading state
@@ -100,7 +102,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Cooldown timer for OTP resend
+  // Cooldown timer for verification email resend
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = window.setInterval(() => {
@@ -112,6 +114,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
   const clearFeedback = () => {
     setValidationError(null);
     setSuccessNotice(null);
+    setUnverifiedSignInEmail(null);
     if (onClearError) onClearError();
   };
 
@@ -133,7 +136,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
     }
   };
 
-  // Sign In with verified college email + password
+  // Sign In with verified PVG college email + password via Firebase Auth (HTTPS)
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearFeedback();
@@ -156,8 +159,8 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
 
     setIsLoading(true);
     try {
-      // 1. Authenticate against persistent Firebase Auth + Firestore profile first
       const firebaseSignIn = await signInFirebaseCollegeAccount(cleanEmail, signInPassword);
+
       if (firebaseSignIn.status === "signed_in") {
         const fbProfile = firebaseSignIn.profile;
         await onDemoCollegeSignIn(
@@ -176,42 +179,24 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
         return;
       }
 
-      if (firebaseSignIn.status === "too_many_requests") {
-        setValidationError(firebaseSignIn.message);
-        return;
-      }
-
-      // 2. Graceful fallback to Express auth store (for accounts created prior to enabling Firebase Email/Password)
-      const response = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cleanEmail,
-          password: signInPassword,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.success || !data?.user) {
+      if (firebaseSignIn.status === "email_not_verified") {
+        setUnverifiedSignInEmail(cleanEmail);
         setValidationError(
-          data?.error ||
-            "Invalid PVG college email or password. If you don't have an account yet, click Create account."
+          `Please verify ${cleanEmail} first. Click the verification link in your college inbox (check Spam/Junk too), then sign in again.`
         );
         return;
       }
 
-      const account = data.user as AuthenticatedAccountPayload;
-      await onDemoCollegeSignIn(
-        account.email,
-        account.displayName,
-        {
-          firstName: account.firstName,
-          surname: account.surname,
-          year: account.year,
-          branch: account.branch,
-          photoURL: account.photoURL,
-        },
-        typeof data.token === "string" ? data.token : undefined
+      if (
+        firebaseSignIn.status === "provider_disabled" ||
+        firebaseSignIn.status === "too_many_requests"
+      ) {
+        setValidationError(firebaseSignIn.message);
+        return;
+      }
+
+      setValidationError(
+        "Invalid PVG college email or password. If you don't have an account yet, click Create account."
       );
     } catch (err: any) {
       setValidationError(err?.message || "Unable to sign in right now. Please try again.");
@@ -220,7 +205,60 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
     }
   };
 
-  // Create Account -> Request OTP email
+  // Resend Firebase verification link directly from the Sign In card when unverified
+  const handleResendFromSignIn = async () => {
+    if (resendCooldown > 0 || !unverifiedSignInEmail || !signInPassword) return;
+    setValidationError(null);
+    setSuccessNotice(null);
+    setIsLoading(true);
+    try {
+      const res = await resendFirebaseVerificationEmail(unverifiedSignInEmail, signInPassword);
+      if (res.status === "sent") {
+        setResendCooldown(60);
+        setSuccessNotice(
+          `A fresh verification link has been sent to ${unverifiedSignInEmail}. Check your inbox and Spam folder, click the link, then sign in.`
+        );
+      } else if (res.status === "already_verified") {
+        setUnverifiedSignInEmail(null);
+        setSuccessNotice("Your email is already verified! Click Sign in to continue.");
+      } else {
+        setValidationError(res.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Send Firebase HTTPS password reset link
+  const handleForgotPassword = async () => {
+    setValidationError(null);
+    setSuccessNotice(null);
+    if (onClearError) onClearError();
+
+    const cleanEmail = signInEmail.trim().toLowerCase();
+    if (!cleanEmail || !isValidCollegeEmail(cleanEmail)) {
+      setValidationError(
+        `Enter your @${ALLOWED_COLLEGE_DOMAIN} email above first, then click Forgot password.`
+      );
+      return;
+    }
+
+    setIsSendingReset(true);
+    try {
+      const res = await sendFirebasePasswordReset(cleanEmail);
+      if (res.status === "sent") {
+        setSuccessNotice(
+          `Password reset link sent to ${cleanEmail}. Check your inbox (and Spam/Junk folder) to set a new password.`
+        );
+      } else {
+        setValidationError(res.message);
+      }
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
+
+  // Create Account -> Register in Firebase Auth + Firestore & Send HTTPS Verification Link
   const handleCreateAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearFeedback();
@@ -264,144 +302,92 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/auth/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: trimmedName,
-          email: cleanEmail,
-          password: createPassword,
-          year,
-          branch,
-          photoURL,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.success) {
-        setValidationError(
-          data?.error || "Could not send verification OTP. Please check your details and try again."
-        );
-        return;
-      }
-
-      setPendingEmail(cleanEmail);
-      setOtpInput("");
-      setOtpDeliveryMethod(data.deliveryMethod === "email" ? "email" : "preview");
-      setPreviewOtpCode(typeof data.previewOtp === "string" ? data.previewOtp : null);
-      setResendCooldown(30);
-      setSuccessNotice(
-        data.message || `A 6-digit verification code has been sent to ${cleanEmail}.`
-      );
-      setViewMode("verify_otp");
-    } catch (err: any) {
-      setValidationError(err?.message || "Failed to initiate OTP verification. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Verify OTP -> Create Account -> Redirect cleanly to Sign In
-  const handleVerifyOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
-    if (onClearError) onClearError();
-
-    const cleanOtp = otpInput.replace(/\D/g, "").trim();
-    if (cleanOtp.length !== 6) {
-      setValidationError("Please enter the 6-digit one-time password.");
-      return;
-    }
+    const firstName = nameParts[0].slice(0, 60);
+    const surname = nameParts.slice(1).join(" ").slice(0, 60);
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: pendingEmail,
-          otp: cleanOtp,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.success) {
-        setValidationError(data?.error || "Invalid verification code. Please try again.");
-        return;
-      }
-
-      // Persist verified student account to Firebase Auth + Firestore /users/{uid}
-      const verifiedEmail = data.email || pendingEmail;
-      const verifiedUser = data.user as Partial<AuthenticatedAccountPayload> | undefined;
-      const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
-      const resolvedFirstName = verifiedUser?.firstName || nameParts[0] || "";
-      const resolvedSurname = verifiedUser?.surname || nameParts.slice(1).join(" ") || "";
-
-      const fbRegistration = await registerFirebaseCollegeAccount({
-        email: verifiedEmail,
+      const fbResult = await registerFirebaseCollegeAccount({
+        email: cleanEmail,
         password: createPassword,
-        firstName: resolvedFirstName,
-        surname: resolvedSurname,
-        year: verifiedUser?.year || year,
-        branch: verifiedUser?.branch || branch,
-        photoURL: verifiedUser?.photoURL || photoURL,
+        firstName,
+        surname,
+        year,
+        branch,
+        photoURL,
       });
 
-      // Account verified and created -> switch to Sign In screen with email pre-filled
-      setSignInEmail(verifiedEmail);
-      setSignInPassword("");
-      setCreatePassword("");
-      setConfirmPassword("");
-      setOtpInput("");
-      setPreviewOtpCode(null);
-
-      if (fbRegistration.status === "already_exists") {
+      if (fbResult.status === "verification_sent") {
+        setPendingEmail(cleanEmail);
+        setPendingPassword(createPassword);
+        setCreatePassword("");
+        setConfirmPassword("");
+        setResendCooldown(60);
         setSuccessNotice(
-          "An account with this PVG college email already exists. Sign in below with your password."
+          `Verification link sent to ${cleanEmail}. Open your inbox and click the link to activate your account.`
         );
-      } else {
-        setSuccessNotice(
-          data.message ||
-            "Account verified and created! Sign in below with your PVG college email and password."
-        );
+        setViewMode("verify_email");
+        return;
       }
-      setViewMode("signin");
+
+      if (fbResult.status === "already_exists") {
+        setSignInEmail(cleanEmail);
+        setSignInPassword("");
+        setCreatePassword("");
+        setConfirmPassword("");
+        setSuccessNotice(
+          "An account with this PVG college email already exists. Sign in below (or use Forgot password if needed)."
+        );
+        setViewMode("signin");
+        return;
+      }
+
+      setValidationError(fbResult.message);
     } catch (err: any) {
-      setValidationError(err?.message || "Could not verify OTP. Please try again.");
+      setValidationError(err?.message || "Could not create your account right now. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Resend OTP
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0 || !pendingEmail) return;
+  // Resend Verification Link from View 3
+  const handleResendVerificationLink = async () => {
+    if (resendCooldown > 0 || !pendingEmail || !pendingPassword) return;
     setValidationError(null);
+    setSuccessNotice(null);
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.success) {
-        setValidationError(data?.error || "Could not resend verification code.");
-        return;
+      const res = await resendFirebaseVerificationEmail(pendingEmail, pendingPassword);
+      if (res.status === "sent") {
+        setResendCooldown(60);
+        setSuccessNotice(
+          `A fresh verification link was sent to ${pendingEmail}. Please check your inbox and Spam folder.`
+        );
+      } else if (res.status === "already_verified") {
+        setSignInEmail(pendingEmail);
+        setSignInPassword("");
+        setPendingPassword("");
+        setSuccessNotice("Your email is already verified! Sign in below with your password.");
+        setViewMode("signin");
+      } else {
+        setValidationError(res.message);
       }
-
-      setOtpDeliveryMethod(data.deliveryMethod === "email" ? "email" : "preview");
-      setPreviewOtpCode(typeof data.previewOtp === "string" ? data.previewOtp : null);
-      setResendCooldown(30);
-      setSuccessNotice(data.message || `A new verification code was sent to ${pendingEmail}.`);
-    } catch (err: any) {
-      setValidationError(err?.message || "Could not resend OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleProceedToSignIn = () => {
+    const emailToPrefill = pendingEmail || signUpEmail.trim().toLowerCase();
+    setSignInEmail(emailToPrefill);
+    setSignInPassword("");
+    setPendingPassword("");
+    setValidationError(null);
+    setUnverifiedSignInEmail(null);
+    setSuccessNotice(
+      "Once you have clicked the verification link in your email, sign in below with your password."
+    );
+    setViewMode("signin");
   };
 
   const activeError = validationError || authErrorMessage;
@@ -480,15 +466,35 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
               <div
                 id="login-error-alert"
                 role="alert"
-                className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2.5"
+                className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-rose-800 dark:text-rose-200 text-xs space-y-2.5"
               >
-                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <p className="leading-relaxed">{activeError}</p>
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">{activeError}</p>
+                </div>
+                {unverifiedSignInEmail && viewMode === "signin" && (
+                  <div className="pl-6">
+                    <button
+                      id="signin-resend-verification-btn"
+                      type="button"
+                      disabled={isLoading || resendCooldown > 0}
+                      onClick={handleResendFromSignIn}
+                      className="inline-flex items-center gap-1.5 font-semibold text-rose-700 dark:text-rose-300 hover:underline underline-offset-4 cursor-pointer disabled:opacity-50 disabled:no-underline"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>
+                        {resendCooldown > 0
+                          ? `Resend verification link in ${resendCooldown}s`
+                          : "Resend verification email"}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
             {/* ============================================================ */}
-            {/* VIEW 1: SIGN IN (Matches First Screenshot)                   */}
+            {/* VIEW 1: SIGN IN                                              */}
             {/* ============================================================ */}
             {viewMode === "signin" && (
               <div>
@@ -518,6 +524,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                       onChange={(e) => {
                         setSignInEmail(e.target.value);
                         if (validationError) setValidationError(null);
+                        if (unverifiedSignInEmail) setUnverifiedSignInEmail(null);
                       }}
                       placeholder={`yourname@${ALLOWED_COLLEGE_DOMAIN}`}
                       className={inputClass}
@@ -526,12 +533,23 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="signin-password"
-                      className="block text-[13px] font-semibold text-[#18201C] dark:text-[#ECF2EF] mb-2"
-                    >
-                      Password
-                    </label>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <label
+                        htmlFor="signin-password"
+                        className="block text-[13px] font-semibold text-[#18201C] dark:text-[#ECF2EF]"
+                      >
+                        Password
+                      </label>
+                      <button
+                        id="forgot-password-btn"
+                        type="button"
+                        disabled={isSendingReset || isLoading}
+                        onClick={handleForgotPassword}
+                        className="text-xs font-medium text-[#224134] dark:text-[#7BBFA8] hover:underline underline-offset-4 cursor-pointer disabled:opacity-50"
+                      >
+                        {isSendingReset ? "Sending reset link..." : "Forgot password?"}
+                      </button>
+                    </div>
                     <div className="relative">
                       <input
                         id="signin-password"
@@ -604,7 +622,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
             )}
 
             {/* ============================================================ */}
-            {/* VIEW 2: CREATE ACCOUNT (Matches Second Screenshot + Profile) */}
+            {/* VIEW 2: CREATE ACCOUNT                                       */}
             {/* ============================================================ */}
             {viewMode === "signup" && (
               <div>
@@ -866,7 +884,7 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4" />
-                        <span>Sending verification OTP...</span>
+                        <span>Creating account &amp; sending link...</span>
                       </>
                     ) : (
                       <>
@@ -893,134 +911,80 @@ export const CollegeLoginPage: React.FC<CollegeLoginPageProps> = ({
                     </button>
                   </p>
                   <p className="text-xs text-[#808E87] dark:text-[#73847D]">
-                    Your college email will be verified using a one-time password.
+                    We will send a secure verification link to your PVG college inbox.
                   </p>
                 </div>
               </div>
             )}
 
             {/* ============================================================ */}
-            {/* VIEW 3: VERIFY EMAIL WITH 6-DIGIT OTP                        */}
+            {/* VIEW 3: VERIFY EMAIL VIA FIREBASE HTTPS LINK                 */}
             {/* ============================================================ */}
-            {viewMode === "verify_otp" && (
+            {viewMode === "verify_email" && (
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9E6B43] dark:text-[#C89B6E]">
                   VERIFY YOUR EMAIL
                 </p>
                 <h1 className="mt-2 text-2xl sm:text-[28px] font-normal tracking-tight text-[#18201C] dark:text-[#ECF2EF] leading-tight">
-                  Enter your one-time password.
+                  Check your PVG inbox.
                 </h1>
                 <p className="mt-2.5 text-sm text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
-                  Enter the 6-digit verification code sent to{" "}
-                  <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF]">
+                  We sent a verification link to{" "}
+                  <span className="font-semibold text-[#18201C] dark:text-[#ECF2EF] break-all">
                     {pendingEmail}
-                  </span>{" "}
-                  to complete your account creation.
+                  </span>
+                  . Click the link in that email to verify your student account.
                 </p>
 
-                {/* Preview fallback code box (only shown when SMTP/Resend secrets are not yet configured) */}
-                {otpDeliveryMethod === "preview" && previewOtpCode && (
-                  <div className="mt-5 p-4 rounded-xl bg-[#EFF4F1] dark:bg-[#182823] border border-[#C4D9D1] dark:border-[#2A4A40] space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[#224134] dark:text-[#7BBFA8] flex items-center gap-1.5">
-                        <MailCheck className="w-3.5 h-3.5" />
-                        Preview Verification Code
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOtpInput(previewOtpCode);
-                          setValidationError(null);
-                        }}
-                        className="text-xs font-semibold text-[#224134] dark:text-[#7BBFA8] hover:underline underline-offset-4 cursor-pointer"
-                      >
-                        Fill code
-                      </button>
-                    </div>
-                    <div className="text-2xl font-bold font-mono tracking-[0.3em] text-[#18201C] dark:text-[#ECF2EF]">
-                      {previewOtpCode}
-                    </div>
-                    <p className="text-[11px] text-[#5C6B63] dark:text-[#8FA199] leading-relaxed">
-                      Add Google SMTP credentials in environment secrets to send real verification emails directly to student inboxes.
-                    </p>
+                <div className="mt-5 p-4 rounded-xl bg-[#EFF4F1] dark:bg-[#182823] border border-[#C4D9D1] dark:border-[#2A4A40] space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#224134] dark:text-[#7BBFA8]">
+                    <MailCheck className="w-4 h-4 shrink-0" />
+                    <span>Next steps</span>
                   </div>
-                )}
+                  <ol className="text-xs text-[#224134] dark:text-[#CDE4DC] space-y-2 list-decimal list-inside leading-relaxed">
+                    <li>Open your PVG college email inbox (check Spam or Junk if needed).</li>
+                    <li>Click the verification link from Campus Resale.</li>
+                    <li>Come back here and sign in with your email and password.</li>
+                  </ol>
+                </div>
 
-                <form
-                  onSubmit={handleVerifyOtpSubmit}
-                  noValidate
-                  className="mt-6 space-y-5"
-                >
-                  <div>
-                    <label
-                      htmlFor="otp-code-input"
-                      className="block text-[13px] font-semibold text-[#18201C] dark:text-[#ECF2EF] mb-2"
-                    >
-                      6-digit verification code
-                    </label>
-                    <input
-                      id="otp-code-input"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      value={otpInput}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
-                        setOtpInput(digits);
-                        if (validationError) setValidationError(null);
-                      }}
-                      placeholder="000000"
-                      className="w-full h-14 px-4 rounded-xl bg-white dark:bg-[#111715] border border-[#DFE6E2] dark:border-[#242E2A] text-center font-mono text-2xl font-bold tracking-[0.35em] text-[#18201C] dark:text-[#ECF2EF] placeholder:text-[#C4D1CA] dark:placeholder:text-[#34433D] focus:outline-none focus:border-[#2F5D50] dark:focus:border-[#5BA18C]"
-                      required
-                    />
-                  </div>
-
+                <div className="mt-6 space-y-3">
                   <button
-                    id="verify-otp-submit-btn"
-                    type="submit"
-                    disabled={isLoading || otpInput.length !== 6}
-                    className="w-full h-12 flex items-center justify-center gap-2 px-4 rounded-xl bg-[#274C3F] hover:bg-[#1E3B31] dark:bg-[#356C5B] dark:hover:bg-[#3F7D6A] text-white font-semibold text-[15px] cursor-pointer disabled:opacity-60"
+                    id="proceed-to-signin-btn"
+                    type="button"
+                    onClick={handleProceedToSignIn}
+                    className="w-full h-12 flex items-center justify-center gap-2 px-4 rounded-xl bg-[#274C3F] hover:bg-[#1E3B31] dark:bg-[#356C5B] dark:hover:bg-[#3F7D6A] text-white font-semibold text-[15px] cursor-pointer"
                   >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4" />
-                        <span>Verifying code...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Verify &amp; create account</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
+                    <span>I&apos;ve verified my email — Sign in</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
-                </form>
+                </div>
 
                 <div className="mt-6 flex items-center justify-between gap-3 text-xs">
                   <button
                     type="button"
                     onClick={() => {
                       clearFeedback();
-                      setViewMode("signup");
+                      setViewMode("signin");
                     }}
                     className="inline-flex items-center gap-1 font-medium text-[#5C6B63] hover:text-[#18201C] dark:text-[#8FA199] dark:hover:text-[#ECF2EF] cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Edit details</span>
+                    <span>Back to Sign in</span>
                   </button>
 
                   <button
-                    id="resend-otp-btn"
+                    id="resend-verification-link-btn"
                     type="button"
-                    disabled={isLoading || resendCooldown > 0}
-                    onClick={handleResendOtp}
+                    disabled={isLoading || resendCooldown > 0 || !pendingPassword}
+                    onClick={handleResendVerificationLink}
                     className="inline-flex items-center gap-1.5 font-semibold text-[#224134] dark:text-[#7BBFA8] hover:underline underline-offset-4 cursor-pointer disabled:opacity-50 disabled:no-underline"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>
                       {resendCooldown > 0
-                        ? `Resend OTP in ${resendCooldown}s`
-                        : "Resend OTP"}
+                        ? `Resend link in ${resendCooldown}s`
+                        : "Resend verification link"}
                     </span>
                   </button>
                 </div>
