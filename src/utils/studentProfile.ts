@@ -229,11 +229,14 @@ export async function fetchFirestoreStudentProfile(
 ): Promise<StudentProfileDetails | null> {
   if (!uid || !auth.currentUser) return null;
   try {
-    const snap = await getDoc(doc(db, "users", uid));
-    if (snap.exists()) {
+    const snap = await Promise.race([
+      getDoc(doc(db, "users", uid)),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+    ]);
+    if (snap && snap.exists()) {
       const data = snap.data() as Record<string, any>;
       if (data.firstName && data.surname && data.year && data.branch && data.photoURL) {
-        return {
+        const loaded: StudentProfileDetails = {
           uid,
           email: data.email || "",
           firstName: data.firstName,
@@ -250,6 +253,8 @@ export async function fetchFirestoreStudentProfile(
           profileCompleted: Boolean(data.profileCompleted),
           updatedAt: data.updatedAt,
         };
+        saveLocalStudentProfile(loaded);
+        return loaded;
       }
     }
   } catch (err) {
@@ -259,7 +264,8 @@ export async function fetchFirestoreStudentProfile(
 }
 
 /**
- * Sanitizes, saves locally, updates Firebase Auth profile (when active), and persists to Firestore.
+ * Sanitizes, saves locally immediately, and syncs Firebase Auth & Firestore in the background
+ * so sign-in and profile edits transition smoothly without stalling on network round-trips.
  */
 export async function persistStudentProfile(
   input: Omit<StudentProfileDetails, "displayName" | "profileCompleted" | "updatedAt">
@@ -295,50 +301,49 @@ export async function persistStudentProfile(
     updatedAt,
   };
 
-  // 1. Save to localStorage immediately
+  // 1. Save to localStorage immediately so UI updates in <1ms
   saveLocalStudentProfile(savedProfile);
 
-  // 2. Sync Firebase Auth profile if currently signed in (keep photoURL under Auth limit)
-  if (auth.currentUser) {
-    try {
+  // 2. Sync Firebase Auth profile & Firestore users/{uid} asynchronously in background
+  const currentAuthUser = auth.currentUser;
+  if (currentAuthUser) {
+    if (currentAuthUser.displayName !== displayName) {
       const authUpdate: { displayName?: string; photoURL?: string } = {
         displayName,
       };
       if (savedProfile.photoURL && savedProfile.photoURL.length < 1800) {
         authUpdate.photoURL = savedProfile.photoURL;
       }
-      await updateProfile(auth.currentUser, authUpdate);
-    } catch (err) {
-      console.warn("Firebase Auth profile sync notice:", err);
+      updateProfile(currentAuthUser, authUpdate).catch((err) => {
+        console.warn("Firebase Auth profile sync notice:", err);
+      });
     }
 
-    // 3. Persist full profile (including compressed photo Data URL) to Firestore users/{uid}
-    try {
-      await setDoc(
-        doc(db, "users", auth.currentUser.uid),
-        {
-          uid: auth.currentUser.uid,
-          email: cleanEmail,
-          firstName: cleanFirstName,
-          surname: cleanSurname,
-          displayName,
-          department: cleanBranch,
-          branch: cleanBranch,
-          year: cleanYear,
-          rollNumber: cleanRollNumber,
-          admissionYear: cleanAdmissionYear,
-          lastYearCgpa: cleanCgpa,
-          bio: cleanBio,
-          interests: cleanInterests,
-          photoURL: savedProfile.photoURL,
-          profileCompleted: true,
-          updatedAt,
-        },
-        { merge: true }
-      );
-    } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `users/${auth.currentUser.uid}`);
-    }
+    setDoc(
+      doc(db, "users", currentAuthUser.uid),
+      {
+        uid: currentAuthUser.uid,
+        email: cleanEmail,
+        firstName: cleanFirstName,
+        surname: cleanSurname,
+        displayName,
+        department: cleanBranch,
+        branch: cleanBranch,
+        year: cleanYear,
+        rollNumber: cleanRollNumber,
+        admissionYear: cleanAdmissionYear,
+        lastYearCgpa: cleanCgpa,
+        bio: cleanBio,
+        interests: cleanInterests,
+        photoURL: savedProfile.photoURL,
+        emailVerified: Boolean(currentAuthUser.emailVerified),
+        profileCompleted: true,
+        updatedAt,
+      },
+      { merge: true }
+    ).catch((err) => {
+      handleFirestoreError(err, OperationType.WRITE, `users/${currentAuthUser.uid}`);
+    });
   }
 
   return savedProfile;

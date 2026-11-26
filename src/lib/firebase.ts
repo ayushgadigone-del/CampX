@@ -475,22 +475,25 @@ export const collegeEmailSignIn = async (
   try {
     // Preserve an existing real (non-anonymous) Firebase Auth session matching this college email
     const existingAuthUser = auth.currentUser;
-    const activeUser =
+    const isAlreadyMatchedRealUser =
       existingAuthUser &&
       !existingAuthUser.isAnonymous &&
-      existingAuthUser.email?.toLowerCase() === cleanEmail
-        ? existingAuthUser
-        : (await signInAnonymously(auth)).user;
+      existingAuthUser.email?.toLowerCase() === cleanEmail;
 
-    try {
+    const activeUser = isAlreadyMatchedRealUser
+      ? existingAuthUser
+      : (await signInAnonymously(auth)).user;
+
+    // Sync Firebase Auth displayName/photo in the background only if it actually changed
+    if (activeUser.displayName !== resolvedName) {
       const authProfileUpdate: { displayName?: string; photoURL?: string } = {
         displayName: resolvedName,
       };
       if (avatarUrl.length < 1800) {
         authProfileUpdate.photoURL = avatarUrl;
       }
-      await updateProfile(activeUser, authProfileUpdate);
-    } catch {}
+      updateProfile(activeUser, authProfileUpdate).catch(() => {});
+    }
 
     const cred = { user: activeUser };
 
@@ -625,18 +628,14 @@ export const registerFirebaseCollegeAccount = async (params: {
   isSigningIn = true;
   try {
     const cred = await createUserWithEmailAndPassword(auth, cleanEmail, params.password);
-    try {
-      const authUpdate: { displayName?: string; photoURL?: string } = { displayName };
-      if (params.photoURL && params.photoURL.length < 1800) {
-        authUpdate.photoURL = params.photoURL;
-      }
-      await updateProfile(cred.user, authUpdate);
-    } catch (profileErr) {
-      console.warn("Firebase Auth displayName update notice:", profileErr);
+    const authUpdate: { displayName?: string; photoURL?: string } = { displayName };
+    if (params.photoURL && params.photoURL.length < 1800) {
+      authUpdate.photoURL = params.photoURL;
     }
 
-    try {
-      await setDoc(
+    // Run Auth profile update, Firestore profile save (capped at 2.5s), and verification email in parallel
+    const firestoreSavePromise = Promise.race([
+      setDoc(
         doc(db, "users", cred.user.uid),
         {
           uid: cred.user.uid,
@@ -653,13 +652,22 @@ export const registerFirebaseCollegeAccount = async (params: {
           updatedAt,
         },
         { merge: true }
-      );
-    } catch (firestoreErr) {
-      handleFirestoreError(firestoreErr, OperationType.WRITE, `users/${cred.user.uid}`);
-    }
+      ).catch((firestoreErr) => {
+        handleFirestoreError(firestoreErr, OperationType.WRITE, `users/${cred.user.uid}`);
+      }),
+      new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+    ]);
 
-    // Send Firebase built-in HTTPS email verification link (never blocked by Render)
-    await dispatchFirebaseVerificationEmail(cred.user);
+    const authUpdatePromise = updateProfile(cred.user, authUpdate).catch((profileErr) => {
+      console.warn("Firebase Auth displayName update notice:", profileErr);
+    });
+
+    // Verification email MUST succeed; profile updates run concurrently without stalling UX
+    await Promise.all([
+      dispatchFirebaseVerificationEmail(cred.user),
+      authUpdatePromise,
+      firestoreSavePromise,
+    ]);
 
     // Sign out cleanly so unverified students cannot bypass the verification gate
     try {
@@ -734,9 +742,13 @@ export const signInFirebaseCollegeAccount = async (
   isSigningIn = true;
   try {
     const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
-    try {
-      await reload(cred.user);
-    } catch {}
+
+    // Only fetch fresh verification status if token doesn't already show emailVerified === true
+    if (!cred.user.emailVerified) {
+      try {
+        await reload(cred.user);
+      } catch {}
+    }
 
     if (!cred.user.emailVerified) {
       try {
@@ -747,34 +759,79 @@ export const signInFirebaseCollegeAccount = async (
 
     let profile: FirebaseCollegeProfileRecord | null = null;
 
+    // Fast-path: check cached local profile first so repeat sign-ins on the same device are instant
     try {
-      const userDocRef = doc(db, "users", cred.user.uid);
-      const snap = await getDoc(userDocRef);
-      if (snap.exists()) {
-        const data = snap.data() as Record<string, any>;
-        if (!data.emailVerified) {
-          setDoc(
-            userDocRef,
-            { emailVerified: true, updatedAt: new Date().toISOString() },
-            { merge: true }
-          ).catch(() => {});
-        }
-        if (data.firstName && data.surname && data.year && data.branch && data.photoURL) {
+      const localRaw = localStorage.getItem(`campus_student_profile_${cred.user.uid}`);
+      if (localRaw) {
+        const parsedLocal = JSON.parse(localRaw);
+        if (
+          parsedLocal?.firstName &&
+          parsedLocal?.surname &&
+          parsedLocal?.year &&
+          parsedLocal?.branch &&
+          parsedLocal?.photoURL
+        ) {
           profile = {
             uid: cred.user.uid,
             email: cleanEmail,
-            firstName: String(data.firstName),
-            surname: String(data.surname),
-            displayName:
-              String(data.displayName || `${data.firstName} ${data.surname}`).trim(),
-            year: String(data.year),
-            branch: String(data.branch),
-            photoURL: String(data.photoURL),
+            firstName: String(parsedLocal.firstName),
+            surname: String(parsedLocal.surname),
+            displayName: String(
+              parsedLocal.displayName || `${parsedLocal.firstName} ${parsedLocal.surname}`
+            ).trim(),
+            year: String(parsedLocal.year),
+            branch: String(parsedLocal.branch),
+            photoURL: String(parsedLocal.photoURL),
           };
         }
       }
-    } catch (firestoreErr) {
-      handleFirestoreError(firestoreErr, OperationType.GET, `users/${cred.user.uid}`);
+    } catch {}
+
+    // Fetch Firestore profile with a 1.5s cap so slow/cold Firestore connections NEVER stall sign-in
+    const userDocRef = doc(db, "users", cred.user.uid);
+    const fetchProfileFromFirestore = async () => {
+      try {
+        const snap = await getDoc(userDocRef);
+        if (snap.exists()) {
+          const data = snap.data() as Record<string, any>;
+          if (!data.emailVerified) {
+            setDoc(
+              userDocRef,
+              { emailVerified: true, updatedAt: new Date().toISOString() },
+              { merge: true }
+            ).catch(() => {});
+          }
+          if (data.firstName && data.surname && data.year && data.branch && data.photoURL) {
+            return {
+              uid: cred.user.uid,
+              email: cleanEmail,
+              firstName: String(data.firstName),
+              surname: String(data.surname),
+              displayName:
+                String(data.displayName || `${data.firstName} ${data.surname}`).trim(),
+              year: String(data.year),
+              branch: String(data.branch),
+              photoURL: String(data.photoURL),
+            } as FirebaseCollegeProfileRecord;
+          }
+        }
+      } catch (firestoreErr) {
+        handleFirestoreError(firestoreErr, OperationType.GET, `users/${cred.user.uid}`);
+      }
+      return null;
+    };
+
+    if (!profile) {
+      const remoteProfile = await Promise.race([
+        fetchProfileFromFirestore(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+      ]);
+      if (remoteProfile) {
+        profile = remoteProfile;
+      }
+    } else {
+      // Refresh emailVerified flag & latest profile in background without blocking sign-in
+      fetchProfileFromFirestore().catch(() => {});
     }
 
     const resolvedName =
